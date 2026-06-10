@@ -1,7 +1,7 @@
 # Miscellaneous
 *.class
 *.lock
-!apps/pos-app/pubspec.lock
+!pubspec.lock
 *.log
 *.pyc
 *.swp
