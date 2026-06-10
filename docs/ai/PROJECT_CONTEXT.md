@@ -119,9 +119,12 @@ Core technologies:
 - PostgreSQL
 - Prisma
 
+Implemented backend capabilities:
+
+- JWT access and rotating refresh authentication
+
 Planned later capabilities:
 
-- JWT access and refresh authentication
 - Socket.IO realtime updates
 - PM2 process management
 - Nginx reverse proxy and static hosting
@@ -247,6 +250,8 @@ The repository currently contains:
 - A committed tenancy and authorization migration with UUIDv7 generation,
   tenant-aware constraints, and forced row-level security
 - An idempotent global permission seed
+- Email/password authentication with Passport JWT
+- Hashed, rotating, revocable refresh-token persistence
 - Flutter and shared package prototype/scaffold work
 
 ## Authoritative References

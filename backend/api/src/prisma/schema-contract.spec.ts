@@ -13,6 +13,7 @@ describe('Prisma tenancy and authorization schema', () => {
         'Tenant',
         'Outlet',
         'UserAccount',
+        'RefreshToken',
         'TenantMembership',
         'Role',
         'Permission',
@@ -96,5 +97,35 @@ describe('Prisma tenancy and authorization schema', () => {
     expect(migration).toContain(
       'CONSTRAINT "user_accounts_identity_required_check"',
     );
+  });
+
+  it('adds hashed, revocable refresh-token persistence', () => {
+    const refreshToken = models.get('RefreshToken');
+    const fieldNames = refreshToken?.fields.map((field) => field.name);
+    const migration = readFileSync(
+      join(
+        process.cwd(),
+        'prisma',
+        'migrations',
+        '20260610150000_add_refresh_tokens',
+        'migration.sql',
+      ),
+      'utf8',
+    );
+
+    expect(fieldNames).toEqual(
+      expect.arrayContaining([
+        'userId',
+        'tokenHash',
+        'expiresAt',
+        'revokedAt',
+        'replacedByTokenId',
+      ]),
+    );
+    expect(fieldNames).not.toContain('token');
+    expect(migration).toContain(
+      'CREATE POLICY "tenant_memberships_tenant_or_user_isolation"',
+    );
+    expect(migration).toContain('"user_id" = app_current_user_id()');
   });
 });

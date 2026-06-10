@@ -8,6 +8,7 @@ import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { appConfig } from './config/app.config';
 import { validateEnvironment } from './config/environment.validation';
+import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -20,6 +21,7 @@ import { PrismaModule } from './prisma/prisma.module';
       validate: validateEnvironment,
     }),
     PrismaModule,
+    AuthModule,
     HealthModule,
   ],
   controllers: [AppController],

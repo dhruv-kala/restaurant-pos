@@ -38,6 +38,7 @@ async function bootstrap(): Promise<void> {
     .setTitle(appName)
     .setDescription('ServeIQ Restaurant POS SaaS API')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, swaggerDocument);

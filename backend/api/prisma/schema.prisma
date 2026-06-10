@@ -87,18 +87,18 @@ model Outlet {
 }
 
 model UserAccount {
-  id          String     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
-  email       String?    @unique @db.Citext
-  phone       String?    @unique @db.VarChar(20)
-  displayName String     @map("display_name") @db.VarChar(160)
-  passwordHash String?   @map("password_hash") @db.VarChar(60)
-  status      UserStatus @default(INVITED)
-  version     Int        @default(1)
-  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt   DateTime?  @map("deleted_at") @db.Timestamptz(3)
+  id           String     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  email        String?    @unique @db.Citext
+  phone        String?    @unique @db.VarChar(20)
+  displayName  String     @map("display_name") @db.VarChar(160)
+  passwordHash String?    @map("password_hash") @db.VarChar(60)
+  status       UserStatus @default(INVITED)
+  version      Int        @default(1)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt    DateTime?  @map("deleted_at") @db.Timestamptz(3)
 
-  memberships TenantMembership[]
+  memberships   TenantMembership[]
   refreshTokens RefreshToken[]
 
   @@index([status])

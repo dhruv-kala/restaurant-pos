@@ -1,10 +1,9 @@
 # Restaurant POS API
 
-Minimal production-ready NestJS foundation for the ServeIQ Restaurant POS SaaS
-platform.
+NestJS API for the ServeIQ Restaurant POS SaaS platform.
 
-Business modules, authentication, database models, realtime gateways, and
-deployment configuration are intentionally outside this foundation task.
+The current foundation includes health checks, Prisma/PostgreSQL tenancy models,
+email/password authentication, JWT access tokens, and rotating refresh tokens.
 
 ## Requirements
 
@@ -37,62 +36,55 @@ Required environment variables:
 | `APP_NAME` | Service name returned by health and Swagger |
 | `API_PREFIX` | Global API prefix |
 | `DATABASE_URL` | PostgreSQL connection URL for Prisma |
-| `JWT_ACCESS_SECRET` | Reserved access-token secret |
-| `JWT_REFRESH_SECRET` | Reserved refresh-token secret |
-| `JWT_ACCESS_EXPIRES_IN` | Reserved access-token lifetime |
-| `JWT_REFRESH_EXPIRES_IN` | Reserved refresh-token lifetime |
+| `JWT_ACCESS_SECRET` | Secret used only for access tokens |
+| `JWT_REFRESH_SECRET` | Separate secret used only for refresh tokens |
+| `JWT_ACCESS_EXPIRES_IN` | Access-token lifetime, for example `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh-token lifetime, for example `7d` |
 | `CORS_ORIGINS` | Comma-separated allowed origins |
 
-JWT variables are validated now so later authentication work does not introduce
-an incompatible environment contract. No JWT behavior is implemented yet.
+Use strong, unrelated JWT secrets outside local development. Never commit real
+secrets.
 
-## PostgreSQL
+## PostgreSQL and Prisma
 
-Ensure PostgreSQL is running, then create the local database:
-
-```powershell
-createdb restaurant_pos
-```
-
-SQL equivalent:
-
-```sql
-CREATE DATABASE restaurant_pos;
-```
-
-The local connection string is:
-
-```dotenv
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/restaurant_pos?schema=public
-```
-
-Change the username and password to match the local PostgreSQL installation.
-Do not commit real credentials.
-
-Generate and validate the Prisma client:
+Create the local database and configure `DATABASE_URL` for the installed
+PostgreSQL credentials.
 
 ```powershell
-npm run prisma:generate
+npm run prisma:format
 npm run prisma:validate
-```
-
-Create a development migration after models are added in a future task:
-
-```powershell
+npm run prisma:generate
 npm run prisma:migrate:dev
 ```
 
-Apply committed migrations in production:
+Production uses committed migrations:
 
 ```powershell
 npm run prisma:migrate:deploy
 ```
 
-Open Prisma Studio:
+The migrations create tenant and authorization tables plus local password
+credentials and revocable refresh-token persistence. They also add tenant-aware
+foreign keys, UUIDv7 generation, check constraints, and forced PostgreSQL RLS.
+
+## Local Development Seed
+
+After applying migrations:
 
 ```powershell
-npm run prisma:studio
+npm run db:seed
 ```
+
+When `NODE_ENV` is not `production`, the idempotent seed creates:
+
+- Tenant: `Local Demo Restaurant`
+- Outlet: `Main Outlet`
+- Role: `TENANT_ADMIN`
+- User: `admin@example.com`
+- Password: `Admin@123`
+
+This credential is local development data only. Production seeding skips demo
+data and only updates the global permission catalog.
 
 ## Run Locally
 
@@ -104,11 +96,51 @@ Endpoints:
 
 - API root: `http://localhost:3000/api/v1`
 - Health: `http://localhost:3000/api/v1/health`
+- Auth: `http://localhost:3000/api/v1/auth`
 - Swagger: `http://localhost:3000/docs`
 
-The health response reports `database: connected` when PostgreSQL responds. If
-the database cannot be reached, it safely reports `status: degraded` and
-`database: disconnected` without exposing connection details.
+## Authentication
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/v1/auth/login` | Validate email/password and issue a token pair |
+| `POST` | `/api/v1/auth/refresh` | Rotate a valid refresh token |
+| `POST` | `/api/v1/auth/logout` | Revoke a refresh token |
+| `GET` | `/api/v1/auth/me` | Return the authenticated access-token context |
+
+Access tokens are short-lived bearer JWTs. Refresh tokens are stored only as
+bcrypt hashes, rotate on successful refresh, and can be revoked by logout.
+
+Login:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"Admin@123"}'
+```
+
+Authenticated user:
+
+```bash
+curl http://localhost:3000/api/v1/auth/me \
+  -H "Authorization: Bearer <access-token>"
+```
+
+Refresh:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"<refresh-token>"}'
+```
+
+Logout:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/logout \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"<refresh-token>"}'
+```
 
 ## Validation
 
@@ -121,42 +153,15 @@ npm run test:e2e
 
 ## Production
 
-Build:
-
 ```powershell
 npm run build
-```
-
-Start the compiled application:
-
-```powershell
 npm run start:prod
 ```
 
-`start:prod` is PM2-ready and runs `node dist/main`. A PM2 ecosystem file will be
-added with the deployment infrastructure.
+`start:prod` is PM2-ready and runs `node dist/main`. PM2 and Nginx deployment
+configuration remains a later infrastructure task.
 
-## Prisma
+## Documentation
 
-The Prisma datasource, client generator, and initial tenancy and authorization
-models are configured in `prisma/schema.prisma`.
-
-The initial migration creates tenant, outlet, global user, membership, role,
-permission, role assignment, permission assignment, and outlet assignment
-tables. It also adds tenant-aware foreign keys, check constraints, UUIDv7
-generation, and forced PostgreSQL row-level security.
-
-See `docs/database/tenancy-authorization-schema.md` for the ownership,
-authorization, deletion, RLS, and seed contracts.
-
-Prisma commands:
-
-```powershell
-npm run prisma:generate
-npm run prisma:validate
-npm run prisma:format
-npm run prisma:migrate:dev
-npm run prisma:migrate:deploy
-npm run prisma:studio
-npm run db:seed
-```
+- `docs/api/authentication.md`
+- `docs/database/tenancy-authorization-schema.md`

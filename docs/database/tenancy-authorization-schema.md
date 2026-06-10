@@ -16,9 +16,11 @@ Implemented models:
 - `MembershipRole`
 - `RolePermission`
 - `MembershipOutlet`
+- `RefreshToken` (Task 7)
 
-Authentication credentials, JWT sessions, MFA, platform-super-admin identity,
-and HTTP APIs are outside this task.
+Task 7 adds optional local password hashes to `UserAccount` and global,
+revocable refresh-token records. MFA and platform-super-admin identity remain
+outside the implemented scope.
 
 ## Ownership Model
 
@@ -48,8 +50,8 @@ role, or outlet from being linked across tenants.
 - Phone values use normalized E.164 format.
 - A user has at most one membership per tenant.
 - Membership status and `revoked_at` must agree.
-- Credentials and password hashes will be added with the authentication task,
-  not to `UserAccount` in this schema task.
+- `password_hash` is optional so non-password identities remain possible.
+- Local passwords use bcrypt and hashes are never returned by APIs.
 
 ## Role and Permission Rules
 
@@ -108,6 +110,11 @@ SET LOCAL app.tenant_id = '<authenticated-tenant-uuid>';
 Policies compare tenant ownership with `app_current_tenant_id()`. Without tenant
 context, ordinary access to tenant-owned rows returns no rows and writes fail.
 
+Authentication sets trusted `app.user_id` context after password validation.
+The membership policy permits that user to discover only their own membership
+candidates. The service then sets `app.tenant_id` before loading tenant-owned
+roles and outlet assignments.
+
 `user_accounts` and `permissions` are global tables and do not use tenant RLS.
 Their access must be restricted through dedicated application services and
 database privileges.
@@ -118,25 +125,21 @@ policies.
 
 ## Seed Strategy
 
-`prisma/seed.ts` idempotently upserts the initial global permission catalog.
+`prisma/seed.ts` always idempotently upserts the global permission catalog.
 
-It does not create:
-
-- A tenant
-- An outlet
-- A user
-- Credentials
-- Tenant roles
-- Membership assignments
-
-Bootstrap of the first tenant and owner must be an explicit audited application
-or administrative workflow in a later task.
+Outside production it also creates a local demo tenant, outlet, tenant-admin
+role, membership, outlet assignment, and bcrypt-protected
+`admin@example.com` development user. Production seeding skips all demo data.
 
 ## Migration
 
 Initial migration:
 
 `backend/api/prisma/migrations/20260610120000_tenancy_authorization_foundation/migration.sql`
+
+Authentication migration:
+
+`backend/api/prisma/migrations/20260610150000_add_refresh_tokens/migration.sql`
 
 Apply committed migrations:
 

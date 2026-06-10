@@ -77,7 +77,7 @@ Backend:
 - NestJS
 - PostgreSQL
 - Prisma
-- JWT later
+- JWT access and rotating refresh tokens
 - Socket.IO later
 - PM2 later
 - Nginx later
@@ -114,13 +114,13 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 6 are complete at the foundation level.
+Tasks 1 through 7 are complete at the foundation level.
 
-Task 6 created the tenant, outlet, global user, membership, role, permission,
-role assignment, permission assignment, and outlet assignment schema.
+Task 7 created email/password authentication, JWT access tokens, hashed rotating
+refresh tokens, logout revocation, and bearer request context.
 
-No next task is currently approved. Read `docs/ai/TASK_LOG.md` and execute only
-the next task explicitly assigned by the user.
+Task 8 is next: implement tenant and outlet module contracts and backend APIs.
+Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

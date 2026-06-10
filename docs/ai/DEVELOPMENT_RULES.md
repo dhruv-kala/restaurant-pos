@@ -68,7 +68,7 @@ committed migrations, not schema pushing.
 
 ## 5. Authentication and Authorization
 
-- JWT is planned but not implemented yet.
+- JWT access and rotating refresh authentication are implemented.
 - Authentication establishes user identity and trusted tenant context.
 - A global user account may belong to multiple tenants.
 - Authorization is resolved from tenant membership, roles, permissions, and
@@ -186,4 +186,3 @@ At the end of substantive work:
 3. Record validation results and limitations.
 4. State the exact next task without implementing it.
 5. Keep `docs/ai/CODEX_START_PROMPT.md` usable for a fresh conversation.
-

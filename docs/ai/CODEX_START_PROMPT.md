@@ -31,12 +31,12 @@ Initial deployment constraints:
 - No mandatory cloud dependency initially
 
 Current status:
-- Tasks 1 through 6 are complete at the foundation level.
-- Task 6 implemented the tenancy and authorization Prisma schema, migration,
-  forced RLS policies, global permission seed, tests, and documentation.
+- Tasks 1 through 7 are complete at the foundation level.
+- Task 7 implemented email/password login, JWT access tokens, rotating hashed
+  refresh tokens, logout revocation, bearer `/auth/me`, tests, and docs.
 - Local migration deployment and seed execution remain unverified because the
-  configured PostgreSQL credentials were rejected on 2026-06-10.
-- No next task is currently approved.
+  configured PostgreSQL connection failed on 2026-06-10.
+- Task 8 is next: implement tenant and outlet modules.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,
