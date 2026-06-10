@@ -1,0 +1,33 @@
+name: restaurant_app
+description: "ServeIQ restaurant point-of-sale Flutter client."
+publish_to: 'none'
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  cloud_firestore: ^6.5.0
+  firebase_auth: ^6.5.2
+  firebase_core: ^4.10.0
+  flutter:
+    sdk: flutter
+  go_router: ^17.3.0
+  provider: ^6.1.5+1
+  serveiq_core:
+    path: ../../packages/core
+  serveiq_auth:
+    path: ../../packages/auth
+  serveiq_shared_models:
+    path: ../../packages/shared_models
+  serveiq_ui_kit:
+    path: ../../packages/ui_kit
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

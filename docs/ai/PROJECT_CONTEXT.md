@@ -1,0 +1,264 @@
+# Project Context
+
+## Project Identity
+
+Repository root: `restaurant-pos`
+
+The repository implements a multi-tenant Restaurant POS SaaS and Restaurant
+Operating System. It is intended to support day-to-day restaurant operations,
+restaurant-owner administration, SaaS platform administration, and
+customer-facing loyalty and ordering.
+
+The working product name `ServeIQ` appears in existing documentation and package
+names. The canonical repository name remains `restaurant-pos`.
+
+## Product Vision
+
+The system will provide:
+
+- Point of sale, billing, payments, and fiscal records
+- Waiter, table, kitchen, and manager workflows
+- Menu, pricing, tax, inventory, and outlet operations
+- Customer profiles, loyalty, rewards, wallet, and referrals
+- Multi-outlet tenant administration and analytics
+- SaaS tenant, subscription, support, impersonation, and platform operations
+- Offline-capable restaurant operation with reliable synchronization
+
+The first deployment must remain operationally simple and cost-efficient while
+preserving domain boundaries that allow later scaling.
+
+## Application Responsibilities
+
+### `apps/restaurant-app`
+
+Role-based operational application for:
+
+- POS and cashier users
+- Waiters
+- Kitchen staff
+- Outlet managers
+
+Target capabilities include orders, tables, kitchen flow, payments, inventory,
+shifts, device-aware sessions, and SQLite-backed offline operation.
+
+### `apps/admin`
+
+Restaurant owner and tenant administrator web portal for:
+
+- Outlets
+- Employees and access
+- Menu, pricing, and taxes
+- Inventory
+- Customers and loyalty
+- Reports and multi-outlet dashboards
+
+### `apps/super-admin`
+
+SaaS owner portal for:
+
+- Tenant lifecycle management
+- Subscription and entitlement management
+- Support and audited impersonation
+- Feature controls
+- Platform analytics
+
+### `apps/customer`
+
+Customer-facing application for:
+
+- Ordering
+- Loyalty points and rewards
+- Wallet and gift cards
+- Referrals
+- Personalized offers
+
+## Repository Direction
+
+```text
+restaurant-pos/
+  apps/
+    restaurant-app/
+    admin/
+    super-admin/
+    customer/
+  packages/
+    core/
+    auth/
+    api_client/
+    shared_models/
+    ui_kit/
+    analytics/
+    common/
+  backend/
+    api/
+    database/
+    migrations/
+    scripts/
+  docs/
+    ai/
+    architecture/
+    api/
+    database/
+    business-rules/
+    specifications/
+  infrastructure/
+  README.md
+```
+
+An additional `apps/kitchen-display` scaffold currently exists as a reserved
+future application. Its presence does not change the four primary application
+responsibilities above. Do not remove it without a dedicated architecture task.
+
+## Backend Direction
+
+The backend starts as a modular NestJS monolith under `backend/api`.
+
+Core technologies:
+
+- NestJS
+- PostgreSQL
+- Prisma
+
+Planned later capabilities:
+
+- JWT access and refresh authentication
+- Socket.IO realtime updates
+- PM2 process management
+- Nginx reverse proxy and static hosting
+
+Initial hosting:
+
+- Ubuntu VPS
+- PostgreSQL installed directly on the VPS
+- Local or VPS-managed infrastructure
+- No Docker
+- No Kubernetes
+- No mandatory cloud service
+
+The backend module direction includes auth, tenants, outlets, users, menu,
+inventory, orders, customers, loyalty, payments, reports, and subscriptions.
+Modules should keep transport, application, domain, and infrastructure concerns
+separate where the feature complexity justifies it.
+
+## Frontend Direction
+
+Primary technologies:
+
+- Flutter
+- Flutter Web
+- Riverpod
+- Dio
+- SQLite
+- GoRouter
+
+Feature code should follow a feature-first structure with data, domain, and
+presentation responsibilities. Widgets must not directly call HTTP, Firebase,
+or SQLite. Shared packages must never import application code.
+
+## Delivery Strategy
+
+The required implementation order is:
+
+```text
+business rules
+  -> domain and database contracts
+  -> API contracts
+  -> backend implementation and tests
+  -> shared client contracts
+  -> Flutter state and screens
+```
+
+Backend/API contracts first, then Flutter screens. UI-first implementation is
+not an accepted shortcut.
+
+## Multi-Tenancy
+
+The initial database uses one shared PostgreSQL schema.
+
+- Every tenant-owned table includes `tenant_id`.
+- Tenant-owned uniqueness is scoped by `tenant_id`.
+- Tenant-aware foreign keys should be used where practical.
+- Trusted authentication establishes tenant context.
+- Repository filtering and PostgreSQL row-level security enforce isolation.
+- Outlet scope is evaluated separately from tenant membership.
+- Jobs, cache keys, files, socket rooms, audit events, and integration events
+  include tenant scope.
+
+A user account is global and may have memberships in multiple tenants. Roles and
+outlet access are resolved inside a tenant membership.
+
+## Data Conventions
+
+- Use UUIDv7 or another time-sortable UUID for primary identifiers.
+- Allow client-generated IDs for offline-created aggregates.
+- Store timestamps in UTC using `timestamptz`.
+- Store IANA timezone identifiers for tenant and outlet configuration.
+- Store money as integer minor units with ISO currency codes.
+- Store inventory quantities with explicit decimal precision.
+- Use aggregate versions for optimistic concurrency.
+- Use effective date ranges for changing prices, tax rules, recipes, and similar
+  configuration.
+- Never rewrite settled financial, stock, loyalty, fiscal, or audit history.
+- Use soft deletion only for suitable master data.
+
+## Offline Direction
+
+The restaurant application will use SQLite as its local operational store.
+
+1. The UI reads local projections.
+2. Commands update local state and append a pending operation atomically.
+3. A sync worker sends operations with unique idempotency identifiers.
+4. The API validates tenant context, authorization, versions, and invariants.
+5. The server acknowledges or rejects operations deterministically.
+6. Clients pull ordered changes using a resumable cursor.
+
+The server remains authoritative for external payments, wallet balances, and
+fiscal numbering.
+
+## Security Direction
+
+Planned security controls include:
+
+- Short-lived JWT access tokens
+- Rotating refresh tokens
+- Secure password hashing
+- Optional MFA and step-up authentication
+- Tenant- and outlet-aware RBAC
+- PostgreSQL row-level security
+- Immutable audit events
+- Idempotent financial and offline operations
+- TLS, rate limiting, redacted logs, and protected sensitive fields
+
+The backend must authorize every protected operation. Flutter role checks do not
+provide security.
+
+## Existing Foundation
+
+The repository currently contains:
+
+- Restructured monorepo directories
+- `docs/architecture/system-overview.md`
+- `docs/database/initial-erd.md`
+- A NestJS base project under `backend/api`
+- Environment validation, health endpoint, and Swagger foundation
+- PostgreSQL/Prisma configuration
+- Prisma tenant, outlet, global user, membership, role, permission, and
+  outlet-scope models
+- A committed tenancy and authorization migration with UUIDv7 generation,
+  tenant-aware constraints, and forced row-level security
+- An idempotent global permission seed
+- Flutter and shared package prototype/scaffold work
+
+## Authoritative References
+
+- `AGENTS.md`
+- `docs/ai/DEVELOPMENT_RULES.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/architecture/system-overview.md`
+- `docs/database/initial-erd.md`
+- `docs/specifications/enterprise-system-design.md`
+- `backend/api/README.md`
+
+When documents conflict, do not silently choose one. Prefer the latest explicit
+user decision, update the affected documentation, and record the decision in the
+task log.

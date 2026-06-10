@@ -1,0 +1,8 @@
+name: serveiq_api_client
+description: Shared ServeIQ API transport contracts and generated clients.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.1

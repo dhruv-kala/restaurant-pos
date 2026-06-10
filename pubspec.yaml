@@ -1,0 +1,16 @@
+name: restaurant_pos_workspace
+description: ServeIQ restaurant operating system monorepo.
+publish_to: none
+
+environment:
+  sdk: ^3.12.1
+
+workspace:
+  - apps/restaurant-app
+  - packages/analytics
+  - packages/api_client
+  - packages/auth
+  - packages/common
+  - packages/core
+  - packages/shared_models
+  - packages/ui_kit

@@ -1,0 +1,11 @@
+name: serveiq_auth
+description: Shared authentication and authorization contracts for ServeIQ clients.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  serveiq_core: any

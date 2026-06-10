@@ -1,0 +1,8 @@
+name: serveiq_common
+description: Carefully governed common contracts for ServeIQ.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.1
