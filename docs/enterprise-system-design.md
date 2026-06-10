@@ -909,8 +909,8 @@ restaurant-pos/
     .gitkeep
 ```
 
-The existing `mobile-app/restaurantpos` prototype can be migrated into `apps/pos`
-incrementally. Firebase should not remain the system of record under this design.
+The existing `apps/pos-app` prototype is being migrated incrementally. Firebase
+should not remain the system of record under this design.
 
 ### NestJS module
 
