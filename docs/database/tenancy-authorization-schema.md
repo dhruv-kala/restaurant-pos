@@ -18,6 +18,9 @@ Implemented models:
 - `MembershipOutlet`
 - `RefreshToken` (Task 7)
 
+Task 8 extends `Tenant`, `Outlet`, and `UserAccount` rather than creating
+duplicate entities.
+
 Task 7 adds optional local password hashes to `UserAccount` and global,
 revocable refresh-token records. MFA and platform-super-admin identity remain
 outside the implemented scope.
@@ -62,6 +65,17 @@ role, or outlet from being linked across tenants.
 - Permission keys use `module.action` format.
 - Optional role-permission constraints must be JSON objects.
 - Platform super-admin access is not represented by a tenant role.
+- Platform access uses the global `UserAccount.is_platform_admin` flag and is
+  emitted as `SUPER_ADMIN` in trusted JWT context.
+
+## Tenant and Outlet Management Fields
+
+Task 8 adds:
+
+- Tenant legal name, contact email, phone, and positive `outlet_limit`
+- Outlet contact and postal-address fields
+- Tenant lifecycle statuses for inactive, trial, and expired tenants
+- `TEMPORARILY_CLOSED` outlet status
 
 ## Outlet Scope
 
@@ -123,6 +137,10 @@ Tenant provisioning and controlled platform support require a separate,
 explicitly privileged database path. They must not weaken ordinary tenant
 policies.
 
+Task 8 adds `app_is_platform_admin()` and updates tenant RLS policies to permit
+trusted platform-admin transactions. Application services set this context only
+from a signed JWT carrying the global platform-admin identity.
+
 ## Seed Strategy
 
 `prisma/seed.ts` always idempotently upserts the global permission catalog.
@@ -140,6 +158,10 @@ Initial migration:
 Authentication migration:
 
 `backend/api/prisma/migrations/20260610150000_add_refresh_tokens/migration.sql`
+
+Tenant/outlet management migration:
+
+`backend/api/prisma/migrations/20260610180000_add_tenant_outlet_management/migration.sql`
 
 Apply committed migrations:
 

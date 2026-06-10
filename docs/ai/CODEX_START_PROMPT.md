@@ -31,12 +31,12 @@ Initial deployment constraints:
 - No mandatory cloud dependency initially
 
 Current status:
-- Tasks 1 through 7 are complete at the foundation level.
-- Task 7 implemented email/password login, JWT access tokens, rotating hashed
-  refresh tokens, logout revocation, bearer `/auth/me`, tests, and docs.
+- Tasks 1 through 8 are complete at the foundation level.
+- Task 8 implemented protected tenant and outlet APIs, role boundaries,
+  pagination, forced-RLS request context, and outlet-limit enforcement.
 - Local migration deployment and seed execution remain unverified because the
   configured PostgreSQL connection failed on 2026-06-10.
-- Task 8 is next: implement tenant and outlet modules.
+- Task 9 is next: create Flutter shared packages.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,

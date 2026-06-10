@@ -252,6 +252,9 @@ The repository currently contains:
 - An idempotent global permission seed
 - Email/password authentication with Passport JWT
 - Hashed, rotating, revocable refresh-token persistence
+- Protected tenant and outlet management APIs
+- Platform-admin and tenant-scoped RLS transaction context
+- Tenant outlet-limit enforcement
 - Flutter and shared package prototype/scaffold work
 
 ## Authoritative References

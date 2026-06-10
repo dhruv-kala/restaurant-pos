@@ -43,6 +43,7 @@ export class AuthService {
         email: true,
         displayName: true,
         passwordHash: true,
+        isPlatformAdmin: true,
         status: true,
         deletedAt: true,
       },
@@ -65,6 +66,7 @@ export class AuthService {
       userAccount.id,
       userAccount.email,
       userAccount.displayName,
+      userAccount.isPlatformAdmin,
     );
     const tokens = await this.issueTokenPair(user);
 
@@ -81,6 +83,7 @@ export class AuthService {
             id: true,
             email: true,
             displayName: true,
+            isPlatformAdmin: true,
             status: true,
             deletedAt: true,
           },
@@ -112,6 +115,7 @@ export class AuthService {
       storedToken.user.id,
       storedToken.user.email,
       storedToken.user.displayName,
+      storedToken.user.isPlatformAdmin,
     );
 
     return this.rotateRefreshToken(storedToken.id, user);
@@ -155,7 +159,19 @@ export class AuthService {
     userId: string,
     email: string,
     name: string,
+    isPlatformAdmin: boolean,
   ): Promise<AuthenticatedUser> {
+    if (isPlatformAdmin) {
+      return {
+        id: userId,
+        email,
+        name,
+        tenantId: null,
+        outletId: null,
+        roles: ['SUPER_ADMIN'],
+      };
+    }
+
     return this.prisma.$transaction(async (transaction) => {
       await this.setLocalContext(transaction, 'app.user_id', userId);
 

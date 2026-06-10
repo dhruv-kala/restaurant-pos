@@ -114,12 +114,12 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 7 are complete at the foundation level.
+Tasks 1 through 8 are complete at the foundation level.
 
-Task 7 created email/password authentication, JWT access tokens, hashed rotating
-refresh tokens, logout revocation, and bearer request context.
+Task 8 created protected tenant and outlet APIs with platform/tenant role
+boundaries, pagination, forced-RLS context, and outlet-limit enforcement.
 
-Task 8 is next: implement tenant and outlet module contracts and backend APIs.
+Task 9 is next: create Flutter shared packages.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

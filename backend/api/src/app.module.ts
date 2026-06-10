@@ -10,6 +10,8 @@ import { appConfig } from './config/app.config';
 import { validateEnvironment } from './config/environment.validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { OutletsModule } from './modules/outlets/outlets.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -23,6 +25,8 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     AuthModule,
     HealthModule,
+    TenantsModule,
+    OutletsModule,
   ],
   controllers: [AppController],
   providers: [

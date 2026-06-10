@@ -136,6 +136,14 @@ describe('Auth endpoints (e2e)', () => {
       .expect(user);
   });
 
+  it('protects tenant endpoints', async () => {
+    await request(getHttpServer()).get('/api/v1/tenants').expect(401);
+  });
+
+  it('protects outlet endpoints', async () => {
+    await request(getHttpServer()).get('/api/v1/outlets').expect(401);
+  });
+
   function getHttpServer(): Server {
     if (app === undefined) {
       throw new Error('Test application was not initialized');

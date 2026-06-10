@@ -99,6 +99,33 @@ describe('AuthService', () => {
     );
   });
 
+  it('returns platform-admin context without a tenant role', async () => {
+    prismaMock.userAccount.findUnique.mockResolvedValue({
+      id: userId,
+      email: 'platform@example.com',
+      displayName: 'Platform Admin',
+      passwordHash,
+      isPlatformAdmin: true,
+      status: UserStatus.ACTIVE,
+      deletedAt: null,
+    });
+
+    const result = await service.login({
+      email: 'platform@example.com',
+      password: 'Admin@123',
+    });
+
+    expect(result.user).toEqual({
+      id: userId,
+      email: 'platform@example.com',
+      name: 'Platform Admin',
+      tenantId: null,
+      outletId: null,
+      roles: ['SUPER_ADMIN'],
+    });
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+  });
+
   it('returns tokens and a safe tenant-scoped user on valid login', async () => {
     prismaMock.userAccount.findUnique.mockResolvedValue({
       id: userId,

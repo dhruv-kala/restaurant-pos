@@ -1,4 +1,5 @@
 # Outlets Module
 
-Outlet profiles, business hours, service configuration, devices, and outlet
-scope.
+Protected outlet management with platform-admin and tenant-admin writes,
+manager reads, strict tenant scoping, pagination, and subscription outlet-limit
+enforcement.

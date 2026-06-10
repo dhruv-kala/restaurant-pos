@@ -11,12 +11,12 @@ Last updated: 2026-06-10
 
 ## Current Summary
 
-Tasks 1 through 7 are complete at the requested foundation level.
+Tasks 1 through 8 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 8 is next: implement tenant and outlet module contracts and backend APIs.
+Task 9 is next: create Flutter shared packages.
 
 ## Task History
 
@@ -29,7 +29,49 @@ Task 8 is next: implement tenant and outlet module contracts and backend APIs.
 | 5. Configure PostgreSQL and Prisma | COMPLETE | Prisma dependencies, datasource, client generator, environment contract, commands, and database-aware health behavior were established before domain modeling began. |
 | 6. Create tenant, outlet, user, role, and permission schema | COMPLETE | Prisma models, initial migration, tenant-aware constraints, forced RLS, permission seed, tests, and database documentation are implemented. |
 | 7. Implement authentication with access and refresh tokens | COMPLETE | Login, refresh rotation, logout revocation, bearer `/auth/me`, bcrypt credentials, hashed refresh persistence, Swagger, tests, seed, and documentation are implemented. |
-| 8. Implement tenant and outlet module | NEXT | Not started. Do not implement until explicitly requested. |
+| 8. Implement tenant and outlet module | COMPLETE | Protected tenant/outlet APIs, role boundaries, pagination, RLS request context, schema fields, migration, tests, and outlet-limit enforcement are implemented. |
+| 9. Create Flutter shared packages | NEXT | Not started. Do not implement until explicitly requested. |
+
+## Task 8 Completion
+
+Completed on 2026-06-10.
+
+Implemented:
+
+- `TenantsModule` with create, list, get, update, and status endpoints
+- `OutletsModule` with create, list, get, update, status, and tenant outlet-list
+  endpoints
+- `SUPER_ADMIN`, `TENANT_ADMIN`, and `MANAGER` access boundaries
+- Global platform-admin identity through `UserAccount.isPlatformAdmin`
+- Transaction-local user, tenant, and platform-admin PostgreSQL context
+- Forced-RLS policies that preserve tenant isolation and permit trusted platform
+  administration
+- Tenant and outlet lifecycle enum additions
+- Tenant contact fields and positive `outletLimit`
+- Outlet contact and address fields
+- Pagination, search, and status filters
+- Atomic non-closed outlet counting and subscription-limit enforcement
+- Safe response DTOs and Swagger documentation
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 28 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+
+Known limitation:
+
+- `npx prisma migrate dev --name add_tenant_outlet_management` returned a Prisma
+  schema-engine connection error before applying migrations to the configured
+  local PostgreSQL database.
+- The committed migration is
+  `backend/api/prisma/migrations/20260610180000_add_tenant_outlet_management/migration.sql`.
+- Database-backed endpoint execution requires valid local PostgreSQL credentials
+  and deployment of all committed migrations.
 
 ## Task 7 Completion
 
@@ -133,17 +175,17 @@ Known limitation:
 
 ## Next Task
 
-### Task 8: Implement Tenant and Outlet Module
+### Task 9: Create Flutter Shared Packages
 
-Define and implement tenant/outlet backend contracts, DTOs, authorization,
-tenant-context transactions, tests, and API documentation. Do not modify
-Flutter until those backend contracts are complete.
+Do not start Task 9 unless explicitly requested. Backend tenant and outlet
+contracts now exist for client-package design.
 
 ## Future Work
 
 - Add password reset, verification, MFA, and explicit tenant switching when
   those contracts are approved.
-- Add tenant and outlet authorization enforcement.
+- Replace minimal role checks with permission guards when the full RBAC task is
+  approved.
 - Define menu, pricing, tax, order, kitchen, payment, inventory, customer, and
   loyalty contracts in backend-first order.
 - Add Socket.IO after durable backend events and authorization exist.

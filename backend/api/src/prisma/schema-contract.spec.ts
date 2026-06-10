@@ -128,4 +128,51 @@ describe('Prisma tenancy and authorization schema', () => {
     );
     expect(migration).toContain('"user_id" = app_current_user_id()');
   });
+
+  it('adds tenant and outlet management fields with platform-admin RLS', () => {
+    const tenantFields = models.get('Tenant')?.fields.map((field) => field.name);
+    const outletFields = models.get('Outlet')?.fields.map((field) => field.name);
+    const userFields = models
+      .get('UserAccount')
+      ?.fields.map((field) => field.name);
+    const migration = readFileSync(
+      join(
+        process.cwd(),
+        'prisma',
+        'migrations',
+        '20260610180000_add_tenant_outlet_management',
+        'migration.sql',
+      ),
+      'utf8',
+    );
+
+    expect(tenantFields).toEqual(
+      expect.arrayContaining([
+        'legalName',
+        'email',
+        'phone',
+        'outletLimit',
+      ]),
+    );
+    expect(outletFields).toEqual(
+      expect.arrayContaining([
+        'email',
+        'phone',
+        'addressLine1',
+        'addressLine2',
+        'city',
+        'state',
+        'country',
+        'postalCode',
+      ]),
+    );
+    expect(userFields).toContain('isPlatformAdmin');
+    expect(migration).toContain('CREATE OR REPLACE FUNCTION app_is_platform_admin()');
+    expect(migration).toContain(
+      'CREATE POLICY "outlets_tenant_or_platform_isolation"',
+    );
+    expect(migration).toContain(
+      'ADD CONSTRAINT "tenants_outlet_limit_positive_check"',
+    );
+  });
 });
