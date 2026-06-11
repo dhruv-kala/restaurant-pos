@@ -7,6 +7,7 @@ import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 import '../../../../app/router/app_router.dart';
 import '../providers/payments_providers.dart';
+import '../../../receipts/presentation/providers/receipts_providers.dart';
 
 class PaymentDetailsScreen extends ConsumerWidget {
   const PaymentDetailsScreen({required this.paymentId, super.key});
@@ -75,6 +76,35 @@ class PaymentDetailsScreen extends ConsumerWidget {
                 icon: const Icon(Icons.undo),
                 label: const Text('Refund Payment'),
               ),
+            if (canRefund &&
+                payment.status == PaymentStatus.success) ...<Widget>[
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: () async {
+                  final receipt = await ref
+                      .read(receiptsRepositoryProvider)
+                      .generate(payment.billId, ReceiptType.customerReceipt);
+                  if (context.mounted) {
+                    context.push('${AppRoutes.receipts}/${receipt.id}');
+                  }
+                },
+                icon: const Icon(Icons.receipt),
+                label: const Text('Generate Receipt'),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonalIcon(
+                onPressed: () async {
+                  final invoice = await ref
+                      .read(receiptsRepositoryProvider)
+                      .generate(payment.billId, ReceiptType.taxInvoice);
+                  if (context.mounted) {
+                    context.push('${AppRoutes.receipts}/${invoice.id}/preview');
+                  }
+                },
+                icon: const Icon(Icons.description),
+                label: const Text('Generate Tax Invoice'),
+              ),
+            ],
           ],
         ),
       ),

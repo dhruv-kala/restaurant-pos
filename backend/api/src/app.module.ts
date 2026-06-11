@@ -16,6 +16,7 @@ import { MenuModule } from './modules/menu/menu.module';
 import { OutletsModule } from './modules/outlets/outlets.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { ReceiptsModule } from './modules/receipts/receipts.module';
 import { TablesModule } from './modules/tables/tables.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -36,6 +37,7 @@ import { PrismaModule } from './prisma/prisma.module';
     MenuModule,
     OrdersModule,
     PaymentsModule,
+    ReceiptsModule,
     TablesModule,
     TenantsModule,
     OutletsModule,

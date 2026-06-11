@@ -14,6 +14,7 @@ abstract final class ApiEndpoints {
   static const String kds = '/kds';
   static const String billing = '/billing';
   static const String payments = '/payments';
+  static const String receipts = '/receipts';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -81,4 +82,10 @@ abstract final class ApiEndpoints {
   static String payment(String id) => '$payments/$id';
   static String paymentStatus(String id) => '${payment(id)}/status';
   static String paymentRefund(String id) => '${payment(id)}/refund';
+  static const String receiptsGenerate = '$receipts/generate';
+  static const String invoices = '$receipts/invoices';
+  static String receipt(String id) => '$receipts/$id';
+  static String receiptPrint(String id) => '${receipt(id)}/print';
+  static String receiptReprint(String id) => '${receipt(id)}/reprint';
+  static String receiptPdf(String id) => '${receipt(id)}/pdf';
 }

@@ -186,6 +186,36 @@ enum PaymentSource {
   @@map("payment_source")
 }
 
+enum ReceiptType {
+  CUSTOMER_RECEIPT
+  TAX_INVOICE
+  DUPLICATE_COPY
+  PROFORMA_INVOICE
+
+  @@map("receipt_type")
+}
+
+enum ReceiptStatus {
+  GENERATED
+  PRINTED
+  REPRINTED
+  VOID
+
+  @@map("receipt_status")
+}
+
+enum PrinterType {
+  THERMAL_58MM
+  THERMAL_80MM
+  BLUETOOTH
+  USB
+  NETWORK
+  PDF
+  MOCK
+
+  @@map("printer_type")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -227,6 +257,10 @@ model Tenant {
   paymentTransactions PaymentTransaction[]
   paymentRefunds      PaymentRefund[]
   paymentCounters     PaymentNumberCounter[]
+  receipts            Receipt[]
+  receiptPrintLogs    ReceiptPrintLog[]
+  receiptCounters     ReceiptNumberCounter[]
+  invoiceCounters     InvoiceNumberCounter[]
 
   @@index([status])
   @@index([deletedAt])
@@ -267,6 +301,10 @@ model Outlet {
   billCounters          BillNumberCounter[]
   payments              Payment[]
   paymentCounters       PaymentNumberCounter[]
+  receipts              Receipt[]
+  receiptPrintLogs      ReceiptPrintLog[]
+  receiptCounters       ReceiptNumberCounter[]
+  invoiceCounters       InvoiceNumberCounter[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -288,14 +326,16 @@ model UserAccount {
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime?  @map("deleted_at") @db.Timestamptz(3)
 
-  memberships     TenantMembership[]
-  refreshTokens   RefreshToken[]
-  waitedOrders    Order[]            @relation("OrderWaiter")
-  generatedBills  Bill[]             @relation("BillGeneratedBy")
-  voidedBills     Bill[]             @relation("BillVoidedBy")
-  createdPayments Payment[]          @relation("PaymentCreatedBy")
-  paidPayments    Payment[]          @relation("PaymentPaidBy")
-  paymentRefunds  PaymentRefund[]    @relation("PaymentRefundedBy")
+  memberships       TenantMembership[]
+  refreshTokens     RefreshToken[]
+  waitedOrders      Order[]            @relation("OrderWaiter")
+  generatedBills    Bill[]             @relation("BillGeneratedBy")
+  voidedBills       Bill[]             @relation("BillVoidedBy")
+  createdPayments   Payment[]          @relation("PaymentCreatedBy")
+  paidPayments      Payment[]          @relation("PaymentPaidBy")
+  paymentRefunds    PaymentRefund[]    @relation("PaymentRefundedBy")
+  generatedReceipts Receipt[]          @relation("ReceiptGeneratedBy")
+  receiptPrintLogs  ReceiptPrintLog[]  @relation("ReceiptPrintedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -842,6 +882,7 @@ model Bill {
   items       BillItem[]
   taxes       BillTax[]
   payments    Payment[]
+  receipts    Receipt[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, billNumber])
@@ -956,6 +997,7 @@ model Payment {
   paidBy       UserAccount?         @relation("PaymentPaidBy", fields: [paidByUserId], references: [id], onDelete: Restrict)
   transactions PaymentTransaction[]
   refunds      PaymentRefund[]
+  receipts     Receipt[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, paymentNumber])
@@ -1016,4 +1058,99 @@ model PaymentRefund {
   @@unique([tenantId, paymentId, idempotencyKey])
   @@index([tenantId, paymentId, status])
   @@map("payment_refunds")
+}
+
+model ReceiptNumberCounter {
+  id           String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  outletId     String   @map("outlet_id") @db.Uuid
+  businessDate DateTime @map("business_date") @db.Date
+  lastNumber   Int      @default(1) @map("last_number")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, outletId, businessDate])
+  @@index([tenantId, outletId])
+  @@map("receipt_number_counters")
+}
+
+model InvoiceNumberCounter {
+  id           String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  outletId     String   @map("outlet_id") @db.Uuid
+  businessDate DateTime @map("business_date") @db.Date
+  lastNumber   Int      @default(1) @map("last_number")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, outletId, businessDate])
+  @@index([tenantId, outletId])
+  @@map("invoice_number_counters")
+}
+
+model Receipt {
+  id                String        @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId          String        @map("tenant_id") @db.Uuid
+  outletId          String        @map("outlet_id") @db.Uuid
+  billId            String        @map("bill_id") @db.Uuid
+  paymentId         String?       @map("payment_id") @db.Uuid
+  receiptNumber     String        @map("receipt_number") @db.VarChar(32)
+  invoiceNumber     String?       @map("invoice_number") @db.VarChar(32)
+  receiptType       ReceiptType   @default(CUSTOMER_RECEIPT) @map("receipt_type")
+  status            ReceiptStatus @default(GENERATED)
+  printablePayload  Json          @map("printable_payload") @db.JsonB
+  verificationCode  String        @map("verification_code") @db.VarChar(64)
+  qrPayload         String        @map("qr_payload") @db.VarChar(1000)
+  printCount        Int           @default(0) @map("print_count")
+  lastPrintedAt     DateTime?     @map("last_printed_at") @db.Timestamptz(3)
+  pdfUrl            String?       @map("pdf_url") @db.VarChar(2048)
+  generatedByUserId String        @map("generated_by_user_id") @db.Uuid
+  generatedAt       DateTime      @default(now()) @map("generated_at") @db.Timestamptz(3)
+  version           Int           @default(1)
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet      Outlet            @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  bill        Bill              @relation(fields: [tenantId, billId], references: [tenantId, id], onDelete: Restrict)
+  payment     Payment?          @relation(fields: [tenantId, paymentId], references: [tenantId, id], onDelete: Restrict)
+  generatedBy UserAccount       @relation("ReceiptGeneratedBy", fields: [generatedByUserId], references: [id], onDelete: Restrict)
+  printLogs   ReceiptPrintLog[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, outletId, receiptNumber])
+  @@unique([tenantId, outletId, invoiceNumber])
+  @@index([tenantId, outletId, status, generatedAt])
+  @@index([tenantId, billId, receiptType])
+  @@index([tenantId, paymentId])
+  @@map("receipts")
+}
+
+model ReceiptPrintLog {
+  id              String      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String      @map("tenant_id") @db.Uuid
+  outletId        String      @map("outlet_id") @db.Uuid
+  receiptId       String      @map("receipt_id") @db.Uuid
+  printedByUserId String      @map("printed_by_user_id") @db.Uuid
+  printerName     String      @map("printer_name") @db.VarChar(160)
+  printerType     PrinterType @map("printer_type")
+  copies          Int         @default(1)
+  isReprint       Boolean     @default(false) @map("is_reprint")
+  printedAt       DateTime    @default(now()) @map("printed_at") @db.Timestamptz(3)
+
+  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet    Outlet      @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  receipt   Receipt     @relation(fields: [tenantId, receiptId], references: [tenantId, id], onDelete: Restrict)
+  printedBy UserAccount @relation("ReceiptPrintedBy", fields: [printedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, receiptId, printedAt])
+  @@index([tenantId, outletId, printedAt])
+  @@map("receipt_print_logs")
 }

@@ -11,12 +11,12 @@ Last updated: 2026-06-11
 
 ## Current Summary
 
-Tasks 1 through 16 are complete at the requested foundation level.
+Tasks 1 through 17 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 17 is next: implement the Receipt & Invoice Module.
+Task 18 is next: implement the Inventory Module.
 
 ## Task History
 
@@ -38,7 +38,58 @@ Task 17 is next: implement the Receipt & Invoice Module.
 | 14. Implement Kitchen Display System Module | COMPLETE | Tenant/outlet kitchen routing, queue projections, item and order kitchen transitions, SLA states, authorization, typed clients, Riverpod KDS screens, tests, and documentation are implemented. |
 | 15. Implement Billing Module | COMPLETE | Immutable bill snapshots, GST/tax breakdowns, atomic numbering, audited lifecycle, split/merge, typed clients, Riverpod screens, tests, and documentation are implemented. |
 | 16. Implement Payment Module | COMPLETE | Idempotent payment aggregates, tender transactions, partial/split payments, refunds, bill reconciliation, typed clients, Riverpod screens, tests, and documentation are implemented. |
-| 17. Implement Receipt & Invoice Module | NEXT | Not started. Define receipt snapshots, invoice numbering, fiscal lifecycle, reprint, delivery, authorization, and audit contracts before UI. |
+| 17. Implement Receipt & Invoice Module | COMPLETE | Immutable receipt and tax-invoice snapshots, numbering, PDF/thermal rendering, print audit, protected APIs, shared clients, and Flutter screens are implemented. |
+| 18. Implement Inventory Module | NEXT | Not started. Define stock items, units, recipes, movements, outlet balances, purchasing, adjustments, and audit contracts before UI. |
+
+## Task 17 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Prisma `Receipt`, `ReceiptPrintLog`, `ReceiptNumberCounter`, and
+  `InvoiceNumberCounter` models with receipt, status, and printer enums
+- Outlet/day `REC-YYYYMMDD-00001` and `INV-YYYYMMDD-00001` numbering
+- Immutable JSONB printable snapshots for outlet, customer, bill, items, GST,
+  payments, totals, footer, and QR verification data
+- Paid-bill validation, idempotent customer receipt/tax invoice generation, and
+  optional representative payment linking
+- Receipt list, invoice list, detail, print, reprint, and streamed PDF endpoints
+- Append-only printer/user/copies/time audit with aggregate print counters
+- Platform, tenant, outlet, cashier, waiter-read-only, and kitchen-denied access
+- PDFKit A4 output and 58mm/80mm thermal layout generation
+- Shared receipt, item, tax, payment, print-log, and printable models
+- Typed `ReceiptsApiService`, Riverpod providers, repository, and mock printer
+  abstraction
+- Receipt history, receipt detail, invoice preview, and print screens
+- Customer receipt and tax invoice actions from successful payment detail
+- API, schema/ERD, layout, PDF, workflow, and module documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 74 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter analyze` for restaurant-app: passed
+- `flutter test` for restaurant-app: passed, 9 tests
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed to PostgreSQL because prior tasks recorded
+  invalid local database credentials.
+- Flutter printer discovery and transport are mock implementations; Bluetooth,
+  USB, and network adapters remain future hardware work.
+- PDF output renders the verification payload with a QR placeholder. A public
+  verification endpoint and QR image encoder remain future work.
+- Outlet GST number and website fields do not yet exist, so those template
+  values remain null until tenant fiscal settings are modeled.
+- Email and digital receipt delivery are intentionally deferred.
 
 ## Task 16 Completion
 
@@ -558,12 +609,11 @@ Known limitation:
 
 ## Next Task
 
-### Task 17: Implement Receipt & Invoice Module
+### Task 18: Implement Inventory Module
 
-Do not start Task 17 unless explicitly requested. Define immutable receipt
-snapshots, invoice and fiscal numbering, payment allocation presentation,
-reprint and delivery audit, authorization, and API contracts before Flutter
-screens.
+Do not start Task 18 unless explicitly requested. Define stock items, units,
+recipes, outlet balances, movement ledgers, purchasing, wastage, adjustments,
+authorization, and API contracts before Flutter screens.
 
 ## Future Work
 

@@ -289,6 +289,10 @@ The repository currently contains:
   split tender support
 - Shared payment models and API client plus Riverpod restaurant-app payment,
   split, refund, history, and detail screens
+- Immutable receipt and tax-invoice snapshots with outlet/day receipt and
+  invoice numbering, append-only print audit, PDF generation, and forced RLS
+- Shared receipt models and API client plus Riverpod receipt history, detail,
+  invoice preview, mock thermal printing, and PDF download flows
 
 ## Authoritative References
 

@@ -31,14 +31,15 @@ Initial deployment constraints:
 - No mandatory cloud dependency initially
 
 Current status:
-- Tasks 1 through 16 are complete at the foundation level.
+- Tasks 1 through 17 are complete at the foundation level.
 - Task 11 implemented the menu schema, protected NestJS menu APIs, shared menu
   models/API client, and Flutter admin menu management screens.
 - Local migration deployment and seed execution remain unverified because the
   configured PostgreSQL connection failed on 2026-06-10.
-- Task 16 implemented idempotent payments, split/partial tenders, refunds,
-  bill reconciliation, protected APIs, shared contracts, and payment screens.
-- Task 17 is next: implement the Receipt & Invoice Module.
+- Task 17 implemented immutable receipts and tax invoices, outlet/day numbering,
+  print/reprint audit, PDF and thermal layouts, protected APIs, shared contracts,
+  and receipt screens.
+- Task 18 is next: implement the Inventory Module.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,

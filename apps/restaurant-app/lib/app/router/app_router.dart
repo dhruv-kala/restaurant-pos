@@ -31,6 +31,10 @@ import '../../features/payments/presentation/screens/payment_history_screen.dart
 import '../../features/payments/presentation/screens/payment_screen.dart';
 import '../../features/payments/presentation/screens/refund_screen.dart';
 import '../../features/payments/presentation/screens/split_payment_screen.dart';
+import '../../features/receipts/presentation/screens/invoice_preview_screen.dart';
+import '../../features/receipts/presentation/screens/print_receipt_screen.dart';
+import '../../features/receipts/presentation/screens/receipt_history_screen.dart';
+import '../../features/receipts/presentation/screens/receipt_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/splash';
@@ -52,6 +56,7 @@ abstract final class AppRoutes {
   static const billing = '/billing';
   static const mergeBills = '/billing/merge';
   static const payments = '/payments';
+  static const receipts = '/receipts';
 
   static String forRole(UserRole role) {
     return switch (role) {
@@ -126,6 +131,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 location.endsWith('/refund'))) {
           return AppRoutes.payments;
         }
+      }
+      if (location.startsWith(AppRoutes.receipts) &&
+          (role == UserRole.customer || role == UserRole.kitchenStaff)) {
+        return roleRoute;
       }
       if (location == AppRoutes.login ||
           location == AppRoutes.splash ||
@@ -278,6 +287,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'refund',
                 builder: (context, state) =>
                     RefundScreen(paymentId: state.pathParameters['id']!),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.receipts,
+        builder: (context, state) => const ReceiptHistoryScreen(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                ReceiptScreen(receiptId: state.pathParameters['id']!),
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'preview',
+                builder: (context, state) => InvoicePreviewScreen(
+                  receiptId: state.pathParameters['id']!,
+                ),
+              ),
+              GoRoute(
+                path: 'print',
+                builder: (context, state) =>
+                    PrintReceiptScreen(receiptId: state.pathParameters['id']!),
               ),
             ],
           ),

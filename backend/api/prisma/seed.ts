@@ -42,6 +42,9 @@ const permissions = [
   ['payments.read', 'payments', 'View payment and refund history'],
   ['payments.update', 'payments', 'Update pending payment status'],
   ['payments.refund', 'payments', 'Create payment refunds'],
+  ['receipts.create', 'receipts', 'Generate customer receipts and tax invoices'],
+  ['receipts.read', 'receipts', 'View receipts, invoices, and PDF output'],
+  ['receipts.print', 'receipts', 'Print and reprint issued receipts'],
 ] as const;
 
 const LOCAL_ADMIN_EMAIL = 'admin@example.com';
