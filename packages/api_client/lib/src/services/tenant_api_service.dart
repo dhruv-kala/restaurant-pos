@@ -42,10 +42,7 @@ class TenantApiService {
     return Tenant.fromJson(_responseMap(response));
   }
 
-  Future<Tenant> update(
-    String tenantId,
-    Map<String, dynamic> payload,
-  ) async {
+  Future<Tenant> update(String tenantId, Map<String, dynamic> payload) async {
     final response = await _dio.patch<Object?>(
       ApiEndpoints.tenant(tenantId),
       data: payload,
@@ -53,10 +50,7 @@ class TenantApiService {
     return Tenant.fromJson(_responseMap(response));
   }
 
-  Future<Tenant> updateStatus(
-    String tenantId,
-    TenantStatus status,
-  ) async {
+  Future<Tenant> updateStatus(String tenantId, TenantStatus status) async {
     final response = await _dio.patch<Object?>(
       ApiEndpoints.tenantStatus(tenantId),
       data: <String, dynamic>{'status': status.toJson()},

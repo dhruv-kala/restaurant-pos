@@ -1,8 +1,5 @@
 class TokenPair {
-  const TokenPair({
-    required this.accessToken,
-    required this.refreshToken,
-  });
+  const TokenPair({required this.accessToken, required this.refreshToken});
 
   factory TokenPair.fromJson(Map<String, dynamic> json) {
     return TokenPair(
@@ -15,9 +12,9 @@ class TokenPair {
   final String refreshToken;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'accessToken': accessToken,
-        'refreshToken': refreshToken,
-      };
+    'accessToken': accessToken,
+    'refreshToken': refreshToken,
+  };
 }
 
 String _requiredString(Map<String, dynamic> json, String key) {

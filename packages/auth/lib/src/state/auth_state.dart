@@ -1,34 +1,35 @@
-import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart'
-    as models;
+import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 
-sealed class AuthState {
-  const AuthState();
-}
+enum AuthStatus { initial, loading, authenticated, unauthenticated }
 
-final class AuthUnknown extends AuthState {
-  const AuthUnknown();
-}
-
-final class AuthLoading extends AuthState {
-  const AuthLoading();
-}
-
-final class Authenticated extends AuthState {
-  const Authenticated({
-    required this.user,
-    required this.tokens,
+class AuthState {
+  const AuthState({
+    this.status = AuthStatus.initial,
+    this.user,
+    this.accessToken,
+    this.refreshToken,
+    this.errorMessage,
   });
 
-  final models.AuthenticatedUser user;
-  final models.TokenPair tokens;
-}
+  final AuthStatus status;
+  final AuthenticatedUser? user;
+  final String? accessToken;
+  final String? refreshToken;
+  final String? errorMessage;
 
-final class Unauthenticated extends AuthState {
-  const Unauthenticated();
-}
-
-final class AuthFailed extends AuthState {
-  const AuthFailed(this.message);
-
-  final String message;
+  AuthState copyWith({
+    required AuthStatus status,
+    AuthenticatedUser? user,
+    String? accessToken,
+    String? refreshToken,
+    String? errorMessage,
+  }) {
+    return AuthState(
+      status: status,
+      user: user,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      errorMessage: errorMessage,
+    );
+  }
 }

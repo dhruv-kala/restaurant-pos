@@ -1,6 +1,6 @@
 # AI Task Log
 
-Last updated: 2026-06-10
+Last updated: 2026-06-11
 
 ## Status Legend
 
@@ -11,12 +11,12 @@ Last updated: 2026-06-10
 
 ## Current Summary
 
-Tasks 1 through 8 are complete at the requested foundation level.
+Tasks 1 through 10 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 9 is next: create Flutter shared packages.
+Task 11 is next: implement the Menu Management Module.
 
 ## Task History
 
@@ -30,7 +30,79 @@ Task 9 is next: create Flutter shared packages.
 | 6. Create tenant, outlet, user, role, and permission schema | COMPLETE | Prisma models, initial migration, tenant-aware constraints, forced RLS, permission seed, tests, and database documentation are implemented. |
 | 7. Implement authentication with access and refresh tokens | COMPLETE | Login, refresh rotation, logout revocation, bearer `/auth/me`, bcrypt credentials, hashed refresh persistence, Swagger, tests, seed, and documentation are implemented. |
 | 8. Implement tenant and outlet module | COMPLETE | Protected tenant/outlet APIs, role boundaries, pagination, RLS request context, schema fields, migration, tests, and outlet-limit enforcement are implemented. |
-| 9. Create Flutter shared packages | NEXT | Not started. Do not implement until explicitly requested. |
+| 9. Create Flutter shared packages | COMPLETE | Standardized seven workspace packages, backend-aligned shared models, Dio auth/tenant/outlet services, auth contracts, UI primitives, analytics, utilities, and frontend architecture documentation are implemented. |
+| 10. Implement Flutter login and role-based navigation | COMPLETE | Secure token storage, Riverpod auth state/providers, NestJS auth repository, splash restore, guarded GoRouter role navigation, refresh/retry, logout, and seven role dashboard placeholders are implemented. |
+| 11. Implement Menu Management Module | NEXT | Not started. Follow backend/domain/API-first delivery order. |
+
+## Task 10 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- `AuthStatus` and immutable `AuthState` with user, tokens, and safe error text
+- Riverpod `AuthNotifier` for login, restore, session expiry, and logout
+- `flutter_secure_storage` token persistence; passwords are never stored
+- Dio-backed `AuthRepositoryImpl` using the Task 9 API client
+- Bearer-token injection, serialized refresh rotation, one-time request retry,
+  token replacement, and forced local logout after refresh failure
+- Compile-time `API_BASE_URL` configuration with no embedded API host
+- Splash and login screens built from `restaurant_pos_ui_kit`
+- GoRouter authentication guards and `/login`, `/dashboard`, and role routes
+- Dashboard placeholders for `SUPER_ADMIN`, `TENANT_ADMIN`, `MANAGER`,
+  `CASHIER`, `WAITER`, `KITCHEN_STAFF`, and `CUSTOMER`
+- Backend logout followed by unconditional local token clearing
+- Removal of the obsolete Firebase auth bootstrap and Provider dependency
+- `docs/architecture/frontend-authentication.md`
+
+Validation:
+
+- `dart format` on changed Dart source and tests: passed
+- `flutter analyze`: passed with no issues
+- `flutter test packages/auth`: passed, 3 tests
+- `flutter test apps/restaurant-app`: passed, 9 tests
+- `git diff --check`: passed
+- Scope audit confirmed no files under `backend/` were modified
+
+Known limitation:
+
+- Standalone `flutter pub get` resolved and downloaded all dependencies but
+  returned a nonzero exit on Windows because plugin symlink creation requires
+  Developer Mode. `flutter analyze` and both test suites still completed
+  successfully with the resolved dependencies.
+- Live login against PostgreSQL-backed NestJS endpoints was not exercised
+  because no runnable API/database environment was configured for this task.
+
+## Task 9 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Root Dart pub workspace integration for all seven shared packages
+- Standardized `restaurant_pos_*` package identifiers and application imports
+- Framework-independent core configuration, constants, failures, results,
+  currency formatting, and UTC date utilities
+- Backend-aligned auth, tenant, outlet, status, pagination, and token models
+- Dio client configuration, endpoint constants, bearer-token/error
+  interceptors, and typed auth/tenant/outlet services
+- Shared auth repository, token storage, state, and role-access contracts
+- Flutter colors, typography, themes, navigation, buttons, fields, cards,
+  loading, and empty-state widgets
+- Privacy-safe analytics contracts and common validation/string utilities
+- Package READMEs and `docs/architecture/frontend-architecture.md`
+
+Validation:
+
+- `flutter pub get`: passed
+- `dart format` on package/app source and tests: passed
+- `flutter analyze`: passed with no issues
+- `flutter test apps/restaurant-app`: passed, 9 tests
+
+Known limitation:
+
+- Legacy `serveiq_*` barrel files remain as temporary re-export shims for source
+  compatibility. New code uses only `restaurant_pos_*` imports.
 
 ## Task 8 Completion
 
@@ -175,10 +247,11 @@ Known limitation:
 
 ## Next Task
 
-### Task 9: Create Flutter Shared Packages
+### Task 11: Implement Menu Management Module
 
-Do not start Task 9 unless explicitly requested. Backend tenant and outlet
-contracts now exist for client-package design.
+Do not start Task 11 unless explicitly requested. Define menu business rules,
+database ownership, API contracts, validation, authorization, and backend tests
+before Flutter menu screens.
 
 ## Future Work
 

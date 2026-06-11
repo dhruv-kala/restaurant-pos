@@ -25,10 +25,7 @@ class AppButton extends StatelessWidget {
           )
         : Text(label);
     final button = icon == null
-        ? FilledButton(
-            onPressed: isLoading ? null : onPressed,
-            child: child,
-          )
+        ? FilledButton(onPressed: isLoading ? null : onPressed, child: child)
         : FilledButton.icon(
             onPressed: isLoading ? null : onPressed,
             icon: Icon(icon),

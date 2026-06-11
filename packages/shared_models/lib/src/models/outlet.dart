@@ -66,23 +66,23 @@ class Outlet {
   final DateTime updatedAt;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'tenantId': tenantId,
-        'code': code,
-        'name': name,
-        'status': status.toJson(),
-        'timezone': timezone,
-        'email': email,
-        'addressLine1': addressLine1,
-        'addressLine2': addressLine2,
-        'city': city,
-        'state': state,
-        'postalCode': postalCode,
-        'country': country,
-        'phone': phone,
-        'createdAt': DateTimeConverter.toJson(createdAt),
-        'updatedAt': DateTimeConverter.toJson(updatedAt),
-      };
+    'id': id,
+    'tenantId': tenantId,
+    'code': code,
+    'name': name,
+    'status': status.toJson(),
+    'timezone': timezone,
+    'email': email,
+    'addressLine1': addressLine1,
+    'addressLine2': addressLine2,
+    'city': city,
+    'state': state,
+    'postalCode': postalCode,
+    'country': country,
+    'phone': phone,
+    'createdAt': DateTimeConverter.toJson(createdAt),
+    'updatedAt': DateTimeConverter.toJson(updatedAt),
+  };
 }
 
 String _requiredString(Map<String, dynamic> json, String key) {

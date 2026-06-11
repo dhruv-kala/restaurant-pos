@@ -1,39 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:restaurant_pos_auth/restaurant_pos_auth.dart';
 import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
-import '../features/auth/domain/usecases/sign_in.dart';
-import '../features/auth/presentation/controllers/login_controller.dart';
 import 'router/app_router.dart';
 
-class RestaurantPosApp extends StatefulWidget {
-  const RestaurantPosApp({required this.signIn, super.key});
-
-  final SignIn signIn;
+class RestaurantPosApp extends ConsumerStatefulWidget {
+  const RestaurantPosApp({super.key});
 
   @override
-  State<RestaurantPosApp> createState() => _RestaurantPosAppState();
+  ConsumerState<RestaurantPosApp> createState() => _RestaurantPosAppState();
 }
 
-class _RestaurantPosAppState extends State<RestaurantPosApp> {
-  late final AppRouter _appRouter;
-
+class _RestaurantPosAppState extends ConsumerState<RestaurantPosApp> {
   @override
   void initState() {
     super.initState();
-    _appRouter = AppRouter();
+    Future<void>.microtask(
+      ref.read(authNotifierProvider.notifier).restoreSession,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => LoginController(signIn: widget.signIn),
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: 'ServeIQ',
-        theme: AppTheme.lightTheme,
-        routerConfig: _appRouter.config,
-      ),
+    final router = ref.watch(appRouterProvider);
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      title: 'ServeIQ',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      routerConfig: router,
     );
   }
 }

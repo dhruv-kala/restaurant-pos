@@ -21,18 +21,15 @@ class PaginationMeta {
   final int totalPages;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'page': page,
-        'limit': limit,
-        'total': total,
-        'totalPages': totalPages,
-      };
+    'page': page,
+    'limit': limit,
+    'total': total,
+    'totalPages': totalPages,
+  };
 }
 
 class PaginatedResponse<T> {
-  const PaginatedResponse({
-    required this.data,
-    required this.meta,
-  });
+  const PaginatedResponse({required this.data, required this.meta});
 
   factory PaginatedResponse.fromJson(
     Map<String, dynamic> json,
@@ -47,12 +44,16 @@ class PaginatedResponse<T> {
       throw const FormatException('Expected an object for "meta".');
     }
     return PaginatedResponse<T>(
-      data: dataValue.map<T>((item) {
-        if (item is! Map<String, dynamic>) {
-          throw const FormatException('Expected each item to be an object.');
-        }
-        return itemFromJson(item);
-      }).toList(growable: false),
+      data: dataValue
+          .map<T>((item) {
+            if (item is! Map<String, dynamic>) {
+              throw const FormatException(
+                'Expected each item to be an object.',
+              );
+            }
+            return itemFromJson(item);
+          })
+          .toList(growable: false),
       meta: PaginationMeta.fromJson(metaValue),
     );
   }

@@ -7,9 +7,9 @@ abstract interface class AuthRepository {
     required String password,
   });
 
-  Future<models.TokenPair> refresh(String refreshToken);
+  Future<models.TokenPair> refreshToken();
 
-  Future<models.AuthenticatedUser> currentUser();
+  Future<models.AuthenticatedUser> getCurrentUser();
 
   Future<void> logout();
 }

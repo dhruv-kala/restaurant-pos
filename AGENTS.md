@@ -114,12 +114,13 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 8 are complete at the foundation level.
+Tasks 1 through 10 are complete at the foundation level.
 
-Task 8 created protected tenant and outlet APIs with platform/tenant role
-boundaries, pagination, forced-RLS context, and outlet-limit enforcement.
+Task 10 created secure token persistence, Riverpod authentication state,
+backend login/session/logout behavior, refresh-and-retry interception, guarded
+GoRouter navigation, and role dashboard placeholders.
 
-Task 9 is next: create Flutter shared packages.
+Task 11 is next: implement the Menu Management Module.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

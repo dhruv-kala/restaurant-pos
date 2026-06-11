@@ -57,20 +57,20 @@ class Tenant {
   final DateTime updatedAt;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'slug': slug,
-        'name': name,
-        'legalName': legalName,
-        'email': email,
-        'phone': phone,
-        'status': status.toJson(),
-        'locale': locale,
-        'timezone': timezone,
-        'currencyCode': currencyCode,
-        'outletLimit': outletLimit,
-        'createdAt': DateTimeConverter.toJson(createdAt),
-        'updatedAt': DateTimeConverter.toJson(updatedAt),
-      };
+    'id': id,
+    'slug': slug,
+    'name': name,
+    'legalName': legalName,
+    'email': email,
+    'phone': phone,
+    'status': status.toJson(),
+    'locale': locale,
+    'timezone': timezone,
+    'currencyCode': currencyCode,
+    'outletLimit': outletLimit,
+    'createdAt': DateTimeConverter.toJson(createdAt),
+    'updatedAt': DateTimeConverter.toJson(updatedAt),
+  };
 }
 
 String _requiredString(Map<String, dynamic> json, String key) {

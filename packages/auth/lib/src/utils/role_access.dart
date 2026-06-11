@@ -29,4 +29,22 @@ abstract final class RoleAccess {
           role == UserRole.waiter,
     );
   }
+
+  static UserRole? primaryRole(Iterable<UserRole> roles) {
+    const precedence = <UserRole>[
+      UserRole.superAdmin,
+      UserRole.tenantAdmin,
+      UserRole.manager,
+      UserRole.cashier,
+      UserRole.waiter,
+      UserRole.kitchenStaff,
+      UserRole.customer,
+    ];
+    for (final role in precedence) {
+      if (roles.contains(role)) {
+        return role;
+      }
+    }
+    return null;
+  }
 }

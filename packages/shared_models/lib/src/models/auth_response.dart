@@ -2,10 +2,7 @@ import 'authenticated_user.dart';
 import 'token_pair.dart';
 
 class AuthResponse {
-  const AuthResponse({
-    required this.user,
-    required this.tokens,
-  });
+  const AuthResponse({required this.user, required this.tokens});
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
     return AuthResponse(
@@ -18,9 +15,9 @@ class AuthResponse {
   final TokenPair tokens;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'user': user.toJson(),
-        ...tokens.toJson(),
-      };
+    'user': user.toJson(),
+    ...tokens.toJson(),
+  };
 }
 
 Map<String, dynamic> _requiredMap(Map<String, dynamic> json, String key) {

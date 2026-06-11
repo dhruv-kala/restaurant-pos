@@ -45,10 +45,7 @@ class OutletApiService {
     return Outlet.fromJson(_responseMap(response));
   }
 
-  Future<Outlet> update(
-    String outletId,
-    Map<String, dynamic> payload,
-  ) async {
+  Future<Outlet> update(String outletId, Map<String, dynamic> payload) async {
     final response = await _dio.patch<Object?>(
       ApiEndpoints.outlet(outletId),
       data: payload,
@@ -56,10 +53,7 @@ class OutletApiService {
     return Outlet.fromJson(_responseMap(response));
   }
 
-  Future<Outlet> updateStatus(
-    String outletId,
-    OutletStatus status,
-  ) async {
+  Future<Outlet> updateStatus(String outletId, OutletStatus status) async {
     final response = await _dio.patch<Object?>(
       ApiEndpoints.outletStatus(outletId),
       data: <String, dynamic>{'status': status.toJson()},

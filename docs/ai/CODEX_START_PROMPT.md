@@ -31,12 +31,12 @@ Initial deployment constraints:
 - No mandatory cloud dependency initially
 
 Current status:
-- Tasks 1 through 8 are complete at the foundation level.
-- Task 8 implemented protected tenant and outlet APIs, role boundaries,
-  pagination, forced-RLS request context, and outlet-limit enforcement.
+- Tasks 1 through 10 are complete at the foundation level.
+- Task 10 implemented secure token storage, Riverpod auth state, Dio
+  refresh-and-retry, guarded GoRouter navigation, and role dashboards.
 - Local migration deployment and seed execution remain unverified because the
   configured PostgreSQL connection failed on 2026-06-10.
-- Task 9 is next: create Flutter shared packages.
+- Task 11 is next: implement the Menu Management Module.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,

@@ -21,7 +21,9 @@ class AuthenticatedUser {
       name: _optionalString(json['name']),
       tenantId: _optionalString(json['tenantId']),
       outletId: _optionalString(json['outletId']),
-      roles: rolesValue.map<UserRole>(UserRole.fromJson).toList(growable: false),
+      roles: rolesValue
+          .map<UserRole>(UserRole.fromJson)
+          .toList(growable: false),
     );
   }
 
@@ -35,13 +37,13 @@ class AuthenticatedUser {
   bool hasRole(UserRole role) => roles.contains(role);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'email': email,
-        'name': name,
-        'tenantId': tenantId,
-        'outletId': outletId,
-        'roles': roles.map((role) => role.toJson()).toList(growable: false),
-      };
+    'id': id,
+    'email': email,
+    'name': name,
+    'tenantId': tenantId,
+    'outletId': outletId,
+    'roles': roles.map((role) => role.toJson()).toList(growable: false),
+  };
 }
 
 String _requiredString(Map<String, dynamic> json, String key) {

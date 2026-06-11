@@ -8,5 +8,15 @@ environment:
   sdk: ^3.12.1
 
 dependencies:
+  dio: ^5.9.0
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.0.3
+  flutter_secure_storage: ^10.0.0
+  restaurant_pos_api_client: any
   restaurant_pos_core: any
   restaurant_pos_shared_models: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

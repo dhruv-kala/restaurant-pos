@@ -7,15 +7,15 @@ class DioClient {
     required ApiClientConfig config,
     Iterable<Interceptor> interceptors = const <Interceptor>[],
   }) : dio = Dio(
-          BaseOptions(
-            baseUrl: config.baseUrl,
-            connectTimeout: config.connectTimeout,
-            receiveTimeout: config.receiveTimeout,
-            sendTimeout: config.sendTimeout,
-            contentType: Headers.jsonContentType,
-            responseType: ResponseType.json,
-          ),
-        ) {
+         BaseOptions(
+           baseUrl: config.baseUrl,
+           connectTimeout: config.connectTimeout,
+           receiveTimeout: config.receiveTimeout,
+           sendTimeout: config.sendTimeout,
+           contentType: Headers.jsonContentType,
+           responseType: ResponseType.json,
+         ),
+       ) {
     dio.interceptors.addAll(interceptors);
   }
 

@@ -255,7 +255,15 @@ The repository currently contains:
 - Protected tenant and outlet management APIs
 - Platform-admin and tenant-scoped RLS transaction context
 - Tenant outlet-limit enforcement
-- Flutter and shared package prototype/scaffold work
+- Standardized `restaurant_pos_*` Dart/Flutter workspace packages
+- Backend-aligned auth, tenant, outlet, and pagination client models
+- Dio API client configuration, interceptors, and typed auth/tenant/outlet
+  services
+- Shared authentication contracts, analytics contracts, utilities, themes, and
+  reusable UI primitives
+- Flutter secure token persistence and Riverpod authentication state
+- NestJS login, session restore, refresh rotation, and logout client flows
+- GoRouter authentication guards and role-based dashboard placeholders
 
 ## Authoritative References
 
