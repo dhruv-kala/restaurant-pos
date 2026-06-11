@@ -46,6 +46,36 @@ enum MembershipStatus {
   @@map("membership_status")
 }
 
+enum DiningTableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  CLEANING
+  OUT_OF_SERVICE
+
+  @@map("dining_table_status")
+}
+
+enum DiningTableShape {
+  RECTANGLE
+  SQUARE
+  ROUND
+  OVAL
+
+  @@map("dining_table_shape")
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  SEATED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+
+  @@map("reservation_status")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -63,14 +93,18 @@ model Tenant {
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(3)
 
-  outlets          Outlet[]
-  memberships      TenantMembership[]
-  roles            Role[]
-  menuCategories   MenuCategory[]
-  menuItems        MenuItem[]
-  menuItemVariants MenuItemVariant[]
-  menuItemAddons   MenuItemAddon[]
-  outletMenuPrices OutletMenuPrice[]
+  outlets           Outlet[]
+  memberships       TenantMembership[]
+  roles             Role[]
+  menuCategories    MenuCategory[]
+  menuItems         MenuItem[]
+  menuItemVariants  MenuItemVariant[]
+  menuItemAddons    MenuItemAddon[]
+  outletMenuPrices  OutletMenuPrice[]
+  tableSections     TableSection[]
+  diningTables      DiningTable[]
+  tableReservations TableReservation[]
+  mergedTables      MergedTable[]
 
   @@index([status])
   @@index([deletedAt])
@@ -100,6 +134,10 @@ model Outlet {
   tenant                Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   membershipAssignments MembershipOutlet[]
   menuPrices            OutletMenuPrice[]
+  tableSections         TableSection[]
+  diningTables          DiningTable[]
+  tableReservations     TableReservation[]
+  mergedTables          MergedTable[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -370,4 +408,105 @@ model OutletMenuPrice {
   @@index([tenantId, menuItemId, deletedAt])
   @@index([tenantId, outletId, deletedAt])
   @@map("outlet_menu_prices")
+}
+
+model TableSection {
+  id           String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  outletId     String    @map("outlet_id") @db.Uuid
+  name         String    @db.VarChar(120)
+  description  String?   @db.VarChar(500)
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
+  version      Int       @default(1)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet        @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  tables DiningTable[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, outletId, id])
+  @@unique([tenantId, outletId, name])
+  @@index([tenantId, outletId, isActive, deletedAt])
+  @@map("table_sections")
+}
+
+model DiningTable {
+  id          String            @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId    String            @map("tenant_id") @db.Uuid
+  outletId    String            @map("outlet_id") @db.Uuid
+  sectionId   String            @map("section_id") @db.Uuid
+  tableNumber String            @map("table_number") @db.VarChar(32)
+  displayName String?           @map("display_name") @db.VarChar(120)
+  capacity    Int
+  status      DiningTableStatus @default(AVAILABLE)
+  xPosition   Decimal           @default(0) @map("x_position") @db.Decimal(10, 2)
+  yPosition   Decimal           @default(0) @map("y_position") @db.Decimal(10, 2)
+  shape       DiningTableShape  @default(RECTANGLE)
+  isActive    Boolean           @default(true) @map("is_active")
+  version     Int               @default(1)
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt   DateTime?         @map("deleted_at") @db.Timestamptz(3)
+
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet             @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  section      TableSection       @relation(fields: [tenantId, outletId, sectionId], references: [tenantId, outletId, id], onDelete: Restrict)
+  reservations TableReservation[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, outletId, id])
+  @@unique([tenantId, outletId, tableNumber])
+  @@index([tenantId, outletId, sectionId])
+  @@index([tenantId, outletId, status, deletedAt])
+  @@map("dining_tables")
+}
+
+model TableReservation {
+  id                  String            @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId            String            @map("tenant_id") @db.Uuid
+  outletId            String            @map("outlet_id") @db.Uuid
+  tableId             String            @map("table_id") @db.Uuid
+  customerName        String            @map("customer_name") @db.VarChar(160)
+  customerPhone       String?           @map("customer_phone") @db.VarChar(20)
+  reservationDate     DateTime          @map("reservation_date") @db.Timestamptz(3)
+  guestCount          Int               @map("guest_count")
+  specialInstructions String?           @map("special_instructions") @db.VarChar(1000)
+  status              ReservationStatus @default(PENDING)
+  version             Int               @default(1)
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt           DateTime?         @map("deleted_at") @db.Timestamptz(3)
+
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet      @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  table  DiningTable @relation(fields: [tenantId, outletId, tableId], references: [tenantId, outletId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, outletId, reservationDate])
+  @@index([tenantId, outletId, tableId, status])
+  @@map("table_reservations")
+}
+
+model MergedTable {
+  id             String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  outletId       String    @map("outlet_id") @db.Uuid
+  primaryTableId String    @map("primary_table_id") @db.Uuid
+  mergedTableIds String[]  @map("merged_table_ids") @db.Uuid
+  isActive       Boolean   @default(true) @map("is_active")
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, outletId, isActive, deletedAt])
+  @@map("merged_tables")
 }

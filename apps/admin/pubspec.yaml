@@ -1,0 +1,29 @@
+name: restaurant_pos_admin
+description: Restaurant POS tenant administration Flutter web application.
+publish_to: none
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.0.3
+  restaurant_pos_api_client:
+    path: ../../packages/api_client
+  restaurant_pos_auth:
+    path: ../../packages/auth
+  restaurant_pos_shared_models:
+    path: ../../packages/shared_models
+  restaurant_pos_ui_kit:
+    path: ../../packages/ui_kit
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

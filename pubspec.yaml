@@ -6,6 +6,7 @@ environment:
   sdk: ^3.12.1
 
 workspace:
+  - apps/admin
   - apps/restaurant-app
   - packages/analytics
   - packages/api_client

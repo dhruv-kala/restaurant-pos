@@ -26,6 +26,10 @@ const permissions = [
   ['menu.read', 'menu', 'View menu categories and items'],
   ['menu.update', 'menu', 'Update menu categories and items'],
   ['menu.delete', 'menu', 'Archive menu categories and items'],
+  ['tables.create', 'tables', 'Create table sections and dining tables'],
+  ['tables.read', 'tables', 'View tables and reservations'],
+  ['tables.update', 'tables', 'Update tables and reservations'],
+  ['tables.delete', 'tables', 'Archive tables and reservations'],
 ] as const;
 
 const LOCAL_ADMIN_EMAIL = 'admin@example.com';

@@ -114,13 +114,13 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 10 are complete at the foundation level.
+Tasks 1 through 11 are complete at the foundation level.
 
-Task 10 created secure token persistence, Riverpod authentication state,
-backend login/session/logout behavior, refresh-and-retry interception, guarded
-GoRouter navigation, and role dashboard placeholders.
+Task 11 created the tenant-scoped menu database schema, NestJS category/item
+APIs, variants, add-ons, outlet price overrides, shared client contracts, and
+the Flutter admin menu application.
 
-Task 11 is next: implement the Menu Management Module.
+Task 12 is complete. Task 13 is next: implement the Order Management Module.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

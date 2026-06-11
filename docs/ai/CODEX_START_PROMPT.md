@@ -31,12 +31,13 @@ Initial deployment constraints:
 - No mandatory cloud dependency initially
 
 Current status:
-- Tasks 1 through 10 are complete at the foundation level.
-- Task 10 implemented secure token storage, Riverpod auth state, Dio
-  refresh-and-retry, guarded GoRouter navigation, and role dashboards.
+- Tasks 1 through 11 are complete at the foundation level.
+- Task 11 implemented the menu schema, protected NestJS menu APIs, shared menu
+  models/API client, and Flutter admin menu management screens.
 - Local migration deployment and seed execution remain unverified because the
   configured PostgreSQL connection failed on 2026-06-10.
-- Task 11 is next: implement the Menu Management Module.
+- Task 12 is complete.
+- Task 13 is next: implement the Order Management Module.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,

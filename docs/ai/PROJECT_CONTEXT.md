@@ -264,6 +264,9 @@ The repository currently contains:
 - Flutter secure token persistence and Riverpod authentication state
 - NestJS login, session restore, refresh rotation, and logout client flows
 - GoRouter authentication guards and role-based dashboard placeholders
+- Tenant-scoped menu categories, items, variants, add-ons, and outlet prices
+- Protected NestJS menu management APIs with pagination and forced RLS
+- Flutter admin menu dashboard with Riverpod category and item management
 
 ## Authoritative References
 

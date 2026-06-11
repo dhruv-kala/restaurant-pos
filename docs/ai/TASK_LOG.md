@@ -11,12 +11,12 @@ Last updated: 2026-06-11
 
 ## Current Summary
 
-Tasks 1 through 10 are complete at the requested foundation level.
+Tasks 1 through 12 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 11 is next: implement the Menu Management Module.
+Task 13 is next: implement the Order Management Module.
 
 ## Task History
 
@@ -32,7 +32,101 @@ Task 11 is next: implement the Menu Management Module.
 | 8. Implement tenant and outlet module | COMPLETE | Protected tenant/outlet APIs, role boundaries, pagination, RLS request context, schema fields, migration, tests, and outlet-limit enforcement are implemented. |
 | 9. Create Flutter shared packages | COMPLETE | Standardized seven workspace packages, backend-aligned shared models, Dio auth/tenant/outlet services, auth contracts, UI primitives, analytics, utilities, and frontend architecture documentation are implemented. |
 | 10. Implement Flutter login and role-based navigation | COMPLETE | Secure token storage, Riverpod auth state/providers, NestJS auth repository, splash restore, guarded GoRouter role navigation, refresh/retry, logout, and seven role dashboard placeholders are implemented. |
-| 11. Implement Menu Management Module | NEXT | Not started. Follow backend/domain/API-first delivery order. |
+| 11. Implement Menu Management Module | COMPLETE | Tenant-scoped menu schema, forced RLS, category/item/variant/add-on APIs, outlet pricing, shared clients, Riverpod admin screens, tests, and documentation are implemented. |
+| 12. Implement Table Management Module | COMPLETE | Outlet-scoped sections, dining tables, statuses, reservations, merge/split/transfer operations, shared clients, Riverpod admin screens, tests, and documentation are implemented. |
+| 13. Implement Order Management Module | NEXT | Not started. Define order lifecycle, item pricing snapshots, authorization, and API contracts before Flutter screens. |
+
+## Task 12 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Prisma `TableSection`, `DiningTable`, `TableReservation`, and `MergedTable`
+  models with tenant/outlet composite ownership
+- Table, shape, and reservation status enums; capacity, coordinate, uniqueness,
+  and active reservation-slot constraints
+- Migration `20260611210000_add_table_management` with forced RLS policies
+- Protected section, table, reservation, status, merge, split, and transfer APIs
+- Write access for platform/tenant admins and managers; read-only access for
+  waiters and cashiers; kitchen access denied
+- Transactional reservation status effects, merge/split, and occupancy transfer
+- Table permission seed entries and Prisma/access contract tests
+- Shared Dart table models and typed `TablesApiService`
+- Riverpod repositories/providers and admin layout, section, table, and
+  reservation screens
+- API, database, and module specification documentation
+
+Validation:
+
+- `npm.cmd run prisma:format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 39 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter analyze` for admin: passed
+- `flutter test` for admin: passed, 1 test
+- `flutter build web` for admin: passed
+
+Known limitation:
+
+- The table migration was not deployed to a live PostgreSQL database because
+  prior tasks recorded invalid local database credentials.
+- Live API calls require deployed migrations, a valid datasource, authenticated
+  tokens, `API_BASE_URL`, and an `OUTLET_ID` for tenant-admin create workflows.
+
+## Task 11 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Prisma `MenuCategory`, `MenuItem`, `MenuItemVariant`, `MenuItemAddon`, and
+  `OutletMenuPrice` models
+- Category hierarchy, tenant-aware composite foreign keys, minor-unit money
+  constraints, tax bounds, soft deletion, versions, and forced RLS
+- Migration `20260611180000_add_menu_management`
+- Protected Swagger category and menu item CRUD endpoints
+- Variant and add-on create/list/delete endpoints
+- Outlet-specific prices through menu item create/update contracts
+- `SUPER_ADMIN`, `TENANT_ADMIN`, and `MANAGER` access; operational roles denied
+- Search, category/availability filtering, sorting, and pagination
+- Menu permission seed entries and schema contract tests
+- Backend-aligned shared models and typed `MenuApiService`
+- Runnable Flutter Web admin app and workspace registration
+- Riverpod `categoryProvider` and `menuItemsProvider`
+- Menu dashboard, category list/add/edit, and item list/add/edit screens
+- Loading, error, empty, search, and pagination presentation states
+- API, database ERD, and module specification documentation
+
+Validation:
+
+- `npm.cmd run prisma:format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 35 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `flutter pub get`: passed
+- `flutter analyze`: passed with no issues
+- `flutter test apps/admin`: passed, 1 test
+- `flutter test apps/restaurant-app`: passed, 9 tests
+- `flutter test packages/auth`: passed, 3 tests
+- `flutter build web` from `apps/admin`: passed
+- `git diff --check`: passed
+
+Known limitation:
+
+- The committed menu migration was not deployed to a live PostgreSQL database.
+  Previous tasks recorded invalid local PostgreSQL credentials, so no database
+  mutation was attempted.
+- Endpoint behavior was verified through unit and application e2e compilation
+  tests, but database-backed menu CRUD requires migration deployment and a valid
+  local datasource.
 
 ## Task 10 Completion
 
@@ -247,11 +341,11 @@ Known limitation:
 
 ## Next Task
 
-### Task 11: Implement Menu Management Module
+### Task 13: Implement Order Management Module
 
-Do not start Task 11 unless explicitly requested. Define menu business rules,
-database ownership, API contracts, validation, authorization, and backend tests
-before Flutter menu screens.
+Do not start Task 13 unless explicitly requested. Define order lifecycle,
+pricing snapshots, taxes, item modifiers, table/customer linkage,
+authorization, and API contracts before Flutter screens.
 
 ## Future Work
 

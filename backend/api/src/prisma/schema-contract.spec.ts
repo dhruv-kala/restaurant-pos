@@ -213,4 +213,41 @@ describe('Prisma tenancy and authorization schema', () => {
       'CREATE POLICY "outlet_menu_prices_tenant_isolation"',
     );
   });
+
+  it('adds outlet-scoped table models, constraints, and forced RLS', () => {
+    for (const modelName of [
+      'TableSection',
+      'DiningTable',
+      'TableReservation',
+      'MergedTable',
+    ]) {
+      const fields = models.get(modelName)?.fields.map((field) => field.name);
+      expect(fields).toEqual(
+        expect.arrayContaining(['tenantId', 'outletId', 'deletedAt']),
+      );
+    }
+
+    const migration = readFileSync(
+      join(
+        process.cwd(),
+        'prisma',
+        'migrations',
+        '20260611210000_add_table_management',
+        'migration.sql',
+      ),
+      'utf8',
+    );
+    expect(migration).toContain(
+      'FOREIGN KEY ("tenant_id", "outlet_id", "section_id")',
+    );
+    expect(migration).toContain(
+      'CONSTRAINT "dining_tables_capacity_positive_check"',
+    );
+    expect(migration).toContain(
+      'ALTER TABLE "table_reservations" FORCE ROW LEVEL SECURITY',
+    );
+    expect(migration).toContain(
+      'CREATE POLICY "merged_tables_tenant_isolation"',
+    );
+  });
 });

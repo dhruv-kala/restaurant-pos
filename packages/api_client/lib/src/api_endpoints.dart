@@ -7,6 +7,9 @@ abstract final class ApiEndpoints {
   static const String outlets = '/outlets';
   static const String menuCategories = '/menu/categories';
   static const String menuItems = '/menu/items';
+  static const String tableSections = '/table-sections';
+  static const String tables = '/tables';
+  static const String reservations = '/reservations';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -37,4 +40,13 @@ abstract final class ApiEndpoints {
   static String menuVariant(String variantId) => '/menu/variants/$variantId';
 
   static String menuAddon(String addonId) => '/menu/addons/$addonId';
+
+  static String tableSection(String id) => '$tableSections/$id';
+  static String table(String id) => '$tables/$id';
+  static String tableStatus(String id) => '${table(id)}/status';
+  static String reservation(String id) => '$reservations/$id';
+  static String reservationStatus(String id) => '${reservation(id)}/status';
+  static const String mergeTables = '$tables/merge';
+  static const String splitTables = '$tables/split';
+  static const String transferTable = '$tables/transfer';
 }

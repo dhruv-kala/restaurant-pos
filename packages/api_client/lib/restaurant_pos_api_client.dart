@@ -8,4 +8,5 @@ export 'src/interceptors/error_interceptor.dart';
 export 'src/services/auth_api_service.dart';
 export 'src/services/menu_api_service.dart';
 export 'src/services/outlet_api_service.dart';
+export 'src/services/tables_api_service.dart';
 export 'src/services/tenant_api_service.dart';
