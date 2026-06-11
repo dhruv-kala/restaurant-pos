@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:restaurant_pos_auth/restaurant_pos_auth.dart' hide UserRole;
@@ -5,6 +6,11 @@ import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/billing/presentation/screens/bill_details_screen.dart';
+import '../../features/billing/presentation/screens/bill_list_screen.dart';
+import '../../features/billing/presentation/screens/billing_screen.dart';
+import '../../features/billing/presentation/screens/merge_bill_screen.dart';
+import '../../features/billing/presentation/screens/split_bill_screen.dart';
 import '../../features/dashboard/presentation/screens/admin_dashboard.dart';
 import '../../features/dashboard/presentation/screens/cashier_dashboard.dart';
 import '../../features/dashboard/presentation/screens/customer_dashboard.dart';
@@ -12,6 +18,14 @@ import '../../features/dashboard/presentation/screens/kitchen_dashboard.dart';
 import '../../features/dashboard/presentation/screens/manager_dashboard.dart';
 import '../../features/dashboard/presentation/screens/super_admin_dashboard.dart';
 import '../../features/dashboard/presentation/screens/waiter_dashboard.dart';
+import '../../features/orders/presentation/screens/create_order_screen.dart';
+import '../../features/orders/presentation/screens/edit_order_screen.dart';
+import '../../features/kds/presentation/screens/completed_orders_screen.dart';
+import '../../features/kds/presentation/screens/kitchen_dashboard_screen.dart';
+import '../../features/kds/presentation/screens/kitchen_queue_screen.dart';
+import '../../features/kds/presentation/screens/ready_orders_screen.dart';
+import '../../features/orders/presentation/screens/order_details_screen.dart';
+import '../../features/orders/presentation/screens/order_list_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/splash';
@@ -24,6 +38,14 @@ abstract final class AppRoutes {
   static const waiterDashboard = '/dashboard/waiter';
   static const kitchenDashboard = '/dashboard/kitchen';
   static const customerDashboard = '/dashboard/customer';
+  static const orders = '/orders';
+  static const createOrder = '/orders/create';
+  static const kds = '/kds';
+  static const kitchenQueue = '/kds/queue';
+  static const readyOrders = '/kds/ready';
+  static const completedOrders = '/kds/completed';
+  static const billing = '/billing';
+  static const mergeBills = '/billing/merge';
 
   static String forRole(UserRole role) {
     return switch (role) {
@@ -62,6 +84,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       final roleRoute = AppRoutes.forRole(role);
+      if (location.startsWith(AppRoutes.orders)) {
+        if (role == UserRole.customer) return roleRoute;
+        if (role == UserRole.kitchenStaff &&
+            location != AppRoutes.kitchenQueue) {
+          return AppRoutes.kitchenQueue;
+        }
+      }
+      if (location.startsWith(AppRoutes.kds)) {
+        if (role == UserRole.customer || role == UserRole.cashier) {
+          return roleRoute;
+        }
+        if (role == UserRole.waiter && location != AppRoutes.readyOrders) {
+          return AppRoutes.readyOrders;
+        }
+      }
+      if (location.startsWith(AppRoutes.billing)) {
+        if (role == UserRole.customer || role == UserRole.kitchenStaff) {
+          return roleRoute;
+        }
+        if (role == UserRole.waiter &&
+            (location.contains('/generate/') ||
+                location == AppRoutes.mergeBills ||
+                location.endsWith('/split'))) {
+          return AppRoutes.billing;
+        }
+      }
       if (location == AppRoutes.login ||
           location == AppRoutes.splash ||
           location == AppRoutes.dashboard ||
@@ -111,6 +159,82 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'customer',
             builder: (context, state) => const CustomerDashboard(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.orders,
+        builder: (context, state) => const OrderListScreen(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'create',
+            builder: (context, state) => const CreateOrderScreen(),
+          ),
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                OrderDetailsScreen(orderId: state.pathParameters['id']!),
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'edit',
+                builder: (context, state) =>
+                    EditOrderScreen(orderId: state.pathParameters['id']!),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.kds,
+        builder: (context, state) => const KitchenDashboardScreen(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'queue',
+            builder: (context, state) => Scaffold(
+              appBar: AppBar(title: const Text('Kitchen Queue')),
+              body: const KdsQueueScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'ready',
+            builder: (context, state) => Scaffold(
+              appBar: AppBar(title: const Text('Ready Orders')),
+              body: const ReadyOrdersScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'completed',
+            builder: (context, state) => Scaffold(
+              appBar: AppBar(title: const Text('Completed Orders')),
+              body: const CompletedOrdersScreen(),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.billing,
+        builder: (context, state) => const BillListScreen(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'generate/:orderId',
+            builder: (context, state) =>
+                BillingScreen(orderId: state.pathParameters['orderId']!),
+          ),
+          GoRoute(
+            path: 'merge',
+            builder: (context, state) => const MergeBillScreen(),
+          ),
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                BillDetailsScreen(billId: state.pathParameters['id']!),
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'split',
+                builder: (context, state) =>
+                    SplitBillScreen(billId: state.pathParameters['id']!),
+              ),
+            ],
           ),
         ],
       ),

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { OrderType } from '@prisma/client';
+import { OrderPriority, OrderType } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -29,6 +29,11 @@ export class CreateOrderDto {
   @ApiProperty({ enum: OrderType })
   @IsEnum(OrderType)
   orderType!: OrderType;
+
+  @ApiPropertyOptional({ enum: OrderPriority, default: OrderPriority.NORMAL })
+  @IsOptional()
+  @IsEnum(OrderPriority)
+  priority?: OrderPriority;
 
   @ApiPropertyOptional()
   @IsOptional()

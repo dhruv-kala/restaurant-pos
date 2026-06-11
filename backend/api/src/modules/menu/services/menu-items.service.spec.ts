@@ -22,9 +22,8 @@ describe('MenuItemsService', () => {
     menuItem: { create: jest.fn() },
   };
   const prisma = {
-    $transaction: jest.fn(
-      (callback: (client: typeof transaction) => Promise<unknown>) =>
-        callback(transaction),
+    $transaction: jest.fn((callback: (client: typeof transaction) => Promise<unknown>) =>
+      callback(transaction),
     ),
   };
   const service = new MenuItemsService(prisma as unknown as PrismaService);
@@ -36,10 +35,7 @@ describe('MenuItemsService', () => {
 
   it('denies waiter menu management', async () => {
     await expect(
-      service.create(
-        { name: 'Paneer Tikka', categoryId: 'category-id', price: 28000 },
-        waiter,
-      ),
+      service.create({ name: 'Paneer Tikka', categoryId: 'category-id', price: 28000 }, waiter),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 

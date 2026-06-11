@@ -40,6 +40,11 @@ export class CreateMenuItemDto {
   @IsUUID()
   categoryId!: string;
 
+  @ApiPropertyOptional({ description: 'Default KDS station route' })
+  @IsOptional()
+  @IsUUID()
+  kitchenCategoryId?: string;
+
   @ApiProperty({ example: 'Paneer Tikka' })
   @IsString()
   @IsNotEmpty()

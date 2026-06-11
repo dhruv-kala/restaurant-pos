@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:restaurant_pos_auth/restaurant_pos_auth.dart';
 import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/router/app_router.dart';
 
 class RoleDashboardScaffold extends ConsumerWidget {
   const RoleDashboardScaffold({required this.roleName, super.key});
@@ -44,6 +47,49 @@ class RoleDashboardScaffold extends ConsumerWidget {
                   label: 'Outlet',
                   value: user?.outletId ?? 'Not assigned',
                 ),
+                if (roleName != 'Customer' && roleName != 'Super Admin')
+                  FilledButton.icon(
+                    onPressed: () => context.push(
+                      roleName == 'Kitchen Staff'
+                          ? AppRoutes.kitchenQueue
+                          : AppRoutes.orders,
+                    ),
+                    icon: const Icon(Icons.receipt_long),
+                    label: Text(
+                      roleName == 'Kitchen Staff'
+                          ? 'Open Kitchen Queue'
+                          : 'Open Orders',
+                    ),
+                  ),
+                if (roleName == 'Manager' || roleName == 'Waiter')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push(
+                        roleName == 'Waiter'
+                            ? AppRoutes.readyOrders
+                            : AppRoutes.kds,
+                      ),
+                      icon: const Icon(Icons.soup_kitchen),
+                      label: Text(
+                        roleName == 'Waiter'
+                            ? 'View Ready Orders'
+                            : 'View Kitchen',
+                      ),
+                    ),
+                  ),
+                if (roleName == 'Tenant Admin' ||
+                    roleName == 'Manager' ||
+                    roleName == 'Cashier' ||
+                    roleName == 'Waiter')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push(AppRoutes.billing),
+                      icon: const Icon(Icons.receipt),
+                      label: const Text('Open Billing'),
+                    ),
+                  ),
               ],
             ),
           ),

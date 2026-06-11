@@ -11,12 +11,12 @@ Last updated: 2026-06-11
 
 ## Current Summary
 
-Tasks 1 through 12 are complete at the requested foundation level.
+Tasks 1 through 15 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 13 is next: implement the Order Management Module.
+Task 16 is next: implement the Payment Module.
 
 ## Task History
 
@@ -34,7 +34,163 @@ Task 13 is next: implement the Order Management Module.
 | 10. Implement Flutter login and role-based navigation | COMPLETE | Secure token storage, Riverpod auth state/providers, NestJS auth repository, splash restore, guarded GoRouter role navigation, refresh/retry, logout, and seven role dashboard placeholders are implemented. |
 | 11. Implement Menu Management Module | COMPLETE | Tenant-scoped menu schema, forced RLS, category/item/variant/add-on APIs, outlet pricing, shared clients, Riverpod admin screens, tests, and documentation are implemented. |
 | 12. Implement Table Management Module | COMPLETE | Outlet-scoped sections, dining tables, statuses, reservations, merge/split/transfer operations, shared clients, Riverpod admin screens, tests, and documentation are implemented. |
-| 13. Implement Order Management Module | NEXT | Not started. Define order lifecycle, item pricing snapshots, authorization, and API contracts before Flutter screens. |
+| 13. Implement Order Management Module | COMPLETE | Tenant/outlet-scoped orders, immutable item pricing snapshots, lifecycle, transfer, kitchen queue, typed clients, Riverpod state, restaurant-app screens, tests, and documentation are implemented. |
+| 14. Implement Kitchen Display System Module | COMPLETE | Tenant/outlet kitchen routing, queue projections, item and order kitchen transitions, SLA states, authorization, typed clients, Riverpod KDS screens, tests, and documentation are implemented. |
+| 15. Implement Billing Module | COMPLETE | Immutable bill snapshots, GST/tax breakdowns, atomic numbering, audited lifecycle, split/merge, typed clients, Riverpod screens, tests, and documentation are implemented. |
+| 16. Implement Payment Module | NEXT | Not started. Define tender, allocation, idempotency, settlement, refund, invoice, authorization, and audit contracts before UI. |
+
+## Task 15 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Prisma `BillNumberCounter`, `Bill`, `BillItem`, and `BillTax` models
+- `BillStatus` and `BillSource` enums
+- Atomic outlet/day numbering in `BILL-YYYYMMDD-00001` format
+- Tenant/outlet composite ownership, forced RLS, money/formula constraints,
+  and void audit constraints
+- Migration `20260612040000_add_billing_module`
+- Completed-order bill generation from immutable order pricing/tax snapshots
+- Bill list, detail, update, void, print/reprint, split, and merge endpoints
+- CGST/SGST and IGST tax breakdowns with integer minor-unit allocation
+- Exact-total preservation across equal, custom-amount, item-based split, and
+  merge replacement flows
+- Platform, tenant, manager, cashier, waiter read-only, and kitchen-denied
+  authorization
+- Generation and void audit users/timestamps plus print/reprint counters
+- Typed `BillGenerated`, `BillPaid`, and `BillVoided` event placeholders
+- Shared Dart bill/item/tax/status/source/split models and `BillingApiService`
+- Riverpod `billProvider`, `billDetailsProvider`, and `billsProvider`
+- Restaurant-app bill generation, list, detail, split, and merge screens
+- API, database, tax, split, merge, role, and audit documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 59 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get` for restaurant-app: passed
+- `flutter analyze` for restaurant-app: passed
+- `flutter test` for restaurant-app: passed, 9 tests
+
+Known limitations:
+
+- The migration was not deployed to PostgreSQL because prior tasks recorded
+  invalid local database credentials.
+- Payment allocation, settlement, invoice numbering, refunds, and fiscal
+  submission are intentionally deferred to Task 16 or later.
+- Realtime publishers are typed no-op placeholders until Socket.IO is
+  explicitly approved.
+- Amount-based split bills use explicit share line items because tender/payment
+  splitting does not yet exist.
+
+## Task 14 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Prisma `KitchenCategory` model and `OrderPriority` enum
+- Tenant/outlet category ownership, forced RLS, routing indexes, and migration
+  `20260612010000_add_kitchen_display_system`
+- Menu item station assignment and order-item kitchen routing snapshots
+- Fired, started, ready, served, estimated-prep, and actual-prep fields
+- Order priority and estimated completion fields
+- Protected queue, active, ready, completed, category, item transition, and
+  bulk order transition endpoints
+- Priority-first and oldest-first queue ordering with station, status, search,
+  and priority filters
+- `ON_TIME`, `AT_RISK`, and `DELAYED` SLA classification
+- Platform, tenant, manager, kitchen, waiter, and cashier access boundaries
+- Typed KDS event placeholders for later realtime transport
+- Shared Dart KDS/order/menu models and typed `KdsApiService`
+- Riverpod KDS providers and restaurant-app dashboard, queue, ready, and
+  completed screens
+- API, database, and KDS workflow documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 48 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get` for restaurant-app: passed
+- `flutter analyze` for restaurant-app: passed
+- `flutter test` for restaurant-app: passed, 9 tests
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed to PostgreSQL because prior tasks recorded
+  invalid local database credentials.
+- Realtime delivery remains deferred. Event publishers are typed no-op
+  placeholders until the Socket.IO contract is approved.
+- A menu item has one default kitchen category. Order creation validates that
+  the category belongs to the order outlet and leaves invalid cross-outlet
+  assignments unrouted; outlet-specific routing overrides require a later
+  explicit contract.
+
+## Task 13 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Prisma `Order`, `OrderItem`, and `OrderNumberCounter` models
+- Order type, order status, and order item status enums
+- Atomic outlet/day numbering in `ORD-YYYYMMDD-00001` format
+- Tenant/outlet composite ownership, forced RLS, commercial snapshots,
+  nonnegative minor-unit money constraints, and lifecycle checks
+- Migration `20260611230000_add_order_management`
+- Protected order create/list/detail/update/status/cancel/transfer endpoints
+- Order item add/update/soft-delete endpoints and transactional recalculation
+- Dine-in, takeaway, delivery, and future QR order validation
+- Table occupancy integration for create, completion, cancellation, and transfer
+- Kitchen queue and kitchen status-only authorization
+- Read-only operational menu access for waiter/cashier order entry
+- Typed `OrderCreated`, `OrderUpdated`, and `OrderStatusChanged` placeholders
+- Order permission seed entries and schema/access contract tests
+- Shared Dart order models and typed `OrdersApiService`
+- Riverpod `activeOrdersProvider`, `orderDetailsProvider`, and
+  `kitchenQueueProvider`
+- Restaurant-app order list, detail, create, edit, and kitchen queue screens
+- GoRouter and role-dashboard integration with customer/kitchen restrictions
+- API, database, lifecycle, and kitchen-flow documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 43 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `flutter pub get` for restaurant-app: passed
+- `flutter analyze` for restaurant-app: passed
+- `flutter test` for restaurant-app: passed, 9 tests
+- `dart analyze` for shared models and API client: passed
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed to PostgreSQL because prior tasks recorded
+  invalid local database credentials.
+- The customer aggregate does not yet exist. `Order.customerId` is a validated
+  tenant-scoped UUID field without a foreign key; the customer module must add
+  that tenant-aware relation later.
+- Event publishers are intentional no-op placeholders. Socket.IO remains
+  deferred.
 
 ## Task 12 Completion
 
@@ -341,11 +497,12 @@ Known limitation:
 
 ## Next Task
 
-### Task 13: Implement Order Management Module
+### Task 16: Implement Payment Module
 
-Do not start Task 13 unless explicitly requested. Define order lifecycle,
-pricing snapshots, taxes, item modifiers, table/customer linkage,
-authorization, and API contracts before Flutter screens.
+Do not start Task 16 unless explicitly requested. Define payment tenders,
+idempotency, bill allocations, settlement, failure/retry behavior, refunds,
+invoice assignment, authorization, immutable audit records, and API contracts
+before Flutter screens.
 
 ## Future Work
 

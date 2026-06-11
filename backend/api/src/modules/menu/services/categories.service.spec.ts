@@ -29,14 +29,11 @@ describe('CategoriesService', () => {
     menuItem: { count: jest.fn() },
   };
   const prisma = {
-    $transaction: jest.fn(
-      (callback: (client: typeof transaction) => Promise<unknown>) =>
-        callback(transaction),
+    $transaction: jest.fn((callback: (client: typeof transaction) => Promise<unknown>) =>
+      callback(transaction),
     ),
   };
-  const service = new CategoriesService(
-    prisma as unknown as PrismaService,
-  );
+  const service = new CategoriesService(prisma as unknown as PrismaService);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,9 +41,9 @@ describe('CategoriesService', () => {
   });
 
   it('denies cashier category management', async () => {
-    await expect(
-      service.create({ name: 'Starters' }, cashier),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(service.create({ name: 'Starters' }, cashier)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
   });
 
   it('creates categories only in the JWT tenant', async () => {
@@ -81,8 +78,8 @@ describe('CategoriesService', () => {
     transaction.menuCategory.count.mockResolvedValue(0);
     transaction.menuItem.count.mockResolvedValue(1);
 
-    await expect(
-      service.remove('category-id', tenantAdmin),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.remove('category-id', tenantAdmin)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 });

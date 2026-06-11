@@ -40,6 +40,17 @@ enum OrderItemStatus {
       values.firstWhere((item) => item.wireName == value);
 }
 
+enum OrderPriority {
+  normal('NORMAL'),
+  high('HIGH'),
+  vip('VIP');
+
+  const OrderPriority(this.wireName);
+  final String wireName;
+  static OrderPriority fromJson(Object? value) =>
+      values.firstWhere((item) => item.wireName == value);
+}
+
 class OrderItem {
   const OrderItem({
     required this.id,
@@ -56,8 +67,15 @@ class OrderItem {
     required this.createdAt,
     required this.updatedAt,
     this.variantId,
+    this.kitchenCategoryId,
     this.variantName,
     this.specialInstructions,
+    this.firedAt,
+    this.startedAt,
+    this.readyAt,
+    this.servedAt,
+    this.estimatedPrepMinutes = 15,
+    this.actualPrepMinutes,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
@@ -65,6 +83,7 @@ class OrderItem {
     orderId: json['orderId'] as String,
     menuItemId: json['menuItemId'] as String,
     variantId: json['variantId'] as String?,
+    kitchenCategoryId: json['kitchenCategoryId'] as String?,
     itemName: json['itemName'] as String,
     variantName: json['variantName'] as String?,
     quantity: json['quantity'] as int,
@@ -75,6 +94,24 @@ class OrderItem {
     taxPercentage: (json['taxPercentage'] as num).toDouble(),
     specialInstructions: json['specialInstructions'] as String?,
     status: OrderItemStatus.fromJson(json['status']),
+    firedAt: DateTimeConverter.nullableFromJson(
+      json['firedAt'],
+      field: 'firedAt',
+    ),
+    startedAt: DateTimeConverter.nullableFromJson(
+      json['startedAt'],
+      field: 'startedAt',
+    ),
+    readyAt: DateTimeConverter.nullableFromJson(
+      json['readyAt'],
+      field: 'readyAt',
+    ),
+    servedAt: DateTimeConverter.nullableFromJson(
+      json['servedAt'],
+      field: 'servedAt',
+    ),
+    estimatedPrepMinutes: json['estimatedPrepMinutes'] as int? ?? 15,
+    actualPrepMinutes: json['actualPrepMinutes'] as int?,
     createdAt: DateTimeConverter.fromJson(
       json['createdAt'],
       field: 'createdAt',
@@ -89,6 +126,7 @@ class OrderItem {
   final String orderId;
   final String menuItemId;
   final String? variantId;
+  final String? kitchenCategoryId;
   final String itemName;
   final String? variantName;
   final int quantity;
@@ -99,6 +137,12 @@ class OrderItem {
   final double taxPercentage;
   final String? specialInstructions;
   final OrderItemStatus status;
+  final DateTime? firedAt;
+  final DateTime? startedAt;
+  final DateTime? readyAt;
+  final DateTime? servedAt;
+  final int estimatedPrepMinutes;
+  final int? actualPrepMinutes;
   final DateTime createdAt;
   final DateTime updatedAt;
 }
@@ -111,6 +155,7 @@ class Order {
     required this.orderNumber,
     required this.orderType,
     required this.status,
+    this.priority = OrderPriority.normal,
     required this.guestCount,
     required this.currencyCode,
     required this.subtotal,
@@ -129,6 +174,7 @@ class Order {
     this.cancellationReason,
     this.completedAt,
     this.cancelledAt,
+    this.estimatedCompletionTime,
     this.table,
     this.waiter,
   });
@@ -142,6 +188,7 @@ class Order {
     orderNumber: json['orderNumber'] as String,
     orderType: OrderType.fromJson(json['orderType']),
     status: OrderStatus.fromJson(json['status']),
+    priority: OrderPriority.fromJson(json['priority'] ?? 'NORMAL'),
     waiterId: json['waiterId'] as String?,
     guestCount: json['guestCount'] as int,
     notes: json['notes'] as String?,
@@ -159,6 +206,10 @@ class Order {
     cancelledAt: DateTimeConverter.nullableFromJson(
       json['cancelledAt'],
       field: 'cancelledAt',
+    ),
+    estimatedCompletionTime: DateTimeConverter.nullableFromJson(
+      json['estimatedCompletionTime'],
+      field: 'estimatedCompletionTime',
     ),
     version: json['version'] as int,
     createdAt: DateTimeConverter.fromJson(
@@ -184,6 +235,7 @@ class Order {
   final String orderNumber;
   final OrderType orderType;
   final OrderStatus status;
+  final OrderPriority priority;
   final String? waiterId;
   final int guestCount;
   final String? notes;
@@ -196,6 +248,7 @@ class Order {
   final String? cancellationReason;
   final DateTime? completedAt;
   final DateTime? cancelledAt;
+  final DateTime? estimatedCompletionTime;
   final int version;
   final DateTime createdAt;
   final DateTime updatedAt;

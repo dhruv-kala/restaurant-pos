@@ -10,14 +10,15 @@ import {
 } from '../../../common/database/request-context.util';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 
-export const MENU_ROLES = [
-  PLATFORM_ADMIN_ROLE,
-  TENANT_ADMIN_ROLE,
-  MANAGER_ROLE,
-];
+export const MENU_ROLES = [PLATFORM_ADMIN_ROLE, TENANT_ADMIN_ROLE, MANAGER_ROLE];
+export const MENU_READ_ROLES = [...MENU_ROLES, 'WAITER', 'CASHIER'];
 
 export function requireMenuRole(user: AuthenticatedUser): void {
   requireRole(user, MENU_ROLES);
+}
+
+export function requireMenuRead(user: AuthenticatedUser): void {
+  requireRole(user, MENU_READ_ROLES);
 }
 
 export function resolveMenuTenantId(
@@ -27,9 +28,7 @@ export function resolveMenuTenantId(
 ): string | undefined {
   if (hasRole(user, PLATFORM_ADMIN_ROLE)) {
     if (requiredForPlatformAdmin && requestedTenantId === undefined) {
-      throw new BadRequestException(
-        'tenantId is required for platform administrator writes',
-      );
+      throw new BadRequestException('tenantId is required for platform administrator writes');
     }
     return requestedTenantId;
   }

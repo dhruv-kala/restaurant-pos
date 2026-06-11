@@ -219,4 +219,85 @@ describe('Prisma tenancy and authorization schema', () => {
     expect(migration).toContain('ALTER TABLE "orders" FORCE ROW LEVEL SECURITY');
     expect(migration).toContain('CREATE POLICY "order_items_tenant_isolation"');
   });
+
+  it('adds KDS routing, preparation metrics, priority, and forced RLS', () => {
+    expect(models.get('KitchenCategory')?.fields.map((field) => field.name)).toEqual(
+      expect.arrayContaining(['tenantId', 'outletId', 'name', 'displayOrder', 'isActive']),
+    );
+    expect(models.get('MenuItem')?.fields.map((field) => field.name)).toContain(
+      'kitchenCategoryId',
+    );
+    expect(models.get('Order')?.fields.map((field) => field.name)).toEqual(
+      expect.arrayContaining(['priority', 'estimatedCompletionTime']),
+    );
+    expect(models.get('OrderItem')?.fields.map((field) => field.name)).toEqual(
+      expect.arrayContaining([
+        'kitchenCategoryId',
+        'firedAt',
+        'startedAt',
+        'readyAt',
+        'servedAt',
+        'estimatedPrepMinutes',
+        'actualPrepMinutes',
+      ]),
+    );
+
+    const migration = readFileSync(
+      join(
+        process.cwd(),
+        'prisma',
+        'migrations',
+        '20260612010000_add_kitchen_display_system',
+        'migration.sql',
+      ),
+      'utf8',
+    );
+    expect(migration).toContain('CREATE TYPE "order_priority"');
+    expect(migration).toContain('order_items_kds_timestamps_check');
+    expect(migration).toContain('ALTER TABLE "kitchen_categories" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "kitchen_categories_tenant_isolation"');
+  });
+
+  it('adds billing snapshots, atomic numbering, audit constraints, and forced RLS', () => {
+    for (const modelName of ['BillNumberCounter', 'Bill', 'BillItem', 'BillTax']) {
+      expect(models.get(modelName)?.fields.map((field) => field.name)).toContain('tenantId');
+    }
+    expect(models.get('Bill')?.fields.map((field) => field.name)).toEqual(
+      expect.arrayContaining([
+        'billNumber',
+        'invoiceNumber',
+        'billSource',
+        'customerGSTNumber',
+        'roundOffAmount',
+        'generatedByUserId',
+        'voidedByUserId',
+        'sourceBillIds',
+      ]),
+    );
+    expect(models.get('BillItem')?.fields.map((field) => field.name)).toEqual(
+      expect.arrayContaining([
+        'orderItemId',
+        'name',
+        'unitPrice',
+        'taxPercentage',
+        'preparationTimeMinutes',
+      ]),
+    );
+
+    const migration = readFileSync(
+      join(
+        process.cwd(),
+        'prisma',
+        'migrations',
+        '20260612040000_add_billing_module',
+        'migration.sql',
+      ),
+      'utf8',
+    );
+    expect(migration).toContain('CREATE TYPE "bill_status"');
+    expect(migration).toContain('bills_total_formula_check');
+    expect(migration).toContain('bills_void_audit_check');
+    expect(migration).toContain('ALTER TABLE "bills" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "bill_taxes_tenant_isolation"');
+  });
 });

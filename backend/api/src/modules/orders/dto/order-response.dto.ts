@@ -1,11 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { OrderItemStatus, OrderStatus, OrderType } from '@prisma/client';
+import { OrderItemStatus, OrderPriority, OrderStatus, OrderType } from '@prisma/client';
 
 export class OrderItemResponseDto {
   @ApiProperty() id!: string;
   @ApiProperty() orderId!: string;
   @ApiProperty() menuItemId!: string;
   @ApiPropertyOptional({ nullable: true }) variantId!: string | null;
+  @ApiPropertyOptional({ nullable: true }) kitchenCategoryId!: string | null;
   @ApiProperty() itemName!: string;
   @ApiPropertyOptional({ nullable: true }) variantName!: string | null;
   @ApiProperty() quantity!: number;
@@ -16,6 +17,12 @@ export class OrderItemResponseDto {
   @ApiProperty() taxPercentage!: number;
   @ApiPropertyOptional({ nullable: true }) specialInstructions!: string | null;
   @ApiProperty({ enum: OrderItemStatus }) status!: OrderItemStatus;
+  @ApiPropertyOptional({ nullable: true }) firedAt!: Date | null;
+  @ApiPropertyOptional({ nullable: true }) startedAt!: Date | null;
+  @ApiPropertyOptional({ nullable: true }) readyAt!: Date | null;
+  @ApiPropertyOptional({ nullable: true }) servedAt!: Date | null;
+  @ApiProperty() estimatedPrepMinutes!: number;
+  @ApiPropertyOptional({ nullable: true }) actualPrepMinutes!: number | null;
   @ApiProperty() createdAt!: Date;
   @ApiProperty() updatedAt!: Date;
 }
@@ -29,6 +36,9 @@ export class OrderResponseDto {
   @ApiProperty() orderNumber!: string;
   @ApiProperty({ enum: OrderType }) orderType!: OrderType;
   @ApiProperty({ enum: OrderStatus }) status!: OrderStatus;
+  @ApiProperty({ enum: OrderPriority }) priority!: OrderPriority;
+  @ApiPropertyOptional({ nullable: true })
+  estimatedCompletionTime!: Date | null;
   @ApiPropertyOptional({ nullable: true }) waiterId!: string | null;
   @ApiProperty() guestCount!: number;
   @ApiPropertyOptional({ nullable: true }) notes!: string | null;

@@ -24,10 +24,7 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 import { CreateCategoryDto } from '../dto/create-category.dto';
-import {
-  MenuCategoryListResponseDto,
-  MenuCategoryResponseDto,
-} from '../dto/menu-response.dto';
+import { MenuCategoryListResponseDto, MenuCategoryResponseDto } from '../dto/menu-response.dto';
 import { MenuQueryDto } from '../dto/menu-query.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { CategoriesService } from '../services/categories.service';

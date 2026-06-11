@@ -63,6 +63,8 @@ export class MenuItemResponseDto {
   tenantId!: string;
   @ApiProperty()
   categoryId!: string;
+  @ApiPropertyOptional({ nullable: true })
+  kitchenCategoryId!: string | null;
   @ApiProperty()
   name!: string;
   @ApiPropertyOptional({ nullable: true })

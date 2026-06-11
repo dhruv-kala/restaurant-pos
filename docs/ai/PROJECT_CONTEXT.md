@@ -267,6 +267,22 @@ The repository currently contains:
 - Tenant-scoped menu categories, items, variants, add-ons, and outlet prices
 - Protected NestJS menu management APIs with pagination and forced RLS
 - Flutter admin menu dashboard with Riverpod category and item management
+- Outlet-scoped table sections, dining tables, reservations, and table
+  operations
+- Order aggregates with server pricing snapshots, lifecycle APIs, kitchen
+  queue, typed clients, and restaurant-app order screens
+- Tenant/outlet-scoped kitchen categories and menu-item station routing
+- KDS queue, active, ready, and completed projections with priority ordering,
+  search, station filters, and SLA classification
+- Protected item and bulk-order kitchen transitions with role/outlet
+  authorization and typed event placeholders
+- Shared KDS models and API client plus Riverpod restaurant-app kitchen
+  dashboard, queue, ready, and completed screens
+- Tenant/outlet-scoped immutable bill, bill item, and tax snapshots
+- Atomic outlet/day bill numbering, GST breakdowns, round-off, and audited
+  generate, update, print, void, split, and merge workflows
+- Shared billing models and API client plus Riverpod restaurant-app bill list,
+  generation, detail, split, and merge screens
 
 ## Authoritative References
 

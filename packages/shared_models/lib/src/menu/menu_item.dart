@@ -123,6 +123,7 @@ class MenuItem {
     required this.priceMinor,
     this.tenantId = '',
     this.categoryId = '',
+    this.kitchenCategoryId,
     this.category = '',
     this.emoji = '',
     this.description,
@@ -145,6 +146,7 @@ class MenuItem {
       id: json['id'] as String,
       tenantId: json['tenantId'] as String,
       categoryId: json['categoryId'] as String,
+      kitchenCategoryId: json['kitchenCategoryId'] as String?,
       name: json['name'] as String,
       description: json['description'] as String?,
       sku: json['sku'] as String?,
@@ -172,6 +174,7 @@ class MenuItem {
   final String id;
   final String tenantId;
   final String categoryId;
+  final String? kitchenCategoryId;
   final String name;
   final String category;
   final String emoji;

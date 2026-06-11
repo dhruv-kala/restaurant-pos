@@ -9,7 +9,9 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { appConfig } from './config/app.config';
 import { validateEnvironment } from './config/environment.validation';
 import { AuthModule } from './modules/auth/auth.module';
+import { BillingModule } from './modules/billing/billing.module';
 import { HealthModule } from './modules/health/health.module';
+import { KdsModule } from './modules/kds/kds.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { OutletsModule } from './modules/outlets/outlets.module';
 import { OrdersModule } from './modules/orders/orders.module';
@@ -27,7 +29,9 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     PrismaModule,
     AuthModule,
+    BillingModule,
     HealthModule,
+    KdsModule,
     MenuModule,
     OrdersModule,
     TablesModule,

@@ -24,6 +24,7 @@ import {
   resolveOrderScope,
 } from './order-access.util';
 import { OrderEventsService } from './order-events.service';
+import { canTransitionOrder } from './order-lifecycle.util';
 
 const orderInclude = {
   items: {
@@ -42,6 +43,7 @@ type OrderRecord = Prisma.OrderGetPayload<{ include: typeof orderInclude }>;
 type OrderItemDraft = {
   menuItemId: string;
   variantId?: string;
+  kitchenCategoryId?: string;
   itemName: string;
   variantName?: string;
   quantity: number;
@@ -51,16 +53,8 @@ type OrderItemDraft = {
   lineTotal: number;
   taxPercentage: Prisma.Decimal;
   specialInstructions?: string;
-};
-
-const transitions: Record<OrderStatus, OrderStatus[]> = {
-  PENDING: [OrderStatus.ACCEPTED, OrderStatus.CANCELLED],
-  ACCEPTED: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
-  PREPARING: [OrderStatus.READY, OrderStatus.CANCELLED],
-  READY: [OrderStatus.SERVED, OrderStatus.COMPLETED, OrderStatus.CANCELLED],
-  SERVED: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
-  COMPLETED: [],
-  CANCELLED: [],
+  firedAt: Date;
+  estimatedPrepMinutes: number;
 };
 
 @Injectable()
@@ -86,13 +80,7 @@ export class OrdersService {
       });
       if (outlet === null) throw new BadRequestException('Outlet is not accessible');
       if (dto.tableId !== undefined) {
-        await this.requireAvailableTable(
-          tx,
-          outlet.tenantId,
-          outlet.id,
-          dto.tableId,
-          true,
-        );
+        await this.requireAvailableTable(tx, outlet.tenantId, outlet.id, dto.tableId, true);
       }
       await this.assertWaiter(tx, outlet.tenantId, outlet.id, dto.waiterId);
       const orderNumber = await this.nextOrderNumber(tx, outlet.tenantId, outlet.id);
@@ -108,10 +96,12 @@ export class OrdersService {
           customerId: dto.customerId,
           orderNumber,
           orderType: dto.orderType,
+          priority: dto.priority,
           waiterId: dto.waiterId ?? (user.outletId === outlet.id ? user.id : undefined),
           guestCount: dto.guestCount ?? 1,
           notes: dto.notes?.trim(),
           currencyCode: outlet.tenant.currencyCode,
+          estimatedCompletionTime: this.estimatedCompletionTime(itemData),
           ...totals,
           items: { create: itemData },
         },
@@ -234,7 +224,7 @@ export class OrdersService {
       throw new BadRequestException('Use the cancel endpoint with a reason');
     }
     return this.withOrder(id, user, async (tx, order) => {
-      if (!transitions[order.status].includes(dto.status)) {
+      if (!canTransitionOrder(order.status, dto.status)) {
         throw new ConflictException(`Cannot change ${order.status} order to ${dto.status}`);
       }
       const itemStatus = this.itemStatusFor(dto.status);
@@ -388,6 +378,7 @@ export class OrdersService {
       include: {
         variants: { where: { deletedAt: null } },
         outletPrices: { where: { outletId, deletedAt: null } },
+        kitchenCategory: true,
       },
     });
     if (item === null) throw new BadRequestException('Menu item is unavailable');
@@ -402,9 +393,16 @@ export class OrdersService {
     if (unitPrice < 0) throw new ConflictException('Calculated item price cannot be negative');
     const subtotal = unitPrice * dto.quantity;
     const taxAmount = Math.round((subtotal * item.taxPercentage.toNumber()) / 100);
+    const kitchenCategory =
+      item.kitchenCategory?.outletId === outletId &&
+      item.kitchenCategory.isActive &&
+      item.kitchenCategory.deletedAt === null
+        ? item.kitchenCategory
+        : undefined;
     return {
       menuItemId: item.id,
       variantId: variant?.id,
+      kitchenCategoryId: kitchenCategory?.id,
       itemName: item.name,
       variantName: variant?.name,
       quantity: dto.quantity,
@@ -414,7 +412,14 @@ export class OrdersService {
       lineTotal: subtotal + taxAmount,
       taxPercentage: item.taxPercentage,
       specialInstructions: dto.specialInstructions?.trim(),
+      firedAt: new Date(),
+      estimatedPrepMinutes: 15,
     };
+  }
+
+  private estimatedCompletionTime(items: OrderItemDraft[]): Date {
+    const minutes = Math.max(...items.map(({ estimatedPrepMinutes }) => estimatedPrepMinutes));
+    return new Date(Date.now() + minutes * 60_000);
   }
 
   private calculateTotals(

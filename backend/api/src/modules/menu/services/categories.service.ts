@@ -16,10 +16,7 @@ import type {
 } from '../dto/menu-response.dto';
 import type { MenuQueryDto } from '../dto/menu-query.dto';
 import type { UpdateCategoryDto } from '../dto/update-category.dto';
-import {
-  requireMenuRole,
-  resolveMenuTenantId,
-} from './menu-access.util';
+import { requireMenuRead, requireMenuRole, resolveMenuTenantId } from './menu-access.util';
 
 const categorySelect = {
   id: true,
@@ -37,10 +34,7 @@ const categorySelect = {
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    dto: CreateCategoryDto,
-    user: AuthenticatedUser,
-  ): Promise<MenuCategoryResponseDto> {
+  async create(dto: CreateCategoryDto, user: AuthenticatedUser): Promise<MenuCategoryResponseDto> {
     requireMenuRole(user);
     const tenantId = resolveMenuTenantId(dto.tenantId, user, true)!;
 
@@ -69,7 +63,7 @@ export class CategoriesService {
     query: MenuQueryDto,
     user: AuthenticatedUser,
   ): Promise<MenuCategoryListResponseDto> {
-    requireMenuRole(user);
+    requireMenuRead(user);
     const tenantId = resolveMenuTenantId(query.tenantId, user, false);
 
     return this.prisma.$transaction(async (transaction) => {
@@ -90,10 +84,7 @@ export class CategoriesService {
         transaction.menuCategory.findMany({
           where,
           select: categorySelect,
-          orderBy: [
-            { displayOrder: query.sortDirection ?? 'asc' },
-            { name: 'asc' },
-          ],
+          orderBy: [{ displayOrder: query.sortDirection ?? 'asc' }, { name: 'asc' }],
           skip: (query.page - 1) * query.limit,
           take: query.limit,
         }),
@@ -111,11 +102,8 @@ export class CategoriesService {
     });
   }
 
-  async findOne(
-    id: string,
-    user: AuthenticatedUser,
-  ): Promise<MenuCategoryResponseDto> {
-    requireMenuRole(user);
+  async findOne(id: string, user: AuthenticatedUser): Promise<MenuCategoryResponseDto> {
+    requireMenuRead(user);
     const tenantId = resolveMenuTenantId(undefined, user, false);
     return this.prisma.$transaction(async (transaction) => {
       await applyDatabaseRequestContext(transaction, user, tenantId);
@@ -144,12 +132,7 @@ export class CategoriesService {
       if (dto.parentId === id) {
         throw new BadRequestException('A category cannot be its own parent');
       }
-      await this.assertParent(
-        transaction,
-        category.tenantId,
-        dto.parentId,
-        category.id,
-      );
+      await this.assertParent(transaction, category.tenantId, dto.parentId, category.id);
       try {
         return await transaction.menuCategory.update({
           where: { id: category.id },
@@ -189,9 +172,7 @@ export class CategoriesService {
         }),
       ]);
       if (childCount > 0 || itemCount > 0) {
-        throw new ConflictException(
-          'Category must be empty before it can be deleted',
-        );
+        throw new ConflictException('Category must be empty before it can be deleted');
       }
       await transaction.menuCategory.update({
         where: { id },
@@ -239,15 +220,13 @@ export class CategoriesService {
     let parentFound = false;
     while (currentId !== null) {
       if (currentId === categoryId) {
-        throw new BadRequestException(
-          'Category hierarchy cannot contain a cycle',
-        );
+        throw new BadRequestException('Category hierarchy cannot contain a cycle');
       }
       const parentRecord: { id: string; parentId: string | null } | null =
         await transaction.menuCategory.findFirst({
-        where: { id: currentId, tenantId, deletedAt: null },
-        select: { id: true, parentId: true },
-      });
+          where: { id: currentId, tenantId, deletedAt: null },
+          select: { id: true, parentId: true },
+        });
       if (parentRecord === null) {
         break;
       }
@@ -260,10 +239,7 @@ export class CategoriesService {
   }
 
   private throwPersistenceError(error: unknown): never {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw new ConflictException('Category name already exists for this tenant');
     }
     throw error;

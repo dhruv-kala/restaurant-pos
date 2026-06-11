@@ -30,6 +30,14 @@ const permissions = [
   ['orders.read', 'orders', 'View restaurant orders'],
   ['orders.update', 'orders', 'Update orders and order statuses'],
   ['orders.cancel', 'orders', 'Cancel restaurant orders'],
+  ['kds.read', 'kds', 'View kitchen queues and stations'],
+  ['kds.update', 'kds', 'Advance kitchen preparation status'],
+  ['kds.configure', 'kds', 'Configure kitchen stations and routing'],
+  ['billing.create', 'billing', 'Generate and update bills'],
+  ['billing.read', 'billing', 'View and print bills'],
+  ['billing.void', 'billing', 'Void unsettled bills'],
+  ['billing.split', 'billing', 'Split unsettled bills'],
+  ['billing.merge', 'billing', 'Merge compatible unsettled bills'],
 ] as const;
 
 const LOCAL_ADMIN_EMAIL = 'admin@example.com';

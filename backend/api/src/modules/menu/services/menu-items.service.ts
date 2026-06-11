@@ -21,10 +21,7 @@ import type {
 import type { MenuQueryDto } from '../dto/menu-query.dto';
 import type { UpdateMenuItemDto } from '../dto/update-menu-item.dto';
 import { MenuSortBy } from '../enums/menu-sort.enum';
-import {
-  requireMenuRole,
-  resolveMenuTenantId,
-} from './menu-access.util';
+import { requireMenuRead, requireMenuRole, resolveMenuTenantId } from './menu-access.util';
 
 const itemInclude = {
   variants: {
@@ -47,10 +44,7 @@ type MenuItemRecord = Prisma.MenuItemGetPayload<{ include: typeof itemInclude }>
 export class MenuItemsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    dto: CreateMenuItemDto,
-    user: AuthenticatedUser,
-  ): Promise<MenuItemResponseDto> {
+  async create(dto: CreateMenuItemDto, user: AuthenticatedUser): Promise<MenuItemResponseDto> {
     requireMenuRole(user);
     const tenantId = resolveMenuTenantId(dto.tenantId, user, true)!;
     this.assertSingleDefault(dto.variants);
@@ -68,6 +62,7 @@ export class MenuItemsService {
           data: {
             tenantId,
             categoryId: dto.categoryId,
+            kitchenCategoryId: dto.kitchenCategoryId,
             name: dto.name.trim(),
             description: dto.description?.trim(),
             sku: dto.sku?.trim().toUpperCase(),
@@ -110,23 +105,16 @@ export class MenuItemsService {
     });
   }
 
-  async findAll(
-    query: MenuQueryDto,
-    user: AuthenticatedUser,
-  ): Promise<MenuItemListResponseDto> {
-    requireMenuRole(user);
+  async findAll(query: MenuQueryDto, user: AuthenticatedUser): Promise<MenuItemListResponseDto> {
+    requireMenuRead(user);
     const tenantId = resolveMenuTenantId(query.tenantId, user, false);
     return this.prisma.$transaction(async (transaction) => {
       await applyDatabaseRequestContext(transaction, user, tenantId);
       const where: Prisma.MenuItemWhereInput = {
         deletedAt: null,
         ...(tenantId === undefined ? {} : { tenantId }),
-        ...(query.categoryId === undefined
-          ? {}
-          : { categoryId: query.categoryId }),
-        ...(query.isAvailable === undefined
-          ? {}
-          : { isAvailable: query.isAvailable }),
+        ...(query.categoryId === undefined ? {} : { categoryId: query.categoryId }),
+        ...(query.isAvailable === undefined ? {} : { isAvailable: query.isAvailable }),
         ...(query.search?.trim()
           ? {
               OR: [
@@ -168,14 +156,9 @@ export class MenuItemsService {
     });
   }
 
-  async findOne(
-    id: string,
-    user: AuthenticatedUser,
-  ): Promise<MenuItemResponseDto> {
-    requireMenuRole(user);
-    return this.withItem(id, user, (_transaction, item) =>
-      Promise.resolve(this.toResponse(item)),
-    );
+  async findOne(id: string, user: AuthenticatedUser): Promise<MenuItemResponseDto> {
+    requireMenuRead(user);
+    return this.withItem(id, user, (_transaction, item) => Promise.resolve(this.toResponse(item)));
   }
 
   async update(
@@ -187,11 +170,7 @@ export class MenuItemsService {
     this.assertSingleDefault(dto.variants);
     return this.withItem(id, user, async (transaction, existing) => {
       if (dto.categoryId !== undefined) {
-        await this.assertCategory(
-          transaction,
-          existing.tenantId,
-          dto.categoryId,
-        );
+        await this.assertCategory(transaction, existing.tenantId, dto.categoryId);
       }
       await this.assertOutlets(
         transaction,
@@ -235,6 +214,7 @@ export class MenuItemsService {
           where: { id },
           data: {
             categoryId: dto.categoryId,
+            kitchenCategoryId: dto.kitchenCategoryId,
             name: dto.name?.trim(),
             description: dto.description?.trim(),
             sku: dto.sku?.trim().toUpperCase(),
@@ -350,7 +330,7 @@ export class MenuItemsService {
     itemId: string,
     user: AuthenticatedUser,
   ): Promise<MenuItemVariantResponseDto[]> {
-    requireMenuRole(user);
+    requireMenuRead(user);
     return this.withItem(itemId, user, (transaction, item) =>
       transaction.menuItemVariant.findMany({
         where: {
@@ -385,11 +365,8 @@ export class MenuItemsService {
     );
   }
 
-  async findAddons(
-    itemId: string,
-    user: AuthenticatedUser,
-  ): Promise<MenuItemAddonResponseDto[]> {
-    requireMenuRole(user);
+  async findAddons(itemId: string, user: AuthenticatedUser): Promise<MenuItemAddonResponseDto[]> {
+    requireMenuRead(user);
     return this.withItem(itemId, user, (transaction, item) =>
       transaction.menuItemAddon.findMany({
         where: {
@@ -450,10 +427,7 @@ export class MenuItemsService {
   private async withItem<T>(
     id: string,
     user: AuthenticatedUser,
-    operation: (
-      transaction: Prisma.TransactionClient,
-      item: MenuItemRecord,
-    ) => Promise<T>,
+    operation: (transaction: Prisma.TransactionClient, item: MenuItemRecord) => Promise<T>,
   ): Promise<T> {
     const tenantId = resolveMenuTenantId(undefined, user, false);
     return this.prisma.$transaction(async (transaction) => {
@@ -535,13 +509,8 @@ export class MenuItemsService {
   }
 
   private throwPersistenceError(error: unknown): never {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
-      throw new ConflictException(
-        'Menu SKU, variant, add-on, or outlet price already exists',
-      );
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ConflictException('Menu SKU, variant, add-on, or outlet price already exists');
     }
     throw error;
   }
