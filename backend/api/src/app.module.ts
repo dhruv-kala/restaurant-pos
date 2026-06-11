@@ -10,6 +10,7 @@ import { appConfig } from './config/app.config';
 import { validateEnvironment } from './config/environment.validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { MenuModule } from './modules/menu/menu.module';
 import { OutletsModule } from './modules/outlets/outlets.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -25,6 +26,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     AuthModule,
     HealthModule,
+    MenuModule,
     TenantsModule,
     OutletsModule,
   ],

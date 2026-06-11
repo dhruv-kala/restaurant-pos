@@ -22,6 +22,10 @@ const permissions = [
   ['roles.read', 'roles', 'View roles and permissions'],
   ['roles.update', 'roles', 'Update role permissions'],
   ['roles.delete', 'roles', 'Archive tenant roles'],
+  ['menu.create', 'menu', 'Create menu categories and items'],
+  ['menu.read', 'menu', 'View menu categories and items'],
+  ['menu.update', 'menu', 'Update menu categories and items'],
+  ['menu.delete', 'menu', 'Archive menu categories and items'],
 ] as const;
 
 const LOCAL_ADMIN_EMAIL = 'admin@example.com';

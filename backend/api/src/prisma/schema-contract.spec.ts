@@ -175,4 +175,42 @@ describe('Prisma tenancy and authorization schema', () => {
       'ADD CONSTRAINT "tenants_outlet_limit_positive_check"',
     );
   });
+
+  it('adds tenant-scoped menu models, money checks, and forced RLS', () => {
+    const menuModels = [
+      'MenuCategory',
+      'MenuItem',
+      'MenuItemVariant',
+      'MenuItemAddon',
+      'OutletMenuPrice',
+    ];
+    for (const modelName of menuModels) {
+      expect(models.get(modelName)?.fields.map((field) => field.name)).toContain(
+        'tenantId',
+      );
+    }
+
+    const migration = readFileSync(
+      join(
+        process.cwd(),
+        'prisma',
+        'migrations',
+        '20260611180000_add_menu_management',
+        'migration.sql',
+      ),
+      'utf8',
+    );
+    expect(migration).toContain(
+      'FOREIGN KEY ("tenant_id", "category_id")',
+    );
+    expect(migration).toContain(
+      'CONSTRAINT "menu_items_price_minor_check" CHECK ("price_minor" > 0)',
+    );
+    expect(migration).toContain(
+      'ALTER TABLE "menu_items" FORCE ROW LEVEL SECURITY',
+    );
+    expect(migration).toContain(
+      'CREATE POLICY "outlet_menu_prices_tenant_isolation"',
+    );
+  });
 });

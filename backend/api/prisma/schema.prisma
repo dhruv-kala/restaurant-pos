@@ -63,9 +63,14 @@ model Tenant {
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(3)
 
-  outlets     Outlet[]
-  memberships TenantMembership[]
-  roles       Role[]
+  outlets          Outlet[]
+  memberships      TenantMembership[]
+  roles            Role[]
+  menuCategories   MenuCategory[]
+  menuItems        MenuItem[]
+  menuItemVariants MenuItemVariant[]
+  menuItemAddons   MenuItemAddon[]
+  outletMenuPrices OutletMenuPrice[]
 
   @@index([status])
   @@index([deletedAt])
@@ -94,6 +99,7 @@ model Outlet {
 
   tenant                Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   membershipAssignments MembershipOutlet[]
+  menuPrices            OutletMenuPrice[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -240,4 +246,128 @@ model MembershipOutlet {
   @@id([tenantId, membershipId, outletId])
   @@index([tenantId, outletId])
   @@map("membership_outlets")
+}
+
+model MenuCategory {
+  id           String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  parentId     String?   @map("parent_id") @db.Uuid
+  name         String    @db.VarChar(120)
+  description  String?   @db.VarChar(500)
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
+  version      Int       @default(1)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  parent   MenuCategory?  @relation("MenuCategoryHierarchy", fields: [tenantId, parentId], references: [tenantId, id], onDelete: Restrict)
+  children MenuCategory[] @relation("MenuCategoryHierarchy")
+  items    MenuItem[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([tenantId, parentId])
+  @@index([tenantId, name])
+  @@index([tenantId, isActive, deletedAt])
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id            String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  categoryId    String    @map("category_id") @db.Uuid
+  name          String    @db.VarChar(160)
+  description   String?   @db.VarChar(1000)
+  sku           String?   @db.VarChar(64)
+  price         Int       @map("price_minor")
+  costPrice     Int?      @map("cost_price_minor")
+  imageUrl      String?   @map("image_url") @db.VarChar(2048)
+  isVegetarian  Boolean   @default(false) @map("is_vegetarian")
+  isVegan       Boolean   @default(false) @map("is_vegan")
+  isAvailable   Boolean   @default(true) @map("is_available")
+  taxPercentage Decimal   @default(0) @map("tax_percentage") @db.Decimal(5, 2)
+  version       Int       @default(1)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  category     MenuCategory      @relation(fields: [tenantId, categoryId], references: [tenantId, id], onDelete: Restrict)
+  variants     MenuItemVariant[]
+  addons       MenuItemAddon[]
+  outletPrices OutletMenuPrice[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, sku])
+  @@index([tenantId])
+  @@index([tenantId, categoryId])
+  @@index([tenantId, name])
+  @@index([tenantId, isAvailable, deletedAt])
+  @@map("menu_items")
+}
+
+model MenuItemVariant {
+  id              String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  menuItemId      String    @map("menu_item_id") @db.Uuid
+  name            String    @db.VarChar(120)
+  priceAdjustment Int       @default(0) @map("price_adjustment_minor")
+  isDefault       Boolean   @default(false) @map("is_default")
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  menuItem MenuItem @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, menuItemId, name])
+  @@index([tenantId, menuItemId, deletedAt])
+  @@map("menu_item_variants")
+}
+
+model MenuItemAddon {
+  id         String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  menuItemId String    @map("menu_item_id") @db.Uuid
+  name       String    @db.VarChar(120)
+  price      Int       @map("price_minor")
+  version    Int       @default(1)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  menuItem MenuItem @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, menuItemId, name])
+  @@index([tenantId, menuItemId, deletedAt])
+  @@map("menu_item_addons")
+}
+
+model OutletMenuPrice {
+  id         String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  outletId   String    @map("outlet_id") @db.Uuid
+  menuItemId String    @map("menu_item_id") @db.Uuid
+  price      Int       @map("price_minor")
+  version    Int       @default(1)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet   Outlet   @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  menuItem MenuItem @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, outletId, menuItemId])
+  @@index([tenantId, menuItemId, deletedAt])
+  @@index([tenantId, outletId, deletedAt])
+  @@map("outlet_menu_prices")
 }
