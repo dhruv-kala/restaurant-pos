@@ -114,13 +114,18 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 11 are complete at the foundation level.
+Tasks 1 through 14 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
 the Flutter admin menu application.
 
-Task 12 is complete. Task 13 is next: implement the Order Management Module.
+Task 14 implemented the Kitchen Display System schema, station routing,
+queue projections, item and order kitchen transitions, SLA classification,
+authorization, event placeholders, shared client contracts, and restaurant-app
+KDS screens.
+
+Task 15 is next: implement the Billing Module.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
