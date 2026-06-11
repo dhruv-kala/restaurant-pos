@@ -90,6 +90,18 @@ class RoleDashboardScaffold extends ConsumerWidget {
                       label: const Text('Open Billing'),
                     ),
                   ),
+                if (roleName == 'Tenant Admin' ||
+                    roleName == 'Manager' ||
+                    roleName == 'Cashier' ||
+                    roleName == 'Waiter')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push(AppRoutes.payments),
+                      icon: const Icon(Icons.payments),
+                      label: const Text('Payment History'),
+                    ),
+                  ),
               ],
             ),
           ),

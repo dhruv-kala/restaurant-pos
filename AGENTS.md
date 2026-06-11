@@ -114,7 +114,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 15 are complete at the foundation level.
+Tasks 1 through 16 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -130,7 +130,12 @@ numbering, bill updates, print/reprint auditing, split/merge replacement flows,
 void auditing, authorization, shared client contracts, and restaurant-app
 billing screens.
 
-Task 16 is next: implement the Payment Module.
+Task 16 implemented idempotent payment aggregates, cash/UPI/card and future
+tenders, partial and split payments, bill balance reconciliation, append-only
+refunds, business-date reporting, authorization, shared client contracts, and
+restaurant-app payment screens.
+
+Task 17 is next: implement the Receipt & Invoice Module.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

@@ -38,6 +38,10 @@ const permissions = [
   ['billing.void', 'billing', 'Void unsettled bills'],
   ['billing.split', 'billing', 'Split unsettled bills'],
   ['billing.merge', 'billing', 'Merge compatible unsettled bills'],
+  ['payments.create', 'payments', 'Create and complete payments'],
+  ['payments.read', 'payments', 'View payment and refund history'],
+  ['payments.update', 'payments', 'Update pending payment status'],
+  ['payments.refund', 'payments', 'Create payment refunds'],
 ] as const;
 
 const LOCAL_ADMIN_EMAIL = 'admin@example.com';

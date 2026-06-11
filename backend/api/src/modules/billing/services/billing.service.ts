@@ -4,7 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { BillSource, BillStatus, OrderStatus, Prisma } from '@prisma/client';
+import {
+  BillPaymentStatus,
+  BillSource,
+  BillStatus,
+  OrderStatus,
+  Prisma,
+} from '@prisma/client';
 import { applyDatabaseRequestContext } from '../../../common/database/request-context.util';
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
@@ -201,6 +207,7 @@ export class BillingService {
           customerPhone: dto.customerPhone,
           customerGSTNumber: dto.customerGSTNumber,
           notes: dto.notes?.trim(),
+          outstandingAmount: money.grandTotal,
           version: { increment: 1 },
         },
         include: billInclude,
@@ -212,6 +219,9 @@ export class BillingService {
   async void(id: string, dto: VoidBillDto, user: AuthenticatedUser): Promise<BillResponseDto> {
     requireBillingWrite(user);
     return this.withBill(id, user, async (tx, bill) => {
+      if (bill.paymentStatus !== BillPaymentStatus.UNPAID) {
+        throw new ConflictException('Bills with payment activity cannot be voided');
+      }
       if (bill.status === BillStatus.PAID) throw new ConflictException('Paid bills cannot be voided');
       if (bill.status === BillStatus.VOID) throw new ConflictException('Bill is already void');
       if (bill.status === BillStatus.REFUNDED) {
@@ -384,6 +394,7 @@ export class BillingService {
         notes: input.notes,
         sourceBillIds: input.sourceBillIds,
         ...input.money,
+        outstandingAmount: input.money.grandTotal,
         items: { create: input.items },
         taxes: {
           create: input.taxes.map((tax) => ({
@@ -617,6 +628,9 @@ export class BillingService {
   }
 
   private assertEditable(bill: BillRecord): void {
+    if (bill.paymentStatus !== BillPaymentStatus.UNPAID) {
+      throw new ConflictException('Bills with payment activity cannot be changed');
+    }
     if (bill.status === BillStatus.PAID) throw new ConflictException('Paid bills cannot be changed');
     if (bill.status === BillStatus.VOID) throw new ConflictException('Void bills cannot be changed');
     if (bill.status === BillStatus.REFUNDED) {

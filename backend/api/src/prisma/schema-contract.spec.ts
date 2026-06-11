@@ -300,4 +300,52 @@ describe('Prisma tenancy and authorization schema', () => {
     expect(migration).toContain('ALTER TABLE "bills" FORCE ROW LEVEL SECURITY');
     expect(migration).toContain('CREATE POLICY "bill_taxes_tenant_isolation"');
   });
+
+  it('adds idempotent payments, transactions, refunds, bill state, and forced RLS', () => {
+    for (const modelName of [
+      'PaymentNumberCounter',
+      'Payment',
+      'PaymentTransaction',
+      'PaymentRefund',
+    ]) {
+      expect(models.get(modelName)?.fields.map((field) => field.name)).toContain(
+        'tenantId',
+      );
+    }
+    expect(models.get('Bill')?.fields.map((field) => field.name)).toEqual(
+      expect.arrayContaining([
+        'paymentStatus',
+        'paidAmount',
+        'refundedAmount',
+        'outstandingAmount',
+      ]),
+    );
+    expect(models.get('Payment')?.fields.map((field) => field.name)).toEqual(
+      expect.arrayContaining([
+        'idempotencyKey',
+        'paymentSource',
+        'businessDate',
+        'gatewayResponse',
+        'deviceId',
+        'terminalId',
+        'shiftId',
+      ]),
+    );
+
+    const migration = readFileSync(
+      join(
+        process.cwd(),
+        'prisma',
+        'migrations',
+        '20260612070000_add_payment_module',
+        'migration.sql',
+      ),
+      'utf8',
+    );
+    expect(migration).toContain('CREATE TYPE "payment_method"');
+    expect(migration).toContain('payments_tenant_id_outlet_id_idempotency_key_key');
+    expect(migration).toContain('bills_payment_amounts_check');
+    expect(migration).toContain('payments_cash_check');
+    expect(migration).toContain('ALTER TABLE "payment_refunds" FORCE ROW LEVEL SECURITY');
+  });
 });

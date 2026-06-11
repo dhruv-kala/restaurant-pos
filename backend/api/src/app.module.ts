@@ -15,6 +15,7 @@ import { KdsModule } from './modules/kds/kds.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { OutletsModule } from './modules/outlets/outlets.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { TablesModule } from './modules/tables/tables.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -34,6 +35,7 @@ import { PrismaModule } from './prisma/prisma.module';
     KdsModule,
     MenuModule,
     OrdersModule,
+    PaymentsModule,
     TablesModule,
     TenantsModule,
     OutletsModule,

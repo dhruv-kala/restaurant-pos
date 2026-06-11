@@ -14,4 +14,5 @@ export 'src/models/paginated_response.dart';
 export 'src/models/tenant.dart';
 export 'src/models/token_pair.dart';
 export 'src/orders/order_models.dart';
+export 'src/payments/payment_models.dart';
 export 'src/tables/table_models.dart';

@@ -11,5 +11,6 @@ export 'src/services/kds_api_service.dart';
 export 'src/services/menu_api_service.dart';
 export 'src/services/orders_api_service.dart';
 export 'src/services/outlet_api_service.dart';
+export 'src/services/payments_api_service.dart';
 export 'src/services/tables_api_service.dart';
 export 'src/services/tenant_api_service.dart';

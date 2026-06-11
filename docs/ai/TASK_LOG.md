@@ -11,12 +11,12 @@ Last updated: 2026-06-11
 
 ## Current Summary
 
-Tasks 1 through 15 are complete at the requested foundation level.
+Tasks 1 through 16 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 16 is next: implement the Payment Module.
+Task 17 is next: implement the Receipt & Invoice Module.
 
 ## Task History
 
@@ -37,7 +37,68 @@ Task 16 is next: implement the Payment Module.
 | 13. Implement Order Management Module | COMPLETE | Tenant/outlet-scoped orders, immutable item pricing snapshots, lifecycle, transfer, kitchen queue, typed clients, Riverpod state, restaurant-app screens, tests, and documentation are implemented. |
 | 14. Implement Kitchen Display System Module | COMPLETE | Tenant/outlet kitchen routing, queue projections, item and order kitchen transitions, SLA states, authorization, typed clients, Riverpod KDS screens, tests, and documentation are implemented. |
 | 15. Implement Billing Module | COMPLETE | Immutable bill snapshots, GST/tax breakdowns, atomic numbering, audited lifecycle, split/merge, typed clients, Riverpod screens, tests, and documentation are implemented. |
-| 16. Implement Payment Module | NEXT | Not started. Define tender, allocation, idempotency, settlement, refund, invoice, authorization, and audit contracts before UI. |
+| 16. Implement Payment Module | COMPLETE | Idempotent payment aggregates, tender transactions, partial/split payments, refunds, bill reconciliation, typed clients, Riverpod screens, tests, and documentation are implemented. |
+| 17. Implement Receipt & Invoice Module | NEXT | Not started. Define receipt snapshots, invoice numbering, fiscal lifecycle, reprint, delivery, authorization, and audit contracts before UI. |
+
+## Task 16 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Prisma `PaymentNumberCounter`, `Payment`, `PaymentTransaction`, and
+  `PaymentRefund` models
+- Payment method, payment status, refund status, payment source, and bill
+  payment status enums
+- Atomic outlet/business-day numbering in `PAY-YYYYMMDD-00001` format
+- Required create/split/refund idempotency keys and database uniqueness
+- Tenant/outlet composite ownership, forced RLS, cash/change, amount, card,
+  audit, and refund constraints
+- Migration `20260612070000_add_payment_module`
+- Cash, UPI, card, wallet, gift-card, and bank-transfer tender contracts
+- Partial payments and arbitrary mixed split tenders
+- Transactional bill row locking and paid/refunded/outstanding reconciliation
+- Append-only idempotent refunds with compensation records
+- Payment list, detail, status update, split, and refund endpoints
+- Business date, device, terminal, shift, source, and gateway readiness fields
+- Platform, tenant, manager, cashier, waiter read-only, and kitchen-denied
+  authorization
+- Typed payment lifecycle event placeholders
+- Shared Dart payment, transaction, refund, method, status, source, and bill
+  payment-status models
+- Typed `PaymentsApiService` and Riverpod payment providers
+- Restaurant-app payment, split payment, refund, history, and detail screens
+- API, database, split, partial, refund, status, business-date, and role
+  documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 70 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get` for restaurant-app: passed
+- `flutter analyze` for restaurant-app: passed
+- `flutter test` for restaurant-app: passed, 9 tests
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed to PostgreSQL because prior tasks recorded
+  invalid local database credentials.
+- Local tender commands complete immediately. External gateway initiation,
+  callback signature verification, asynchronous settlement, and reconciliation
+  jobs require a dedicated gateway task.
+- Refund approval is a UI/domain placeholder; Task 16 completes authorized
+  refunds immediately.
+- Business date currently uses the UTC calendar day. A future shift module must
+  derive it from outlet timezone, configured cutoff, and open shift.
+- Receipt and invoice creation, fiscal submission, and delivery are deferred to
+  Task 17.
 
 ## Task 15 Completion
 
@@ -497,12 +558,12 @@ Known limitation:
 
 ## Next Task
 
-### Task 16: Implement Payment Module
+### Task 17: Implement Receipt & Invoice Module
 
-Do not start Task 16 unless explicitly requested. Define payment tenders,
-idempotency, bill allocations, settlement, failure/retry behavior, refunds,
-invoice assignment, authorization, immutable audit records, and API contracts
-before Flutter screens.
+Do not start Task 17 unless explicitly requested. Define immutable receipt
+snapshots, invoice and fiscal numbering, payment allocation presentation,
+reprint and delivery audit, authorization, and API contracts before Flutter
+screens.
 
 ## Future Work
 

@@ -135,6 +135,57 @@ enum BillSource {
   @@map("bill_source")
 }
 
+enum BillPaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  REFUNDED
+
+  @@map("bill_payment_status")
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  CARD
+  WALLET
+  GIFT_CARD
+  BANK_TRANSFER
+
+  @@map("payment_method")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  PARTIALLY_PAID
+  REFUNDED
+  CANCELLED
+
+  @@map("payment_status")
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  COMPLETED
+  REJECTED
+
+  @@map("refund_status")
+}
+
+enum PaymentSource {
+  POS
+  WAITER_APP
+  QR_ORDER
+  ONLINE_ORDER
+  CUSTOMER_APP
+
+  @@map("payment_source")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -152,26 +203,30 @@ model Tenant {
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(3)
 
-  outlets           Outlet[]
-  memberships       TenantMembership[]
-  roles             Role[]
-  menuCategories    MenuCategory[]
-  menuItems         MenuItem[]
-  menuItemVariants  MenuItemVariant[]
-  menuItemAddons    MenuItemAddon[]
-  outletMenuPrices  OutletMenuPrice[]
-  tableSections     TableSection[]
-  diningTables      DiningTable[]
-  tableReservations TableReservation[]
-  mergedTables      MergedTable[]
-  orders            Order[]
-  orderItems        OrderItem[]
-  orderCounters     OrderNumberCounter[]
-  kitchenCategories KitchenCategory[]
-  bills             Bill[]
-  billItems         BillItem[]
-  billTaxes         BillTax[]
-  billCounters      BillNumberCounter[]
+  outlets             Outlet[]
+  memberships         TenantMembership[]
+  roles               Role[]
+  menuCategories      MenuCategory[]
+  menuItems           MenuItem[]
+  menuItemVariants    MenuItemVariant[]
+  menuItemAddons      MenuItemAddon[]
+  outletMenuPrices    OutletMenuPrice[]
+  tableSections       TableSection[]
+  diningTables        DiningTable[]
+  tableReservations   TableReservation[]
+  mergedTables        MergedTable[]
+  orders              Order[]
+  orderItems          OrderItem[]
+  orderCounters       OrderNumberCounter[]
+  kitchenCategories   KitchenCategory[]
+  bills               Bill[]
+  billItems           BillItem[]
+  billTaxes           BillTax[]
+  billCounters        BillNumberCounter[]
+  payments            Payment[]
+  paymentTransactions PaymentTransaction[]
+  paymentRefunds      PaymentRefund[]
+  paymentCounters     PaymentNumberCounter[]
 
   @@index([status])
   @@index([deletedAt])
@@ -198,7 +253,7 @@ model Outlet {
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(3)
 
-  tenant                Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   membershipAssignments MembershipOutlet[]
   menuPrices            OutletMenuPrice[]
   tableSections         TableSection[]
@@ -210,6 +265,8 @@ model Outlet {
   kitchenCategories     KitchenCategory[]
   bills                 Bill[]
   billCounters          BillNumberCounter[]
+  payments              Payment[]
+  paymentCounters       PaymentNumberCounter[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -231,11 +288,14 @@ model UserAccount {
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime?  @map("deleted_at") @db.Timestamptz(3)
 
-  memberships    TenantMembership[]
-  refreshTokens  RefreshToken[]
-  waitedOrders   Order[]            @relation("OrderWaiter")
-  generatedBills Bill[]             @relation("BillGeneratedBy")
-  voidedBills    Bill[]             @relation("BillVoidedBy")
+  memberships     TenantMembership[]
+  refreshTokens   RefreshToken[]
+  waitedOrders    Order[]            @relation("OrderWaiter")
+  generatedBills  Bill[]             @relation("BillGeneratedBy")
+  voidedBills     Bill[]             @relation("BillVoidedBy")
+  createdPayments Payment[]          @relation("PaymentCreatedBy")
+  paidPayments    Payment[]          @relation("PaymentPaidBy")
+  paymentRefunds  PaymentRefund[]    @relation("PaymentRefundedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -735,40 +795,44 @@ model BillNumberCounter {
 }
 
 model Bill {
-  id                    String     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
-  tenantId              String     @map("tenant_id") @db.Uuid
-  outletId              String     @map("outlet_id") @db.Uuid
-  orderId               String     @map("order_id") @db.Uuid
-  billNumber            String     @map("bill_number") @db.VarChar(32)
-  invoiceNumber         String?    @map("invoice_number") @db.VarChar(64)
-  status                BillStatus @default(GENERATED)
-  billSource            BillSource @default(POS) @map("bill_source")
-  currencyCode          String     @map("currency_code") @db.Char(3)
-  customerName          String?    @map("customer_name") @db.VarChar(160)
-  customerPhone         String?    @map("customer_phone") @db.VarChar(20)
-  customerGSTNumber     String?    @map("customer_gst_number") @db.VarChar(32)
-  subtotal              Int        @default(0) @map("subtotal_minor")
-  discountAmount        Int        @default(0) @map("discount_amount_minor")
-  taxAmount             Int        @default(0) @map("tax_amount_minor")
-  serviceChargeAmount   Int        @default(0) @map("service_charge_amount_minor")
-  roundOffAmount        Int        @default(0) @map("round_off_amount_minor")
-  grandTotal            Int        @default(0) @map("grand_total_minor")
-  loyaltyPointsEarned   Int        @default(0) @map("loyalty_points_earned")
-  loyaltyPointsRedeemed Int        @default(0) @map("loyalty_points_redeemed")
-  couponCode            String?    @map("coupon_code") @db.VarChar(64)
-  couponDiscountAmount  Int        @default(0) @map("coupon_discount_amount_minor")
-  notes                 String?    @db.VarChar(1000)
-  sourceBillIds         String[]   @default([]) @map("source_bill_ids") @db.Uuid
-  generatedByUserId     String     @map("generated_by_user_id") @db.Uuid
-  generatedAt           DateTime   @default(now()) @map("generated_at") @db.Timestamptz(3)
-  voidReason            String?    @map("void_reason") @db.VarChar(500)
-  voidedByUserId        String?    @map("voided_by_user_id") @db.Uuid
-  voidedAt              DateTime?  @map("voided_at") @db.Timestamptz(3)
-  printCount            Int        @default(0) @map("print_count")
-  lastPrintedAt         DateTime?  @map("last_printed_at") @db.Timestamptz(3)
-  version               Int        @default(1)
-  createdAt             DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt             DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id                    String            @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId              String            @map("tenant_id") @db.Uuid
+  outletId              String            @map("outlet_id") @db.Uuid
+  orderId               String            @map("order_id") @db.Uuid
+  billNumber            String            @map("bill_number") @db.VarChar(32)
+  invoiceNumber         String?           @map("invoice_number") @db.VarChar(64)
+  status                BillStatus        @default(GENERATED)
+  paymentStatus         BillPaymentStatus @default(UNPAID) @map("payment_status")
+  billSource            BillSource        @default(POS) @map("bill_source")
+  currencyCode          String            @map("currency_code") @db.Char(3)
+  customerName          String?           @map("customer_name") @db.VarChar(160)
+  customerPhone         String?           @map("customer_phone") @db.VarChar(20)
+  customerGSTNumber     String?           @map("customer_gst_number") @db.VarChar(32)
+  subtotal              Int               @default(0) @map("subtotal_minor")
+  discountAmount        Int               @default(0) @map("discount_amount_minor")
+  taxAmount             Int               @default(0) @map("tax_amount_minor")
+  serviceChargeAmount   Int               @default(0) @map("service_charge_amount_minor")
+  roundOffAmount        Int               @default(0) @map("round_off_amount_minor")
+  grandTotal            Int               @default(0) @map("grand_total_minor")
+  paidAmount            Int               @default(0) @map("paid_amount_minor")
+  refundedAmount        Int               @default(0) @map("refunded_amount_minor")
+  outstandingAmount     Int               @default(0) @map("outstanding_amount_minor")
+  loyaltyPointsEarned   Int               @default(0) @map("loyalty_points_earned")
+  loyaltyPointsRedeemed Int               @default(0) @map("loyalty_points_redeemed")
+  couponCode            String?           @map("coupon_code") @db.VarChar(64)
+  couponDiscountAmount  Int               @default(0) @map("coupon_discount_amount_minor")
+  notes                 String?           @db.VarChar(1000)
+  sourceBillIds         String[]          @default([]) @map("source_bill_ids") @db.Uuid
+  generatedByUserId     String            @map("generated_by_user_id") @db.Uuid
+  generatedAt           DateTime          @default(now()) @map("generated_at") @db.Timestamptz(3)
+  voidReason            String?           @map("void_reason") @db.VarChar(500)
+  voidedByUserId        String?           @map("voided_by_user_id") @db.Uuid
+  voidedAt              DateTime?         @map("voided_at") @db.Timestamptz(3)
+  printCount            Int               @default(0) @map("print_count")
+  lastPrintedAt         DateTime?         @map("last_printed_at") @db.Timestamptz(3)
+  version               Int               @default(1)
+  createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   outlet      Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
@@ -777,6 +841,7 @@ model Bill {
   voidedBy    UserAccount? @relation("BillVoidedBy", fields: [voidedByUserId], references: [id], onDelete: Restrict)
   items       BillItem[]
   taxes       BillTax[]
+  payments    Payment[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, billNumber])
@@ -829,4 +894,126 @@ model BillTax {
   @@unique([tenantId, id])
   @@index([tenantId, billId])
   @@map("bill_taxes")
+}
+
+model PaymentNumberCounter {
+  id           String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  outletId     String   @map("outlet_id") @db.Uuid
+  businessDate DateTime @map("business_date") @db.Date
+  lastNumber   Int      @default(1) @map("last_number")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, outletId, businessDate])
+  @@index([tenantId, outletId])
+  @@map("payment_number_counters")
+}
+
+model Payment {
+  id                   String         @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId             String         @map("tenant_id") @db.Uuid
+  outletId             String         @map("outlet_id") @db.Uuid
+  billId               String         @map("bill_id") @db.Uuid
+  paymentNumber        String         @map("payment_number") @db.VarChar(32)
+  idempotencyKey       String         @map("idempotency_key") @db.VarChar(100)
+  paymentMethod        PaymentMethod? @map("payment_method")
+  paymentSource        PaymentSource  @default(POS) @map("payment_source")
+  status               PaymentStatus  @default(PENDING)
+  amount               Int            @map("amount_minor")
+  paidAmount           Int            @default(0) @map("paid_amount_minor")
+  refundedAmount       Int            @default(0) @map("refunded_amount_minor")
+  referenceNumber      String?        @map("reference_number") @db.VarChar(120)
+  gatewayTransactionId String?        @map("gateway_transaction_id") @db.VarChar(160)
+  upiTransactionId     String?        @map("upi_transaction_id") @db.VarChar(160)
+  payerName            String?        @map("payer_name") @db.VarChar(160)
+  cardLast4            String?        @map("card_last4") @db.Char(4)
+  approvalCode         String?        @map("approval_code") @db.VarChar(80)
+  cashReceived         Int?           @map("cash_received_minor")
+  changeReturned       Int?           @map("change_returned_minor")
+  gatewayName          String?        @map("gateway_name") @db.VarChar(80)
+  gatewayResponse      Json?          @map("gateway_response") @db.JsonB
+  gatewayReference     String?        @map("gateway_reference") @db.VarChar(160)
+  deviceId             String?        @map("device_id") @db.VarChar(120)
+  terminalId           String?        @map("terminal_id") @db.VarChar(120)
+  shiftId              String?        @map("shift_id") @db.Uuid
+  businessDate         DateTime       @map("business_date") @db.Date
+  notes                String?        @db.VarChar(1000)
+  createdByUserId      String         @map("created_by_user_id") @db.Uuid
+  paidByUserId         String?        @map("paid_by_user_id") @db.Uuid
+  paidAt               DateTime?      @map("paid_at") @db.Timestamptz(3)
+  version              Int            @default(1)
+  createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet               @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  bill         Bill                 @relation(fields: [tenantId, billId], references: [tenantId, id], onDelete: Restrict)
+  createdBy    UserAccount          @relation("PaymentCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  paidBy       UserAccount?         @relation("PaymentPaidBy", fields: [paidByUserId], references: [id], onDelete: Restrict)
+  transactions PaymentTransaction[]
+  refunds      PaymentRefund[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, outletId, paymentNumber])
+  @@unique([tenantId, outletId, idempotencyKey])
+  @@index([tenantId, outletId, status, businessDate])
+  @@index([tenantId, billId, status])
+  @@index([tenantId, referenceNumber])
+  @@map("payments")
+}
+
+model PaymentTransaction {
+  id                   String        @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId             String        @map("tenant_id") @db.Uuid
+  paymentId            String        @map("payment_id") @db.Uuid
+  paymentMethod        PaymentMethod @map("payment_method")
+  amount               Int           @map("amount_minor")
+  referenceNumber      String?       @map("reference_number") @db.VarChar(120)
+  gatewayTransactionId String?       @map("gateway_transaction_id") @db.VarChar(160)
+  upiTransactionId     String?       @map("upi_transaction_id") @db.VarChar(160)
+  payerName            String?       @map("payer_name") @db.VarChar(160)
+  cardLast4            String?       @map("card_last4") @db.Char(4)
+  approvalCode         String?       @map("approval_code") @db.VarChar(80)
+  cashReceived         Int?          @map("cash_received_minor")
+  changeReturned       Int?          @map("change_returned_minor")
+  gatewayName          String?       @map("gateway_name") @db.VarChar(80)
+  gatewayResponse      Json?         @map("gateway_response") @db.JsonB
+  gatewayReference     String?       @map("gateway_reference") @db.VarChar(160)
+  status               PaymentStatus @default(PENDING)
+  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  payment Payment @relation(fields: [tenantId, paymentId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, paymentId, status])
+  @@map("payment_transactions")
+}
+
+model PaymentRefund {
+  id               String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId         String       @map("tenant_id") @db.Uuid
+  paymentId        String       @map("payment_id") @db.Uuid
+  refundNumber     String       @map("refund_number") @db.VarChar(48)
+  idempotencyKey   String       @map("idempotency_key") @db.VarChar(100)
+  refundAmount     Int          @map("refund_amount_minor")
+  refundReason     String       @map("refund_reason") @db.VarChar(500)
+  status           RefundStatus @default(COMPLETED)
+  refundedByUserId String       @map("refunded_by_user_id") @db.Uuid
+  refundedAt       DateTime?    @map("refunded_at") @db.Timestamptz(3)
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  payment    Payment     @relation(fields: [tenantId, paymentId], references: [tenantId, id], onDelete: Restrict)
+  refundedBy UserAccount @relation("PaymentRefundedBy", fields: [refundedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, refundNumber])
+  @@unique([tenantId, paymentId, idempotencyKey])
+  @@index([tenantId, paymentId, status])
+  @@map("payment_refunds")
 }

@@ -26,6 +26,11 @@ import '../../features/kds/presentation/screens/kitchen_queue_screen.dart';
 import '../../features/kds/presentation/screens/ready_orders_screen.dart';
 import '../../features/orders/presentation/screens/order_details_screen.dart';
 import '../../features/orders/presentation/screens/order_list_screen.dart';
+import '../../features/payments/presentation/screens/payment_details_screen.dart';
+import '../../features/payments/presentation/screens/payment_history_screen.dart';
+import '../../features/payments/presentation/screens/payment_screen.dart';
+import '../../features/payments/presentation/screens/refund_screen.dart';
+import '../../features/payments/presentation/screens/split_payment_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/splash';
@@ -46,6 +51,7 @@ abstract final class AppRoutes {
   static const completedOrders = '/kds/completed';
   static const billing = '/billing';
   static const mergeBills = '/billing/merge';
+  static const payments = '/payments';
 
   static String forRole(UserRole role) {
     return switch (role) {
@@ -108,6 +114,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 location == AppRoutes.mergeBills ||
                 location.endsWith('/split'))) {
           return AppRoutes.billing;
+        }
+      }
+      if (location.startsWith(AppRoutes.payments)) {
+        if (role == UserRole.customer || role == UserRole.kitchenStaff) {
+          return roleRoute;
+        }
+        if (role == UserRole.waiter &&
+            (location.contains('/pay/') ||
+                location.contains('/split/') ||
+                location.endsWith('/refund'))) {
+          return AppRoutes.payments;
         }
       }
       if (location == AppRoutes.login ||
@@ -233,6 +250,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'split',
                 builder: (context, state) =>
                     SplitBillScreen(billId: state.pathParameters['id']!),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.payments,
+        builder: (context, state) => const PaymentHistoryScreen(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'pay/:billId',
+            builder: (context, state) =>
+                PaymentScreen(billId: state.pathParameters['billId']!),
+          ),
+          GoRoute(
+            path: 'split/:billId',
+            builder: (context, state) =>
+                SplitPaymentScreen(billId: state.pathParameters['billId']!),
+          ),
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                PaymentDetailsScreen(paymentId: state.pathParameters['id']!),
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'refund',
+                builder: (context, state) =>
+                    RefundScreen(paymentId: state.pathParameters['id']!),
               ),
             ],
           ),

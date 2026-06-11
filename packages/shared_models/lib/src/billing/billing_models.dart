@@ -26,6 +26,18 @@ enum BillSource {
       values.firstWhere((item) => item.wireName == value);
 }
 
+enum BillPaymentStatus {
+  unpaid('UNPAID'),
+  partiallyPaid('PARTIALLY_PAID'),
+  paid('PAID'),
+  refunded('REFUNDED');
+
+  const BillPaymentStatus(this.wireName);
+  final String wireName;
+  static BillPaymentStatus fromJson(Object? value) =>
+      values.firstWhere((item) => item.wireName == value);
+}
+
 enum SplitBillMode {
   equal('EQUAL'),
   customAmount('CUSTOM_AMOUNT'),
@@ -109,6 +121,7 @@ class Bill {
     required this.orderId,
     required this.billNumber,
     required this.status,
+    required this.paymentStatus,
     required this.billSource,
     required this.currencyCode,
     required this.subtotal,
@@ -117,6 +130,9 @@ class Bill {
     required this.serviceChargeAmount,
     required this.roundOffAmount,
     required this.grandTotal,
+    required this.paidAmount,
+    required this.refundedAmount,
+    required this.outstandingAmount,
     required this.generatedByUserId,
     required this.generatedAt,
     required this.printCount,
@@ -152,6 +168,9 @@ class Bill {
     billNumber: json['billNumber'] as String,
     invoiceNumber: json['invoiceNumber'] as String?,
     status: BillStatus.fromJson(json['status']),
+    paymentStatus: BillPaymentStatus.fromJson(
+      json['paymentStatus'] ?? 'UNPAID',
+    ),
     billSource: BillSource.fromJson(json['billSource']),
     currencyCode: json['currencyCode'] as String,
     customerName: json['customerName'] as String?,
@@ -163,6 +182,10 @@ class Bill {
     serviceChargeAmount: json['serviceChargeAmount'] as int,
     roundOffAmount: json['roundOffAmount'] as int,
     grandTotal: json['grandTotal'] as int,
+    paidAmount: json['paidAmount'] as int? ?? 0,
+    refundedAmount: json['refundedAmount'] as int? ?? 0,
+    outstandingAmount:
+        json['outstandingAmount'] as int? ?? json['grandTotal'] as int,
     loyaltyPointsEarned: json['loyaltyPointsEarned'] as int? ?? 0,
     loyaltyPointsRedeemed: json['loyaltyPointsRedeemed'] as int? ?? 0,
     couponCode: json['couponCode'] as String?,
@@ -214,6 +237,7 @@ class Bill {
   final String billNumber;
   final String? invoiceNumber;
   final BillStatus status;
+  final BillPaymentStatus paymentStatus;
   final BillSource billSource;
   final String currencyCode;
   final String? customerName;
@@ -225,6 +249,9 @@ class Bill {
   final int serviceChargeAmount;
   final int roundOffAmount;
   final int grandTotal;
+  final int paidAmount;
+  final int refundedAmount;
+  final int outstandingAmount;
   final int loyaltyPointsEarned;
   final int loyaltyPointsRedeemed;
   final String? couponCode;

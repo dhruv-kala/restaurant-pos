@@ -283,6 +283,12 @@ The repository currently contains:
   generate, update, print, void, split, and merge workflows
 - Shared billing models and API client plus Riverpod restaurant-app bill list,
   generation, detail, split, and merge screens
+- Tenant/outlet-scoped idempotent payment aggregates, immutable tender
+  transactions, append-only refunds, and atomic outlet/day payment numbering
+- Transactional bill paid/refunded/outstanding reconciliation with partial and
+  split tender support
+- Shared payment models and API client plus Riverpod restaurant-app payment,
+  split, refund, history, and detail screens
 
 ## Authoritative References
 

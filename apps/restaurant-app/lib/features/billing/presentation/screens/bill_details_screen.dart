@@ -65,6 +65,14 @@ class BillDetailsScreen extends ConsumerWidget {
               bill.currencyCode,
               bold: true,
             ),
+            _total('Paid', bill.paidAmount, bill.currencyCode),
+            _total('Refunded', -bill.refundedAmount, bill.currencyCode),
+            _total(
+              'Outstanding',
+              bill.outstandingAmount,
+              bill.currencyCode,
+              bold: true,
+            ),
             const SizedBox(height: 20),
             Wrap(
               spacing: 8,
@@ -80,6 +88,16 @@ class BillDetailsScreen extends ConsumerWidget {
                   icon: const Icon(Icons.print),
                   label: Text(bill.printCount == 0 ? 'Print' : 'Reprint'),
                 ),
+                if (canWrite && bill.status == BillStatus.generated)
+                  FilledButton.icon(
+                    onPressed: bill.outstandingAmount > 0
+                        ? () => context.push(
+                            '${AppRoutes.payments}/pay/${bill.id}',
+                          )
+                        : null,
+                    icon: const Icon(Icons.payments),
+                    label: const Text('Take Payment'),
+                  ),
                 if (canWrite && bill.status == BillStatus.generated)
                   OutlinedButton.icon(
                     onPressed: () =>

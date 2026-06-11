@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BillSource, BillStatus } from '@prisma/client';
+import { BillPaymentStatus, BillSource, BillStatus } from '@prisma/client';
 
 export class BillItemResponseDto {
   @ApiProperty() id!: string;
@@ -31,6 +31,7 @@ export class BillResponseDto {
   @ApiProperty() billNumber!: string;
   @ApiPropertyOptional({ nullable: true }) invoiceNumber!: string | null;
   @ApiProperty({ enum: BillStatus }) status!: BillStatus;
+  @ApiProperty({ enum: BillPaymentStatus }) paymentStatus!: BillPaymentStatus;
   @ApiProperty({ enum: BillSource }) billSource!: BillSource;
   @ApiProperty() currencyCode!: string;
   @ApiPropertyOptional({ nullable: true }) customerName!: string | null;
@@ -42,6 +43,9 @@ export class BillResponseDto {
   @ApiProperty() serviceChargeAmount!: number;
   @ApiProperty() roundOffAmount!: number;
   @ApiProperty() grandTotal!: number;
+  @ApiProperty() paidAmount!: number;
+  @ApiProperty() refundedAmount!: number;
+  @ApiProperty() outstandingAmount!: number;
   @ApiProperty() loyaltyPointsEarned!: number;
   @ApiProperty() loyaltyPointsRedeemed!: number;
   @ApiPropertyOptional({ nullable: true }) couponCode!: string | null;
