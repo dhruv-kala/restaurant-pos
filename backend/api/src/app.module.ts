@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { OutletsModule } from './modules/outlets/outlets.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { TablesModule } from './modules/tables/tables.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -28,6 +29,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     HealthModule,
     MenuModule,
+    OrdersModule,
     TablesModule,
     TenantsModule,
     OutletsModule,

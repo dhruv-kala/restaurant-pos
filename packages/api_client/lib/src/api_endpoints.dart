@@ -10,6 +10,7 @@ abstract final class ApiEndpoints {
   static const String tableSections = '/table-sections';
   static const String tables = '/tables';
   static const String reservations = '/reservations';
+  static const String orders = '/orders';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -49,4 +50,11 @@ abstract final class ApiEndpoints {
   static const String mergeTables = '$tables/merge';
   static const String splitTables = '$tables/split';
   static const String transferTable = '$tables/transfer';
+  static String order(String id) => '$orders/$id';
+  static String orderStatus(String id) => '${order(id)}/status';
+  static String orderCancel(String id) => '${order(id)}/cancel';
+  static String orderTransfer(String id) => '${order(id)}/transfer';
+  static String orderItems(String id) => '${order(id)}/items';
+  static String orderItem(String id) => '/order-items/$id';
+  static const String kitchenQueue = '$orders/kitchen/queue';
 }

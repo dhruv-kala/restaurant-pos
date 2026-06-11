@@ -76,6 +76,37 @@ enum ReservationStatus {
   @@map("reservation_status")
 }
 
+enum OrderType {
+  DINE_IN
+  TAKEAWAY
+  DELIVERY
+  QR_ORDER
+
+  @@map("order_type")
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  SERVED
+  COMPLETED
+  CANCELLED
+
+  @@map("order_status")
+}
+
+enum OrderItemStatus {
+  PENDING
+  PREPARING
+  READY
+  SERVED
+  CANCELLED
+
+  @@map("order_item_status")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -105,6 +136,9 @@ model Tenant {
   diningTables      DiningTable[]
   tableReservations TableReservation[]
   mergedTables      MergedTable[]
+  orders            Order[]
+  orderItems        OrderItem[]
+  orderCounters     OrderNumberCounter[]
 
   @@index([status])
   @@index([deletedAt])
@@ -131,13 +165,15 @@ model Outlet {
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(3)
 
-  tenant                Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant                Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   membershipAssignments MembershipOutlet[]
   menuPrices            OutletMenuPrice[]
   tableSections         TableSection[]
   diningTables          DiningTable[]
   tableReservations     TableReservation[]
   mergedTables          MergedTable[]
+  orders                Order[]
+  orderCounters         OrderNumberCounter[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -161,6 +197,7 @@ model UserAccount {
 
   memberships   TenantMembership[]
   refreshTokens RefreshToken[]
+  waitedOrders  Order[]            @relation("OrderWaiter")
 
   @@index([status])
   @@index([deletedAt])
@@ -337,6 +374,7 @@ model MenuItem {
   variants     MenuItemVariant[]
   addons       MenuItemAddon[]
   outletPrices OutletMenuPrice[]
+  orderItems   OrderItem[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, sku])
@@ -359,8 +397,9 @@ model MenuItemVariant {
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  menuItem MenuItem @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  menuItem   MenuItem    @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+  orderItems OrderItem[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, menuItemId, name])
@@ -456,6 +495,7 @@ model DiningTable {
   outlet       Outlet             @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
   section      TableSection       @relation(fields: [tenantId, outletId, sectionId], references: [tenantId, outletId, id], onDelete: Restrict)
   reservations TableReservation[]
+  orders       Order[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, id])
@@ -509,4 +549,93 @@ model MergedTable {
   @@unique([tenantId, id])
   @@index([tenantId, outletId, isActive, deletedAt])
   @@map("merged_tables")
+}
+
+model OrderNumberCounter {
+  id           String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  outletId     String   @map("outlet_id") @db.Uuid
+  businessDate DateTime @map("business_date") @db.Date
+  lastNumber   Int      @default(1) @map("last_number")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, outletId, businessDate])
+  @@index([tenantId, outletId])
+  @@map("order_number_counters")
+}
+
+model Order {
+  id                  String      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId            String      @map("tenant_id") @db.Uuid
+  outletId            String      @map("outlet_id") @db.Uuid
+  tableId             String?     @map("table_id") @db.Uuid
+  customerId          String?     @map("customer_id") @db.Uuid
+  orderNumber         String      @map("order_number") @db.VarChar(32)
+  orderType           OrderType   @map("order_type")
+  status              OrderStatus @default(PENDING)
+  waiterId            String?     @map("waiter_id") @db.Uuid
+  guestCount          Int         @default(1) @map("guest_count")
+  notes               String?     @db.VarChar(1000)
+  currencyCode        String      @map("currency_code") @db.Char(3)
+  subtotal            Int         @default(0) @map("subtotal_minor")
+  discountAmount      Int         @default(0) @map("discount_amount_minor")
+  taxAmount           Int         @default(0) @map("tax_amount_minor")
+  serviceChargeAmount Int         @default(0) @map("service_charge_amount_minor")
+  grandTotal          Int         @default(0) @map("grand_total_minor")
+  cancellationReason  String?     @map("cancellation_reason") @db.VarChar(500)
+  completedAt         DateTime?   @map("completed_at") @db.Timestamptz(3)
+  cancelledAt         DateTime?   @map("cancelled_at") @db.Timestamptz(3)
+  version             Int         @default(1)
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  table  DiningTable? @relation(fields: [tenantId, outletId, tableId], references: [tenantId, outletId, id], onDelete: Restrict)
+  waiter UserAccount? @relation("OrderWaiter", fields: [waiterId], references: [id], onDelete: Restrict)
+  items  OrderItem[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, outletId, orderNumber])
+  @@index([tenantId, outletId, status, createdAt])
+  @@index([tenantId, outletId, tableId, status])
+  @@index([tenantId, outletId, waiterId, createdAt])
+  @@index([tenantId, customerId, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String          @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId            String          @map("tenant_id") @db.Uuid
+  orderId             String          @map("order_id") @db.Uuid
+  menuItemId          String          @map("menu_item_id") @db.Uuid
+  variantId           String?         @map("variant_id") @db.Uuid
+  itemName            String          @map("item_name") @db.VarChar(160)
+  variantName         String?         @map("variant_name") @db.VarChar(120)
+  quantity            Int
+  unitPrice           Int             @map("unit_price_minor")
+  discountAmount      Int             @default(0) @map("discount_amount_minor")
+  taxAmount           Int             @default(0) @map("tax_amount_minor")
+  lineTotal           Int             @map("line_total_minor")
+  taxPercentage       Decimal         @default(0) @map("tax_percentage") @db.Decimal(5, 2)
+  specialInstructions String?         @map("special_instructions") @db.VarChar(500)
+  status              OrderItemStatus @default(PENDING)
+  version             Int             @default(1)
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt           DateTime?       @map("deleted_at") @db.Timestamptz(3)
+
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  order    Order            @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  menuItem MenuItem         @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+  variant  MenuItemVariant? @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, orderId, status, deletedAt])
+  @@index([tenantId, menuItemId])
+  @@map("order_items")
 }

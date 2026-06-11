@@ -3,9 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 describe('Prisma tenancy and authorization schema', () => {
-  const models = new Map(
-    Prisma.dmmf.datamodel.models.map((model) => [model.name, model]),
-  );
+  const models = new Map(Prisma.dmmf.datamodel.models.map((model) => [model.name, model]));
 
   it('contains the Task 6 models', () => {
     expect([...models.keys()]).toEqual(
@@ -38,30 +36,19 @@ describe('Prisma tenancy and authorization schema', () => {
   });
 
   it('keeps user accounts and permissions global', () => {
-    expect(
-      models
-        .get('UserAccount')
-        ?.fields.some((field) => field.name === 'tenantId'),
-    ).toBe(false);
-    expect(
-      models
-        .get('Permission')
-        ?.fields.some((field) => field.name === 'tenantId'),
-    ).toBe(false);
+    expect(models.get('UserAccount')?.fields.some((field) => field.name === 'tenantId')).toBe(
+      false,
+    );
+    expect(models.get('Permission')?.fields.some((field) => field.name === 'tenantId')).toBe(false);
   });
 
   it('uses composite tenant-aware relations for assignment tables', () => {
     const relationFieldNames = ['membership', 'role', 'outlet'];
 
-    for (const modelName of [
-      'MembershipRole',
-      'RolePermission',
-      'MembershipOutlet',
-    ]) {
+    for (const modelName of ['MembershipRole', 'RolePermission', 'MembershipOutlet']) {
       const model = models.get(modelName);
       const relationFields = model?.fields.filter(
-        (field) =>
-          field.kind === 'object' && relationFieldNames.includes(field.name),
+        (field) => field.kind === 'object' && relationFieldNames.includes(field.name),
       );
 
       for (const field of relationFields ?? []) {
@@ -85,18 +72,10 @@ describe('Prisma tenancy and authorization schema', () => {
     );
 
     expect(migration).toContain('CREATE OR REPLACE FUNCTION app_uuid_v7()');
-    expect(migration).toContain(
-      'FOREIGN KEY ("tenant_id", "membership_id")',
-    );
-    expect(migration).toContain(
-      'ALTER TABLE "tenant_memberships" FORCE ROW LEVEL SECURITY',
-    );
-    expect(migration).toContain(
-      'CREATE POLICY "role_permissions_tenant_isolation"',
-    );
-    expect(migration).toContain(
-      'CONSTRAINT "user_accounts_identity_required_check"',
-    );
+    expect(migration).toContain('FOREIGN KEY ("tenant_id", "membership_id")');
+    expect(migration).toContain('ALTER TABLE "tenant_memberships" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "role_permissions_tenant_isolation"');
+    expect(migration).toContain('CONSTRAINT "user_accounts_identity_required_check"');
   });
 
   it('adds hashed, revocable refresh-token persistence', () => {
@@ -123,18 +102,14 @@ describe('Prisma tenancy and authorization schema', () => {
       ]),
     );
     expect(fieldNames).not.toContain('token');
-    expect(migration).toContain(
-      'CREATE POLICY "tenant_memberships_tenant_or_user_isolation"',
-    );
+    expect(migration).toContain('CREATE POLICY "tenant_memberships_tenant_or_user_isolation"');
     expect(migration).toContain('"user_id" = app_current_user_id()');
   });
 
   it('adds tenant and outlet management fields with platform-admin RLS', () => {
     const tenantFields = models.get('Tenant')?.fields.map((field) => field.name);
     const outletFields = models.get('Outlet')?.fields.map((field) => field.name);
-    const userFields = models
-      .get('UserAccount')
-      ?.fields.map((field) => field.name);
+    const userFields = models.get('UserAccount')?.fields.map((field) => field.name);
     const migration = readFileSync(
       join(
         process.cwd(),
@@ -147,12 +122,7 @@ describe('Prisma tenancy and authorization schema', () => {
     );
 
     expect(tenantFields).toEqual(
-      expect.arrayContaining([
-        'legalName',
-        'email',
-        'phone',
-        'outletLimit',
-      ]),
+      expect.arrayContaining(['legalName', 'email', 'phone', 'outletLimit']),
     );
     expect(outletFields).toEqual(
       expect.arrayContaining([
@@ -168,12 +138,8 @@ describe('Prisma tenancy and authorization schema', () => {
     );
     expect(userFields).toContain('isPlatformAdmin');
     expect(migration).toContain('CREATE OR REPLACE FUNCTION app_is_platform_admin()');
-    expect(migration).toContain(
-      'CREATE POLICY "outlets_tenant_or_platform_isolation"',
-    );
-    expect(migration).toContain(
-      'ADD CONSTRAINT "tenants_outlet_limit_positive_check"',
-    );
+    expect(migration).toContain('CREATE POLICY "outlets_tenant_or_platform_isolation"');
+    expect(migration).toContain('ADD CONSTRAINT "tenants_outlet_limit_positive_check"');
   });
 
   it('adds tenant-scoped menu models, money checks, and forced RLS', () => {
@@ -185,9 +151,7 @@ describe('Prisma tenancy and authorization schema', () => {
       'OutletMenuPrice',
     ];
     for (const modelName of menuModels) {
-      expect(models.get(modelName)?.fields.map((field) => field.name)).toContain(
-        'tenantId',
-      );
+      expect(models.get(modelName)?.fields.map((field) => field.name)).toContain('tenantId');
     }
 
     const migration = readFileSync(
@@ -200,31 +164,18 @@ describe('Prisma tenancy and authorization schema', () => {
       ),
       'utf8',
     );
-    expect(migration).toContain(
-      'FOREIGN KEY ("tenant_id", "category_id")',
-    );
+    expect(migration).toContain('FOREIGN KEY ("tenant_id", "category_id")');
     expect(migration).toContain(
       'CONSTRAINT "menu_items_price_minor_check" CHECK ("price_minor" > 0)',
     );
-    expect(migration).toContain(
-      'ALTER TABLE "menu_items" FORCE ROW LEVEL SECURITY',
-    );
-    expect(migration).toContain(
-      'CREATE POLICY "outlet_menu_prices_tenant_isolation"',
-    );
+    expect(migration).toContain('ALTER TABLE "menu_items" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "outlet_menu_prices_tenant_isolation"');
   });
 
   it('adds outlet-scoped table models, constraints, and forced RLS', () => {
-    for (const modelName of [
-      'TableSection',
-      'DiningTable',
-      'TableReservation',
-      'MergedTable',
-    ]) {
+    for (const modelName of ['TableSection', 'DiningTable', 'TableReservation', 'MergedTable']) {
       const fields = models.get(modelName)?.fields.map((field) => field.name);
-      expect(fields).toEqual(
-        expect.arrayContaining(['tenantId', 'outletId', 'deletedAt']),
-      );
+      expect(fields).toEqual(expect.arrayContaining(['tenantId', 'outletId', 'deletedAt']));
     }
 
     const migration = readFileSync(
@@ -237,17 +188,35 @@ describe('Prisma tenancy and authorization schema', () => {
       ),
       'utf8',
     );
-    expect(migration).toContain(
-      'FOREIGN KEY ("tenant_id", "outlet_id", "section_id")',
+    expect(migration).toContain('FOREIGN KEY ("tenant_id", "outlet_id", "section_id")');
+    expect(migration).toContain('CONSTRAINT "dining_tables_capacity_positive_check"');
+    expect(migration).toContain('ALTER TABLE "table_reservations" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "merged_tables_tenant_isolation"');
+  });
+
+  it('adds order aggregates, atomic numbering, snapshots, and forced RLS', () => {
+    for (const modelName of ['OrderNumberCounter', 'Order', 'OrderItem']) {
+      expect(models.get(modelName)?.fields.map((field) => field.name)).toContain('tenantId');
+    }
+    expect(models.get('OrderItem')?.fields.map((field) => field.name)).toEqual(
+      expect.arrayContaining(['itemName', 'unitPrice', 'taxPercentage', 'lineTotal']),
     );
-    expect(migration).toContain(
-      'CONSTRAINT "dining_tables_capacity_positive_check"',
+
+    const migration = readFileSync(
+      join(
+        process.cwd(),
+        'prisma',
+        'migrations',
+        '20260611230000_add_order_management',
+        'migration.sql',
+      ),
+      'utf8',
     );
-    expect(migration).toContain(
-      'ALTER TABLE "table_reservations" FORCE ROW LEVEL SECURITY',
-    );
-    expect(migration).toContain(
-      'CREATE POLICY "merged_tables_tenant_isolation"',
-    );
+    expect(migration).toContain('CREATE TYPE "order_status"');
+    expect(migration).toContain('orders_tenant_id_outlet_id_order_number_key');
+    expect(migration).toContain('orders_type_requirements_check');
+    expect(migration).toContain('order_items_money_nonnegative_check');
+    expect(migration).toContain('ALTER TABLE "orders" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "order_items_tenant_isolation"');
   });
 });

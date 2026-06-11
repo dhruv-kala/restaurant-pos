@@ -1,8 +1,4 @@
-import {
-  MembershipStatus,
-  PrismaClient,
-  UserStatus,
-} from '@prisma/client';
+import { MembershipStatus, PrismaClient, UserStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -30,6 +26,10 @@ const permissions = [
   ['tables.read', 'tables', 'View tables and reservations'],
   ['tables.update', 'tables', 'Update tables and reservations'],
   ['tables.delete', 'tables', 'Archive tables and reservations'],
+  ['orders.create', 'orders', 'Create restaurant orders'],
+  ['orders.read', 'orders', 'View restaurant orders'],
+  ['orders.update', 'orders', 'Update orders and order statuses'],
+  ['orders.cancel', 'orders', 'Cancel restaurant orders'],
 ] as const;
 
 const LOCAL_ADMIN_EMAIL = 'admin@example.com';
