@@ -16,13 +16,13 @@ Only `apps/restaurant-app` currently contains executable application code.
 
 | Package | Current content |
 |---|---|
-| `serveiq_core` | App exception and currency formatting |
-| `serveiq_shared_models` | Stable menu item contract |
-| `serveiq_ui_kit` | Theme and shared navigation |
-| `serveiq_auth` | Session/JWT/permission package boundary |
-| `serveiq_api_client` | API transport package boundary |
-| `serveiq_analytics` | Privacy-safe analytics package boundary |
-| `serveiq_common` | Governed cross-domain package boundary |
+| `restaurant_pos_core` | App configuration, errors, results, and utilities |
+| `restaurant_pos_shared_models` | Backend-aligned shared transport models |
+| `restaurant_pos_ui_kit` | Theme, navigation, and reusable widgets |
+| `restaurant_pos_auth` | Session, token, role, and repository contracts |
+| `restaurant_pos_api_client` | Dio transport, interceptors, and typed services |
+| `restaurant_pos_analytics` | Privacy-safe analytics contracts |
+| `restaurant_pos_common` | Governed cross-domain utilities |
 
 The repository root `pubspec.yaml` defines the Dart workspace. Local packages use
 `resolution: workspace`, and the root `pubspec.lock` is the reproducible
@@ -32,12 +32,12 @@ dependency lock.
 
 ```mermaid
 flowchart LR
-    APPS[Applications] --> CORE[serveiq_core]
-    APPS --> MODELS[serveiq_shared_models]
-    APPS --> UI[serveiq_ui_kit]
-    APPS --> AUTH[serveiq_auth]
-    APPS --> API[serveiq_api_client]
-    APPS --> ANALYTICS[serveiq_analytics]
+    APPS[Applications] --> CORE[restaurant_pos_core]
+    APPS --> MODELS[restaurant_pos_shared_models]
+    APPS --> UI[restaurant_pos_ui_kit]
+    APPS --> AUTH[restaurant_pos_auth]
+    APPS --> API[restaurant_pos_api_client]
+    APPS --> ANALYTICS[restaurant_pos_analytics]
     UI --> CORE
     API --> CORE
 ```

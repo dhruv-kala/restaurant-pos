@@ -15,14 +15,20 @@ dependencies:
     sdk: flutter
   go_router: ^17.3.0
   provider: ^6.1.5+1
-  serveiq_core:
+  restaurant_pos_core:
     path: ../../packages/core
-  serveiq_auth:
+  restaurant_pos_auth:
     path: ../../packages/auth
-  serveiq_shared_models:
+  restaurant_pos_api_client:
+    path: ../../packages/api_client
+  restaurant_pos_shared_models:
     path: ../../packages/shared_models
-  serveiq_ui_kit:
+  restaurant_pos_ui_kit:
     path: ../../packages/ui_kit
+  restaurant_pos_analytics:
+    path: ../../packages/analytics
+  restaurant_pos_common:
+    path: ../../packages/common
 
 dev_dependencies:
   flutter_test:

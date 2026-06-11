@@ -1,4 +1,4 @@
-name: serveiq_common
+name: restaurant_pos_common
 description: Carefully governed common contracts for ServeIQ.
 version: 0.1.0
 publish_to: none

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:restaurant_app/features/pos/presentation/controllers/pos_controller.dart';
-import 'package:serveiq_shared_models/serveiq_shared_models.dart';
+import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 
 void main() {
   const paneer = MenuItem(

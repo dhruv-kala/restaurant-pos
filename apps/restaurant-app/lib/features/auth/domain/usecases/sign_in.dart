@@ -1,5 +1,6 @@
-import 'package:serveiq_core/serveiq_core.dart';
-import 'package:serveiq_auth/serveiq_auth.dart';
+import 'package:restaurant_pos_auth/restaurant_pos_auth.dart'
+    show AuthenticatedUser;
+import 'package:restaurant_pos_core/restaurant_pos_core.dart';
 
 import '../repositories/auth_repository.dart';
 

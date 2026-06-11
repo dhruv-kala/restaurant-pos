@@ -1,4 +1,4 @@
-name: serveiq_api_client
+name: restaurant_pos_api_client
 description: Shared ServeIQ API transport contracts and generated clients.
 version: 0.1.0
 publish_to: none
@@ -6,3 +6,8 @@ resolution: workspace
 
 environment:
   sdk: ^3.12.1
+
+dependencies:
+  dio: ^5.9.0
+  restaurant_pos_core: any
+  restaurant_pos_shared_models: any

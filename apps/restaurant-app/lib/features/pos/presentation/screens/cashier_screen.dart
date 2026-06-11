@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:serveiq_core/serveiq_core.dart';
-import 'package:serveiq_shared_models/serveiq_shared_models.dart';
-import 'package:serveiq_ui_kit/serveiq_ui_kit.dart';
+import 'package:restaurant_pos_core/restaurant_pos_core.dart';
+import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
+import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 import '../../data/demo_menu_catalog.dart';
 import '../controllers/pos_controller.dart';

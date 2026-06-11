@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:serveiq_auth/serveiq_auth.dart';
-import 'package:serveiq_core/serveiq_core.dart';
+import 'package:restaurant_pos_auth/restaurant_pos_auth.dart'
+    show AuthenticatedUser, UserRole;
+import 'package:restaurant_pos_core/restaurant_pos_core.dart';
 
 import '../../domain/usecases/sign_in.dart';
 

@@ -159,13 +159,13 @@ Rules:
 
 | Package | Responsibility |
 |---|---|
-| `serveiq_core` | Framework-independent errors and utilities |
-| `serveiq_auth` | Shared identity, role, session, and permission contracts |
-| `serveiq_api_client` | Planned API transport and generated clients |
-| `serveiq_shared_models` | Stable cross-application domain contracts |
-| `serveiq_ui_kit` | Flutter theme and reusable presentation components |
-| `serveiq_analytics` | Planned privacy-safe analytics contracts |
-| `serveiq_common` | Governed cross-domain primitives |
+| `restaurant_pos_core` | Framework-independent configuration, errors, results, and utilities |
+| `restaurant_pos_auth` | Shared authentication, token, state, and role contracts |
+| `restaurant_pos_api_client` | Dio transport, interceptors, and typed API services |
+| `restaurant_pos_shared_models` | Backend-aligned cross-application contracts |
+| `restaurant_pos_ui_kit` | Flutter theme and reusable presentation components |
+| `restaurant_pos_analytics` | Privacy-safe analytics contracts |
+| `restaurant_pos_common` | Governed cross-domain primitives |
 
 Packages must never import application code.
 

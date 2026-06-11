@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:serveiq_ui_kit/serveiq_ui_kit.dart';
+import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 // ─────────────────────────────────────────────
 //  SERVEIQ – Waiter Screen

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:serveiq_auth/serveiq_auth.dart';
+import 'package:restaurant_pos_auth/restaurant_pos_auth.dart'
+    show AuthenticatedUser, UserRole;
 
 import '../../../../app/router/app_router.dart';
 import '../controllers/login_controller.dart';

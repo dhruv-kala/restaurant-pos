@@ -1,4 +1,5 @@
-import 'package:serveiq_auth/serveiq_auth.dart';
+import 'package:restaurant_pos_auth/restaurant_pos_auth.dart'
+    show AuthenticatedUser;
 
 abstract interface class AuthRepository {
   Future<AuthenticatedUser> signIn({

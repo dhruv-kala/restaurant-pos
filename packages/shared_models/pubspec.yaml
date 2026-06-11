@@ -1,4 +1,4 @@
-name: serveiq_shared_models
+name: restaurant_pos_shared_models
 description: Shared domain contracts used across ServeIQ applications.
 version: 0.1.0
 publish_to: none

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:serveiq_auth/serveiq_auth.dart';
-import 'package:serveiq_core/serveiq_core.dart';
+import 'package:restaurant_pos_auth/restaurant_pos_auth.dart'
+    show AuthenticatedUser, UserRole;
+import 'package:restaurant_pos_core/restaurant_pos_core.dart';
 
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/firebase_auth_data_source.dart';

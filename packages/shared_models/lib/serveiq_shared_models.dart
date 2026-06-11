@@ -1,3 +1,1 @@
-library;
-
-export 'src/menu/menu_item.dart';
+export 'restaurant_pos_shared_models.dart';

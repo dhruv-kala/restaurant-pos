@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:serveiq_ui_kit/serveiq_ui_kit.dart';
+import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 import '../features/auth/domain/usecases/sign_in.dart';
 import '../features/auth/presentation/controllers/login_controller.dart';

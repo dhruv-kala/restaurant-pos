@@ -1,3 +1,1 @@
-library;
-
-export 'src/authenticated_user.dart';
+export 'restaurant_pos_auth.dart';

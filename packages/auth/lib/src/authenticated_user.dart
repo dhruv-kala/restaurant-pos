@@ -1,4 +1,4 @@
-import 'package:serveiq_core/serveiq_core.dart';
+import 'package:restaurant_pos_core/restaurant_pos_core.dart';
 
 enum UserRole {
   admin,

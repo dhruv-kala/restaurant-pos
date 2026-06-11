@@ -8,6 +8,7 @@ Enterprise multi-tenant restaurant POS and management SaaS.
 - [Repository architecture audit](docs/architecture/repository-architecture-audit.md)
 - [Repository restructuring plan](docs/architecture/repository-restructuring.md)
 - [AI-friendly monorepo layout](docs/architecture/monorepo-layout.md)
+- [Flutter frontend architecture](docs/architecture/frontend-architecture.md)
 
 ## Repository Structure
 
@@ -19,13 +20,13 @@ apps/
   customer/          Future customer ordering application
   kitchen-display/   Future KDS application
 packages/
-  core/
-  auth/
-  api_client/
-  shared_models/
-  ui_kit/
-  analytics/
-  common/
+  core/              Framework-independent foundations
+  auth/              Authentication and authorization contracts
+  api_client/        Dio transport and typed API services
+  shared_models/     Backend-aligned shared models
+  ui_kit/            Reusable Flutter presentation primitives
+  analytics/         Privacy-safe analytics contracts
+  common/            Small dependency-free shared utilities
 backend/
   api/               Reserved NestJS application
   database/          Database design and policies
@@ -41,11 +42,11 @@ the system design document.
 
 ## Flutter Validation
 
-Run from `apps/restaurant-app`:
+Run from the repository root:
 
 ```powershell
 flutter pub get
+dart analyze
 flutter analyze
-flutter test
-flutter build web
+flutter test apps/restaurant-app
 ```

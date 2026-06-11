@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:serveiq_shared_models/serveiq_shared_models.dart';
+import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 
 import '../../domain/entities/cart_totals.dart';
 

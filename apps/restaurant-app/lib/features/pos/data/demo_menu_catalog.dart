@@ -1,4 +1,4 @@
-import 'package:serveiq_shared_models/serveiq_shared_models.dart';
+import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 
 const demoMenuCatalog = [
   MenuItem(

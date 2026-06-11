@@ -1,6 +1,8 @@
-# ServeIQ API Client
+# Restaurant POS API Client
 
-Reserved for Dio configuration, generated endpoint clients, authentication
-interceptors, idempotency headers, error translation, and request tracing.
+Dio configuration, bearer-token and error interceptors, endpoint constants, and
+typed auth, tenant, and outlet services aligned with the NestJS API.
 
-The package remains dependency-free until the NestJS API contract exists.
+```dart
+import 'package:restaurant_pos_api_client/restaurant_pos_api_client.dart';
+```
