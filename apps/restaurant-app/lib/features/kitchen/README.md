@@ -1,3 +1,7 @@
 # Kitchen Feature
 
-Reserved for kitchen tickets, routing, timers, and preparation status.
+Station-aware kitchen queue, item/order preparation transitions, realtime
+refresh, station configuration, timers, SLA colors, and analytics foundation.
+
+REST remains authoritative. Socket.IO events invalidate Riverpod projections
+and cause a fresh scoped queue read.

@@ -31,7 +31,7 @@ Initial deployment constraints:
 - No mandatory cloud dependency initially
 
 Current status:
-- Tasks 1 through 17 are complete at the foundation level.
+- Tasks 1 through 18 are complete at the foundation level.
 - Task 11 implemented the menu schema, protected NestJS menu APIs, shared menu
   models/API client, and Flutter admin menu management screens.
 - Local migration deployment and seed execution remain unverified because the
@@ -39,7 +39,10 @@ Current status:
 - Task 17 implemented immutable receipts and tax invoices, outlet/day numbering,
   print/reprint audit, PDF and thermal layouts, protected APIs, shared contracts,
   and receipt screens.
-- Task 18 is next: implement the Inventory Module.
+- Task 18 completed first-class kitchen stations, station-aware routing,
+  preparation auditing and metrics, authenticated Socket.IO kitchen events,
+  typed clients, Riverpod providers, and KDS screens.
+- Task 19 is next: implement the Inventory Module.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,

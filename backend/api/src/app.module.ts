@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { HealthModule } from './modules/health/health.module';
 import { KdsModule } from './modules/kds/kds.module';
+import { KitchenModule } from './modules/kitchen/kitchen.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { OutletsModule } from './modules/outlets/outlets.module';
 import { OrdersModule } from './modules/orders/orders.module';
@@ -34,6 +35,7 @@ import { PrismaModule } from './prisma/prisma.module';
     BillingModule,
     HealthModule,
     KdsModule,
+    KitchenModule,
     MenuModule,
     OrdersModule,
     PaymentsModule,

@@ -61,21 +61,16 @@ class RoleDashboardScaffold extends ConsumerWidget {
                           : 'Open Orders',
                     ),
                   ),
-                if (roleName == 'Manager' || roleName == 'Waiter')
+                if (roleName == 'Tenant Admin' ||
+                    roleName == 'Manager' ||
+                    roleName == 'Cashier' ||
+                    roleName == 'Waiter')
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: OutlinedButton.icon(
-                      onPressed: () => context.push(
-                        roleName == 'Waiter'
-                            ? AppRoutes.readyOrders
-                            : AppRoutes.kds,
-                      ),
+                      onPressed: () => context.push(AppRoutes.kds),
                       icon: const Icon(Icons.soup_kitchen),
-                      label: Text(
-                        roleName == 'Waiter'
-                            ? 'View Ready Orders'
-                            : 'View Kitchen',
-                      ),
+                      label: const Text('View Kitchen'),
                     ),
                   ),
                 if (roleName == 'Tenant Admin' ||

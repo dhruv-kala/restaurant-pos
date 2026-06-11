@@ -80,7 +80,7 @@ class OrdersApiService {
   );
 
   Future<List<Order>> getKitchenQueue() async {
-    final response = await _dio.get<Object?>(ApiEndpoints.kitchenQueue);
+    final response = await _dio.get<Object?>(ApiEndpoints.orderKitchenQueue);
     final data = response.data;
     if (data is! List<dynamic>) {
       throw const FormatException('Expected an array response.');

@@ -117,6 +117,7 @@ class KitchenQueueCard extends ConsumerWidget {
     OrderPriority.normal => null,
     OrderPriority.high => Colors.orange.shade200,
     OrderPriority.vip => Colors.red.shade200,
+    OrderPriority.urgent => Colors.red.shade400,
   };
 
   Color _statusColor(OrderStatus status) => switch (status) {

@@ -78,7 +78,7 @@ Backend:
 - PostgreSQL
 - Prisma
 - JWT access and rotating refresh tokens
-- Socket.IO later
+- Socket.IO for kitchen realtime updates
 - PM2 later
 - Nginx later
 - Ubuntu VPS
@@ -114,7 +114,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 16 are complete at the foundation level.
+Tasks 1 through 18 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -135,7 +135,17 @@ tenders, partial and split payments, bill balance reconciliation, append-only
 refunds, business-date reporting, authorization, shared client contracts, and
 restaurant-app payment screens.
 
-Task 17 is next: implement the Receipt & Invoice Module.
+Task 17 implemented immutable receipt and tax-invoice snapshots, outlet/day
+numbering, protected APIs, print auditing, PDF/thermal rendering, shared client
+contracts, and restaurant-app receipt screens.
+
+Task 18 completed the Kitchen Display System with first-class kitchen stations,
+menu-item station assignments, station-aware order-item routing, item actor
+auditing, preparation metrics, protected `/kitchen` APIs, tenant/outlet/station
+Socket.IO rooms, typed clients, Riverpod providers, and restaurant-app kitchen
+queue, station, and analytics screens.
+
+Task 19 is next: implement the Inventory Module.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

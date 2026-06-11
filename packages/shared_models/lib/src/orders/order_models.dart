@@ -43,7 +43,8 @@ enum OrderItemStatus {
 enum OrderPriority {
   normal('NORMAL'),
   high('HIGH'),
-  vip('VIP');
+  vip('VIP'),
+  urgent('URGENT');
 
   const OrderPriority(this.wireName);
   final String wireName;
@@ -68,6 +69,7 @@ class OrderItem {
     required this.updatedAt,
     this.variantId,
     this.kitchenCategoryId,
+    this.kitchenStationId,
     this.variantName,
     this.specialInstructions,
     this.firedAt,
@@ -76,6 +78,9 @@ class OrderItem {
     this.servedAt,
     this.estimatedPrepMinutes = 15,
     this.actualPrepMinutes,
+    this.startedByUserId,
+    this.readyByUserId,
+    this.servedByUserId,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
@@ -84,6 +89,7 @@ class OrderItem {
     menuItemId: json['menuItemId'] as String,
     variantId: json['variantId'] as String?,
     kitchenCategoryId: json['kitchenCategoryId'] as String?,
+    kitchenStationId: json['kitchenStationId'] as String?,
     itemName: json['itemName'] as String,
     variantName: json['variantName'] as String?,
     quantity: json['quantity'] as int,
@@ -112,6 +118,9 @@ class OrderItem {
     ),
     estimatedPrepMinutes: json['estimatedPrepMinutes'] as int? ?? 15,
     actualPrepMinutes: json['actualPrepMinutes'] as int?,
+    startedByUserId: json['startedByUserId'] as String?,
+    readyByUserId: json['readyByUserId'] as String?,
+    servedByUserId: json['servedByUserId'] as String?,
     createdAt: DateTimeConverter.fromJson(
       json['createdAt'],
       field: 'createdAt',
@@ -127,6 +136,7 @@ class OrderItem {
   final String menuItemId;
   final String? variantId;
   final String? kitchenCategoryId;
+  final String? kitchenStationId;
   final String itemName;
   final String? variantName;
   final int quantity;
@@ -143,6 +153,9 @@ class OrderItem {
   final DateTime? servedAt;
   final int estimatedPrepMinutes;
   final int? actualPrepMinutes;
+  final String? startedByUserId;
+  final String? readyByUserId;
+  final String? servedByUserId;
   final DateTime createdAt;
   final DateTime updatedAt;
 }

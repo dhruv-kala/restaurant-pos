@@ -44,6 +44,7 @@ type OrderItemDraft = {
   menuItemId: string;
   variantId?: string;
   kitchenCategoryId?: string;
+  kitchenStationId?: string;
   itemName: string;
   variantName?: string;
   quantity: number;
@@ -379,6 +380,12 @@ export class OrdersService {
         variants: { where: { deletedAt: null } },
         outletPrices: { where: { outletId, deletedAt: null } },
         kitchenCategory: true,
+        stationAssignments: {
+          where: { outletId, kitchenStation: { isActive: true, deletedAt: null } },
+          include: { kitchenStation: true },
+          orderBy: { kitchenStation: { displayOrder: 'asc' } },
+          take: 1,
+        },
       },
     });
     if (item === null) throw new BadRequestException('Menu item is unavailable');
@@ -403,6 +410,7 @@ export class OrdersService {
       menuItemId: item.id,
       variantId: variant?.id,
       kitchenCategoryId: kitchenCategory?.id,
+      kitchenStationId: item.stationAssignments[0]?.kitchenStationId,
       itemName: item.name,
       variantName: variant?.name,
       quantity: dto.quantity,

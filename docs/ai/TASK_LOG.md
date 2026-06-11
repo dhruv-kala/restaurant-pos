@@ -11,12 +11,12 @@ Last updated: 2026-06-11
 
 ## Current Summary
 
-Tasks 1 through 17 are complete at the requested foundation level.
+Tasks 1 through 18 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 18 is next: implement the Inventory Module.
+Task 19 is next: implement the Inventory Module.
 
 ## Task History
 
@@ -39,7 +39,60 @@ Task 18 is next: implement the Inventory Module.
 | 15. Implement Billing Module | COMPLETE | Immutable bill snapshots, GST/tax breakdowns, atomic numbering, audited lifecycle, split/merge, typed clients, Riverpod screens, tests, and documentation are implemented. |
 | 16. Implement Payment Module | COMPLETE | Idempotent payment aggregates, tender transactions, partial/split payments, refunds, bill reconciliation, typed clients, Riverpod screens, tests, and documentation are implemented. |
 | 17. Implement Receipt & Invoice Module | COMPLETE | Immutable receipt and tax-invoice snapshots, numbering, PDF/thermal rendering, print audit, protected APIs, shared clients, and Flutter screens are implemented. |
-| 18. Implement Inventory Module | NEXT | Not started. Define stock items, units, recipes, movements, outlet balances, purchasing, adjustments, and audit contracts before UI. |
+| 18. Complete Kitchen Display System | COMPLETE | First-class stations, station routing, item actor audits, preparation metrics, authenticated Socket.IO events, typed clients, Riverpod providers, and KDS screens are implemented. |
+| 19. Implement Inventory Module | NEXT | Not started. Define stock items, units, recipes, movements, outlet balances, purchasing, adjustments, and audit contracts before UI. |
+
+## Task 18 Completion
+
+Completed on 2026-06-11.
+
+Implemented:
+
+- Prisma `KitchenStation` and `KitchenStationAssignment` tenant/outlet models
+- `URGENT` order priority and station, timestamp, actor, and preparation fields
+  on order items
+- Deterministic primary-station snapshots from active menu-item assignments
+- Migration `20260612130000_complete_kitchen_display_system` with forced RLS,
+  tenant-aware constraints, and queue indexes
+- Protected station CRUD, queue, metrics, item-status, and order-status APIs
+- Kitchen read, write, and configuration role boundaries with outlet scope
+- Item and bulk-order transition actor auditing, including the legacy `/kds`
+  compatibility endpoints
+- Preparation elapsed/remaining timers, SLA states, and operational metrics
+- Authenticated Socket.IO `/kitchen` namespace with tenant, outlet, and station
+  rooms
+- `KitchenQueueUpdated`, `OrderCreated`, `OrderUpdated`, `OrderReady`,
+  `OrderServed`, `ItemReady`, and `ItemServed` events
+- Shared station, queue, priority, and metrics models
+- Typed kitchen HTTP and Socket.IO clients
+- Riverpod station, queue, metrics, and realtime refresh providers
+- Restaurant-app kitchen dashboard, queue, station, and analytics screens
+- API, database, and feature specification documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 77 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get`: passed
+- `flutter analyze` for restaurant-app: passed
+- `flutter test` for restaurant-app: passed, 9 tests
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed to PostgreSQL because prior tasks recorded
+  invalid local database credentials.
+- Multiple station assignments are supported in menu configuration, while each
+  order item snapshots one deterministic primary station. Fan-out tickets to
+  multiple simultaneous stations remain a future explicit workflow.
+- The legacy category-based `/kds` API remains for compatibility; new clients
+  use the first-class `/kitchen` API.
 
 ## Task 17 Completion
 
@@ -609,9 +662,9 @@ Known limitation:
 
 ## Next Task
 
-### Task 18: Implement Inventory Module
+### Task 19: Implement Inventory Module
 
-Do not start Task 18 unless explicitly requested. Define stock items, units,
+Do not start Task 19 unless explicitly requested. Define stock items, units,
 recipes, outlet balances, movement ledgers, purchasing, wastage, adjustments,
 authorization, and API contracts before Flutter screens.
 
@@ -623,7 +676,8 @@ authorization, and API contracts before Flutter screens.
   approved.
 - Define menu, pricing, tax, order, kitchen, payment, inventory, customer, and
   loyalty contracts in backend-first order.
-- Add Socket.IO after durable backend events and authorization exist.
+- Extend Socket.IO beyond kitchen workflows only after durable events and
+  authorization exist for each module.
 - Add SQLite sync after server command, idempotency, versioning, and change-feed
   contracts exist.
 - Add PM2, Nginx, Ubuntu deployment, backups, and operational documentation.

@@ -11,3 +11,4 @@ dependencies:
   dio: ^5.9.0
   restaurant_pos_core: any
   restaurant_pos_shared_models: any
+  socket_io_client: ^3.1.2

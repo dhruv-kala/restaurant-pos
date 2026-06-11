@@ -12,6 +12,7 @@ abstract final class ApiEndpoints {
   static const String reservations = '/reservations';
   static const String orders = '/orders';
   static const String kds = '/kds';
+  static const String kitchen = '/kitchen';
   static const String billing = '/billing';
   static const String payments = '/payments';
   static const String receipts = '/receipts';
@@ -60,7 +61,7 @@ abstract final class ApiEndpoints {
   static String orderTransfer(String id) => '${order(id)}/transfer';
   static String orderItems(String id) => '${order(id)}/items';
   static String orderItem(String id) => '/order-items/$id';
-  static const String kitchenQueue = '$orders/kitchen/queue';
+  static const String orderKitchenQueue = '$orders/kitchen/queue';
   static const String kdsQueue = '$kds/queue';
   static const String kdsActive = '$kds/active';
   static const String kdsReady = '$kds/ready';
@@ -72,6 +73,12 @@ abstract final class ApiEndpoints {
   static String kdsItemServed(String id) => '$kds/items/$id/served';
   static String kdsOrderStart(String id) => '$kds/orders/$id/start';
   static String kdsOrderReady(String id) => '$kds/orders/$id/ready';
+  static const String kitchenStations = '$kitchen/stations';
+  static const String kitchenQueue = '$kitchen/queue';
+  static const String kitchenMetrics = '$kitchen/metrics';
+  static String kitchenStation(String id) => '$kitchenStations/$id';
+  static String kitchenItemStatus(String id) => '$kitchen/items/$id/status';
+  static String kitchenOrderStatus(String id) => '$kitchen/orders/$id/status';
   static const String billingGenerate = '$billing/generate';
   static const String billingMerge = '$billing/merge';
   static String bill(String id) => '$billing/$id';

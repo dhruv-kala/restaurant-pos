@@ -20,10 +20,10 @@ import '../../features/dashboard/presentation/screens/super_admin_dashboard.dart
 import '../../features/dashboard/presentation/screens/waiter_dashboard.dart';
 import '../../features/orders/presentation/screens/create_order_screen.dart';
 import '../../features/orders/presentation/screens/edit_order_screen.dart';
-import '../../features/kds/presentation/screens/completed_orders_screen.dart';
-import '../../features/kds/presentation/screens/kitchen_dashboard_screen.dart';
-import '../../features/kds/presentation/screens/kitchen_queue_screen.dart';
-import '../../features/kds/presentation/screens/ready_orders_screen.dart';
+import '../../features/kitchen/presentation/screens/kitchen_analytics_screen.dart';
+import '../../features/kitchen/presentation/screens/kitchen_dashboard_screen.dart';
+import '../../features/kitchen/presentation/screens/kitchen_queue_screen.dart';
+import '../../features/kitchen/presentation/screens/station_screen.dart';
 import '../../features/orders/presentation/screens/order_details_screen.dart';
 import '../../features/orders/presentation/screens/order_list_screen.dart';
 import '../../features/payments/presentation/screens/payment_details_screen.dart';
@@ -49,10 +49,10 @@ abstract final class AppRoutes {
   static const customerDashboard = '/dashboard/customer';
   static const orders = '/orders';
   static const createOrder = '/orders/create';
-  static const kds = '/kds';
-  static const kitchenQueue = '/kds/queue';
-  static const readyOrders = '/kds/ready';
-  static const completedOrders = '/kds/completed';
+  static const kds = '/kitchen';
+  static const kitchenQueue = '/kitchen/queue';
+  static const readyOrders = '/kitchen/queue';
+  static const completedOrders = '/kitchen/analytics';
   static const billing = '/billing';
   static const mergeBills = '/billing/merge';
   static const payments = '/payments';
@@ -103,11 +103,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         }
       }
       if (location.startsWith(AppRoutes.kds)) {
-        if (role == UserRole.customer || role == UserRole.cashier) {
+        if (role == UserRole.customer) {
           return roleRoute;
-        }
-        if (role == UserRole.waiter && location != AppRoutes.readyOrders) {
-          return AppRoutes.readyOrders;
         }
       }
       if (location.startsWith(AppRoutes.billing)) {
@@ -216,24 +213,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: <RouteBase>[
           GoRoute(
             path: 'queue',
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Kitchen Queue')),
-              body: const KdsQueueScreen(),
-            ),
+            builder: (context, state) =>
+                const Scaffold(body: SafeArea(child: KitchenQueueScreen())),
           ),
           GoRoute(
-            path: 'ready',
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Ready Orders')),
-              body: const ReadyOrdersScreen(),
-            ),
+            path: 'stations',
+            builder: (context, state) => const StationScreen(),
           ),
           GoRoute(
-            path: 'completed',
-            builder: (context, state) => Scaffold(
-              appBar: AppBar(title: const Text('Completed Orders')),
-              body: const CompletedOrdersScreen(),
-            ),
+            path: 'analytics',
+            builder: (context, state) => const KitchenAnalyticsScreen(),
           ),
         ],
       ),

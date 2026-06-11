@@ -88,6 +88,7 @@ export class KdsService {
   async startItem(id: string, dto: StartItemDto, user: AuthenticatedUser) {
     return this.updateItem(id, OrderItemStatus.PREPARING, user, (now, item) => ({
       startedAt: item.startedAt ?? now,
+      startedBy: { connect: { id: user.id } },
       estimatedPrepMinutes: dto.estimatedPrepMinutes ?? item.estimatedPrepMinutes,
     }));
   }
@@ -95,6 +96,7 @@ export class KdsService {
   readyItem(id: string, user: AuthenticatedUser) {
     return this.updateItem(id, OrderItemStatus.READY, user, (now, item) => ({
       readyAt: now,
+      readiedBy: { connect: { id: user.id } },
       actualPrepMinutes: this.durationMinutes(item.startedAt, now),
     }));
   }
@@ -102,6 +104,7 @@ export class KdsService {
   servedItem(id: string, user: AuthenticatedUser) {
     return this.updateItem(id, OrderItemStatus.SERVED, user, (now) => ({
       servedAt: now,
+      servedBy: { connect: { id: user.id } },
     }));
   }
 
@@ -283,6 +286,7 @@ export class KdsService {
           data: {
             status,
             startedAt: now,
+            startedByUserId: user.id,
             version: { increment: 1 },
           },
         });
@@ -298,6 +302,7 @@ export class KdsService {
             data: {
               status,
               readyAt: now,
+              readyByUserId: user.id,
               actualPrepMinutes: this.durationMinutes(item.startedAt, now),
               version: { increment: 1 },
             },

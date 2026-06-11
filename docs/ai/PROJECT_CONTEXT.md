@@ -122,10 +122,10 @@ Core technologies:
 Implemented backend capabilities:
 
 - JWT access and rotating refresh authentication
+- Socket.IO kitchen queue and order-status realtime updates
 
 Planned later capabilities:
 
-- Socket.IO realtime updates
 - PM2 process management
 - Nginx reverse proxy and static hosting
 
@@ -293,6 +293,16 @@ The repository currently contains:
   invoice numbering, append-only print audit, PDF generation, and forced RLS
 - Shared receipt models and API client plus Riverpod receipt history, detail,
   invoice preview, mock thermal printing, and PDF download flows
+- First-class kitchen stations and menu-item station assignments with
+  tenant/outlet ownership and forced RLS
+- Station-aware order-item routing snapshots, preparation timers, transition
+  actor auditing, and kitchen analytics foundations
+- Protected `/kitchen` station, queue, metrics, item-status, and order-status
+  APIs
+- Socket.IO `/kitchen` namespace with tenant, outlet, and station rooms and
+  authenticated realtime events
+- Shared kitchen models, typed HTTP/socket clients, Riverpod providers, and
+  restaurant-app queue, station, and analytics screens
 
 ## Authoritative References
 

@@ -7,6 +7,7 @@ export class OrderItemResponseDto {
   @ApiProperty() menuItemId!: string;
   @ApiPropertyOptional({ nullable: true }) variantId!: string | null;
   @ApiPropertyOptional({ nullable: true }) kitchenCategoryId!: string | null;
+  @ApiPropertyOptional({ nullable: true }) kitchenStationId!: string | null;
   @ApiProperty() itemName!: string;
   @ApiPropertyOptional({ nullable: true }) variantName!: string | null;
   @ApiProperty() quantity!: number;
@@ -23,6 +24,9 @@ export class OrderItemResponseDto {
   @ApiPropertyOptional({ nullable: true }) servedAt!: Date | null;
   @ApiProperty() estimatedPrepMinutes!: number;
   @ApiPropertyOptional({ nullable: true }) actualPrepMinutes!: number | null;
+  @ApiPropertyOptional({ nullable: true }) startedByUserId!: string | null;
+  @ApiPropertyOptional({ nullable: true }) readyByUserId!: string | null;
+  @ApiPropertyOptional({ nullable: true }) servedByUserId!: string | null;
   @ApiProperty() createdAt!: Date;
   @ApiProperty() updatedAt!: Date;
 }
