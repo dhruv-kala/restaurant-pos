@@ -385,6 +385,7 @@ export class BillingService {
         outletId: input.outletId,
         orderId: input.orderId,
         billNumber,
+        businessDate: this.businessDate(),
         currencyCode: input.currencyCode,
         generatedByUserId: input.generatedByUserId,
         billSource: input.billSource,
@@ -614,8 +615,7 @@ export class BillingService {
     tenantId: string,
     outletId: string,
   ): Promise<string> {
-    const now = new Date();
-    const businessDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const businessDate = this.businessDate();
     const counter = await tx.billNumberCounter.upsert({
       where: { tenantId_outletId_businessDate: { tenantId, outletId, businessDate } },
       create: { tenantId, outletId, businessDate, lastNumber: 1 },
@@ -625,6 +625,11 @@ export class BillingService {
     return `BILL-${businessDate.toISOString().slice(0, 10).replaceAll('-', '')}-${counter.lastNumber
       .toString()
       .padStart(5, '0')}`;
+  }
+
+  private businessDate(): Date {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   }
 
   private assertEditable(bill: BillRecord): void {

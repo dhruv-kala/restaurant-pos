@@ -305,6 +305,14 @@ enum CustomerSource {
   @@map("customer_source")
 }
 
+enum ReportExportFormat {
+  PDF
+  EXCEL
+  CSV
+
+  @@map("report_export_format")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -375,6 +383,7 @@ model Tenant {
   customerNotes               CustomerNote[]
   customerVisits              CustomerVisit[]
   customerStats               CustomerStats[]
+  reportGenerationAudits      ReportGenerationAudit[]
 
   @@index([status])
   @@index([deletedAt])
@@ -403,37 +412,38 @@ model Outlet {
   allowNegativeStock Boolean                     @default(false) @map("allow_negative_stock")
   consumptionTrigger InventoryConsumptionTrigger @default(COMPLETED) @map("consumption_trigger")
 
-  tenant                Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  membershipAssignments MembershipOutlet[]
-  menuPrices            OutletMenuPrice[]
-  tableSections         TableSection[]
-  diningTables          DiningTable[]
-  tableReservations     TableReservation[]
-  mergedTables          MergedTable[]
-  orders                Order[]
-  orderCounters         OrderNumberCounter[]
-  kitchenCategories     KitchenCategory[]
-  kitchenStations       KitchenStation[]
-  stationAssignments    KitchenStationAssignment[]
-  bills                 Bill[]
-  billCounters          BillNumberCounter[]
-  payments              Payment[]
-  paymentCounters       PaymentNumberCounter[]
-  receipts              Receipt[]
-  receiptPrintLogs      ReceiptPrintLog[]
-  receiptCounters       ReceiptNumberCounter[]
-  invoiceCounters       InvoiceNumberCounter[]
-  inventoryStocks       InventoryStock[]
-  inventoryBatches      InventoryBatch[]
-  stockTransactions     StockTransaction[]
-  purchaseOrders        PurchaseOrder[]
-  purchaseOrderItems    PurchaseOrderItem[]
-  purchaseOrderCounters PurchaseOrderNumberCounter[]
-  inventoryAlerts       InventoryAlert[]
-  inventoryConsumptions InventoryConsumption[]
-  inventoryWastages     InventoryWastage[]
-  customerVisits        CustomerVisit[]
-  favoriteCustomerStats CustomerStats[]              @relation("CustomerFavoriteOutlet")
+  tenant                 Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  membershipAssignments  MembershipOutlet[]
+  menuPrices             OutletMenuPrice[]
+  tableSections          TableSection[]
+  diningTables           DiningTable[]
+  tableReservations      TableReservation[]
+  mergedTables           MergedTable[]
+  orders                 Order[]
+  orderCounters          OrderNumberCounter[]
+  kitchenCategories      KitchenCategory[]
+  kitchenStations        KitchenStation[]
+  stationAssignments     KitchenStationAssignment[]
+  bills                  Bill[]
+  billCounters           BillNumberCounter[]
+  payments               Payment[]
+  paymentCounters        PaymentNumberCounter[]
+  receipts               Receipt[]
+  receiptPrintLogs       ReceiptPrintLog[]
+  receiptCounters        ReceiptNumberCounter[]
+  invoiceCounters        InvoiceNumberCounter[]
+  inventoryStocks        InventoryStock[]
+  inventoryBatches       InventoryBatch[]
+  stockTransactions      StockTransaction[]
+  purchaseOrders         PurchaseOrder[]
+  purchaseOrderItems     PurchaseOrderItem[]
+  purchaseOrderCounters  PurchaseOrderNumberCounter[]
+  inventoryAlerts        InventoryAlert[]
+  inventoryConsumptions  InventoryConsumption[]
+  inventoryWastages      InventoryWastage[]
+  customerVisits         CustomerVisit[]
+  favoriteCustomerStats  CustomerStats[]              @relation("CustomerFavoriteOutlet")
+  reportGenerationAudits ReportGenerationAudit[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -457,33 +467,34 @@ model UserAccount {
 
   memberships                TenantMembership[]
   refreshTokens              RefreshToken[]
-  waitedOrders               Order[]                @relation("OrderWaiter")
-  generatedBills             Bill[]                 @relation("BillGeneratedBy")
-  voidedBills                Bill[]                 @relation("BillVoidedBy")
-  createdPayments            Payment[]              @relation("PaymentCreatedBy")
-  paidPayments               Payment[]              @relation("PaymentPaidBy")
-  paymentRefunds             PaymentRefund[]        @relation("PaymentRefundedBy")
-  generatedReceipts          Receipt[]              @relation("ReceiptGeneratedBy")
-  receiptPrintLogs           ReceiptPrintLog[]      @relation("ReceiptPrintedBy")
-  startedKitchenItems        OrderItem[]            @relation("KitchenItemStartedBy")
-  readiedKitchenItems        OrderItem[]            @relation("KitchenItemReadiedBy")
-  servedKitchenItems         OrderItem[]            @relation("KitchenItemServedBy")
-  createdIngredients         Ingredient[]           @relation("IngredientCreatedBy")
-  updatedIngredients         Ingredient[]           @relation("IngredientUpdatedBy")
-  performedStockTransactions StockTransaction[]     @relation("StockTransactionPerformedBy")
-  createdVendors             Vendor[]               @relation("VendorCreatedBy")
-  updatedVendors             Vendor[]               @relation("VendorUpdatedBy")
-  createdPurchaseOrders      PurchaseOrder[]        @relation("PurchaseOrderCreatedBy")
-  updatedPurchaseOrders      PurchaseOrder[]        @relation("PurchaseOrderUpdatedBy")
-  receivedPurchaseOrders     PurchaseOrder[]        @relation("PurchaseOrderReceivedBy")
-  resolvedInventoryAlerts    InventoryAlert[]       @relation("InventoryAlertResolvedBy")
-  createdRecipes             Recipe[]               @relation("RecipeCreatedBy")
-  updatedRecipes             Recipe[]               @relation("RecipeUpdatedBy")
-  createdProductionRecipes   ProductionRecipe[]     @relation("ProductionRecipeCreatedBy")
-  updatedProductionRecipes   ProductionRecipe[]     @relation("ProductionRecipeUpdatedBy")
-  triggeredConsumptions      InventoryConsumption[] @relation("ConsumptionTriggeredBy")
-  recordedWastages           InventoryWastage[]     @relation("WastageRecordedBy")
-  customerNotes              CustomerNote[]         @relation("CustomerNoteCreatedBy")
+  waitedOrders               Order[]                 @relation("OrderWaiter")
+  generatedBills             Bill[]                  @relation("BillGeneratedBy")
+  voidedBills                Bill[]                  @relation("BillVoidedBy")
+  createdPayments            Payment[]               @relation("PaymentCreatedBy")
+  paidPayments               Payment[]               @relation("PaymentPaidBy")
+  paymentRefunds             PaymentRefund[]         @relation("PaymentRefundedBy")
+  generatedReceipts          Receipt[]               @relation("ReceiptGeneratedBy")
+  receiptPrintLogs           ReceiptPrintLog[]       @relation("ReceiptPrintedBy")
+  startedKitchenItems        OrderItem[]             @relation("KitchenItemStartedBy")
+  readiedKitchenItems        OrderItem[]             @relation("KitchenItemReadiedBy")
+  servedKitchenItems         OrderItem[]             @relation("KitchenItemServedBy")
+  createdIngredients         Ingredient[]            @relation("IngredientCreatedBy")
+  updatedIngredients         Ingredient[]            @relation("IngredientUpdatedBy")
+  performedStockTransactions StockTransaction[]      @relation("StockTransactionPerformedBy")
+  createdVendors             Vendor[]                @relation("VendorCreatedBy")
+  updatedVendors             Vendor[]                @relation("VendorUpdatedBy")
+  createdPurchaseOrders      PurchaseOrder[]         @relation("PurchaseOrderCreatedBy")
+  updatedPurchaseOrders      PurchaseOrder[]         @relation("PurchaseOrderUpdatedBy")
+  receivedPurchaseOrders     PurchaseOrder[]         @relation("PurchaseOrderReceivedBy")
+  resolvedInventoryAlerts    InventoryAlert[]        @relation("InventoryAlertResolvedBy")
+  createdRecipes             Recipe[]                @relation("RecipeCreatedBy")
+  updatedRecipes             Recipe[]                @relation("RecipeUpdatedBy")
+  createdProductionRecipes   ProductionRecipe[]      @relation("ProductionRecipeCreatedBy")
+  updatedProductionRecipes   ProductionRecipe[]      @relation("ProductionRecipeUpdatedBy")
+  triggeredConsumptions      InventoryConsumption[]  @relation("ConsumptionTriggeredBy")
+  recordedWastages           InventoryWastage[]      @relation("WastageRecordedBy")
+  customerNotes              CustomerNote[]          @relation("CustomerNoteCreatedBy")
+  generatedReports           ReportGenerationAudit[] @relation("ReportGeneratedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -866,6 +877,7 @@ model Order {
   tableId                 String?       @map("table_id") @db.Uuid
   customerId              String?       @map("customer_id") @db.Uuid
   orderNumber             String        @map("order_number") @db.VarChar(32)
+  businessDate            DateTime      @map("business_date") @db.Date
   orderType               OrderType     @map("order_type")
   status                  OrderStatus   @default(PENDING)
   priority                OrderPriority @default(NORMAL)
@@ -898,7 +910,7 @@ model Order {
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, orderNumber])
-  @@index([tenantId, outletId, status, createdAt])
+  @@index([tenantId, businessDate, outletId, status], map: "orders_reporting_idx")
   @@index([tenantId, outletId, tableId, status])
   @@index([tenantId, outletId, waiterId, createdAt])
   @@index([tenantId, customerId, createdAt])
@@ -1050,6 +1062,7 @@ model Bill {
   outletId              String            @map("outlet_id") @db.Uuid
   orderId               String            @map("order_id") @db.Uuid
   billNumber            String            @map("bill_number") @db.VarChar(32)
+  businessDate          DateTime          @map("business_date") @db.Date
   invoiceNumber         String?           @map("invoice_number") @db.VarChar(64)
   status                BillStatus        @default(GENERATED)
   paymentStatus         BillPaymentStatus @default(UNPAID) @map("payment_status")
@@ -1098,7 +1111,7 @@ model Bill {
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, billNumber])
   @@unique([tenantId, outletId, invoiceNumber])
-  @@index([tenantId, outletId, status, generatedAt])
+  @@index([tenantId, businessDate, outletId, status], map: "bills_reporting_idx")
   @@index([tenantId, orderId, status])
   @@map("bills")
 }
@@ -1215,6 +1228,7 @@ model Payment {
   @@unique([tenantId, outletId, paymentNumber])
   @@unique([tenantId, outletId, idempotencyKey])
   @@index([tenantId, outletId, status, businessDate])
+  @@index([tenantId, businessDate, outletId, status], map: "payments_reporting_idx")
   @@index([tenantId, billId, status])
   @@index([tenantId, referenceNumber])
   @@map("payments")
@@ -1797,6 +1811,7 @@ model InventoryConsumption {
   costAtConsumption Int                         @map("cost_at_consumption_minor")
   trigger           InventoryConsumptionTrigger
   triggeredByUserId String                      @map("triggered_by_user_id") @db.Uuid
+  businessDate      DateTime                    @map("business_date") @db.Date
   consumedAt        DateTime                    @default(now()) @map("consumed_at") @db.Timestamptz(3)
 
   tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
@@ -1810,7 +1825,7 @@ model InventoryConsumption {
 
   @@unique([tenantId, id])
   @@unique([tenantId, orderItemId, ingredientId])
-  @@index([tenantId, outletId, consumedAt])
+  @@index([tenantId, businessDate, outletId], map: "inventory_consumptions_reporting_idx")
   @@index([tenantId, orderId])
   @@map("inventory_consumptions")
 }
@@ -1826,6 +1841,7 @@ model InventoryWastage {
   notes            String?       @db.VarChar(500)
   costAtWastage    Int           @map("cost_at_wastage_minor")
   recordedByUserId String        @map("recorded_by_user_id") @db.Uuid
+  businessDate     DateTime      @map("business_date") @db.Date
   recordedAt       DateTime      @default(now()) @map("recorded_at") @db.Timestamptz(3)
 
   tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
@@ -1835,7 +1851,7 @@ model InventoryWastage {
   recordedBy UserAccount   @relation("WastageRecordedBy", fields: [recordedByUserId], references: [id], onDelete: Restrict)
 
   @@unique([tenantId, id])
-  @@index([tenantId, outletId, ingredientId, recordedAt])
+  @@index([tenantId, businessDate, outletId, ingredientId], map: "inventory_wastages_reporting_idx")
   @@map("inventory_wastages")
 }
 
@@ -1923,16 +1939,17 @@ model CustomerNote {
 }
 
 model CustomerVisit {
-  id         String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
-  tenantId   String   @map("tenant_id") @db.Uuid
-  outletId   String   @map("outlet_id") @db.Uuid
-  customerId String   @map("customer_id") @db.Uuid
-  orderId    String?  @map("order_id") @db.Uuid
-  billId     String?  @map("bill_id") @db.Uuid
-  paymentId  String?  @map("payment_id") @db.Uuid
-  visitDate  DateTime @map("visit_date") @db.Timestamptz(3)
-  totalSpend Int      @map("total_spend_minor")
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  id           String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  outletId     String   @map("outlet_id") @db.Uuid
+  customerId   String   @map("customer_id") @db.Uuid
+  orderId      String?  @map("order_id") @db.Uuid
+  billId       String?  @map("bill_id") @db.Uuid
+  paymentId    String?  @map("payment_id") @db.Uuid
+  businessDate DateTime @map("business_date") @db.Date
+  visitDate    DateTime @map("visit_date") @db.Timestamptz(3)
+  totalSpend   Int      @map("total_spend_minor")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   outlet   Outlet   @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
@@ -1943,9 +1960,29 @@ model CustomerVisit {
 
   @@unique([tenantId, id])
   @@unique([tenantId, paymentId])
-  @@index([tenantId, customerId, visitDate])
-  @@index([tenantId, outletId, visitDate])
+  @@index([tenantId, businessDate, customerId], map: "customer_visits_customer_reporting_idx")
+  @@index([tenantId, businessDate, outletId], map: "customer_visits_outlet_reporting_idx")
   @@map("customer_visits")
+}
+
+model ReportGenerationAudit {
+  id                String              @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId          String?             @map("tenant_id") @db.Uuid
+  outletId          String?             @map("outlet_id") @db.Uuid
+  reportType        String              @map("report_type") @db.VarChar(100)
+  exportFormat      ReportExportFormat? @map("export_format")
+  filters           Json                @db.JsonB
+  generatedByUserId String              @map("generated_by_user_id") @db.Uuid
+  generatedAt       DateTime            @default(now()) @map("generated_at") @db.Timestamptz(3)
+
+  tenant      Tenant?     @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet      Outlet?     @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  generatedBy UserAccount @relation("ReportGeneratedBy", fields: [generatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "report_generation_audits_tenant_id_id_key")
+  @@index([tenantId, generatedAt], map: "report_generation_audits_tenant_generated_idx")
+  @@index([tenantId, outletId, reportType, generatedAt], map: "report_generation_audits_catalog_idx")
+  @@map("report_generation_audits")
 }
 
 model CustomerStats {

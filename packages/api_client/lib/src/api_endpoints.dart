@@ -21,6 +21,8 @@ abstract final class ApiEndpoints {
   static const String productionRecipes = '/production-recipes';
   static const String consumption = '/consumption';
   static const String customers = '/customers';
+  static const String reports = '/reports';
+  static const String dashboard = '/dashboard';
   static const String inventoryWastage = '/inventory/wastage';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
@@ -138,4 +140,17 @@ abstract final class ApiEndpoints {
   static String customerPayments(String id) => '${customer(id)}/payments';
   static String customerVisits(String id) => '${customer(id)}/visits';
   static String customerStats(String id) => '${customer(id)}/stats';
+  static const String salesSummaryReport = '$reports/sales/summary';
+  static const String dailySalesReport = '$reports/sales/daily';
+  static const String monthlySalesReport = '$reports/sales/monthly';
+  static const String yearlySalesReport = '$reports/sales/yearly';
+  static const String itemSalesReport = '$reports/sales/items';
+  static const String categorySalesReport = '$reports/sales/categories';
+  static const String gstSummaryReport = '$reports/gst/summary';
+  static const String paymentSummaryReport = '$reports/payments/summary';
+  static const String inventoryValueReport = '$reports/inventory/value';
+  static const String customerTopReport = '$reports/customers/top';
+  static const String outletPerformanceReport = '$reports/outlets/performance';
+  static const String kitchenPerformanceReport = '$reports/kitchen/performance';
+  static const String staffPerformanceReport = '$reports/staff/performance';
 }

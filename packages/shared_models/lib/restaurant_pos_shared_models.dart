@@ -19,4 +19,5 @@ export 'src/orders/order_models.dart';
 export 'src/payments/payment_models.dart';
 export 'src/receipts/receipt_models.dart';
 export 'src/recipes/recipe_models.dart';
+export 'src/reports/report_models.dart';
 export 'src/tables/table_models.dart';

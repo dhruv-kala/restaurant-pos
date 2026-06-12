@@ -320,6 +320,9 @@ The repository currently contains:
   lookup, addresses, consent flags, append-only notes and payment visits
 - Rebuilt customer spend/repeat/favorite-outlet stats, customer-linked order
   history, typed clients, admin CRM screens, and restaurant customer lookup
+- Business-date-driven sales, GST, payment, outlet, customer, inventory,
+  kitchen, staff, platform, and dashboard reporting with append-only generation
+  audits, typed clients, Riverpod providers, and admin report screens
 
 ## Authoritative References
 

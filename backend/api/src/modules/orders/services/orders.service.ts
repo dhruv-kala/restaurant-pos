@@ -106,6 +106,7 @@ export class OrdersService {
           tableId: dto.tableId,
           customerId: dto.customerId,
           orderNumber,
+          businessDate: this.businessDate(),
           orderType: dto.orderType,
           priority: dto.priority,
           waiterId: dto.waiterId ?? (user.outletId === outlet.id ? user.id : undefined),
@@ -495,10 +496,7 @@ export class OrdersService {
     tenantId: string,
     outletId: string,
   ): Promise<string> {
-    const now = new Date();
-    const businessDate = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-    );
+    const businessDate = this.businessDate();
     const counter = await tx.orderNumberCounter.upsert({
       where: { tenantId_outletId_businessDate: { tenantId, outletId, businessDate } },
       create: { tenantId, outletId, businessDate, lastNumber: 1 },
@@ -507,6 +505,11 @@ export class OrdersService {
     });
     const date = businessDate.toISOString().slice(0, 10).replaceAll('-', '');
     return `ORD-${date}-${counter.lastNumber.toString().padStart(5, '0')}`;
+  }
+
+  private businessDate(): Date {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   }
 
   private assertTypeRequirements(type: OrderType, tableId?: string, customerId?: string): void {

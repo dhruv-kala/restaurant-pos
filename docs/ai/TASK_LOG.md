@@ -11,12 +11,12 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 21 are complete at the requested foundation level.
+Tasks 1 through 22 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 22 is next: implement the Reports Module.
+Task 23 is next: implement the Employee & Staff Management Module.
 
 ## Task History
 
@@ -43,7 +43,59 @@ Task 22 is next: implement the Reports Module.
 | 19. Implement Inventory Module | COMPLETE | Tenant inventory masters, outlet balances, append-only movements, adjustments, transfers, purchasing, batches, alerts, valuation, typed clients, and admin screens are implemented. |
 | 20. Implement Recipe & Stock Consumption Engine | COMPLETE | Recipes, production recipes, costing, profitability, idempotent order consumption, wastage, typed clients, and admin screens are implemented. |
 | 21. Implement Customer Management Module | COMPLETE | Customer profiles, duplicate-safe lookup, addresses, notes, payment visits, stats/history, typed clients, admin screens, and restaurant lookup are implemented. |
-| 22. Implement Reports Module | NEXT | Not started. Define report ownership, business dates, metrics, filters, exports, and authorization before UI. |
+| 22. Implement Reports Module | COMPLETE | Business-date reports, dashboard KPIs, tenant/outlet authorization, audit history, export foundation, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
+| 23. Implement Employee & Staff Management Module | NEXT | Not started. Define employee identity, outlet assignment, roles, shifts, attendance, and payroll boundaries before UI. |
+
+## Task 22 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Stored business dates on orders, bills, customer visits, inventory
+  consumption, and inventory wastage, with timezone/link-aware migration
+  backfills
+- Reporting indexes for tenant, business date, outlet, status, customer, and
+  inventory aggregation paths
+- Append-only report generation audits with filters, report type, export
+  format, generator, scope, timestamp, and forced RLS
+- Sales, GST, payment, outlet, customer, inventory, kitchen, staff, platform,
+  and dashboard report APIs
+- `PDF`, `EXCEL`, and `CSV` export request validation and audited foundation
+  without prematurely adding a renderer or storage dependency
+- Role and trusted tenant/outlet scope enforcement, including waiter-own and
+  kitchen-only performance boundaries
+- Shared Dart report models, chart-neutral series points, typed API service,
+  Riverpod providers, and nine admin report screens
+- API catalog, reporting architecture, business-date, security, dashboard, and
+  future BI documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 117 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get` for admin: passed
+- `flutter analyze` for admin: passed
+- `flutter test` for admin: passed, 1 test
+- `flutter build web` for admin: passed
+- `git diff --check`: passed
+
+Known limitations:
+
+- Migration `20260613020000_add_reports_analytics` was not deployed because
+  existing project history records invalid local PostgreSQL credentials.
+- Runtime business-date creation retains the existing UTC calendar-day rule;
+  Task 23 or a later shift task must centralize outlet cutoff/open-shift rules.
+- Export rendering, storage, asynchronous delivery, scheduled reports,
+  materialized fact views, and a custom report builder remain future work.
+- Item profitability uses current menu cost when a historical cost snapshot is
+  unavailable; financial sales and tax amounts remain immutable snapshots.
 
 ## Task 21 Completion
 
@@ -838,11 +890,11 @@ Known limitation:
 
 ## Next Task
 
-### Task 22: Implement Reports Module
+### Task 23: Implement Employee & Staff Management Module
 
-Do not start Task 22 unless explicitly requested. Define report ownership,
-business-date semantics, metrics, filters, exports, authorization, and API
-contracts before Flutter screens.
+Do not start Task 23 unless explicitly requested. Define employee identity,
+tenant/outlet assignment, authorization ownership, shifts, attendance, and
+payroll boundaries before Flutter screens.
 
 ## Future Work
 

@@ -5,6 +5,7 @@ import 'features/menu/presentation/screens/menu_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
 import 'features/customers/presentation/screens/customer_dashboard.dart';
 import 'features/recipes/presentation/screens/recipe_dashboard.dart';
+import 'features/reports/presentation/screens/reports_dashboard.dart';
 import 'features/tables/presentation/screens/table_layout_screen.dart';
 
 class AdminApp extends StatelessWidget {
@@ -42,6 +43,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           InventoryDashboard(),
           RecipeDashboard(),
           CustomerDashboard(),
+          ReportsDashboard(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -62,6 +64,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
           NavigationDestination(icon: Icon(Icons.menu_book), label: 'Recipes'),
           NavigationDestination(icon: Icon(Icons.people), label: 'Customers'),
+          NavigationDestination(icon: Icon(Icons.analytics), label: 'Reports'),
         ],
       ),
     );

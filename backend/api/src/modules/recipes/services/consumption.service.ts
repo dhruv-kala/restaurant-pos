@@ -132,6 +132,7 @@ export class ConsumptionService {
             costAtConsumption: cost,
             trigger,
             triggeredByUserId: userId,
+            businessDate: order.businessDate,
           },
         });
         await tx.inventoryStock.update({
@@ -279,6 +280,7 @@ export class ConsumptionService {
           notes: dto.notes?.trim(),
           costAtWastage: Math.round(quantity.toNumber() * ingredient.costPrice),
           recordedByUserId: user.id,
+          businessDate: this.businessDate(),
         },
       });
       await tx.inventoryStock.update({
@@ -393,6 +395,11 @@ export class ConsumptionService {
 
   private lockStock(tx: Prisma.TransactionClient, stockId: string) {
     return tx.$queryRaw`SELECT "id" FROM "inventory_stocks" WHERE "id" = ${stockId}::uuid FOR UPDATE`;
+  }
+
+  private businessDate(): Date {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   }
 
   private mapConsumption(

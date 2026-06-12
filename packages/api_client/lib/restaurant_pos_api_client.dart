@@ -17,6 +17,7 @@ export 'src/services/outlet_api_service.dart';
 export 'src/services/payments_api_service.dart';
 export 'src/services/receipts_api_service.dart';
 export 'src/services/recipes_api_service.dart';
+export 'src/services/reports_api_service.dart';
 export 'src/services/tables_api_service.dart';
 export 'src/services/tenant_api_service.dart';
 export 'src/socket_service.dart';

@@ -31,6 +31,7 @@ export class CustomerStatsService {
         orderId: payment.bill.orderId,
         billId: payment.billId,
         paymentId: payment.id,
+        businessDate: payment.businessDate,
         visitDate: payment.paidAt ?? new Date(),
         totalSpend: payment.paidAmount,
       },
