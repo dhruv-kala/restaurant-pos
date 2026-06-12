@@ -11,7 +11,7 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 23 are complete at the requested foundation level.
+Tasks 1 through 23.5 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
@@ -45,7 +45,53 @@ Task 24 is next: implement the RBAC & User Management Module.
 | 21. Implement Customer Management Module | COMPLETE | Customer profiles, duplicate-safe lookup, addresses, notes, payment visits, stats/history, typed clients, admin screens, and restaurant lookup are implemented. |
 | 22. Implement Reports Module | COMPLETE | Business-date reports, dashboard KPIs, tenant/outlet authorization, audit history, export foundation, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
 | 23. Implement Employee & Staff Management Module | COMPLETE | User-linked profiles, shifts, assignments, attendance, performance projections, events, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
+| 23.5. Implement Master Data & Database Seed Framework | COMPLETE | Global locale/settings/module/role-template masters, 184 permissions, role mappings, environment-aware idempotent seeds, and a complete development demo restaurant dataset are implemented. |
 | 24. Implement RBAC & User Management Module | NEXT | Not started. Define user provisioning, invitations, memberships, role/permission administration, outlet access, and audit boundaries before UI. |
+
+## Task 23.5 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Global country, currency, language, timezone, application-module,
+  system-setting, role-template, and template-permission tables
+- Migration `20260613100000_add_master_data_seed_framework`
+- 10 countries, 8 currencies, 8 languages, 8 timezones, 9 system role
+  templates, 184 granular permissions, and role-permission mappings
+- Published order, payment, inventory, kitchen, customer, business-date,
+  currency, timezone, tax, receipt, and loyalty settings
+- Numbered `001` through `020` transactional seed stages
+- Environment-aware `seed`, `seed:master`, and `seed:demo` commands
+- Production hard block for demo data and explicit staging opt-in
+- Demo Restaurant, Main Branch, five kitchen stations, seven users, tenant
+  roles and grants, memberships, and outlet assignments
+- 20 tables, four menu categories, seven menu items, station routing, eight
+  stocked ingredients, five recipes, and 20 customers with varied visit history
+- Master-data, seeding-strategy, and demo-data documentation
+
+Validation:
+
+- `npm.cmd run prisma:format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npx.cmd tsc -p prisma/tsconfig.seed.json`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 134 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- Production `npm.cmd run seed:demo`: correctly rejected before database access
+- `git diff --check`: passed
+- `npm.cmd run seed`, `npm.cmd run seed:master`, and `npm.cmd run seed:demo`
+  reached Prisma but failed with PostgreSQL `P1000` authentication errors
+
+Known limitation:
+
+- Existing project history records invalid local PostgreSQL credentials.
+  Database-backed seed execution requires a reachable database with all
+  committed migrations deployed. Runtime duplicate and foreign-key verification
+  could not be completed against the unavailable database; schema validation,
+  deterministic keys, transactional execution, and seed contract tests passed.
 
 ## Task 23 Completion
 

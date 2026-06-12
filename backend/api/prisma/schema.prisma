@@ -363,6 +363,115 @@ enum AttendanceStatus {
   @@map("attendance_status")
 }
 
+model Country {
+  id        String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  code      String   @unique @db.Citext
+  name      String   @db.VarChar(120)
+  isoCode   String   @unique @map("iso_code") @db.Char(3)
+  phoneCode String   @map("phone_code") @db.VarChar(8)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([isActive, name])
+  @@map("countries")
+}
+
+model Currency {
+  id            String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  code          String   @unique @db.Char(3)
+  name          String   @db.VarChar(120)
+  symbol        String   @db.VarChar(12)
+  decimalPlaces Int      @default(2) @map("decimal_places")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([isActive, name])
+  @@map("currencies")
+}
+
+model Language {
+  id        String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  code      String   @unique @db.VarChar(35)
+  name      String   @db.VarChar(120)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([isActive, name])
+  @@map("languages")
+}
+
+model Timezone {
+  id          String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  timezoneId  String   @unique @map("timezone_id") @db.VarChar(64)
+  displayName String   @map("display_name") @db.VarChar(120)
+  utcOffset   String   @map("utc_offset") @db.VarChar(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([displayName])
+  @@map("timezones")
+}
+
+model ApplicationModule {
+  id          String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  moduleKey   String   @unique @map("module_key") @db.Citext
+  name        String   @db.VarChar(120)
+  description String?  @db.VarChar(500)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([isActive, name])
+  @@map("application_modules")
+}
+
+model SystemSetting {
+  id          String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  settingKey  String   @unique @map("setting_key") @db.Citext
+  category    String   @db.VarChar(80)
+  value       Json     @db.JsonB
+  description String?  @db.VarChar(500)
+  isPublic    Boolean  @default(false) @map("is_public")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([category, isActive])
+  @@map("system_settings")
+}
+
+model SystemRoleTemplate {
+  id             String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  roleKey        String   @unique @map("role_key") @db.Citext
+  name           String   @db.VarChar(120)
+  description    String?  @db.VarChar(500)
+  isPlatformRole Boolean  @default(false) @map("is_platform_role")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  permissionAssignments SystemRolePermission[]
+
+  @@index([isActive, name])
+  @@map("system_role_templates")
+}
+
+model SystemRolePermission {
+  roleTemplateId String   @map("role_template_id") @db.Uuid
+  permissionId   String   @map("permission_id") @db.Uuid
+  grantedAt      DateTime @default(now()) @map("granted_at") @db.Timestamptz(3)
+
+  roleTemplate SystemRoleTemplate @relation(fields: [roleTemplateId], references: [id], onDelete: Cascade)
+  permission   Permission         @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleTemplateId, permissionId])
+  @@index([permissionId])
+  @@map("system_role_permissions")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -637,7 +746,8 @@ model Permission {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  roleAssignments RolePermission[]
+  roleAssignments       RolePermission[]
+  systemRoleAssignments SystemRolePermission[]
 
   @@index([module])
   @@map("permissions")

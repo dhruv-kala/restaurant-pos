@@ -31,8 +31,12 @@ describe('employee schema contract', () => {
   });
 
   it('enforces one attendance row and one performance row per business day', () => {
-    expect(schema).toContain('@@unique([tenantId, employeeId, attendanceDate])');
-    expect(schema).toContain('@@unique([tenantId, employeeId, businessDate])');
+    expect(schema).toMatch(
+      /@@unique\(\[tenantId, employeeId, attendanceDate\](?:,\s+map:\s+"[^"]+")?\)/,
+    );
+    expect(schema).toMatch(
+      /@@unique\(\[tenantId, employeeId, businessDate\](?:,\s+map:\s+"[^"]+")?\)/,
+    );
   });
 
   it('adds audit actors, reporting indexes, constraints, and forced RLS', () => {

@@ -1,212 +1,85 @@
-import { MembershipStatus, PrismaClient, UserStatus } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { PrismaClient } from '@prisma/client';
+import { buildSeedConfiguration } from './seeds/seed-configuration';
+import { createSeedContext, SeedStep } from './seeds/seed-context';
+import { seedCountries } from './seeds/001-countries.seed';
+import { seedCurrencies } from './seeds/002-currencies.seed';
+import { seedLanguages } from './seeds/003-languages.seed';
+import { seedTimezones } from './seeds/004-timezones.seed';
+import { seedRoles } from './seeds/005-roles.seed';
+import { seedPermissions } from './seeds/006-permissions.seed';
+import { seedRolePermissions } from './seeds/007-role-permissions.seed';
+import { seedOrderMaster } from './seeds/008-order-master.seed';
+import { seedPaymentMaster } from './seeds/009-payment-master.seed';
+import { seedInventoryMaster } from './seeds/010-inventory-master.seed';
+import { seedKitchenMaster } from './seeds/011-kitchen-master.seed';
+import { seedCustomerMaster } from './seeds/012-customer-master.seed';
+import { seedDemoTenant } from './seeds/013-demo-tenant.seed';
+import { seedDemoOutlet } from './seeds/014-demo-outlet.seed';
+import { seedDemoUsers } from './seeds/015-demo-users.seed';
+import { seedDemoTables } from './seeds/016-demo-tables.seed';
+import { seedDemoMenu } from './seeds/017-demo-menu.seed';
+import { seedDemoInventory } from './seeds/018-demo-inventory.seed';
+import { seedDemoRecipes } from './seeds/019-demo-recipes.seed';
+import { seedDemoCustomers } from './seeds/020-demo-customers.seed';
 
 const prisma = new PrismaClient();
 
-const permissions = [
-  ['tenants.read', 'tenants', 'View tenant settings'],
-  ['tenants.update', 'tenants', 'Update tenant settings'],
-  ['outlets.create', 'outlets', 'Create outlets'],
-  ['outlets.read', 'outlets', 'View outlets'],
-  ['outlets.update', 'outlets', 'Update outlets'],
-  ['outlets.archive', 'outlets', 'Archive outlets'],
-  ['users.invite', 'users', 'Invite tenant members'],
-  ['users.read', 'users', 'View tenant members'],
-  ['users.update', 'users', 'Update tenant members'],
-  ['users.revoke', 'users', 'Revoke tenant memberships'],
-  ['roles.create', 'roles', 'Create tenant roles'],
-  ['roles.read', 'roles', 'View roles and permissions'],
-  ['roles.update', 'roles', 'Update role permissions'],
-  ['roles.delete', 'roles', 'Archive tenant roles'],
-  ['menu.create', 'menu', 'Create menu categories and items'],
-  ['menu.read', 'menu', 'View menu categories and items'],
-  ['menu.update', 'menu', 'Update menu categories and items'],
-  ['menu.delete', 'menu', 'Archive menu categories and items'],
-  ['tables.create', 'tables', 'Create table sections and dining tables'],
-  ['tables.read', 'tables', 'View tables and reservations'],
-  ['tables.update', 'tables', 'Update tables and reservations'],
-  ['tables.delete', 'tables', 'Archive tables and reservations'],
-  ['orders.create', 'orders', 'Create restaurant orders'],
-  ['orders.read', 'orders', 'View restaurant orders'],
-  ['orders.update', 'orders', 'Update orders and order statuses'],
-  ['orders.cancel', 'orders', 'Cancel restaurant orders'],
-  ['kds.read', 'kds', 'View kitchen queues and stations'],
-  ['kds.update', 'kds', 'Advance kitchen preparation status'],
-  ['kds.configure', 'kds', 'Configure kitchen stations and routing'],
-  ['kitchen.read', 'kitchen', 'View station queues and kitchen metrics'],
-  ['kitchen.update', 'kitchen', 'Advance kitchen item and order status'],
-  ['kitchen.configure', 'kitchen', 'Configure kitchen stations and assignments'],
-  ['billing.create', 'billing', 'Generate and update bills'],
-  ['billing.read', 'billing', 'View and print bills'],
-  ['billing.void', 'billing', 'Void unsettled bills'],
-  ['billing.split', 'billing', 'Split unsettled bills'],
-  ['billing.merge', 'billing', 'Merge compatible unsettled bills'],
-  ['payments.create', 'payments', 'Create and complete payments'],
-  ['payments.read', 'payments', 'View payment and refund history'],
-  ['payments.update', 'payments', 'Update pending payment status'],
-  ['payments.refund', 'payments', 'Create payment refunds'],
-  ['receipts.create', 'receipts', 'Generate customer receipts and tax invoices'],
-  ['receipts.read', 'receipts', 'View receipts, invoices, and PDF output'],
-  ['receipts.print', 'receipts', 'Print and reprint issued receipts'],
-  ['inventory.create', 'inventory', 'Create inventory master and purchase records'],
-  ['inventory.read', 'inventory', 'View stock, purchasing, alerts, and valuation'],
-  ['inventory.update', 'inventory', 'Adjust and transfer stock and update purchasing'],
-  ['inventory.receive', 'inventory', 'Receive purchase orders into outlet stock'],
-  ['recipes.create', 'recipes', 'Create recipes and production recipes'],
-  ['recipes.read', 'recipes', 'View recipes, costing, and profitability'],
-  ['recipes.update', 'recipes', 'Update recipes and ingredient composition'],
-  ['inventory.consume', 'inventory', 'Consume recipe ingredients from outlet stock'],
-  ['inventory.wastage', 'inventory', 'Record immutable inventory wastage'],
-  ['customers.create', 'customers', 'Create customer profiles'],
-  ['customers.read', 'customers', 'Search customers and view history'],
-  ['customers.update', 'customers', 'Update customer profiles and addresses'],
-  ['customers.notes', 'customers', 'Create customer operational notes'],
-] as const;
+const masterSteps: SeedStep[] = [
+  seedCountries,
+  seedCurrencies,
+  seedLanguages,
+  seedTimezones,
+  seedRoles,
+  seedPermissions,
+  seedRolePermissions,
+  seedOrderMaster,
+  seedPaymentMaster,
+  seedInventoryMaster,
+  seedKitchenMaster,
+  seedCustomerMaster,
+];
 
-const LOCAL_ADMIN_EMAIL = 'admin@example.com';
-const LOCAL_ADMIN_PASSWORD = 'Admin@123';
+const demoSteps: SeedStep[] = [
+  seedDemoTenant,
+  seedDemoOutlet,
+  seedDemoUsers,
+  seedDemoTables,
+  seedDemoMenu,
+  seedDemoInventory,
+  seedDemoRecipes,
+  seedDemoCustomers,
+];
 
 async function main(): Promise<void> {
-  await prisma.$transaction(
-    permissions.map(([permissionKey, module, description]) =>
-      prisma.permission.upsert({
-        where: { permissionKey },
-        update: { module, description },
-        create: { permissionKey, module, description },
-      }),
-    ),
-  );
-
-  console.log(`Seeded ${permissions.length} global permissions.`);
-
-  if (process.env.NODE_ENV === 'production') {
-    console.log('Skipped local development tenant and admin seed in production.');
-    return;
-  }
-
-  const passwordHash = await bcrypt.hash(LOCAL_ADMIN_PASSWORD, 12);
-  const tenant = await prisma.tenant.upsert({
-    where: { slug: 'local-demo' },
-    update: {
-      name: 'Local Demo Restaurant',
-      status: 'ACTIVE',
-      deletedAt: null,
-    },
-    create: {
-      slug: 'local-demo',
-      name: 'Local Demo Restaurant',
-    },
-  });
-  const outlet = await prisma.outlet.upsert({
-    where: {
-      tenantId_code: {
-        tenantId: tenant.id,
-        code: 'MAIN',
-      },
-    },
-    update: {
-      name: 'Main Outlet',
-      timezone: 'Asia/Kolkata',
-      status: 'ACTIVE',
-      deletedAt: null,
-    },
-    create: {
-      tenantId: tenant.id,
-      code: 'MAIN',
-      name: 'Main Outlet',
-      timezone: 'Asia/Kolkata',
-    },
-  });
-  const role = await prisma.role.upsert({
-    where: {
-      tenantId_systemKey: {
-        tenantId: tenant.id,
-        systemKey: 'tenant_admin',
-      },
-    },
-    update: {
-      name: 'Tenant Admin',
-      isSystem: true,
-      deletedAt: null,
-    },
-    create: {
-      tenantId: tenant.id,
-      name: 'Tenant Admin',
-      systemKey: 'tenant_admin',
-      isSystem: true,
-    },
-  });
-  const user = await prisma.userAccount.upsert({
-    where: { email: LOCAL_ADMIN_EMAIL },
-    update: {
-      displayName: 'Admin User',
-      passwordHash,
-      status: UserStatus.ACTIVE,
-      deletedAt: null,
-    },
-    create: {
-      email: LOCAL_ADMIN_EMAIL,
-      displayName: 'Admin User',
-      passwordHash,
-      status: UserStatus.ACTIVE,
-    },
-  });
-  const membership = await prisma.tenantMembership.upsert({
-    where: {
-      tenantId_userId: {
-        tenantId: tenant.id,
-        userId: user.id,
-      },
-    },
-    update: {
-      status: MembershipStatus.ACTIVE,
-      joinedAt: new Date(),
-      revokedAt: null,
-    },
-    create: {
-      tenantId: tenant.id,
-      userId: user.id,
-      status: MembershipStatus.ACTIVE,
-      joinedAt: new Date(),
-    },
-  });
-
-  await prisma.$transaction([
-    prisma.membershipRole.upsert({
-      where: {
-        tenantId_membershipId_roleId: {
-          tenantId: tenant.id,
-          membershipId: membership.id,
-          roleId: role.id,
-        },
-      },
-      update: {},
-      create: {
-        tenantId: tenant.id,
-        membershipId: membership.id,
-        roleId: role.id,
-      },
-    }),
-    prisma.membershipOutlet.upsert({
-      where: {
-        tenantId_membershipId_outletId: {
-          tenantId: tenant.id,
-          membershipId: membership.id,
-          outletId: outlet.id,
-        },
-      },
-      update: {},
-      create: {
-        tenantId: tenant.id,
-        membershipId: membership.id,
-        outletId: outlet.id,
-      },
-    }),
-  ]);
+  const configuration = buildSeedConfiguration(process.argv.slice(2), process.env);
 
   console.log(
-    `Seeded local development admin ${LOCAL_ADMIN_EMAIL} with the documented development password.`,
+    `Seeding ${configuration.environment} with mode ${configuration.mode}.`,
   );
+
+  await prisma.$transaction(
+    async (transaction) => {
+      await transaction.$queryRaw`
+        SELECT set_config('app.is_platform_admin', 'true', true)
+      `;
+
+      const context = createSeedContext(transaction, configuration);
+      for (const step of masterSteps) {
+        await step(context);
+      }
+      if (configuration.includeDemoData) {
+        for (const step of demoSteps) {
+          await step(context);
+        }
+      }
+    },
+    { maxWait: 10_000, timeout: 120_000 },
+  );
+
+  if (!configuration.includeDemoData) {
+    console.log('Demo data was excluded by the environment/mode policy.');
+  }
+  console.log('Database seed completed.');
 }
 
 main()

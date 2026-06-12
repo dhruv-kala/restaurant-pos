@@ -66,6 +66,11 @@ without an explicit task and documented operational need.
 Migration names should describe the domain change. Production changes must use
 committed migrations, not schema pushing.
 
+Database seeds must be idempotent and environment-aware. Use stable natural
+keys or deterministic seed identifiers with `upsert()`. Production seeds may
+bootstrap global master data but must never create demo tenants, credentials,
+menus, inventory, or customers.
+
 ## 5. Authentication and Authorization
 
 - JWT access and rotating refresh authentication are implemented.
