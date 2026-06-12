@@ -249,6 +249,24 @@ enum InventoryAlertType {
   @@map("inventory_alert_type")
 }
 
+enum WastageReason {
+  PREPARATION
+  EXPIRED
+  DAMAGED
+  SPILLAGE
+  QUALITY_REJECTION
+  OTHER
+
+  @@map("wastage_reason")
+}
+
+enum InventoryConsumptionTrigger {
+  READY
+  COMPLETED
+
+  @@map("inventory_consumption_trigger")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -266,47 +284,54 @@ model Tenant {
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(3)
 
-  outlets               Outlet[]
-  memberships           TenantMembership[]
-  roles                 Role[]
-  menuCategories        MenuCategory[]
-  menuItems             MenuItem[]
-  menuItemVariants      MenuItemVariant[]
-  menuItemAddons        MenuItemAddon[]
-  outletMenuPrices      OutletMenuPrice[]
-  tableSections         TableSection[]
-  diningTables          DiningTable[]
-  tableReservations     TableReservation[]
-  mergedTables          MergedTable[]
-  orders                Order[]
-  orderItems            OrderItem[]
-  orderCounters         OrderNumberCounter[]
-  kitchenCategories     KitchenCategory[]
-  kitchenStations       KitchenStation[]
-  stationAssignments    KitchenStationAssignment[]
-  bills                 Bill[]
-  billItems             BillItem[]
-  billTaxes             BillTax[]
-  billCounters          BillNumberCounter[]
-  payments              Payment[]
-  paymentTransactions   PaymentTransaction[]
-  paymentRefunds        PaymentRefund[]
-  paymentCounters       PaymentNumberCounter[]
-  receipts              Receipt[]
-  receiptPrintLogs      ReceiptPrintLog[]
-  receiptCounters       ReceiptNumberCounter[]
-  invoiceCounters       InvoiceNumberCounter[]
-  inventoryCategories   InventoryCategory[]
-  unitsOfMeasure        UnitOfMeasure[]
-  ingredients           Ingredient[]
-  inventoryStocks       InventoryStock[]
-  inventoryBatches      InventoryBatch[]
-  stockTransactions     StockTransaction[]
-  vendors               Vendor[]
-  purchaseOrders        PurchaseOrder[]
-  purchaseOrderItems    PurchaseOrderItem[]
-  purchaseOrderCounters PurchaseOrderNumberCounter[]
-  inventoryAlerts       InventoryAlert[]
+  outlets                     Outlet[]
+  memberships                 TenantMembership[]
+  roles                       Role[]
+  menuCategories              MenuCategory[]
+  menuItems                   MenuItem[]
+  menuItemVariants            MenuItemVariant[]
+  menuItemAddons              MenuItemAddon[]
+  outletMenuPrices            OutletMenuPrice[]
+  tableSections               TableSection[]
+  diningTables                DiningTable[]
+  tableReservations           TableReservation[]
+  mergedTables                MergedTable[]
+  orders                      Order[]
+  orderItems                  OrderItem[]
+  orderCounters               OrderNumberCounter[]
+  kitchenCategories           KitchenCategory[]
+  kitchenStations             KitchenStation[]
+  stationAssignments          KitchenStationAssignment[]
+  bills                       Bill[]
+  billItems                   BillItem[]
+  billTaxes                   BillTax[]
+  billCounters                BillNumberCounter[]
+  payments                    Payment[]
+  paymentTransactions         PaymentTransaction[]
+  paymentRefunds              PaymentRefund[]
+  paymentCounters             PaymentNumberCounter[]
+  receipts                    Receipt[]
+  receiptPrintLogs            ReceiptPrintLog[]
+  receiptCounters             ReceiptNumberCounter[]
+  invoiceCounters             InvoiceNumberCounter[]
+  inventoryCategories         InventoryCategory[]
+  unitsOfMeasure              UnitOfMeasure[]
+  ingredients                 Ingredient[]
+  inventoryStocks             InventoryStock[]
+  inventoryBatches            InventoryBatch[]
+  stockTransactions           StockTransaction[]
+  vendors                     Vendor[]
+  purchaseOrders              PurchaseOrder[]
+  purchaseOrderItems          PurchaseOrderItem[]
+  purchaseOrderCounters       PurchaseOrderNumberCounter[]
+  inventoryAlerts             InventoryAlert[]
+  recipes                     Recipe[]
+  recipeIngredients           RecipeIngredient[]
+  recipeCostSnapshots         RecipeCostSnapshot[]
+  productionRecipes           ProductionRecipe[]
+  productionRecipeIngredients ProductionRecipeIngredient[]
+  inventoryConsumptions       InventoryConsumption[]
+  inventoryWastages           InventoryWastage[]
 
   @@index([status])
   @@index([deletedAt])
@@ -314,24 +339,26 @@ model Tenant {
 }
 
 model Outlet {
-  id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
-  tenantId     String       @map("tenant_id") @db.Uuid
-  code         String       @db.VarChar(32)
-  name         String       @db.VarChar(160)
-  email        String?      @db.Citext
-  phone        String?      @db.VarChar(20)
-  addressLine1 String?      @map("address_line_1") @db.VarChar(200)
-  addressLine2 String?      @map("address_line_2") @db.VarChar(200)
-  city         String?      @db.VarChar(100)
-  state        String?      @db.VarChar(100)
-  country      String?      @db.VarChar(2)
-  postalCode   String?      @map("postal_code") @db.VarChar(20)
-  timezone     String       @db.VarChar(64)
-  status       OutletStatus @default(ACTIVE)
-  version      Int          @default(1)
-  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(3)
+  id                 String                      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId           String                      @map("tenant_id") @db.Uuid
+  code               String                      @db.VarChar(32)
+  name               String                      @db.VarChar(160)
+  email              String?                     @db.Citext
+  phone              String?                     @db.VarChar(20)
+  addressLine1       String?                     @map("address_line_1") @db.VarChar(200)
+  addressLine2       String?                     @map("address_line_2") @db.VarChar(200)
+  city               String?                     @db.VarChar(100)
+  state              String?                     @db.VarChar(100)
+  country            String?                     @db.VarChar(2)
+  postalCode         String?                     @map("postal_code") @db.VarChar(20)
+  timezone           String                      @db.VarChar(64)
+  status             OutletStatus                @default(ACTIVE)
+  version            Int                         @default(1)
+  createdAt          DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt          DateTime?                   @map("deleted_at") @db.Timestamptz(3)
+  allowNegativeStock Boolean                     @default(false) @map("allow_negative_stock")
+  consumptionTrigger InventoryConsumptionTrigger @default(COMPLETED) @map("consumption_trigger")
 
   tenant                Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   membershipAssignments MembershipOutlet[]
@@ -360,6 +387,8 @@ model Outlet {
   purchaseOrderItems    PurchaseOrderItem[]
   purchaseOrderCounters PurchaseOrderNumberCounter[]
   inventoryAlerts       InventoryAlert[]
+  inventoryConsumptions InventoryConsumption[]
+  inventoryWastages     InventoryWastage[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -383,26 +412,32 @@ model UserAccount {
 
   memberships                TenantMembership[]
   refreshTokens              RefreshToken[]
-  waitedOrders               Order[]            @relation("OrderWaiter")
-  generatedBills             Bill[]             @relation("BillGeneratedBy")
-  voidedBills                Bill[]             @relation("BillVoidedBy")
-  createdPayments            Payment[]          @relation("PaymentCreatedBy")
-  paidPayments               Payment[]          @relation("PaymentPaidBy")
-  paymentRefunds             PaymentRefund[]    @relation("PaymentRefundedBy")
-  generatedReceipts          Receipt[]          @relation("ReceiptGeneratedBy")
-  receiptPrintLogs           ReceiptPrintLog[]  @relation("ReceiptPrintedBy")
-  startedKitchenItems        OrderItem[]        @relation("KitchenItemStartedBy")
-  readiedKitchenItems        OrderItem[]        @relation("KitchenItemReadiedBy")
-  servedKitchenItems         OrderItem[]        @relation("KitchenItemServedBy")
-  createdIngredients         Ingredient[]       @relation("IngredientCreatedBy")
-  updatedIngredients         Ingredient[]       @relation("IngredientUpdatedBy")
-  performedStockTransactions StockTransaction[] @relation("StockTransactionPerformedBy")
-  createdVendors             Vendor[]           @relation("VendorCreatedBy")
-  updatedVendors             Vendor[]           @relation("VendorUpdatedBy")
-  createdPurchaseOrders      PurchaseOrder[]    @relation("PurchaseOrderCreatedBy")
-  updatedPurchaseOrders      PurchaseOrder[]    @relation("PurchaseOrderUpdatedBy")
-  receivedPurchaseOrders     PurchaseOrder[]    @relation("PurchaseOrderReceivedBy")
-  resolvedInventoryAlerts    InventoryAlert[]   @relation("InventoryAlertResolvedBy")
+  waitedOrders               Order[]                @relation("OrderWaiter")
+  generatedBills             Bill[]                 @relation("BillGeneratedBy")
+  voidedBills                Bill[]                 @relation("BillVoidedBy")
+  createdPayments            Payment[]              @relation("PaymentCreatedBy")
+  paidPayments               Payment[]              @relation("PaymentPaidBy")
+  paymentRefunds             PaymentRefund[]        @relation("PaymentRefundedBy")
+  generatedReceipts          Receipt[]              @relation("ReceiptGeneratedBy")
+  receiptPrintLogs           ReceiptPrintLog[]      @relation("ReceiptPrintedBy")
+  startedKitchenItems        OrderItem[]            @relation("KitchenItemStartedBy")
+  readiedKitchenItems        OrderItem[]            @relation("KitchenItemReadiedBy")
+  servedKitchenItems         OrderItem[]            @relation("KitchenItemServedBy")
+  createdIngredients         Ingredient[]           @relation("IngredientCreatedBy")
+  updatedIngredients         Ingredient[]           @relation("IngredientUpdatedBy")
+  performedStockTransactions StockTransaction[]     @relation("StockTransactionPerformedBy")
+  createdVendors             Vendor[]               @relation("VendorCreatedBy")
+  updatedVendors             Vendor[]               @relation("VendorUpdatedBy")
+  createdPurchaseOrders      PurchaseOrder[]        @relation("PurchaseOrderCreatedBy")
+  updatedPurchaseOrders      PurchaseOrder[]        @relation("PurchaseOrderUpdatedBy")
+  receivedPurchaseOrders     PurchaseOrder[]        @relation("PurchaseOrderReceivedBy")
+  resolvedInventoryAlerts    InventoryAlert[]       @relation("InventoryAlertResolvedBy")
+  createdRecipes             Recipe[]               @relation("RecipeCreatedBy")
+  updatedRecipes             Recipe[]               @relation("RecipeUpdatedBy")
+  createdProductionRecipes   ProductionRecipe[]     @relation("ProductionRecipeCreatedBy")
+  updatedProductionRecipes   ProductionRecipe[]     @relation("ProductionRecipeUpdatedBy")
+  triggeredConsumptions      InventoryConsumption[] @relation("ConsumptionTriggeredBy")
+  recordedWastages           InventoryWastage[]     @relation("WastageRecordedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -583,6 +618,7 @@ model MenuItem {
   kitchenCategory    KitchenCategory?           @relation(fields: [tenantId, kitchenCategoryId], references: [tenantId, id], onDelete: Restrict)
   kitchenCategoryId  String?                    @map("kitchen_category_id") @db.Uuid
   stationAssignments KitchenStationAssignment[]
+  recipes            Recipe[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, sku])
@@ -608,6 +644,7 @@ model MenuItemVariant {
   tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   menuItem   MenuItem    @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
   orderItems OrderItem[]
+  recipes    Recipe[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, menuItemId, name])
@@ -803,12 +840,13 @@ model Order {
   createdAt               DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt               DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  table  DiningTable? @relation(fields: [tenantId, outletId, tableId], references: [tenantId, outletId, id], onDelete: Restrict)
-  waiter UserAccount? @relation("OrderWaiter", fields: [waiterId], references: [id], onDelete: Restrict)
-  items  OrderItem[]
-  bills  Bill[]
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet                Outlet                 @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  table                 DiningTable?           @relation(fields: [tenantId, outletId, tableId], references: [tenantId, outletId, id], onDelete: Restrict)
+  waiter                UserAccount?           @relation("OrderWaiter", fields: [waiterId], references: [id], onDelete: Restrict)
+  items                 OrderItem[]
+  bills                 Bill[]
+  inventoryConsumptions InventoryConsumption[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, orderNumber])
@@ -851,16 +889,17 @@ model OrderItem {
   updatedAt            DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt            DateTime?       @map("deleted_at") @db.Timestamptz(3)
 
-  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  order           Order            @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
-  menuItem        MenuItem         @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
-  variant         MenuItemVariant? @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
-  kitchenCategory KitchenCategory? @relation(fields: [tenantId, kitchenCategoryId], references: [tenantId, id], onDelete: Restrict)
-  kitchenStation  KitchenStation?  @relation(fields: [tenantId, kitchenStationId], references: [tenantId, id], onDelete: Restrict)
-  startedBy       UserAccount?     @relation("KitchenItemStartedBy", fields: [startedByUserId], references: [id], onDelete: Restrict)
-  readiedBy       UserAccount?     @relation("KitchenItemReadiedBy", fields: [readyByUserId], references: [id], onDelete: Restrict)
-  servedBy        UserAccount?     @relation("KitchenItemServedBy", fields: [servedByUserId], references: [id], onDelete: Restrict)
-  billItems       BillItem[]
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  order                 Order                  @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  menuItem              MenuItem               @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+  variant               MenuItemVariant?       @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
+  kitchenCategory       KitchenCategory?       @relation(fields: [tenantId, kitchenCategoryId], references: [tenantId, id], onDelete: Restrict)
+  kitchenStation        KitchenStation?        @relation(fields: [tenantId, kitchenStationId], references: [tenantId, id], onDelete: Restrict)
+  startedBy             UserAccount?           @relation("KitchenItemStartedBy", fields: [startedByUserId], references: [id], onDelete: Restrict)
+  readiedBy             UserAccount?           @relation("KitchenItemReadiedBy", fields: [readyByUserId], references: [id], onDelete: Restrict)
+  servedBy              UserAccount?           @relation("KitchenItemServedBy", fields: [servedByUserId], references: [id], onDelete: Restrict)
+  billItems             BillItem[]
+  inventoryConsumptions InventoryConsumption[]
 
   @@unique([tenantId, id])
   @@index([tenantId, orderId, status, deletedAt])
@@ -1310,8 +1349,14 @@ model UnitOfMeasure {
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  ingredients Ingredient[]
+  tenant                      Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  ingredients                 Ingredient[]
+  recipeIngredients           RecipeIngredient[]
+  productionRecipeYields      ProductionRecipe[]           @relation("ProductionRecipeYieldUnit")
+  productionRecipeIngredients ProductionRecipeIngredient[]
+  recipeYields                Recipe[]                     @relation("RecipeYieldUnit")
+  inventoryConsumptions       InventoryConsumption[]
+  inventoryWastages           InventoryWastage[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1341,16 +1386,21 @@ model Ingredient {
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  tenant        Tenant              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  category      InventoryCategory   @relation(fields: [tenantId, categoryId], references: [tenantId, id], onDelete: Restrict)
-  unit          UnitOfMeasure       @relation(fields: [tenantId, unitId], references: [tenantId, id], onDelete: Restrict)
-  createdBy     UserAccount         @relation("IngredientCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  updatedBy     UserAccount         @relation("IngredientUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
-  stocks        InventoryStock[]
-  batches       InventoryBatch[]
-  transactions  StockTransaction[]
-  purchaseItems PurchaseOrderItem[]
-  alerts        InventoryAlert[]
+  tenant                      Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  category                    InventoryCategory            @relation(fields: [tenantId, categoryId], references: [tenantId, id], onDelete: Restrict)
+  unit                        UnitOfMeasure                @relation(fields: [tenantId, unitId], references: [tenantId, id], onDelete: Restrict)
+  createdBy                   UserAccount                  @relation("IngredientCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy                   UserAccount                  @relation("IngredientUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  stocks                      InventoryStock[]
+  batches                     InventoryBatch[]
+  transactions                StockTransaction[]
+  purchaseItems               PurchaseOrderItem[]
+  alerts                      InventoryAlert[]
+  recipeIngredients           RecipeIngredient[]
+  productionRecipeOutputs     ProductionRecipe[]           @relation("ProductionRecipeOutput")
+  productionRecipeIngredients ProductionRecipeIngredient[]
+  inventoryConsumptions       InventoryConsumption[]
+  inventoryWastages           InventoryWastage[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, sku])
@@ -1559,4 +1609,182 @@ model InventoryAlert {
   @@index([tenantId, outletId, isResolved, alertType, createdAt])
   @@index([tenantId, ingredientId, isResolved])
   @@map("inventory_alerts")
+}
+
+model Recipe {
+  id                String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  menuItemId        String    @map("menu_item_id") @db.Uuid
+  variantId         String?   @map("variant_id") @db.Uuid
+  yieldUnitId       String    @map("yield_unit_id") @db.Uuid
+  name              String    @db.VarChar(160)
+  description       String?   @db.VarChar(500)
+  yieldQuantity     Decimal   @default(1) @map("yield_quantity") @db.Decimal(18, 3)
+  portionMultiplier Decimal   @default(1) @map("portion_multiplier") @db.Decimal(10, 4)
+  isActive          Boolean   @default(true) @map("is_active")
+  createdByUserId   String    @map("created_by_user_id") @db.Uuid
+  updatedByUserId   String    @map("updated_by_user_id") @db.Uuid
+  version           Int       @default(1)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  menuItem      MenuItem               @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+  variant       MenuItemVariant?       @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
+  yieldUnit     UnitOfMeasure          @relation("RecipeYieldUnit", fields: [tenantId, yieldUnitId], references: [tenantId, id], onDelete: Restrict)
+  createdBy     UserAccount            @relation("RecipeCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy     UserAccount            @relation("RecipeUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  ingredients   RecipeIngredient[]
+  costSnapshots RecipeCostSnapshot[]
+  consumptions  InventoryConsumption[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, menuItemId, variantId, isActive, deletedAt])
+  @@index([tenantId, updatedAt])
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id                String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  recipeId          String   @map("recipe_id") @db.Uuid
+  ingredientId      String   @map("ingredient_id") @db.Uuid
+  unitId            String   @map("unit_id") @db.Uuid
+  quantity          Decimal  @db.Decimal(18, 3)
+  wastagePercentage Decimal  @default(0) @map("wastage_percentage") @db.Decimal(5, 2)
+  notes             String?  @db.VarChar(500)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  recipe     Recipe        @relation(fields: [tenantId, recipeId], references: [tenantId, id], onDelete: Restrict)
+  ingredient Ingredient    @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+  unit       UnitOfMeasure @relation(fields: [tenantId, unitId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, recipeId, ingredientId])
+  @@index([tenantId, ingredientId])
+  @@map("recipe_ingredients")
+}
+
+model RecipeCostSnapshot {
+  id                  String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  recipeId            String   @map("recipe_id") @db.Uuid
+  calculatedCost      Int      @map("calculated_cost_minor")
+  ingredientBreakdown Json     @map("ingredient_breakdown") @db.JsonB
+  calculatedAt        DateTime @default(now()) @map("calculated_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  recipe Recipe @relation(fields: [tenantId, recipeId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, recipeId, calculatedAt])
+  @@map("recipe_cost_snapshots")
+}
+
+model ProductionRecipe {
+  id                 String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  outputIngredientId String?   @map("output_ingredient_id") @db.Uuid
+  yieldUnitId        String    @map("yield_unit_id") @db.Uuid
+  name               String    @db.VarChar(160)
+  description        String?   @db.VarChar(500)
+  yieldQuantity      Decimal   @map("yield_quantity") @db.Decimal(18, 3)
+  isActive           Boolean   @default(true) @map("is_active")
+  createdByUserId    String    @map("created_by_user_id") @db.Uuid
+  updatedByUserId    String    @map("updated_by_user_id") @db.Uuid
+  version            Int       @default(1)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant           Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outputIngredient Ingredient?                  @relation("ProductionRecipeOutput", fields: [tenantId, outputIngredientId], references: [tenantId, id], onDelete: Restrict)
+  yieldUnit        UnitOfMeasure                @relation("ProductionRecipeYieldUnit", fields: [tenantId, yieldUnitId], references: [tenantId, id], onDelete: Restrict)
+  createdBy        UserAccount                  @relation("ProductionRecipeCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy        UserAccount                  @relation("ProductionRecipeUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  ingredients      ProductionRecipeIngredient[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, name])
+  @@index([tenantId, outputIngredientId, isActive, deletedAt])
+  @@map("production_recipes")
+}
+
+model ProductionRecipeIngredient {
+  id                 String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  productionRecipeId String   @map("production_recipe_id") @db.Uuid
+  ingredientId       String   @map("ingredient_id") @db.Uuid
+  unitId             String   @map("unit_id") @db.Uuid
+  quantity           Decimal  @db.Decimal(18, 3)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  productionRecipe ProductionRecipe @relation(fields: [tenantId, productionRecipeId], references: [tenantId, id], onDelete: Restrict)
+  ingredient       Ingredient       @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+  unit             UnitOfMeasure    @relation(fields: [tenantId, unitId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, productionRecipeId, ingredientId])
+  @@index([tenantId, ingredientId])
+  @@map("production_recipe_ingredients")
+}
+
+model InventoryConsumption {
+  id                String                      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId          String                      @map("tenant_id") @db.Uuid
+  outletId          String                      @map("outlet_id") @db.Uuid
+  orderId           String                      @map("order_id") @db.Uuid
+  orderItemId       String                      @map("order_item_id") @db.Uuid
+  recipeId          String                      @map("recipe_id") @db.Uuid
+  ingredientId      String                      @map("ingredient_id") @db.Uuid
+  unitId            String                      @map("unit_id") @db.Uuid
+  consumedQuantity  Decimal                     @map("consumed_quantity") @db.Decimal(18, 3)
+  costAtConsumption Int                         @map("cost_at_consumption_minor")
+  trigger           InventoryConsumptionTrigger
+  triggeredByUserId String                      @map("triggered_by_user_id") @db.Uuid
+  consumedAt        DateTime                    @default(now()) @map("consumed_at") @db.Timestamptz(3)
+
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet      Outlet        @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  order       Order         @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  orderItem   OrderItem     @relation(fields: [tenantId, orderItemId], references: [tenantId, id], onDelete: Restrict)
+  recipe      Recipe        @relation(fields: [tenantId, recipeId], references: [tenantId, id], onDelete: Restrict)
+  ingredient  Ingredient    @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+  unit        UnitOfMeasure @relation(fields: [tenantId, unitId], references: [tenantId, id], onDelete: Restrict)
+  triggeredBy UserAccount   @relation("ConsumptionTriggeredBy", fields: [triggeredByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, orderItemId, ingredientId])
+  @@index([tenantId, outletId, consumedAt])
+  @@index([tenantId, orderId])
+  @@map("inventory_consumptions")
+}
+
+model InventoryWastage {
+  id               String        @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId         String        @map("tenant_id") @db.Uuid
+  outletId         String        @map("outlet_id") @db.Uuid
+  ingredientId     String        @map("ingredient_id") @db.Uuid
+  unitId           String        @map("unit_id") @db.Uuid
+  quantity         Decimal       @db.Decimal(18, 3)
+  reason           WastageReason
+  notes            String?       @db.VarChar(500)
+  costAtWastage    Int           @map("cost_at_wastage_minor")
+  recordedByUserId String        @map("recorded_by_user_id") @db.Uuid
+  recordedAt       DateTime      @default(now()) @map("recorded_at") @db.Timestamptz(3)
+
+  tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet     Outlet        @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  ingredient Ingredient    @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+  unit       UnitOfMeasure @relation(fields: [tenantId, unitId], references: [tenantId, id], onDelete: Restrict)
+  recordedBy UserAccount   @relation("WastageRecordedBy", fields: [recordedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, outletId, ingredientId, recordedAt])
+  @@map("inventory_wastages")
 }
