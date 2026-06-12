@@ -11,12 +11,12 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 22 are complete at the requested foundation level.
+Tasks 1 through 23 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 23 is next: implement the Employee & Staff Management Module.
+Task 24 is next: implement the RBAC & User Management Module.
 
 ## Task History
 
@@ -44,7 +44,73 @@ Task 23 is next: implement the Employee & Staff Management Module.
 | 20. Implement Recipe & Stock Consumption Engine | COMPLETE | Recipes, production recipes, costing, profitability, idempotent order consumption, wastage, typed clients, and admin screens are implemented. |
 | 21. Implement Customer Management Module | COMPLETE | Customer profiles, duplicate-safe lookup, addresses, notes, payment visits, stats/history, typed clients, admin screens, and restaurant lookup are implemented. |
 | 22. Implement Reports Module | COMPLETE | Business-date reports, dashboard KPIs, tenant/outlet authorization, audit history, export foundation, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
-| 23. Implement Employee & Staff Management Module | NEXT | Not started. Define employee identity, outlet assignment, roles, shifts, attendance, and payroll boundaries before UI. |
+| 23. Implement Employee & Staff Management Module | COMPLETE | User-linked profiles, shifts, assignments, attendance, performance projections, events, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
+| 24. Implement RBAC & User Management Module | NEXT | Not started. Define user provisioning, invitations, memberships, role/permission administration, outlet access, and audit boundaries before UI. |
+
+## Task 23 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Employee profiles extending existing global `UserAccount` identities and
+  validating active tenant membership, selected role, and outlet assignment
+- Tenant-local employee codes, role/designation/department/employment data,
+  salary minor units, manager hierarchy, emergency contacts, language,
+  status, profile audit actors, versioning, and soft termination
+- Outlet shifts with wall-clock times, breaks, night-shift state, activation,
+  and effective-dated non-overlapping employee assignments
+- One attendance record per employee/day with business date, check-in/out,
+  worked minutes, status, remarks, device, captured location, and recording
+  actor
+- Daily employee performance projections for waiter, cashier, kitchen, and
+  manager metrics, including enhanced tips, discounts, refunds, preparation,
+  delays, and rating foundations
+- Automatic performance refreshes from completed orders, successful/refunded
+  payments, and kitchen-ready transitions, plus report-time recovery rebuilds
+- Protected employee CRUD/directory/dashboard, shift CRUD/assignment,
+  attendance check-in/out/history, employee performance, and performance report
+  endpoints
+- Super-admin, tenant-admin, manager, HR-manager, and employee-own access
+  boundaries with trusted tenant/outlet scope and forced RLS
+- Typed `EmployeeCreated`, `ShiftAssigned`, `AttendanceCheckedIn`,
+  `AttendanceCheckedOut`, and `PerformanceUpdated` event placeholders
+- Shared Dart employee, shift, attendance, performance, enum, and dashboard
+  models with typed `EmployeesApiService`
+- Riverpod employee list/detail, shifts, attendance, performance, and dashboard
+  providers
+- Admin employee dashboard, directory, details, add/edit, shifts, attendance,
+  and performance screens
+- Employee API, ERD/schema, attendance, shift, performance, identity boundary,
+  security, and future payroll documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 131 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get` for admin: passed
+- `flutter analyze` for admin: passed
+- `flutter test` for admin: passed, 1 test
+- `flutter build web` for admin: passed
+- `git diff --check`: passed
+
+Known limitations:
+
+- Migration `20260613060000_add_employee_staff_management` was not deployed
+  because project history records invalid local PostgreSQL credentials.
+- Task 23 requires an existing active user membership, role assignment, and
+  outlet assignment. User invitation/provisioning and RBAC administration are
+  intentionally Task 24.
+- Business date retains the existing UTC calendar-day rule until shift cutoff
+  policy is centralized.
+- Payroll, leave approval, incentives, tip allocation, biometric verification,
+  ratings, and Socket.IO delivery remain future work.
 
 ## Task 22 Completion
 
@@ -890,11 +956,11 @@ Known limitation:
 
 ## Next Task
 
-### Task 23: Implement Employee & Staff Management Module
+### Task 24: Implement RBAC & User Management Module
 
-Do not start Task 23 unless explicitly requested. Define employee identity,
-tenant/outlet assignment, authorization ownership, shifts, attendance, and
-payroll boundaries before Flutter screens.
+Do not start Task 24 unless explicitly requested. Define user provisioning,
+invitations, memberships, role/permission administration, outlet access, and
+audit boundaries before Flutter screens.
 
 ## Future Work
 

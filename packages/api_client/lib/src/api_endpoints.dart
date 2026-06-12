@@ -21,6 +21,9 @@ abstract final class ApiEndpoints {
   static const String productionRecipes = '/production-recipes';
   static const String consumption = '/consumption';
   static const String customers = '/customers';
+  static const String employees = '/employees';
+  static const String shifts = '/shifts';
+  static const String attendance = '/attendance';
   static const String reports = '/reports';
   static const String dashboard = '/dashboard';
   static const String inventoryWastage = '/inventory/wastage';
@@ -140,6 +143,16 @@ abstract final class ApiEndpoints {
   static String customerPayments(String id) => '${customer(id)}/payments';
   static String customerVisits(String id) => '${customer(id)}/visits';
   static String customerStats(String id) => '${customer(id)}/stats';
+  static String employee(String id) => '$employees/$id';
+  static String employeePerformance(String id) => '${employee(id)}/performance';
+  static const String employeeDashboard = '$employees/dashboard';
+  static String shift(String id) => '$shifts/$id';
+  static const String assignShift = '$shifts/assign';
+  static const String attendanceCheckIn = '$attendance/check-in';
+  static const String attendanceCheckOut = '$attendance/check-out';
+  static String employeeAttendance(String id) => '$attendance/$id';
+  static const String employeePerformanceReport =
+      '$reports/employees/performance';
   static const String salesSummaryReport = '$reports/sales/summary';
   static const String dailySalesReport = '$reports/sales/daily';
   static const String monthlySalesReport = '$reports/sales/monthly';

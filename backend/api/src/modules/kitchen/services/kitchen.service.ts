@@ -10,6 +10,7 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 import { canTransitionOrder } from '../../orders/services/order-lifecycle.util';
 import { ConsumptionService } from '../../recipes/services/consumption.service';
+import { PerformanceService } from '../../employees/services/performance.service';
 import { kitchenSlaStatus } from '../../kds/services/kds-sla.util';
 import type { KitchenQueryDto } from '../dto/kitchen-query.dto';
 import type { UpdateItemStatusDto } from '../dto/update-item-status.dto';
@@ -47,6 +48,7 @@ export class KitchenService {
     private readonly prisma: PrismaService,
     private readonly events: KitchenEventsService,
     private readonly consumption: ConsumptionService,
+    private readonly performance: PerformanceService,
   ) {}
 
   async queue(query: KitchenQueryDto, user: AuthenticatedUser) {
@@ -187,6 +189,14 @@ export class KitchenService {
           ticket.id,
           InventoryConsumptionTrigger.READY,
           user.id,
+        );
+      }
+      if (dto.status === OrderItemStatus.READY) {
+        await this.performance.refreshByUserInTransaction(
+          tx,
+          ticket.tenantId,
+          user.id,
+          ticket.businessDate,
         );
       }
       this.publish(ticket, item.id, item.kitchenStationId, dto.status);

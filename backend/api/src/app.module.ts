@@ -11,6 +11,7 @@ import { validateEnvironment } from './config/environment.validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { CustomersModule } from './modules/customers/customers.module';
+import { EmployeesModule } from './modules/employees/employees.module';
 import { HealthModule } from './modules/health/health.module';
 import { KdsModule } from './modules/kds/kds.module';
 import { KitchenModule } from './modules/kitchen/kitchen.module';
@@ -38,6 +39,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     BillingModule,
     CustomersModule,
+    EmployeesModule,
     HealthModule,
     KdsModule,
     KitchenModule,

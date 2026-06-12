@@ -31,7 +31,7 @@ Initial deployment constraints:
 - No mandatory cloud dependency initially
 
 Current status:
-- Tasks 1 through 21 are complete at the foundation level.
+- Tasks 1 through 23 are complete at the foundation level.
 - Task 11 implemented the menu schema, protected NestJS menu APIs, shared menu
   models/API client, and Flutter admin menu management screens.
 - Local migration deployment and seed execution remain unverified because the
@@ -51,7 +51,11 @@ Current status:
 - Task 21 implemented tenant customer profiles, duplicate prevention,
   addresses, notes, payment visits, customer stats/history, typed clients,
   admin CRM screens, and restaurant customer lookup.
-- Task 22 is next: implement the Reports Module.
+- Task 22 implemented business-date reports, dashboard metrics, audit records,
+  export foundations, typed clients, and admin reporting screens.
+- Task 23 implemented user-linked employee profiles, shifts, attendance,
+  performance projections, typed clients, and admin workforce screens.
+- Task 24 is next: implement the RBAC & User Management Module.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,

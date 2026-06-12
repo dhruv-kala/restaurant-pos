@@ -16,6 +16,7 @@ import { applyDatabaseRequestContext } from '../../../common/database/request-co
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 import { ConsumptionService } from '../../recipes/services/consumption.service';
+import { PerformanceService } from '../../employees/services/performance.service';
 import type { AddOrderItemDto } from '../dto/add-order-item.dto';
 import type { CancelOrderDto } from '../dto/cancel-order.dto';
 import type { CreateOrderDto } from '../dto/create-order.dto';
@@ -72,6 +73,7 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly events: OrderEventsService,
     private readonly consumption: ConsumptionService,
+    private readonly performance: PerformanceService,
   ) {}
 
   async create(dto: CreateOrderDto, user: AuthenticatedUser): Promise<OrderResponseDto> {
@@ -267,6 +269,14 @@ export class OrdersService {
             ? InventoryConsumptionTrigger.READY
             : InventoryConsumptionTrigger.COMPLETED,
           user.id,
+        );
+      }
+      if (dto.status === OrderStatus.COMPLETED) {
+        await this.performance.refreshByUserInTransaction(
+          tx,
+          updated.tenantId,
+          updated.waiterId,
+          updated.businessDate,
         );
       }
       this.events.publishStatusChanged({

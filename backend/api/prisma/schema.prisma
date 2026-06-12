@@ -313,6 +313,56 @@ enum ReportExportFormat {
   @@map("report_export_format")
 }
 
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  TEMPORARY
+  INTERN
+
+  @@map("employment_type")
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
+
+  @@map("employee_status")
+}
+
+enum EmployeeDepartment {
+  OPERATIONS
+  KITCHEN
+  SERVICE
+  CASHIER
+  MANAGEMENT
+  INVENTORY
+  ADMINISTRATION
+
+  @@map("employee_department")
+}
+
+enum EmployeeGender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+
+  @@map("employee_gender")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  HALF_DAY
+  LATE
+  LEAVE
+
+  @@map("attendance_status")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -384,6 +434,11 @@ model Tenant {
   customerVisits              CustomerVisit[]
   customerStats               CustomerStats[]
   reportGenerationAudits      ReportGenerationAudit[]
+  employeeProfiles            EmployeeProfile[]
+  shifts                      Shift[]
+  employeeShiftAssignments    EmployeeShiftAssignment[]
+  attendanceRecords           Attendance[]
+  employeePerformance         EmployeePerformance[]
 
   @@index([status])
   @@index([deletedAt])
@@ -412,38 +467,43 @@ model Outlet {
   allowNegativeStock Boolean                     @default(false) @map("allow_negative_stock")
   consumptionTrigger InventoryConsumptionTrigger @default(COMPLETED) @map("consumption_trigger")
 
-  tenant                 Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  membershipAssignments  MembershipOutlet[]
-  menuPrices             OutletMenuPrice[]
-  tableSections          TableSection[]
-  diningTables           DiningTable[]
-  tableReservations      TableReservation[]
-  mergedTables           MergedTable[]
-  orders                 Order[]
-  orderCounters          OrderNumberCounter[]
-  kitchenCategories      KitchenCategory[]
-  kitchenStations        KitchenStation[]
-  stationAssignments     KitchenStationAssignment[]
-  bills                  Bill[]
-  billCounters           BillNumberCounter[]
-  payments               Payment[]
-  paymentCounters        PaymentNumberCounter[]
-  receipts               Receipt[]
-  receiptPrintLogs       ReceiptPrintLog[]
-  receiptCounters        ReceiptNumberCounter[]
-  invoiceCounters        InvoiceNumberCounter[]
-  inventoryStocks        InventoryStock[]
-  inventoryBatches       InventoryBatch[]
-  stockTransactions      StockTransaction[]
-  purchaseOrders         PurchaseOrder[]
-  purchaseOrderItems     PurchaseOrderItem[]
-  purchaseOrderCounters  PurchaseOrderNumberCounter[]
-  inventoryAlerts        InventoryAlert[]
-  inventoryConsumptions  InventoryConsumption[]
-  inventoryWastages      InventoryWastage[]
-  customerVisits         CustomerVisit[]
-  favoriteCustomerStats  CustomerStats[]              @relation("CustomerFavoriteOutlet")
-  reportGenerationAudits ReportGenerationAudit[]
+  tenant                   Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  membershipAssignments    MembershipOutlet[]
+  menuPrices               OutletMenuPrice[]
+  tableSections            TableSection[]
+  diningTables             DiningTable[]
+  tableReservations        TableReservation[]
+  mergedTables             MergedTable[]
+  orders                   Order[]
+  orderCounters            OrderNumberCounter[]
+  kitchenCategories        KitchenCategory[]
+  kitchenStations          KitchenStation[]
+  stationAssignments       KitchenStationAssignment[]
+  bills                    Bill[]
+  billCounters             BillNumberCounter[]
+  payments                 Payment[]
+  paymentCounters          PaymentNumberCounter[]
+  receipts                 Receipt[]
+  receiptPrintLogs         ReceiptPrintLog[]
+  receiptCounters          ReceiptNumberCounter[]
+  invoiceCounters          InvoiceNumberCounter[]
+  inventoryStocks          InventoryStock[]
+  inventoryBatches         InventoryBatch[]
+  stockTransactions        StockTransaction[]
+  purchaseOrders           PurchaseOrder[]
+  purchaseOrderItems       PurchaseOrderItem[]
+  purchaseOrderCounters    PurchaseOrderNumberCounter[]
+  inventoryAlerts          InventoryAlert[]
+  inventoryConsumptions    InventoryConsumption[]
+  inventoryWastages        InventoryWastage[]
+  customerVisits           CustomerVisit[]
+  favoriteCustomerStats    CustomerStats[]              @relation("CustomerFavoriteOutlet")
+  reportGenerationAudits   ReportGenerationAudit[]
+  employeeProfiles         EmployeeProfile[]
+  shifts                   Shift[]
+  employeeShiftAssignments EmployeeShiftAssignment[]
+  attendanceRecords        Attendance[]
+  employeePerformance      EmployeePerformance[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -467,34 +527,39 @@ model UserAccount {
 
   memberships                TenantMembership[]
   refreshTokens              RefreshToken[]
-  waitedOrders               Order[]                 @relation("OrderWaiter")
-  generatedBills             Bill[]                  @relation("BillGeneratedBy")
-  voidedBills                Bill[]                  @relation("BillVoidedBy")
-  createdPayments            Payment[]               @relation("PaymentCreatedBy")
-  paidPayments               Payment[]               @relation("PaymentPaidBy")
-  paymentRefunds             PaymentRefund[]         @relation("PaymentRefundedBy")
-  generatedReceipts          Receipt[]               @relation("ReceiptGeneratedBy")
-  receiptPrintLogs           ReceiptPrintLog[]       @relation("ReceiptPrintedBy")
-  startedKitchenItems        OrderItem[]             @relation("KitchenItemStartedBy")
-  readiedKitchenItems        OrderItem[]             @relation("KitchenItemReadiedBy")
-  servedKitchenItems         OrderItem[]             @relation("KitchenItemServedBy")
-  createdIngredients         Ingredient[]            @relation("IngredientCreatedBy")
-  updatedIngredients         Ingredient[]            @relation("IngredientUpdatedBy")
-  performedStockTransactions StockTransaction[]      @relation("StockTransactionPerformedBy")
-  createdVendors             Vendor[]                @relation("VendorCreatedBy")
-  updatedVendors             Vendor[]                @relation("VendorUpdatedBy")
-  createdPurchaseOrders      PurchaseOrder[]         @relation("PurchaseOrderCreatedBy")
-  updatedPurchaseOrders      PurchaseOrder[]         @relation("PurchaseOrderUpdatedBy")
-  receivedPurchaseOrders     PurchaseOrder[]         @relation("PurchaseOrderReceivedBy")
-  resolvedInventoryAlerts    InventoryAlert[]        @relation("InventoryAlertResolvedBy")
-  createdRecipes             Recipe[]                @relation("RecipeCreatedBy")
-  updatedRecipes             Recipe[]                @relation("RecipeUpdatedBy")
-  createdProductionRecipes   ProductionRecipe[]      @relation("ProductionRecipeCreatedBy")
-  updatedProductionRecipes   ProductionRecipe[]      @relation("ProductionRecipeUpdatedBy")
-  triggeredConsumptions      InventoryConsumption[]  @relation("ConsumptionTriggeredBy")
-  recordedWastages           InventoryWastage[]      @relation("WastageRecordedBy")
-  customerNotes              CustomerNote[]          @relation("CustomerNoteCreatedBy")
-  generatedReports           ReportGenerationAudit[] @relation("ReportGeneratedBy")
+  waitedOrders               Order[]                   @relation("OrderWaiter")
+  generatedBills             Bill[]                    @relation("BillGeneratedBy")
+  voidedBills                Bill[]                    @relation("BillVoidedBy")
+  createdPayments            Payment[]                 @relation("PaymentCreatedBy")
+  paidPayments               Payment[]                 @relation("PaymentPaidBy")
+  paymentRefunds             PaymentRefund[]           @relation("PaymentRefundedBy")
+  generatedReceipts          Receipt[]                 @relation("ReceiptGeneratedBy")
+  receiptPrintLogs           ReceiptPrintLog[]         @relation("ReceiptPrintedBy")
+  startedKitchenItems        OrderItem[]               @relation("KitchenItemStartedBy")
+  readiedKitchenItems        OrderItem[]               @relation("KitchenItemReadiedBy")
+  servedKitchenItems         OrderItem[]               @relation("KitchenItemServedBy")
+  createdIngredients         Ingredient[]              @relation("IngredientCreatedBy")
+  updatedIngredients         Ingredient[]              @relation("IngredientUpdatedBy")
+  performedStockTransactions StockTransaction[]        @relation("StockTransactionPerformedBy")
+  createdVendors             Vendor[]                  @relation("VendorCreatedBy")
+  updatedVendors             Vendor[]                  @relation("VendorUpdatedBy")
+  createdPurchaseOrders      PurchaseOrder[]           @relation("PurchaseOrderCreatedBy")
+  updatedPurchaseOrders      PurchaseOrder[]           @relation("PurchaseOrderUpdatedBy")
+  receivedPurchaseOrders     PurchaseOrder[]           @relation("PurchaseOrderReceivedBy")
+  resolvedInventoryAlerts    InventoryAlert[]          @relation("InventoryAlertResolvedBy")
+  createdRecipes             Recipe[]                  @relation("RecipeCreatedBy")
+  updatedRecipes             Recipe[]                  @relation("RecipeUpdatedBy")
+  createdProductionRecipes   ProductionRecipe[]        @relation("ProductionRecipeCreatedBy")
+  updatedProductionRecipes   ProductionRecipe[]        @relation("ProductionRecipeUpdatedBy")
+  triggeredConsumptions      InventoryConsumption[]    @relation("ConsumptionTriggeredBy")
+  recordedWastages           InventoryWastage[]        @relation("WastageRecordedBy")
+  customerNotes              CustomerNote[]            @relation("CustomerNoteCreatedBy")
+  generatedReports           ReportGenerationAudit[]   @relation("ReportGeneratedBy")
+  employeeProfiles           EmployeeProfile[]         @relation("EmployeeUser")
+  createdEmployeeProfiles    EmployeeProfile[]         @relation("EmployeeCreatedBy")
+  updatedEmployeeProfiles    EmployeeProfile[]         @relation("EmployeeUpdatedBy")
+  assignedEmployeeShifts     EmployeeShiftAssignment[] @relation("ShiftAssignedBy")
+  recordedAttendance         Attendance[]              @relation("AttendanceRecordedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -552,9 +617,10 @@ model Role {
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  tenant                Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant                Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   membershipAssignments MembershipRole[]
   permissionAssignments RolePermission[]
+  employeeProfiles      EmployeeProfile[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, name])
@@ -1983,6 +2049,168 @@ model ReportGenerationAudit {
   @@index([tenantId, generatedAt], map: "report_generation_audits_tenant_generated_idx")
   @@index([tenantId, outletId, reportType, generatedAt], map: "report_generation_audits_catalog_idx")
   @@map("report_generation_audits")
+}
+
+model EmployeeProfile {
+  id                    String             @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId              String             @map("tenant_id") @db.Uuid
+  outletId              String             @map("outlet_id") @db.Uuid
+  userId                String             @map("user_id") @db.Uuid
+  roleId                String             @map("role_id") @db.Uuid
+  employeeCode          String             @map("employee_code") @db.Citext
+  firstName             String             @map("first_name") @db.VarChar(100)
+  lastName              String?            @map("last_name") @db.VarChar(100)
+  phone                 String?            @db.VarChar(20)
+  email                 String?            @db.Citext
+  gender                EmployeeGender?
+  dateOfBirth           DateTime?          @map("date_of_birth") @db.Date
+  dateOfJoining         DateTime           @map("date_of_joining") @db.Date
+  designation           String             @db.VarChar(120)
+  department            EmployeeDepartment
+  employmentType        EmploymentType     @map("employment_type")
+  salary                Int?               @map("salary_minor")
+  reportingManagerId    String?            @map("reporting_manager_id") @db.Uuid
+  profileImageUrl       String?            @map("profile_image_url") @db.VarChar(500)
+  preferredLanguage     String             @default("en") @map("preferred_language") @db.VarChar(35)
+  emergencyContactName  String?            @map("emergency_contact_name") @db.VarChar(160)
+  emergencyContactPhone String?            @map("emergency_contact_phone") @db.VarChar(20)
+  status                EmployeeStatus     @default(ACTIVE)
+  createdByUserId       String             @map("created_by_user_id") @db.Uuid
+  updatedByUserId       String             @map("updated_by_user_id") @db.Uuid
+  version               Int                @default(1)
+  createdAt             DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt             DateTime?          @map("deleted_at") @db.Timestamptz(3)
+
+  tenant             Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet             Outlet                    @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  user               UserAccount               @relation("EmployeeUser", fields: [userId], references: [id], onDelete: Restrict)
+  role               Role                      @relation(fields: [tenantId, roleId], references: [tenantId, id], onDelete: Restrict)
+  reportingManager   EmployeeProfile?          @relation("EmployeeManager", fields: [tenantId, reportingManagerId], references: [tenantId, id], onDelete: Restrict)
+  directReports      EmployeeProfile[]         @relation("EmployeeManager")
+  createdBy          UserAccount               @relation("EmployeeCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy          UserAccount               @relation("EmployeeUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  shiftAssignments   EmployeeShiftAssignment[]
+  attendanceRecords  Attendance[]
+  performanceRecords EmployeePerformance[]
+
+  @@unique([tenantId, id], map: "employee_profiles_tenant_id_id_key")
+  @@unique([tenantId, employeeCode], map: "employee_profiles_tenant_code_key")
+  @@unique([tenantId, userId], map: "employee_profiles_tenant_user_key")
+  @@index([tenantId, outletId, status, deletedAt], map: "employee_profiles_directory_idx")
+  @@index([tenantId, department, designation], map: "employee_profiles_department_idx")
+  @@index([tenantId, reportingManagerId], map: "employee_profiles_manager_idx")
+  @@map("employee_profiles")
+}
+
+model Shift {
+  id           String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  outletId     String   @map("outlet_id") @db.Uuid
+  name         String   @db.VarChar(120)
+  startTime    DateTime @map("start_time") @db.Time(0)
+  endTime      DateTime @map("end_time") @db.Time(0)
+  breakMinutes Int      @default(0) @map("break_minutes")
+  isNightShift Boolean  @default(false) @map("is_night_shift")
+  isActive     Boolean  @default(true) @map("is_active")
+  version      Int      @default(1)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant      Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet      Outlet                    @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  assignments EmployeeShiftAssignment[]
+
+  @@unique([tenantId, id], map: "shifts_tenant_id_id_key")
+  @@unique([tenantId, outletId, name], map: "shifts_tenant_outlet_name_key")
+  @@index([tenantId, outletId, isActive], map: "shifts_active_idx")
+  @@map("shifts")
+}
+
+model EmployeeShiftAssignment {
+  id               String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  outletId         String    @map("outlet_id") @db.Uuid
+  employeeId       String    @map("employee_id") @db.Uuid
+  shiftId          String    @map("shift_id") @db.Uuid
+  effectiveFrom    DateTime  @map("effective_from") @db.Date
+  effectiveTo      DateTime? @map("effective_to") @db.Date
+  assignedByUserId String    @map("assigned_by_user_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet     Outlet          @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  employee   EmployeeProfile @relation(fields: [tenantId, employeeId], references: [tenantId, id], onDelete: Restrict)
+  shift      Shift           @relation(fields: [tenantId, shiftId], references: [tenantId, id], onDelete: Restrict)
+  assignedBy UserAccount     @relation("ShiftAssignedBy", fields: [assignedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "employee_shift_assignments_tenant_id_id_key")
+  @@index([tenantId, outletId, employeeId, effectiveFrom, effectiveTo], map: "employee_shift_assignments_employee_idx")
+  @@index([tenantId, shiftId, effectiveFrom, effectiveTo], map: "employee_shift_assignments_shift_idx")
+  @@map("employee_shift_assignments")
+}
+
+model Attendance {
+  id               String           @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId         String           @map("tenant_id") @db.Uuid
+  outletId         String           @map("outlet_id") @db.Uuid
+  employeeId       String           @map("employee_id") @db.Uuid
+  attendanceDate   DateTime         @map("attendance_date") @db.Date
+  businessDate     DateTime         @map("business_date") @db.Date
+  checkInTime      DateTime?        @map("check_in_time") @db.Timestamptz(3)
+  checkOutTime     DateTime?        @map("check_out_time") @db.Timestamptz(3)
+  workedMinutes    Int              @default(0) @map("worked_minutes")
+  status           AttendanceStatus @default(PRESENT)
+  remarks          String?          @db.VarChar(500)
+  deviceId         String?          @map("device_id") @db.VarChar(120)
+  locationCaptured Json?            @map("location_captured") @db.JsonB
+  recordedByUserId String           @map("recorded_by_user_id") @db.Uuid
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet     Outlet          @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  employee   EmployeeProfile @relation(fields: [tenantId, employeeId], references: [tenantId, id], onDelete: Restrict)
+  recordedBy UserAccount     @relation("AttendanceRecordedBy", fields: [recordedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "attendance_tenant_id_id_key")
+  @@unique([tenantId, employeeId, attendanceDate], map: "attendance_employee_day_key")
+  @@index([tenantId, businessDate, outletId, status], map: "attendance_reporting_idx")
+  @@index([tenantId, employeeId, businessDate], map: "attendance_employee_idx")
+  @@map("attendance")
+}
+
+model EmployeePerformance {
+  id                 String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  outletId           String   @map("outlet_id") @db.Uuid
+  employeeId         String   @map("employee_id") @db.Uuid
+  businessDate       DateTime @map("business_date") @db.Date
+  ordersHandled      Int      @default(0) @map("orders_handled")
+  salesAmount        Int      @default(0) @map("sales_amount_minor")
+  customersServed    Int      @default(0) @map("customers_served")
+  averageTicketSize  Int      @default(0) @map("average_ticket_size_minor")
+  itemsProcessed     Int      @default(0) @map("items_processed")
+  billsProcessed     Int      @default(0) @map("bills_processed")
+  paymentsCollected  Int      @default(0) @map("payments_collected_minor")
+  tipsCollected      Int      @default(0) @map("tips_collected_minor")
+  discountsGiven     Int      @default(0) @map("discounts_given_minor")
+  refundsProcessed   Int      @default(0) @map("refunds_processed")
+  averagePrepMinutes Decimal  @default(0) @map("average_prep_minutes") @db.Decimal(8, 2)
+  delayedOrders      Int      @default(0) @map("delayed_orders")
+  customerRating     Decimal? @map("customer_rating") @db.Decimal(3, 2)
+  generatedAt        DateTime @default(now()) @map("generated_at") @db.Timestamptz(3)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet   Outlet          @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  employee EmployeeProfile @relation(fields: [tenantId, employeeId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "employee_performance_tenant_id_id_key")
+  @@unique([tenantId, employeeId, businessDate], map: "employee_performance_employee_day_key")
+  @@index([tenantId, businessDate, outletId, salesAmount], map: "employee_performance_reporting_idx")
+  @@map("employee_performance")
 }
 
 model CustomerStats {

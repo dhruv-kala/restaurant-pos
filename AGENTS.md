@@ -114,7 +114,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 22 are complete at the foundation level.
+Tasks 1 through 23 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -161,7 +161,11 @@ Task 22 implemented business-date report facts, audited and tenant-isolated
 sales/GST/payment/outlet/customer/inventory/kitchen/staff reports, dashboard
 KPIs, export foundations, shared clients, and admin report screens.
 
-Task 23 is next: implement the Employee & Staff Management Module.
+Task 23 implemented user-linked employee profiles, shifts, effective
+assignments, attendance, source-derived performance projections, typed clients,
+and admin workforce screens.
+
+Task 24 is next: implement the RBAC & User Management Module.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

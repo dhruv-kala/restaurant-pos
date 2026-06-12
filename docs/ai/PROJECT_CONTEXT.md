@@ -323,6 +323,9 @@ The repository currently contains:
 - Business-date-driven sales, GST, payment, outlet, customer, inventory,
   kitchen, staff, platform, and dashboard reporting with append-only generation
   audits, typed clients, Riverpod providers, and admin report screens
+- Existing-user-linked employee profiles, tenant roles, outlet assignments,
+  effective shifts, attendance, operational performance projections, typed
+  clients, Riverpod providers, and admin workforce screens
 
 ## Authoritative References
 

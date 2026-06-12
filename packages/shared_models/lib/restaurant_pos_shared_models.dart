@@ -3,6 +3,7 @@ library;
 export 'src/billing/billing_models.dart';
 export 'src/converters/date_time_converter.dart';
 export 'src/customers/customer_models.dart';
+export 'src/employees/employee_models.dart';
 export 'src/enums/outlet_status.dart';
 export 'src/enums/tenant_status.dart';
 export 'src/enums/user_role.dart';

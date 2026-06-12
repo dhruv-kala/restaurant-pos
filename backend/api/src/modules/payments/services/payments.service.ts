@@ -17,6 +17,7 @@ import { applyDatabaseRequestContext } from '../../../common/database/request-co
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 import { CustomerStatsService } from '../../customers/services/customer-stats.service';
+import { PerformanceService } from '../../employees/services/performance.service';
 import type { CreatePaymentDto } from '../dto/create-payment.dto';
 import type { PaymentQueryDto } from '../dto/payment-query.dto';
 import type {
@@ -62,6 +63,7 @@ export class PaymentsService {
     private readonly prisma: PrismaService,
     private readonly events: PaymentEventsService,
     private readonly customerStats: CustomerStatsService,
+    private readonly performance: PerformanceService,
   ) {}
 
   async create(dto: CreatePaymentDto, user: AuthenticatedUser): Promise<PaymentResponseDto> {
@@ -170,6 +172,14 @@ export class PaymentsService {
       });
       await this.reconcileBill(tx, payment.billId);
       if (successful) await this.customerStats.recordSuccessfulPayment(tx, payment.id);
+      if (successful) {
+        await this.performance.refreshByUserInTransaction(
+          tx,
+          updated.tenantId,
+          user.id,
+          updated.businessDate,
+        );
+      }
       if (dto.status === PaymentStatus.FAILED) {
         this.events.publishFailed({
           type: 'PaymentFailed',
@@ -244,6 +254,12 @@ export class PaymentsService {
         },
         include: paymentInclude,
       });
+      await this.performance.refreshByUserInTransaction(
+        tx,
+        updated.tenantId,
+        user.id,
+        updated.businessDate,
+      );
       await this.reconcileBill(tx, payment.billId);
       this.events.publishRefunded({
         type: 'PaymentRefunded',
@@ -369,6 +385,12 @@ export class PaymentsService {
       });
       await this.reconcileBill(tx, lockedBill.id);
       await this.customerStats.recordSuccessfulPayment(tx, payment.id);
+      await this.performance.refreshByUserInTransaction(
+        tx,
+        payment.tenantId,
+        user.id,
+        payment.businessDate,
+      );
       this.events.publishCreated({
         type: 'PaymentCreated',
         tenantId: payment.tenantId,

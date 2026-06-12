@@ -4,6 +4,7 @@ import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 import 'features/menu/presentation/screens/menu_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
 import 'features/customers/presentation/screens/customer_dashboard.dart';
+import 'features/employees/presentation/screens/employee_dashboard.dart';
 import 'features/recipes/presentation/screens/recipe_dashboard.dart';
 import 'features/reports/presentation/screens/reports_dashboard.dart';
 import 'features/tables/presentation/screens/table_layout_screen.dart';
@@ -44,6 +45,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           RecipeDashboard(),
           CustomerDashboard(),
           ReportsDashboard(),
+          EmployeeDashboard(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -65,6 +67,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           NavigationDestination(icon: Icon(Icons.menu_book), label: 'Recipes'),
           NavigationDestination(icon: Icon(Icons.people), label: 'Customers'),
           NavigationDestination(icon: Icon(Icons.analytics), label: 'Reports'),
+          NavigationDestination(icon: Icon(Icons.badge), label: 'Employees'),
         ],
       ),
     );
