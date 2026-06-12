@@ -2,8 +2,7 @@
 
 ## Status
 
-Planned for Task 25. This document defines the contract boundary; it does not
-implement the module.
+Implemented at the Task 25 foundation level.
 
 ## Objective
 
@@ -112,3 +111,27 @@ Audit export requires a distinct permission and reason.
 - SIEM integration
 - automated retention deletion before legal/product policy is approved
 
+## Implemented Scope
+
+- immutable `AuditEvent` Prisma model and migration
+- per-platform/per-tenant SHA-256 hash chains with transaction advisory locking
+- forced RLS and database update/delete rejection
+- redaction of credential, token, and payment-secret keys
+- tenant, outlet, actor, action, target, result, date, correlation, and search
+  filters
+- protected list, detail, and export-request APIs
+- audit of audit reads and exports
+- transactional authentication login/refresh/logout events
+- transactional RBAC user, role, permission, and outlet-assignment events
+- transactional report generation and export events
+- shared Dart models, typed Dio client, Riverpod providers, and admin explorer
+
+## Deferred Scope
+
+- asynchronous file rendering and delivery
+- automated retention execution
+- SIEM export
+- comprehensive denied/failed request interception
+- historical backfill for business actions completed before this migration
+- incremental integration of remaining domain services into the shared append
+  contract

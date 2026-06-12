@@ -17,9 +17,9 @@ Last updated: 2026-06-12
 |---|---|---|
 | 24 | COMPLETE | RBAC and user management |
 | 24.5 | COMPLETE | AI development optimization framework |
-| 25 | NEXT | Audit and activity logging |
-| 26 | PLANNED | Notification templates, preferences, and delivery foundation |
-| 27 | PLANNED | Loyalty points, tiers, rewards, and referrals |
+| 25 | COMPLETE | Audit and activity logging |
+| 26 | COMPLETE | In-app Notification Center, preferences, read state, publishing, shared clients, and Flutter foundations |
+| 27 | NEXT | Communication Module: templates and email/SMS/WhatsApp/push provider delivery |
 | 28 | PLANNED | SaaS plans, subscriptions, entitlements, and limits |
 | 29 | PLANNED | Promotions, coupons, and discount policy engine |
 | 30 | PLANNED | Tax configuration and fiscal policy administration |
@@ -113,4 +113,3 @@ Last updated: 2026-06-12
 | 98 | PLANNED | Pilot rollout, telemetry review, and stabilization |
 | 99 | PLANNED | Production launch checklist and go-live rehearsal |
 | 100 | PLANNED | General availability readiness review |
-

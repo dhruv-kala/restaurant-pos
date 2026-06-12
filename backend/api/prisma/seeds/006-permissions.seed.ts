@@ -24,6 +24,7 @@ const moduleActions: Record<string, readonly string[]> = {
   subscriptions: ['create', 'read', 'update', 'cancel', 'renew', 'invoice', 'plan_manage', 'module_manage'],
   settings: ['read', 'update', 'tax', 'receipt', 'inventory', 'order', 'kitchen', 'security'],
   audit: ['read', 'export', 'user_activity', 'financial', 'inventory', 'security', 'retention', 'configure'],
+  notifications: ['read', 'create', 'manage', 'send', 'preferences', 'tenant', 'outlet', 'user'],
 };
 
 export const PERMISSIONS = Object.entries(moduleActions).flatMap(

@@ -15,6 +15,7 @@ import {
 } from '../../../common/database/request-context.util';
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
+import { AuditService } from '../../audit/services/audit.service';
 import type { CreateUserDto } from '../dto/create-user.dto';
 import type { InviteUserDto } from '../dto/invite-user.dto';
 import type { RbacQueryDto } from '../dto/rbac-query.dto';
@@ -64,7 +65,10 @@ type MembershipRecord = Prisma.TenantMembershipGetPayload<{
 
 @Injectable()
 export class UsersManagementService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   async create(dto: CreateUserDto, actor: AuthenticatedUser): Promise<object> {
     requireRbacWrite(actor);
@@ -89,12 +93,8 @@ export class UsersManagementService {
       const where: Prisma.TenantMembershipWhereInput = {
         tenantId,
         ...(query.status ? { status: query.status } : {}),
-        ...(query.roleId
-          ? { roleAssignments: { some: { roleId: query.roleId } } }
-          : {}),
-        ...(outletId
-          ? { outletAssignments: { some: { outletId } } }
-          : {}),
+        ...(query.roleId ? { roleAssignments: { some: { roleId: query.roleId } } } : {}),
+        ...(outletId ? { outletAssignments: { some: { outletId } } } : {}),
         ...(query.search?.trim()
           ? {
               user: {
@@ -141,9 +141,7 @@ export class UsersManagementService {
         where: {
           ...(tenantId ? { tenantId } : {}),
           userId: id,
-          ...(managerOutlet
-            ? { outletAssignments: { some: { outletId: managerOutlet } } }
-            : {}),
+          ...(managerOutlet ? { outletAssignments: { some: { outletId: managerOutlet } } } : {}),
         },
         include: membershipInclude,
       });
@@ -152,11 +150,7 @@ export class UsersManagementService {
     });
   }
 
-  async update(
-    id: string,
-    dto: UpdateUserDto,
-    actor: AuthenticatedUser,
-  ): Promise<object> {
+  async update(id: string, dto: UpdateUserDto, actor: AuthenticatedUser): Promise<object> {
     requireRbacWrite(actor);
     const tenantId = hasRole(actor, PLATFORM_ADMIN_ROLE)
       ? undefined
@@ -182,6 +176,21 @@ export class UsersManagementService {
         where: { id: membership.id },
         include: membershipInclude,
       });
+      await this.audit.append(transaction, {
+        tenantId: membership.tenantId,
+        actorUserId: actor.id,
+        actorRoles: actor.roles,
+        action: 'users.profile.updated',
+        targetType: 'UserAccount',
+        targetId: membership.userId,
+        changes: {
+          changedFields: [
+            ...(dto.name !== undefined ? ['name'] : []),
+            ...(dto.email !== undefined ? ['email'] : []),
+            ...(dto.phone !== undefined ? ['phone'] : []),
+          ],
+        },
+      });
       return this.toResponse(updated);
     });
   }
@@ -204,13 +213,21 @@ export class UsersManagementService {
           status: dto.status,
           joinedAt:
             dto.status === MembershipStatus.ACTIVE
-              ? membership.joinedAt ?? new Date()
+              ? (membership.joinedAt ?? new Date())
               : membership.joinedAt,
-          revokedAt:
-            dto.status === MembershipStatus.REVOKED ? new Date() : null,
+          revokedAt: dto.status === MembershipStatus.REVOKED ? new Date() : null,
           version: { increment: 1 },
         },
         include: membershipInclude,
+      });
+      await this.audit.append(transaction, {
+        tenantId: membership.tenantId,
+        actorUserId: actor.id,
+        actorRoles: actor.roles,
+        action: 'users.status.changed',
+        targetType: 'TenantMembership',
+        targetId: membership.id,
+        changes: { before: membership.status, after: dto.status },
       });
       return this.toResponse(updated);
     });
@@ -230,10 +247,7 @@ export class UsersManagementService {
           status: { not: MembershipStatus.REVOKED },
         },
       });
-      if (
-        membershipCount > 1 &&
-        !hasRole(actor, PLATFORM_ADMIN_ROLE)
-      ) {
+      if (membershipCount > 1 && !hasRole(actor, PLATFORM_ADMIN_ROLE)) {
         throw new ForbiddenException(
           'Platform administrator approval is required for multi-tenant password reset',
         );
@@ -250,6 +264,15 @@ export class UsersManagementService {
       await transaction.tenantMembership.update({
         where: { id: membership.id },
         data: { status: MembershipStatus.INVITED, version: { increment: 1 } },
+      });
+      await this.audit.append(transaction, {
+        tenantId: membership.tenantId,
+        actorUserId: actor.id,
+        actorRoles: actor.roles,
+        action: 'users.password_reset.initialized',
+        targetType: 'UserAccount',
+        targetId: membership.userId,
+        reason: 'Administrative password reset',
       });
       return {
         userId: membership.userId,
@@ -269,12 +292,7 @@ export class UsersManagementService {
     const tenantId = resolveRbacTenantId(dto.tenantId, actor);
     return this.prisma.$transaction(async (transaction) => {
       await applyDatabaseRequestContext(transaction, actor, tenantId);
-      await this.validateAssignments(
-        transaction,
-        tenantId,
-        dto.roleIds,
-        dto.outletIds ?? [],
-      );
+      await this.validateAssignments(transaction, tenantId, dto.roleIds, dto.outletIds ?? []);
       const existingMembership = await transaction.tenantMembership.findFirst({
         where: { tenantId, user: { email: dto.email.toLowerCase() } },
       });
@@ -311,10 +329,7 @@ export class UsersManagementService {
         data: {
           tenantId,
           userId: user.id,
-          status:
-            invited || !password
-              ? MembershipStatus.INVITED
-              : MembershipStatus.ACTIVE,
+          status: invited || !password ? MembershipStatus.INVITED : MembershipStatus.ACTIVE,
           joinedAt: password ? new Date() : null,
         },
       });
@@ -337,6 +352,19 @@ export class UsersManagementService {
       const created = await transaction.tenantMembership.findUniqueOrThrow({
         where: { id: membership.id },
         include: membershipInclude,
+      });
+      await this.audit.append(transaction, {
+        tenantId,
+        actorUserId: actor.id,
+        actorRoles: actor.roles,
+        action: invited ? 'users.invited' : 'users.created',
+        targetType: 'TenantMembership',
+        targetId: membership.id,
+        changes: {
+          userId: user.id,
+          roleIds: dto.roleIds,
+          outletIds: dto.outletIds ?? [],
+        },
       });
       return this.toResponse(created);
     });
@@ -405,10 +433,7 @@ export class UsersManagementService {
   }
 
   private throwUserConflict(error: unknown): never {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw new ConflictException('Email or phone is already in use');
     }
     throw error;

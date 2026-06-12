@@ -13,15 +13,12 @@ import {
 } from '../../../common/database/request-context.util';
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
+import { AuditService } from '../../audit/services/audit.service';
 import type { AssignPermissionsDto } from '../dto/assign-permissions.dto';
 import type { CreateRoleDto } from '../dto/create-role.dto';
 import type { RbacQueryDto } from '../dto/rbac-query.dto';
 import type { UpdateRoleDto } from '../dto/update-role.dto';
-import {
-  requireRbacRead,
-  requireRbacWrite,
-  resolveRbacTenantId,
-} from './rbac-access.util';
+import { requireRbacRead, requireRbacWrite, resolveRbacTenantId } from './rbac-access.util';
 
 const roleInclude = {
   _count: {
@@ -31,7 +28,10 @@ const roleInclude = {
 
 @Injectable()
 export class RolesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   async create(dto: CreateRoleDto, actor: AuthenticatedUser): Promise<object> {
     requireRbacWrite(actor);
@@ -39,18 +39,26 @@ export class RolesService {
     return this.prisma.$transaction(async (transaction) => {
       await applyDatabaseRequestContext(transaction, actor, tenantId);
       try {
-        return this.toResponse(
-          await transaction.role.create({
-            data: {
-              tenantId,
-              name: dto.name.trim(),
-              systemKey: dto.code.toUpperCase(),
-              description: dto.description?.trim(),
-              isSystem: false,
-            },
-            include: roleInclude,
-          }),
-        );
+        const role = await transaction.role.create({
+          data: {
+            tenantId,
+            name: dto.name.trim(),
+            systemKey: dto.code.toUpperCase(),
+            description: dto.description?.trim(),
+            isSystem: false,
+          },
+          include: roleInclude,
+        });
+        await this.audit.append(transaction, {
+          tenantId,
+          actorUserId: actor.id,
+          actorRoles: actor.roles,
+          action: 'roles.created',
+          targetType: 'Role',
+          targetId: role.id,
+          changes: { name: role.name, code: role.systemKey },
+        });
+        return this.toResponse(role);
       } catch (error: unknown) {
         this.throwConflict(error);
       }
@@ -106,27 +114,37 @@ export class RolesService {
     return this.toResponse(role);
   }
 
-  async update(
-    id: string,
-    dto: UpdateRoleDto,
-    actor: AuthenticatedUser,
-  ): Promise<object> {
+  async update(id: string, dto: UpdateRoleDto, actor: AuthenticatedUser): Promise<object> {
     requireRbacWrite(actor);
     return this.withRole(id, actor, true, async (transaction, role) => {
       this.protectSystemRole(role.isSystem, actor);
       try {
-        return this.toResponse(
-          await transaction.role.update({
-            where: { id },
-            data: {
-              name: dto.name?.trim(),
-              systemKey: dto.code?.toUpperCase(),
-              description: dto.description?.trim(),
-              version: { increment: 1 },
-            },
-            include: roleInclude,
-          }),
-        );
+        const updated = await transaction.role.update({
+          where: { id },
+          data: {
+            name: dto.name?.trim(),
+            systemKey: dto.code?.toUpperCase(),
+            description: dto.description?.trim(),
+            version: { increment: 1 },
+          },
+          include: roleInclude,
+        });
+        await this.audit.append(transaction, {
+          tenantId: role.tenantId,
+          actorUserId: actor.id,
+          actorRoles: actor.roles,
+          action: 'roles.updated',
+          targetType: 'Role',
+          targetId: role.id,
+          changes: {
+            changedFields: [
+              ...(dto.name !== undefined ? ['name'] : []),
+              ...(dto.code !== undefined ? ['code'] : []),
+              ...(dto.description !== undefined ? ['description'] : []),
+            ],
+          },
+        });
+        return this.toResponse(updated);
       } catch (error: unknown) {
         this.throwConflict(error);
       }
@@ -149,6 +167,15 @@ export class RolesService {
           deletedAt: new Date(),
           version: { increment: 1 },
         },
+      });
+      await this.audit.append(transaction, {
+        tenantId: role.tenantId,
+        actorUserId: actor.id,
+        actorRoles: actor.roles,
+        action: 'roles.deleted',
+        targetType: 'Role',
+        targetId: role.id,
+        changes: { name: role.name, code: role.systemKey },
       });
     });
   }
@@ -183,6 +210,10 @@ export class RolesService {
     await this.withRole(id, actor, true, async (transaction, role) => {
       this.protectSystemRole(role.isSystem, actor);
       const uniqueIds = [...new Set(dto.permissionIds)];
+      const previous = await transaction.rolePermission.findMany({
+        where: { tenantId: role.tenantId, roleId: role.id },
+        select: { permissionId: true },
+      });
       const permissions = await transaction.permission.findMany({
         where: { id: { in: uniqueIds }, isActive: true },
         select: { id: true },
@@ -191,15 +222,13 @@ export class RolesService {
         throw new NotFoundException('One or more permissions are unavailable');
       }
       if (!hasRole(actor, PLATFORM_ADMIN_ROLE)) {
-        const tenantAdminTemplate =
-          await transaction.systemRoleTemplate.findUnique({
-            where: { roleKey: 'TENANT_ADMIN' },
-            include: { permissionAssignments: true },
-          });
+        const tenantAdminTemplate = await transaction.systemRoleTemplate.findUnique({
+          where: { roleKey: 'TENANT_ADMIN' },
+          include: { permissionAssignments: true },
+        });
         const allowed = new Set(
-          tenantAdminTemplate?.permissionAssignments.map(
-            (assignment) => assignment.permissionId,
-          ) ?? [],
+          tenantAdminTemplate?.permissionAssignments.map((assignment) => assignment.permissionId) ??
+            [],
         );
         if (uniqueIds.some((permissionId) => !allowed.has(permissionId))) {
           throw new ForbiddenException(
@@ -219,6 +248,18 @@ export class RolesService {
           })),
         });
       }
+      await this.audit.append(transaction, {
+        tenantId: role.tenantId,
+        actorUserId: actor.id,
+        actorRoles: actor.roles,
+        action: 'roles.permissions.changed',
+        targetType: 'Role',
+        targetId: role.id,
+        changes: {
+          before: previous.map((item) => item.permissionId),
+          after: uniqueIds,
+        },
+      });
     });
     return this.getPermissions(id, actor);
   }
@@ -248,26 +289,17 @@ export class RolesService {
         include: roleInclude,
       });
       if (!role) throw new NotFoundException('Role not found');
-      return operation
-        ? operation(transaction, role)
-        : (role as unknown as T);
+      return operation ? operation(transaction, role) : (role as unknown as T);
     });
   }
 
-  private protectSystemRole(
-    isSystem: boolean,
-    actor: AuthenticatedUser,
-  ): void {
+  private protectSystemRole(isSystem: boolean, actor: AuthenticatedUser): void {
     if (isSystem && !hasRole(actor, PLATFORM_ADMIN_ROLE)) {
-      throw new ForbiddenException(
-        'Tenant administrators cannot modify system roles',
-      );
+      throw new ForbiddenException('Tenant administrators cannot modify system roles');
     }
   }
 
-  private toResponse(
-    role: Prisma.RoleGetPayload<{ include: typeof roleInclude }>,
-  ): object {
+  private toResponse(role: Prisma.RoleGetPayload<{ include: typeof roleInclude }>): object {
     return {
       id: role.id,
       tenantId: role.tenantId,
@@ -284,13 +316,8 @@ export class RolesService {
   }
 
   private throwConflict(error: unknown): never {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
-      throw new ConflictException(
-        'Role name or code already exists for this tenant',
-      );
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new ConflictException('Role name or code already exists for this tenant');
     }
     throw error;
   }

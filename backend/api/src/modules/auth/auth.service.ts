@@ -7,7 +7,9 @@ import { randomUUID } from 'node:crypto';
 import type { SignOptions } from 'jsonwebtoken';
 
 import type { EnvironmentVariables } from '../../config/environment.validation';
+import { applyDatabaseRequestContext } from '../../common/database/request-context.util';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AuditService } from '../audit/services/audit.service';
 import type {
   AuthResponseDto,
   LogoutResponseDto,
@@ -16,15 +18,11 @@ import type {
 import type { LoginDto } from './dto/login.dto';
 import type { RefreshTokenDto } from './dto/refresh-token.dto';
 import type { AuthenticatedUser } from './types/authenticated-user.type';
-import type {
-  AccessTokenPayload,
-  RefreshTokenPayload,
-} from './types/jwt-payload.type';
+import type { AccessTokenPayload, RefreshTokenPayload } from './types/jwt-payload.type';
 
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password';
 const INVALID_REFRESH_TOKEN_MESSAGE = 'Invalid refresh token';
-const DUMMY_PASSWORD_HASH =
-  '$2b$12$C6UzMDM.H6dfI/f/IKcEe.5fR3H9uCzYVYIBz4h5VfN0D2I.8xJzK';
+const DUMMY_PASSWORD_HASH = '$2b$12$C6UzMDM.H6dfI/f/IKcEe.5fR3H9uCzYVYIBz4h5VfN0D2I.8xJzK';
 const REFRESH_TOKEN_HASH_ROUNDS = 12;
 
 @Injectable()
@@ -33,6 +31,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<EnvironmentVariables, true>,
+    private readonly audit: AuditService,
   ) {}
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
@@ -106,10 +105,7 @@ export class AuthService {
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
     }
 
-    const tokenMatches = await bcrypt.compare(
-      dto.refreshToken,
-      storedToken.tokenHash,
-    );
+    const tokenMatches = await bcrypt.compare(dto.refreshToken, storedToken.tokenHash);
     if (!tokenMatches) {
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
     }
@@ -128,32 +124,62 @@ export class AuthService {
     const payload = await this.verifyRefreshToken(dto.refreshToken);
     const storedToken = await this.prisma.refreshToken.findUnique({
       where: { id: payload.jti },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            displayName: true,
+            isPlatformAdmin: true,
+            status: true,
+            deletedAt: true,
+          },
+        },
+      },
     });
 
     if (
       storedToken === null ||
       storedToken.userId !== payload.sub ||
       storedToken.revokedAt !== null ||
-      storedToken.expiresAt <= new Date()
+      storedToken.expiresAt <= new Date() ||
+      storedToken.user.email === null ||
+      storedToken.user.status !== UserStatus.ACTIVE ||
+      storedToken.user.deletedAt !== null
     ) {
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
     }
 
-    const tokenMatches = await bcrypt.compare(
-      dto.refreshToken,
-      storedToken.tokenHash,
-    );
+    const tokenMatches = await bcrypt.compare(dto.refreshToken, storedToken.tokenHash);
     if (!tokenMatches) {
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
     }
 
-    const result = await this.prisma.refreshToken.updateMany({
-      where: { id: storedToken.id, revokedAt: null },
-      data: { revokedAt: new Date() },
+    const user = await this.resolveAuthenticatedUser(
+      storedToken.user.id,
+      storedToken.user.email,
+      storedToken.user.displayName,
+      storedToken.user.isPlatformAdmin,
+    );
+    await this.prisma.$transaction(async (transaction) => {
+      await applyDatabaseRequestContext(transaction, user, user.tenantId ?? undefined);
+      const result = await transaction.refreshToken.updateMany({
+        where: { id: storedToken.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      if (result.count !== 1) {
+        throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
+      }
+      await this.audit.append(transaction, {
+        tenantId: user.tenantId,
+        outletId: user.outletId,
+        actorUserId: user.id,
+        actorRoles: user.roles,
+        action: 'auth.logout',
+        targetType: 'RefreshToken',
+        targetId: storedToken.id,
+      });
     });
-    if (result.count !== 1) {
-      throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
-    }
 
     return { message: 'Logged out successfully' };
   }
@@ -201,11 +227,7 @@ export class AuthService {
         };
       }
 
-      await this.setLocalContext(
-        transaction,
-        'app.tenant_id',
-        membership.tenantId,
-      );
+      await this.setLocalContext(transaction, 'app.tenant_id', membership.tenantId);
 
       const scopedMembership = await transaction.tenantMembership.findUnique({
         where: {
@@ -255,17 +277,14 @@ export class AuthService {
         email,
         name,
         tenantId: membership.tenantId,
-        outletId:
-          scopedMembership.outletAssignments[0]?.outletId ?? null,
+        outletId: scopedMembership.outletAssignments[0]?.outletId ?? null,
         roles: scopedMembership.roleAssignments.map(({ role }) =>
           (role.systemKey ?? role.name).toUpperCase(),
         ),
         permissions: [
           ...new Set(
             scopedMembership.roleAssignments.flatMap(({ role }) =>
-              (role.permissionAssignments ?? []).map(
-                ({ permission }) => permission.permissionKey,
-              ),
+              (role.permissionAssignments ?? []).map(({ permission }) => permission.permissionKey),
             ),
           ),
         ],
@@ -273,9 +292,7 @@ export class AuthService {
     });
   }
 
-  private async issueTokenPair(
-    user: AuthenticatedUser,
-  ): Promise<TokenPairResponseDto> {
+  private async issueTokenPair(user: AuthenticatedUser): Promise<TokenPairResponseDto> {
     const accessToken = await this.signAccessToken(user);
     const refreshTokenId = randomUUID();
     const refreshToken = await this.signRefreshToken(user.id, refreshTokenId);
@@ -286,16 +303,26 @@ export class AuthService {
     }
     const expiresAt = new Date(refreshPayload.exp * 1000);
 
-    await this.prisma.refreshToken.create({
-      data: {
-        id: refreshTokenId,
-        userId: user.id,
-        tokenHash: await bcrypt.hash(
-          refreshToken,
-          REFRESH_TOKEN_HASH_ROUNDS,
-        ),
-        expiresAt,
-      },
+    const tokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_HASH_ROUNDS);
+    await this.prisma.$transaction(async (transaction) => {
+      await applyDatabaseRequestContext(transaction, user, user.tenantId ?? undefined);
+      await transaction.refreshToken.create({
+        data: {
+          id: refreshTokenId,
+          userId: user.id,
+          tokenHash,
+          expiresAt,
+        },
+      });
+      await this.audit.append(transaction, {
+        tenantId: user.tenantId,
+        outletId: user.outletId,
+        actorUserId: user.id,
+        actorRoles: user.roles,
+        action: 'auth.login.succeeded',
+        targetType: 'UserAccount',
+        targetId: user.id,
+      });
     });
 
     return { accessToken, refreshToken };
@@ -306,10 +333,7 @@ export class AuthService {
     user: AuthenticatedUser,
   ): Promise<TokenPairResponseDto> {
     const replacementTokenId = randomUUID();
-    const refreshToken = await this.signRefreshToken(
-      user.id,
-      replacementTokenId,
-    );
+    const refreshToken = await this.signRefreshToken(user.id, replacementTokenId);
     const refreshPayload = this.jwtService.decode<RefreshTokenPayload>(refreshToken);
 
     if (refreshPayload.exp === undefined) {
@@ -317,13 +341,11 @@ export class AuthService {
     }
     const expiresAt = new Date(refreshPayload.exp * 1000);
 
-    const tokenHash = await bcrypt.hash(
-      refreshToken,
-      REFRESH_TOKEN_HASH_ROUNDS,
-    );
+    const tokenHash = await bcrypt.hash(refreshToken, REFRESH_TOKEN_HASH_ROUNDS);
     const accessToken = await this.signAccessToken(user);
 
     await this.prisma.$transaction(async (transaction) => {
+      await applyDatabaseRequestContext(transaction, user, user.tenantId ?? undefined);
       const revoked = await transaction.refreshToken.updateMany({
         where: { id: currentTokenId, revokedAt: null },
         data: {
@@ -343,6 +365,16 @@ export class AuthService {
           tokenHash,
           expiresAt,
         },
+      });
+      await this.audit.append(transaction, {
+        tenantId: user.tenantId,
+        outletId: user.outletId,
+        actorUserId: user.id,
+        actorRoles: user.roles,
+        action: 'auth.token.refreshed',
+        targetType: 'RefreshToken',
+        targetId: replacementTokenId,
+        changes: { replacedTokenId: currentTokenId },
       });
     });
 
@@ -380,18 +412,13 @@ export class AuthService {
     });
   }
 
-  private async verifyRefreshToken(
-    token: string,
-  ): Promise<RefreshTokenPayload> {
+  private async verifyRefreshToken(token: string): Promise<RefreshTokenPayload> {
     try {
-      const payload = await this.jwtService.verifyAsync<RefreshTokenPayload>(
-        token,
-        {
-          secret: this.configService.get('JWT_REFRESH_SECRET', {
-            infer: true,
-          }),
-        },
-      );
+      const payload = await this.jwtService.verifyAsync<RefreshTokenPayload>(token, {
+        secret: this.configService.get('JWT_REFRESH_SECRET', {
+          infer: true,
+        }),
+      });
 
       if (payload.type !== 'refresh' || !payload.sub || !payload.jti) {
         throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);

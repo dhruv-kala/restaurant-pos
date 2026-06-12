@@ -315,6 +315,64 @@ enum ReportExportFormat {
   @@map("report_export_format")
 }
 
+enum AuditResult {
+  SUCCESS
+  DENIED
+  FAILED
+
+  @@map("audit_result")
+}
+
+enum AuditExportFormat {
+  CSV
+  JSON
+
+  @@map("audit_export_format")
+}
+
+enum NotificationAudience {
+  USER
+  TENANT
+  OUTLET
+
+  @@map("notification_audience")
+}
+
+enum NotificationCategory {
+  SYSTEM
+  SECURITY
+  OPERATIONS
+  ORDERS
+  KITCHEN
+  BILLING
+  PAYMENTS
+  INVENTORY
+  STAFF
+  CUSTOMER
+  REPORTS
+
+  @@map("notification_category")
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+
+  @@map("notification_priority")
+}
+
+enum NotificationDeliveryStatus {
+  PENDING
+  DELIVERED
+  SKIPPED
+  FAILED
+  CANCELLED
+
+  @@map("notification_delivery_status")
+}
+
 enum EmploymentType {
   FULL_TIME
   PART_TIME
@@ -550,6 +608,10 @@ model Tenant {
   employeeShiftAssignments    EmployeeShiftAssignment[]
   attendanceRecords           Attendance[]
   employeePerformance         EmployeePerformance[]
+  auditEvents                 AuditEvent[]
+  notifications               Notification[]
+  notificationRecipients      NotificationRecipient[]
+  notificationPreferences     NotificationPreference[]
 
   @@index([status])
   @@index([deletedAt])
@@ -615,6 +677,8 @@ model Outlet {
   employeeShiftAssignments EmployeeShiftAssignment[]
   attendanceRecords        Attendance[]
   employeePerformance      EmployeePerformance[]
+  auditEvents              AuditEvent[]
+  notifications            Notification[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -671,6 +735,12 @@ model UserAccount {
   updatedEmployeeProfiles    EmployeeProfile[]         @relation("EmployeeUpdatedBy")
   assignedEmployeeShifts     EmployeeShiftAssignment[] @relation("ShiftAssignedBy")
   recordedAttendance         Attendance[]              @relation("AttendanceRecordedBy")
+  auditEvents                AuditEvent[]              @relation("AuditActor")
+  effectiveAuditEvents       AuditEvent[]              @relation("AuditEffectiveActor")
+  impersonatedAuditEvents    AuditEvent[]              @relation("AuditImpersonator")
+  createdNotifications       Notification[]            @relation("NotificationCreatedBy")
+  notificationRecipients     NotificationRecipient[]
+  notificationPreferences    NotificationPreference[]
 
   @@index([status])
   @@index([deletedAt])
@@ -2165,6 +2235,119 @@ model ReportGenerationAudit {
   @@index([tenantId, generatedAt], map: "report_generation_audits_tenant_generated_idx")
   @@index([tenantId, outletId, reportType, generatedAt], map: "report_generation_audits_catalog_idx")
   @@map("report_generation_audits")
+}
+
+model AuditEvent {
+  id                 String      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  sequence           BigInt      @unique @default(autoincrement())
+  scopeKey           String      @map("scope_key") @db.VarChar(80)
+  tenantId           String?     @map("tenant_id") @db.Uuid
+  outletId           String?     @map("outlet_id") @db.Uuid
+  actorUserId        String?     @map("actor_user_id") @db.Uuid
+  effectiveUserId    String?     @map("effective_user_id") @db.Uuid
+  impersonatorUserId String?     @map("impersonator_user_id") @db.Uuid
+  actorRoles         Json        @map("actor_roles") @db.JsonB
+  action             String      @db.VarChar(160)
+  targetType         String      @map("target_type") @db.VarChar(100)
+  targetId           String?     @map("target_id") @db.VarChar(160)
+  result             AuditResult @default(SUCCESS)
+  reason             String?     @db.VarChar(500)
+  changes            Json?       @db.JsonB
+  metadata           Json?       @db.JsonB
+  correlationId      String?     @map("correlation_id") @db.VarChar(120)
+  idempotencyKey     String?     @map("idempotency_key") @db.VarChar(160)
+  ipAddress          String?     @map("ip_address") @db.VarChar(64)
+  userAgent          String?     @map("user_agent") @db.VarChar(500)
+  occurredAt         DateTime    @default(now()) @map("occurred_at") @db.Timestamptz(3)
+  previousHash       String?     @map("previous_hash") @db.Char(64)
+  eventHash          String      @unique @map("event_hash") @db.Char(64)
+
+  tenant       Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet?      @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  actor        UserAccount? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+  effective    UserAccount? @relation("AuditEffectiveActor", fields: [effectiveUserId], references: [id], onDelete: Restrict)
+  impersonator UserAccount? @relation("AuditImpersonator", fields: [impersonatorUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([scopeKey, sequence], map: "audit_events_scope_sequence_idx")
+  @@index([tenantId, occurredAt], map: "audit_events_tenant_occurred_idx")
+  @@index([tenantId, outletId, occurredAt], map: "audit_events_outlet_occurred_idx")
+  @@index([tenantId, actorUserId, occurredAt], map: "audit_events_actor_occurred_idx")
+  @@index([tenantId, action, occurredAt], map: "audit_events_action_occurred_idx")
+  @@index([tenantId, targetType, targetId, occurredAt], map: "audit_events_target_occurred_idx")
+  @@index([correlationId], map: "audit_events_correlation_idx")
+  @@map("audit_events")
+}
+
+model Notification {
+  id              String                     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String                     @map("tenant_id") @db.Uuid
+  outletId        String?                    @map("outlet_id") @db.Uuid
+  audience        NotificationAudience
+  category        NotificationCategory
+  priority        NotificationPriority       @default(NORMAL)
+  title           String                     @db.VarChar(180)
+  body            String                     @db.VarChar(2000)
+  actionUrl       String?                    @map("action_url") @db.VarChar(500)
+  metadata        Json?                      @db.JsonB
+  isMandatory     Boolean                    @default(false) @map("is_mandatory")
+  deliveryStatus  NotificationDeliveryStatus @default(PENDING) @map("delivery_status")
+  deliveredAt     DateTime?                  @map("delivered_at") @db.Timestamptz(3)
+  expiresAt       DateTime?                  @map("expires_at") @db.Timestamptz(3)
+  createdByUserId String                     @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant     Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet     Outlet?                 @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  createdBy  UserAccount             @relation("NotificationCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  recipients NotificationRecipient[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, createdAt], map: "notifications_tenant_created_idx")
+  @@index([tenantId, outletId, createdAt], map: "notifications_outlet_created_idx")
+  @@index([tenantId, category, priority, createdAt], map: "notifications_catalog_idx")
+  @@index([tenantId, deliveryStatus, createdAt], map: "notifications_delivery_idx")
+  @@map("notifications")
+}
+
+model NotificationRecipient {
+  id             String                     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId       String                     @map("tenant_id") @db.Uuid
+  notificationId String                     @map("notification_id") @db.Uuid
+  userId         String                     @map("user_id") @db.Uuid
+  deliveryStatus NotificationDeliveryStatus @default(PENDING) @map("delivery_status")
+  deliveredAt    DateTime?                  @map("delivered_at") @db.Timestamptz(3)
+  readAt         DateTime?                  @map("read_at") @db.Timestamptz(3)
+  archivedAt     DateTime?                  @map("archived_at") @db.Timestamptz(3)
+  createdAt      DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  notification Notification @relation(fields: [tenantId, notificationId], references: [tenantId, id], onDelete: Restrict)
+  user         UserAccount  @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, notificationId, userId])
+  @@index([tenantId, userId, readAt, createdAt], map: "notification_recipients_inbox_idx")
+  @@index([tenantId, notificationId, deliveryStatus], map: "notification_recipients_delivery_idx")
+  @@map("notification_recipients")
+}
+
+model NotificationPreference {
+  id           String               @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String               @map("tenant_id") @db.Uuid
+  userId       String               @map("user_id") @db.Uuid
+  category     NotificationCategory
+  inAppEnabled Boolean              @default(true) @map("in_app_enabled")
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  user   UserAccount @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, userId, category])
+  @@index([tenantId, userId], map: "notification_preferences_user_idx")
+  @@map("notification_preferences")
 }
 
 model EmployeeProfile {

@@ -331,6 +331,12 @@ The repository currently contains:
 - Tenant-safe RBAC user administration, custom role management, effective
   permission visibility in JWT sessions, role/permission and multi-outlet
   assignment APIs, shared clients, and admin access-management screens
+- Immutable platform/tenant audit events with per-scope hash chains, forced
+  RLS, redacted metadata, protected explorer/export APIs, security-sensitive
+  transactional integrations, shared clients, and admin audit screens
+- Tenant, outlet, and direct-user in-app notifications with immutable content,
+  recipient delivery/read state, category preferences, audit integration,
+  typed clients, admin publishing, and restaurant-app inbox foundations
 
 ## Authoritative References
 

@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 24.5 are complete at the foundation level.
+Tasks 1 through 26 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -179,7 +179,16 @@ Task 24.5 created the AI-first documentation framework, split architecture and
 engineering standards, module dependency map, concise current status, module
 specifications, Task 24-100 roadmap, and reusable prompt template.
 
-Task 25 is next: implement the Audit & Activity Logging Module.
+Task 25 implemented immutable platform/tenant audit events, hash-chain
+integrity, forced RLS, protected query/export APIs, redaction, transactional
+authentication/RBAC/report events, shared clients, and an admin explorer.
+
+Task 26 implemented tenant/outlet/user in-app notifications, immutable content,
+per-recipient delivery/read state, category preferences, authorized publishing,
+audit integration, shared clients, admin UI, and restaurant-app foundations.
+
+Task 27 is next provisionally: implement the Communication Module for external
+email, SMS, WhatsApp, and push delivery.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

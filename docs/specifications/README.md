@@ -20,11 +20,11 @@ loading the complete enterprise design.
 - `reports-module.md`
 - `employee-module.md`
 - `rbac-module.md`
+- `audit-module.md`
+- `notification-module.md`
 
 ## Planned Modules
 
-- `audit-module.md`
-- `notification-module.md`
 - `loyalty-module.md`
 
 ## Broad Reference

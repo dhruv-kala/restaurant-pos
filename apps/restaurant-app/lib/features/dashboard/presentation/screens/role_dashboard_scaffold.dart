@@ -5,6 +5,7 @@ import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_router.dart';
+import '../../../notifications/presentation/providers/notification_providers.dart';
 
 class RoleDashboardScaffold extends ConsumerWidget {
   const RoleDashboardScaffold({required this.roleName, super.key});
@@ -15,11 +16,25 @@ class RoleDashboardScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.user;
+    final unread = ref
+        .watch(notificationUnreadCountProvider)
+        .maybeWhen(data: (value) => value, orElse: () => 0);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('$roleName Dashboard'),
         actions: <Widget>[
+          IconButton(
+            tooltip: 'Notifications',
+            onPressed: user?.tenantId == null
+                ? null
+                : () => context.push(AppRoutes.notifications),
+            icon: Badge(
+              isLabelVisible: unread > 0,
+              label: Text(unread > 99 ? '99+' : '$unread'),
+              child: const Icon(Icons.notifications),
+            ),
+          ),
           TextButton.icon(
             onPressed: authState.status == AuthStatus.loading
                 ? null

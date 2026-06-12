@@ -26,6 +26,7 @@ import '../../features/kitchen/presentation/screens/kitchen_queue_screen.dart';
 import '../../features/kitchen/presentation/screens/station_screen.dart';
 import '../../features/orders/presentation/screens/order_details_screen.dart';
 import '../../features/orders/presentation/screens/order_list_screen.dart';
+import '../../features/notifications/presentation/screens/notification_center_screen.dart';
 import '../../features/payments/presentation/screens/payment_details_screen.dart';
 import '../../features/payments/presentation/screens/payment_history_screen.dart';
 import '../../features/payments/presentation/screens/payment_screen.dart';
@@ -57,12 +58,15 @@ abstract final class AppRoutes {
   static const mergeBills = '/billing/merge';
   static const payments = '/payments';
   static const receipts = '/receipts';
+  static const notifications = '/notifications';
 
   static String forRole(UserRole role) {
     return switch (role) {
       UserRole.superAdmin => superAdminDashboard,
       UserRole.tenantAdmin => adminDashboard,
       UserRole.manager => managerDashboard,
+      UserRole.inventoryManager => managerDashboard,
+      UserRole.hrManager => managerDashboard,
       UserRole.cashier => cashierDashboard,
       UserRole.waiter => waiterDashboard,
       UserRole.kitchenStaff => kitchenDashboard,
@@ -184,6 +188,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const CustomerDashboard(),
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationCenterScreen(),
       ),
       GoRoute(
         path: AppRoutes.orders,

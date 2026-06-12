@@ -9,6 +9,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { appConfig } from './config/app.config';
 import { validateEnvironment } from './config/environment.validation';
 import { AuthModule } from './modules/auth/auth.module';
+import { AuditModule } from './modules/audit/audit.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { EmployeesModule } from './modules/employees/employees.module';
@@ -17,6 +18,7 @@ import { KdsModule } from './modules/kds/kds.module';
 import { KitchenModule } from './modules/kitchen/kitchen.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { MenuModule } from './modules/menu/menu.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OutletsModule } from './modules/outlets/outlets.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
@@ -37,6 +39,7 @@ import { PrismaModule } from './prisma/prisma.module';
       validate: validateEnvironment,
     }),
     PrismaModule,
+    AuditModule,
     AuthModule,
     BillingModule,
     CustomersModule,
@@ -46,6 +49,7 @@ import { PrismaModule } from './prisma/prisma.module';
     KitchenModule,
     InventoryModule,
     MenuModule,
+    NotificationsModule,
     OrdersModule,
     PaymentsModule,
     ReceiptsModule,

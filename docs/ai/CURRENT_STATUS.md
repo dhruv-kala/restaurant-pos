@@ -4,9 +4,9 @@ Last updated: 2026-06-12
 
 ## Current Position
 
-- Completed through: **Task 24.5**
-- Current module: **AI Development Optimization Framework**
-- Next approved task: **Task 25 - Audit & Activity Logging Module**
+- Completed through: **Task 26**
+- Current module: **Notification Center**
+- Next provisional task: **Task 27 - Communication Module**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -20,6 +20,8 @@ Last updated: 2026-06-12
 | 23.5 | Master-data and environment-aware seed framework |
 | 24 | RBAC and user management |
 | 24.5 | AI-first documentation, standards, task index, and prompt framework |
+| 25 | Immutable audit ledger, hash-chain integrity, protected APIs, security/RBAC/report integrations, and admin explorer |
+| 26 | Tenant/outlet/user in-app notifications, recipient/read state, preferences, publishing APIs, shared clients, and Flutter notification centers |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -34,6 +36,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Socket.IO kitchen realtime foundation
 - Domain foundations through RBAC, employees, operations, payments, inventory,
   customers, and reports
+- Immutable tenant/platform audit events with forced RLS and hash-chain
+  integrity
+- Tenant-isolated in-app notifications with immutable content, per-recipient
+  state, user preferences, audit integration, and shared Flutter clients
 
 ## Known Environment Limitation
 
@@ -44,21 +50,22 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 25 - Audit & Activity Logging Module
+### Task 27 - Communication Module
 
 Read:
 
-- `docs/specifications/audit-module.md`
+- `docs/specifications/notification-module.md`
 - `docs/ai/SECURITY_RULES.md`
 - `docs/ai/MULTI_TENANCY_RULES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 25 unless explicitly requested.
+Define external email, SMS, WhatsApp, and push channels, templates, consent,
+provider adapters, delivery attempts, idempotency, retries, webhooks, and
+outbox/worker boundaries. Do not implement Task 27 unless explicitly requested.
 
 ## Status Maintenance
 
 Update this file after every substantive task. Keep it short; historical detail
 belongs in `TASK_LOG.md`, while future sequencing belongs in
 `docs/tasks/000-roadmap.md`.
-

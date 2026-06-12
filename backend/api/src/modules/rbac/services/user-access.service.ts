@@ -8,17 +8,17 @@ import {
 } from '../../../common/database/request-context.util';
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
+import { AuditService } from '../../audit/services/audit.service';
 import type { AssignOutletAccessDto } from '../dto/assign-outlet-access.dto';
 import type { AssignRoleDto } from '../dto/assign-role.dto';
-import {
-  requireRbacRead,
-  requireRbacWrite,
-  resolveRbacTenantId,
-} from './rbac-access.util';
+import { requireRbacRead, requireRbacWrite, resolveRbacTenantId } from './rbac-access.util';
 
 @Injectable()
 export class UserAccessService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   getRoles(userId: string, actor: AuthenticatedUser): Promise<object[]> {
     return this.withMembership(userId, actor, false, async (tx, membership) => {
@@ -38,13 +38,13 @@ export class UserAccessService {
     });
   }
 
-  assignRoles(
-    userId: string,
-    dto: AssignRoleDto,
-    actor: AuthenticatedUser,
-  ): Promise<object[]> {
+  assignRoles(userId: string, dto: AssignRoleDto, actor: AuthenticatedUser): Promise<object[]> {
     return this.withMembership(userId, actor, true, async (tx, membership) => {
       const roleIds = [...new Set(dto.roleIds)];
+      const previous = await tx.membershipRole.findMany({
+        where: { tenantId: membership.tenantId, membershipId: membership.id },
+        select: { roleId: true },
+      });
       const count = await tx.role.count({
         where: {
           tenantId: membership.tenantId,
@@ -65,6 +65,18 @@ export class UserAccessService {
           membershipId: membership.id,
           roleId,
         })),
+      });
+      await this.audit.append(tx, {
+        tenantId: membership.tenantId,
+        actorUserId: actor.id,
+        actorRoles: actor.roles,
+        action: 'users.roles.changed',
+        targetType: 'TenantMembership',
+        targetId: membership.id,
+        changes: {
+          before: previous.map((item) => item.roleId),
+          after: roleIds,
+        },
       });
       return tx.membershipRole
         .findMany({
@@ -108,6 +120,10 @@ export class UserAccessService {
   ): Promise<object[]> {
     return this.withMembership(userId, actor, true, async (tx, membership) => {
       const outletIds = [...new Set(dto.outletIds)];
+      const previous = await tx.membershipOutlet.findMany({
+        where: { tenantId: membership.tenantId, membershipId: membership.id },
+        select: { outletId: true },
+      });
       const count = await tx.outlet.count({
         where: {
           tenantId: membership.tenantId,
@@ -130,6 +146,18 @@ export class UserAccessService {
           })),
         });
       }
+      await this.audit.append(tx, {
+        tenantId: membership.tenantId,
+        actorUserId: actor.id,
+        actorRoles: actor.roles,
+        action: 'users.outlets.changed',
+        targetType: 'TenantMembership',
+        targetId: membership.id,
+        changes: {
+          before: previous.map((item) => item.outletId),
+          after: outletIds,
+        },
+      });
       return tx.membershipOutlet
         .findMany({
           where: { tenantId: membership.tenantId, membershipId: membership.id },

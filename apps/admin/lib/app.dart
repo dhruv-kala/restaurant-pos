@@ -5,6 +5,8 @@ import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 import 'features/menu/presentation/screens/menu_dashboard.dart';
+import 'features/notifications/presentation/screens/notification_center_screen.dart';
+import 'features/audit/presentation/screens/audit_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
 import 'features/customers/presentation/screens/customer_dashboard.dart';
 import 'features/employees/presentation/screens/employee_dashboard.dart';
@@ -45,6 +47,10 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasRole(UserRole.tenantAdmin) == true ||
         user?.hasPermission('roles.update') == true ||
         user?.hasPermission('users.update') == true;
+    final canViewAudit =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('audit.read') == true;
     final screens = <Widget>[
       const MenuDashboard(),
       const TableLayoutScreen(),
@@ -53,7 +59,9 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       const CustomerDashboard(),
       const ReportsDashboard(),
       const EmployeeDashboard(),
+      const NotificationCenterScreen(),
       if (canManageRbac) const UserManagementDashboard(),
+      if (canViewAudit) const AuditDashboard(),
     ];
     final destinations = <NavigationDestination>[
       const NavigationDestination(
@@ -78,11 +86,17 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         label: 'Reports',
       ),
       const NavigationDestination(icon: Icon(Icons.badge), label: 'Employees'),
+      const NavigationDestination(
+        icon: Icon(Icons.notifications),
+        label: 'Notifications',
+      ),
       if (canManageRbac)
         const NavigationDestination(
           icon: Icon(Icons.admin_panel_settings),
           label: 'Access',
         ),
+      if (canViewAudit)
+        const NavigationDestination(icon: Icon(Icons.history), label: 'Audit'),
     ];
     return Scaffold(
       body: screens[_index.clamp(0, screens.length - 1)],

@@ -31,6 +31,13 @@ abstract final class ApiEndpoints {
   static const String rbacRoles = '/rbac/roles';
   static const String rbacPermissions = '/rbac/permissions';
   static const String rbacGroupedPermissions = '$rbacPermissions/grouped';
+  static const String auditEvents = '/audit-events';
+  static const String auditExport = '$auditEvents/export';
+  static const String notifications = '/notifications';
+  static const String notificationAdmin = '$notifications/admin';
+  static const String notificationUnreadCount = '$notifications/unread-count';
+  static const String notificationPreferences = '$notifications/preferences';
+  static const String notificationReadAll = '$notifications/read-all';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -157,6 +164,10 @@ abstract final class ApiEndpoints {
   static const String rbacInviteUser = '$rbacUsers/invite';
   static String rbacRole(String id) => '$rbacRoles/$id';
   static String rbacRolePermissions(String id) => '${rbacRole(id)}/permissions';
+  static String auditEvent(String id) => '$auditEvents/$id';
+  static String notification(String id) => '$notifications/$id';
+  static String notificationRead(String id) => '${notification(id)}/read';
+  static String notificationAdminDetail(String id) => '$notificationAdmin/$id';
   static String employeePerformance(String id) => '${employee(id)}/performance';
   static const String employeeDashboard = '$employees/dashboard';
   static String shift(String id) => '$shifts/$id';

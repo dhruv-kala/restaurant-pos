@@ -1,83 +1,95 @@
-# Notification Module
+# Notification Center Module
 
 ## Status
 
-Planned. No implementation is approved by this document.
+Implemented by Task 26 on 2026-06-12.
 
 ## Objective
 
-Provide tenant-aware, preference-aware, retryable delivery for in-app, email,
-SMS, and push notifications without coupling business modules to providers.
+Provide a tenant-isolated in-app notification center for restaurant users,
+tenant administrators, and outlet operations without coupling Task 26 to
+external communication providers.
+
+Email, SMS, WhatsApp, mobile push, provider webhooks, templates, retries, and
+scheduled provider delivery belong to Task 27, the Communication Module.
 
 ## Ownership
 
-- notification templates and versions
-- recipient preferences and consent
-- notification message snapshots
-- channel delivery attempts
-- provider-neutral status and error classification
-- deduplication and idempotency
-- scheduled delivery and retry policy
+- immutable notification content snapshots
+- direct-user, tenant, and outlet audiences
+- per-recipient delivery and read state
+- per-user, per-category in-app preferences
+- category and priority classification
+- administrative publishing history
 
-Business modules own the triggering domain event and recipient intent.
+Business modules continue to own the source event and may call the notification
+service only after their business transaction contract is defined.
 
-## Core Contracts
+## Data Model
 
-Potential entities:
+- `Notification`: immutable title/body, audience, category, priority, optional
+  action URL and metadata, tenant/outlet scope, aggregate delivery state
+- `NotificationRecipient`: per-user delivered, skipped, read, and archived
+  state
+- `NotificationPreference`: per-user category opt-in for the in-app channel
 
-- `NotificationTemplate`
-- `NotificationPreference`
-- `NotificationMessage`
-- `NotificationDeliveryAttempt`
-
-Every tenant-owned record carries tenant scope. Message snapshots retain the
-rendered subject/body and template version used.
+All records carry tenant scope and use forced PostgreSQL row-level security.
 
 ## Invariants
 
-- Domain transactions do not call email/SMS/push providers directly.
-- Durable event/outbox processing creates messages after commit.
-- An idempotency key prevents duplicate messages for the same trigger,
-  recipient, template, and channel.
-- Consent, quiet hours, locale, and channel preference are evaluated before
-  delivery.
-- Provider credentials and sensitive payloads are never logged.
-- Delivery retries are bounded and classified as retryable or terminal.
-- Notification history is append-only except for safe delivery-state
-  progression.
-- Tenant templates cannot read cross-tenant data.
+- Tenant context comes from trusted authentication.
+- Direct recipients must be active members of the same tenant.
+- Outlet broadcasts resolve only active members assigned to that outlet.
+- Managers can publish only outlet and direct-user notifications in their
+  authenticated outlet context.
+- Notification content is immutable after creation.
+- Recipient and preference state may progress without rewriting content.
+- Mandatory notices bypass category opt-out.
+- Expired notifications do not appear in the active inbox.
+- Publishing and preference changes append Audit module events.
 
-## Initial Use Cases
+## Authorization
 
-- user invitation and password-reset delivery
-- kitchen/order operational alerts
-- payment and receipt delivery
-- low-stock and expiry alerts
-- loyalty earn, redemption, reward, and expiry notices
-- customer order status
-- platform subscription and tenant lifecycle notices
+- All authenticated tenant users can read their own inbox, mark their own
+  notifications read, and manage their own preferences.
+- `SUPER_ADMIN` and `TENANT_ADMIN` may publish and inspect authorized tenant
+  notifications.
+- `MANAGER` may publish and inspect outlet-scoped notifications.
+- Granular `notifications.*` permissions support custom roles.
+- Backend authorization is authoritative.
 
-## API Foundation
+## API
 
-- template administration
-- recipient preference management
-- message list/detail
-- resend where authorized
-- provider webhook ingestion with signature verification
+User endpoints:
 
-## Delivery Order
+- `GET /notifications`
+- `GET /notifications/unread-count`
+- `GET /notifications/preferences`
+- `PATCH /notifications/preferences`
+- `POST /notifications/read-all`
+- `GET /notifications/:id`
+- `PATCH /notifications/:id/read`
 
-1. Channel-neutral domain and consent rules
-2. Database and outbox contracts
-3. Template rendering and redaction
-4. Provider adapter interface
-5. API and worker behavior
-6. Shared clients and UI
+Administrative endpoints:
+
+- `POST /notifications/admin`
+- `GET /notifications/admin`
+- `GET /notifications/admin/:id`
+
+## Flutter
+
+- Admin Notification Center with inbox and authorized publishing history
+- Admin compose flow for tenant, outlet, and direct-user notifications
+- Restaurant-app shared repository, providers, unread badge, inbox, detail,
+  and mark-read behavior
+- Shared models and typed Dio API client
 
 ## Non-Goals
 
-- Selecting a cloud provider before the task approves one
-- Marketing automation and segmentation
-- Replacing Socket.IO operational updates
-- Storing provider credentials in the database without a secrets strategy
+- Email, SMS, WhatsApp, or push delivery
+- Provider credentials, adapters, or webhooks
+- Template rendering and localization
+- Marketing campaigns or segmentation
+- Durable outbox workers and retry scheduling
 
+These are Task 27 Communication Module concerns.

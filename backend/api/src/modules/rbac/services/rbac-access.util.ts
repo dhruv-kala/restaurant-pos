@@ -24,9 +24,7 @@ export function resolveRbacTenantId(
 ): string {
   if (hasRole(user, PLATFORM_ADMIN_ROLE)) {
     if (!requestedTenantId) {
-      throw new BadRequestException(
-        'tenantId is required for platform administration',
-      );
+      throw new BadRequestException('tenantId is required for platform administration');
     }
     return requestedTenantId;
   }

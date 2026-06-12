@@ -11,12 +11,13 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 24.5 are complete at the requested foundation level.
+Tasks 1 through 26 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 25 is next: implement the Audit & Activity Logging Module.
+Task 27, the Communication Module, is the next provisional roadmap item. It is
+not approved for implementation until explicitly requested.
 
 ## Task History
 
@@ -48,7 +49,143 @@ Task 25 is next: implement the Audit & Activity Logging Module.
 | 23.5. Implement Master Data & Database Seed Framework | COMPLETE | Global locale/settings/module/role-template masters, 184 permissions, role mappings, environment-aware idempotent seeds, and a complete development demo restaurant dataset are implemented. |
 | 24. Implement RBAC & User Management Module | COMPLETE | Tenant-safe user provisioning, lifecycle controls, roles, granular permissions, outlet access, effective JWT permissions, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
 | 24.5. AI Development Optimization Framework | COMPLETE | Concern-specific AI standards, concise status, dependency map, module specifications, Task 24-100 roadmap, prompt template, and optimized restart instructions are implemented. |
-| 25. Implement Audit & Activity Logging Module | NEXT | Not started. Define append-only audit event ownership, actor and tenant context, sensitive-data controls, query contracts, retention, and administrative visibility before UI. |
+| 25. Implement Audit & Activity Logging Module | COMPLETE | Immutable tenant/platform events, per-scope hash chains, forced RLS, protected APIs, transactional security integrations, typed clients, Riverpod providers, admin explorer, tests, and documentation are implemented. |
+| 26. Implement Notification Center Module | COMPLETE | Tenant/outlet/user in-app notifications, recipient delivery/read state, preferences, publishing APIs, shared clients, admin center, and restaurant-app foundation are implemented. |
+
+## Task 26 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- `Notification`, `NotificationRecipient`, and `NotificationPreference` Prisma
+  models with category, priority, audience, delivery, read, archive, expiry,
+  mandatory, and immutable content contracts
+- Migration `20260613220000_add_notification_center` with tenant-aware foreign
+  keys, forced RLS, integrity checks, indexes, and immutable content/delete
+  triggers
+- Active membership expansion for tenant, outlet, and direct-user audiences
+- Preference-aware in-app delivery with mandatory notice bypass
+- Self-service inbox, unread count, detail, mark-read, mark-all-read, and
+  preference APIs
+- Authorized administration create/list/detail APIs with platform, tenant,
+  manager-outlet, and granular permission boundaries
+- Audit events for notification publishing and preference changes
+- Notification permission seeds with publishing restricted to administrative
+  roles
+- Shared Dart notification models and typed Dio API service
+- Admin inbox, publishing history, and compose UI
+- Restaurant-app notification repository/providers, unread badge, inbox,
+  detail, and read-state foundation
+- API, database, and module specification documentation
+
+Decisions:
+
+- Task 26 is in-app only. Email, SMS, WhatsApp, push, templates, providers,
+  webhooks, retries, and worker/outbox delivery belong to Task 27 Communication.
+- Notification content is immutable; per-recipient delivery and read state is
+  mutable.
+- Disabled preferences create `SKIPPED` recipient rows for delivery accounting.
+- Managers cannot publish tenant-wide notices and are locked to their
+  authenticated outlet.
+- Task 27 Communication replaces the prior provisional Task 27 loyalty slot by
+  explicit product direction; loyalty remains future work.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 159 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Focused notification tests: passed, 7 tests
+- `flutter pub get` for admin and restaurant-app: passed
+- `dart analyze` for shared models and API client: passed
+- `flutter analyze` for admin and restaurant-app: passed
+- `flutter test` for admin: passed, 1 test
+- `flutter test` for restaurant-app: passed, 9 tests
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed because project history records invalid local
+  PostgreSQL credentials.
+- Task 26 does not send email, SMS, WhatsApp, or push notifications. Those
+  provider channels, templates, retries, webhooks, and workers are intentionally
+  deferred to Task 27.
+- Existing business modules are not automatically emitting notification
+  records; each future integration must define its event, idempotency, audience,
+  and transaction boundary.
+
+## Task 25 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Immutable `AuditEvent` model with global sequence, tenant/platform scope,
+  outlet scope, actor/effective actor/impersonator context, action taxonomy,
+  target, result, reason, redacted changes, request metadata, and correlation
+  fields
+- Per-platform and per-tenant SHA-256 hash chains serialized with PostgreSQL
+  transaction advisory locks
+- Database constraints, indexes, forced RLS, and triggers rejecting audit row
+  updates and deletes
+- Migration `20260613180000_add_audit_activity_logging`
+- Credential, token, authorization, and payment-secret redaction utility
+- Protected audit list, detail, and export-request APIs with tenant, outlet,
+  actor, action, target, result, date, correlation, search, and pagination
+  filters
+- Super-admin, tenant-admin, permission-based, and manager-outlet access
+  boundaries
+- Audit events for audit reads and export requests
+- Transactional login, refresh, logout, user administration, role,
+  role-permission, user-role, user-outlet, report generation, and report export
+  events
+- Shared Dart audit models and typed `AuditApiService`
+- Riverpod audit repository/providers and admin event explorer/detail screens
+- Super-admin audit integration foundation
+- API, database, and module specification documentation
+
+Decisions:
+
+- Audit chains are independent per tenant and for platform events, avoiding
+  cross-tenant chain contention while preserving ordered integrity.
+- Mandatory integrated events are appended in the same transaction as the
+  security or business change.
+- Audit access and export are auditable.
+- Export rendering and delivery remain deferred; Task 25 records the immutable
+  request.
+- Existing domain-specific immutable fields and ledgers remain authoritative;
+  the audit module records actor/action context rather than duplicating domain
+  state.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:generate`: passed
+- `npm run prisma:validate`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 152 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter analyze` for admin: passed
+- `flutter test` for admin: passed
+- `flutter build web` for admin: passed
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed because project history records invalid local
+  PostgreSQL credentials.
+- Historical actions completed before this migration are not backfilled.
+- Comprehensive denied/failed request interception, retention execution, SIEM
+  export, and asynchronous export file delivery remain future work.
+- Remaining operational modules can adopt the shared transactional append
+  service incrementally as their privileged action contracts are revised.
 
 ## Task 24.5 Completion
 
