@@ -48,6 +48,10 @@ const permissions = [
   ['receipts.create', 'receipts', 'Generate customer receipts and tax invoices'],
   ['receipts.read', 'receipts', 'View receipts, invoices, and PDF output'],
   ['receipts.print', 'receipts', 'Print and reprint issued receipts'],
+  ['inventory.create', 'inventory', 'Create inventory master and purchase records'],
+  ['inventory.read', 'inventory', 'View stock, purchasing, alerts, and valuation'],
+  ['inventory.update', 'inventory', 'Adjust and transfer stock and update purchasing'],
+  ['inventory.receive', 'inventory', 'Receive purchase orders into outlet stock'],
 ] as const;
 
 const LOCAL_ADMIN_EMAIL = 'admin@example.com';

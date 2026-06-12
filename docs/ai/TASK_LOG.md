@@ -1,6 +1,6 @@
 # AI Task Log
 
-Last updated: 2026-06-11
+Last updated: 2026-06-12
 
 ## Status Legend
 
@@ -11,12 +11,12 @@ Last updated: 2026-06-11
 
 ## Current Summary
 
-Tasks 1 through 18 are complete at the requested foundation level.
+Tasks 1 through 19 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 19 is next: implement the Inventory Module.
+Task 20 is next: implement the Recipe & Stock Consumption Engine.
 
 ## Task History
 
@@ -40,7 +40,66 @@ Task 19 is next: implement the Inventory Module.
 | 16. Implement Payment Module | COMPLETE | Idempotent payment aggregates, tender transactions, partial/split payments, refunds, bill reconciliation, typed clients, Riverpod screens, tests, and documentation are implemented. |
 | 17. Implement Receipt & Invoice Module | COMPLETE | Immutable receipt and tax-invoice snapshots, numbering, PDF/thermal rendering, print audit, protected APIs, shared clients, and Flutter screens are implemented. |
 | 18. Complete Kitchen Display System | COMPLETE | First-class stations, station routing, item actor audits, preparation metrics, authenticated Socket.IO events, typed clients, Riverpod providers, and KDS screens are implemented. |
-| 19. Implement Inventory Module | NEXT | Not started. Define stock items, units, recipes, movements, outlet balances, purchasing, adjustments, and audit contracts before UI. |
+| 19. Implement Inventory Module | COMPLETE | Tenant inventory masters, outlet balances, append-only movements, adjustments, transfers, purchasing, batches, alerts, valuation, typed clients, and admin screens are implemented. |
+| 20. Implement Recipe & Stock Consumption Engine | NEXT | Not started. Define recipe versions, menu-item yields, order consumption, reversals, wastage, and idempotency before UI. |
+
+## Task 19 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Prisma inventory category, unit, ingredient, stock, batch, transaction,
+  vendor, purchase order, PO item, counter, and alert models
+- Fixed-precision quantities, integer minor-unit costs, tenant-aware composite
+  keys, balance checks, unresolved-alert uniqueness, and forced RLS
+- Migration `20260612170000_add_inventory_management`
+- Inventory category and unit configuration endpoints
+- Ingredient create/list/detail/update/archive endpoints
+- Outlet stock list/detail, adjustment, transfer, and valuation endpoints
+- Signed append-only adjustment and paired transfer transactions
+- Same-tenant transfer validation, row locking, and sufficient-stock checks
+- Vendor create/list/update endpoints
+- Atomic outlet/day purchase-order numbering and audited lifecycle
+- Transactional PO receipt that increments stock and appends purchase movements
+- Low-stock, out-of-stock, negative-stock, and expiry-warning alert foundation
+- Explicit alert resolution with user/time audit
+- Typed future `StockAdjusted`, `StockTransferred`,
+  `PurchaseOrderReceived`, and `InventoryAlertCreated` event boundaries
+- Shared Dart inventory models and typed `InventoryApiService`
+- Riverpod ingredient, stock, vendor, purchase-order, alert, and valuation
+  providers
+- Admin inventory dashboard, ingredient list/details, adjustment, transfer,
+  vendor, purchase order, alerts, and valuation screens
+- API, database, ERD, workflow, and module documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 83 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get`: passed
+- `flutter analyze` for admin: passed
+- `flutter test` for admin: passed, 1 test
+- `flutter build web` for admin: passed
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed because existing project history records
+  invalid local PostgreSQL credentials.
+- Recipe-based automatic stock consumption is intentionally deferred to Task 20.
+- Purchase receiving is whole-order only; partial receipts and supplier invoice
+  matching require a later procurement contract.
+- Valuation uses current ingredient cost. FIFO, weighted-average, landed-cost,
+  and batch depletion policies are deferred.
+- The built admin web artifact could not be smoke-tested in the in-app browser
+  because its runtime was denied access to the local application-data path.
 
 ## Task 18 Completion
 
@@ -662,11 +721,11 @@ Known limitation:
 
 ## Next Task
 
-### Task 19: Implement Inventory Module
+### Task 20: Implement Recipe & Stock Consumption Engine
 
-Do not start Task 19 unless explicitly requested. Define stock items, units,
-recipes, outlet balances, movement ledgers, purchasing, wastage, adjustments,
-authorization, and API contracts before Flutter screens.
+Do not start Task 20 unless explicitly requested. Define recipe versions,
+menu-item yields, order consumption, reversals, wastage, authorization,
+idempotency, and API contracts before Flutter screens.
 
 ## Future Work
 

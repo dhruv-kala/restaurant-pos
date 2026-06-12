@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 import 'features/menu/presentation/screens/menu_dashboard.dart';
+import 'features/inventory/presentation/screens/inventory_dashboard.dart';
 import 'features/tables/presentation/screens/table_layout_screen.dart';
 
 class AdminApp extends StatelessWidget {
@@ -33,7 +34,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Scaffold(
       body: IndexedStack(
         index: _index,
-        children: const <Widget>[MenuDashboard(), TableLayoutScreen()],
+        children: const <Widget>[
+          MenuDashboard(),
+          TableLayoutScreen(),
+          InventoryDashboard(),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
@@ -46,6 +51,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
           NavigationDestination(
             icon: Icon(Icons.table_restaurant),
             label: 'Tables',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.inventory),
+            label: 'Inventory',
           ),
         ],
       ),

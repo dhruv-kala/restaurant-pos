@@ -16,6 +16,7 @@ abstract final class ApiEndpoints {
   static const String billing = '/billing';
   static const String payments = '/payments';
   static const String receipts = '/receipts';
+  static const String inventory = '/inventory';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -95,4 +96,22 @@ abstract final class ApiEndpoints {
   static String receiptPrint(String id) => '${receipt(id)}/print';
   static String receiptReprint(String id) => '${receipt(id)}/reprint';
   static String receiptPdf(String id) => '${receipt(id)}/pdf';
+  static const String inventoryCategories = '$inventory/categories';
+  static const String inventoryUnits = '$inventory/units';
+  static const String ingredients = '$inventory/ingredients';
+  static const String inventoryStocks = '$inventory/stocks';
+  static const String inventoryStockAdjust = '$inventoryStocks/adjust';
+  static const String inventoryStockTransfer = '$inventoryStocks/transfer';
+  static const String vendors = '$inventory/vendors';
+  static const String purchaseOrders = '$inventory/purchase-orders';
+  static const String inventoryAlerts = '$inventory/alerts';
+  static const String inventoryValuation = '$inventory/valuation';
+  static String ingredient(String id) => '$ingredients/$id';
+  static String inventoryStock(String id) => '$inventoryStocks/$id';
+  static String vendor(String id) => '$vendors/$id';
+  static String purchaseOrder(String id) => '$purchaseOrders/$id';
+  static String receivePurchaseOrder(String id) =>
+      '${purchaseOrder(id)}/receive';
+  static String resolveInventoryAlert(String id) =>
+      '$inventoryAlerts/$id/resolve';
 }

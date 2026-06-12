@@ -303,6 +303,13 @@ The repository currently contains:
   authenticated realtime events
 - Shared kitchen models, typed HTTP/socket clients, Riverpod providers, and
   restaurant-app queue, station, and analytics screens
+- Tenant-scoped inventory categories, units, ingredients, and vendors
+- Outlet stock balances, expiry batches, append-only stock transactions,
+  adjustments, same-tenant transfers, low-stock alerts, and valuation
+- Audited purchase orders with atomic outlet/day numbering and transactional
+  stock receipt
+- Shared inventory models, typed API client, Riverpod providers, and admin
+  inventory dashboard and workflows
 
 ## Authoritative References
 

@@ -114,7 +114,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 18 are complete at the foundation level.
+Tasks 1 through 19 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -145,7 +145,11 @@ auditing, preparation metrics, protected `/kitchen` APIs, tenant/outlet/station
 Socket.IO rooms, typed clients, Riverpod providers, and restaurant-app kitchen
 queue, station, and analytics screens.
 
-Task 19 is next: implement the Inventory Module.
+Task 19 implemented tenant-scoped inventory master data, outlet stock balances,
+append-only movements, adjustments, transfers, vendors, purchase orders,
+receiving, batches, alerts, valuation, shared clients, and admin screens.
+
+Task 20 is next: implement the Recipe & Stock Consumption Engine.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
