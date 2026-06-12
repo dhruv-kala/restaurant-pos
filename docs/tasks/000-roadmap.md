@@ -19,7 +19,15 @@ Last updated: 2026-06-12
 | 24.5 | COMPLETE | AI development optimization framework |
 | 25 | COMPLETE | Audit and activity logging |
 | 26 | COMPLETE | In-app Notification Center, preferences, read state, publishing, shared clients, and Flutter foundations |
-| 27 | NEXT | Communication Module: templates and email/SMS/WhatsApp/push provider delivery |
+| 27.1 | COMPLETE | Communication infrastructure foundation |
+| 27.2 | NEXT | Communication template management |
+| 27.3 | PLANNED | Email delivery providers |
+| 27.4 | PLANNED | SMS delivery providers |
+| 27.5 | PLANNED | WhatsApp delivery providers |
+| 27.6 | PLANNED | Push notification delivery |
+| 27.7 | PLANNED | Webhooks and delivery tracking |
+| 27.8 | PLANNED | Communication center UI |
+| 27.9 | PLANNED | Communication analytics |
 | 28 | PLANNED | SaaS plans, subscriptions, entitlements, and limits |
 | 29 | PLANNED | Promotions, coupons, and discount policy engine |
 | 30 | PLANNED | Tax configuration and fiscal policy administration |

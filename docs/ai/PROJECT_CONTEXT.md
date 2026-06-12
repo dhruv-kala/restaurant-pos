@@ -337,6 +337,9 @@ The repository currently contains:
 - Tenant, outlet, and direct-user in-app notifications with immutable content,
   recipient delivery/read state, category preferences, audit integration,
   typed clients, admin publishing, and restaurant-app inbox foundations
+- Provider-neutral communication provider/message/attempt persistence for
+  email, SMS, WhatsApp, and push with protected recipient addressing,
+  idempotent outbound snapshots, and an internal transactional enqueue service
 
 ## Authoritative References
 

@@ -11,13 +11,13 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 26 are complete at the requested foundation level.
+Tasks 1 through 27.1 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27, the Communication Module, is the next provisional roadmap item. It is
-not approved for implementation until explicitly requested.
+Task 27.2, Communication Template Management, is the next provisional roadmap
+item. It is not approved for implementation until explicitly requested.
 
 ## Task History
 
@@ -51,6 +51,79 @@ not approved for implementation until explicitly requested.
 | 24.5. AI Development Optimization Framework | COMPLETE | Concern-specific AI standards, concise status, dependency map, module specifications, Task 24-100 roadmap, prompt template, and optimized restart instructions are implemented. |
 | 25. Implement Audit & Activity Logging Module | COMPLETE | Immutable tenant/platform events, per-scope hash chains, forced RLS, protected APIs, transactional security integrations, typed clients, Riverpod providers, admin explorer, tests, and documentation are implemented. |
 | 26. Implement Notification Center Module | COMPLETE | Tenant/outlet/user in-app notifications, recipient delivery/read state, preferences, publishing APIs, shared clients, admin center, and restaurant-app foundation are implemented. |
+| 27.1. Communication Infrastructure Foundation | COMPLETE | Provider/message/attempt schema, protected recipient addressing, immutable communication history, idempotent enqueueing, abstraction contracts, and state rules are implemented. |
+
+## Task 27.1 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Communication channel, provider, recipient, message, and attempt lifecycle
+  enums
+- Tenant-scoped `CommunicationProvider`, `CommunicationMessage`, and
+  `CommunicationAttempt` Prisma models
+- Migration `20260614020000_add_communication_foundation` with composite tenant
+  foreign keys, integrity checks, queue/retry/history indexes, forced RLS, and
+  immutable history triggers
+- Ciphertext, SHA-256 lookup hash, and masked recipient-address persistence
+- Secret-reference-only provider configuration contract
+- Tenant/channel idempotency keys bound to deterministic request fingerprints
+- Internal `CommunicationService.enqueue` for atomic use inside an existing
+  Prisma business transaction
+- Communication-owned sensitive metadata sanitization before message
+  persistence
+- Provider-neutral adapter request/result interfaces
+- Explicit message and delivery-attempt transition rules
+- Schema, state-transition, and enqueue/idempotency tests
+- Communication architecture, database, specification, and task documentation
+
+Decisions:
+
+- Task 27.1 exposes no HTTP endpoints and makes no external network calls.
+- Business modules enqueue durable communication snapshots in their own
+  transaction; they never call providers directly.
+- Templates, concrete providers, delivery workers, webhooks, Flutter UI,
+  analytics, and communication permissions remain in their assigned Task 27.x
+  subtasks.
+- General transactional outbox and background-job infrastructure remains Task
+  34; Task 27.1 does not introduce Redis, a broker, or cloud queues.
+- Plaintext recipient addresses are allowed only transiently at a future
+  authorized provider adapter boundary.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run prisma:migrate:deploy`: failed with a Prisma schema-engine error
+  before migration deployment
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 169 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Focused communication tests: passed, 10 tests
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed because the configured local PostgreSQL
+  datasource returned a Prisma schema-engine error.
+- No communication provider is registered and no delivery worker runs in Task
+  27.1.
+- Recipient address encryption/decryption implementation is intentionally
+  deferred to the authorized provider boundary; Task 27.1 requires callers to
+  supply ciphertext, a hash, and a masked value.
+
+Corrections on 2026-06-13:
+
+- Removed out-of-scope `CommunicationTemplate`,
+  `CommunicationTemplateVersion`, and `CommunicationWebhook` schema and
+  migration contracts.
+- Removed template references from messages and enqueue service contracts.
+- Removed premature communication permission seeds.
+- Replaced the Audit module redaction dependency with a communication-local
+  metadata sanitizer.
 
 ## Task 26 Completion
 

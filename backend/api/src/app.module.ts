@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { CustomersModule } from './modules/customers/customers.module';
+import { CommunicationModule } from './modules/communication/communication.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { HealthModule } from './modules/health/health.module';
 import { KdsModule } from './modules/kds/kds.module';
@@ -42,6 +43,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuditModule,
     AuthModule,
     BillingModule,
+    CommunicationModule,
     CustomersModule,
     EmployeesModule,
     HealthModule,

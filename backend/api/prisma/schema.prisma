@@ -373,6 +373,52 @@ enum NotificationDeliveryStatus {
   @@map("notification_delivery_status")
 }
 
+enum CommunicationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+
+  @@map("communication_channel")
+}
+
+enum CommunicationProviderStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("communication_provider_status")
+}
+
+enum CommunicationRecipientType {
+  USER
+  CUSTOMER
+  EXTERNAL
+
+  @@map("communication_recipient_type")
+}
+
+enum CommunicationMessageStatus {
+  QUEUED
+  PROCESSING
+  SENT
+  DELIVERED
+  FAILED
+  CANCELLED
+
+  @@map("communication_message_status")
+}
+
+enum CommunicationAttemptStatus {
+  PENDING
+  PROCESSING
+  ACCEPTED
+  DELIVERED
+  RETRYABLE_FAILED
+  TERMINAL_FAILED
+
+  @@map("communication_attempt_status")
+}
+
 enum EmploymentType {
   FULL_TIME
   PART_TIME
@@ -612,6 +658,9 @@ model Tenant {
   notifications               Notification[]
   notificationRecipients      NotificationRecipient[]
   notificationPreferences     NotificationPreference[]
+  communicationProviders      CommunicationProvider[]
+  communicationMessages       CommunicationMessage[]
+  communicationAttempts       CommunicationAttempt[]
 
   @@index([status])
   @@index([deletedAt])
@@ -679,6 +728,7 @@ model Outlet {
   employeePerformance      EmployeePerformance[]
   auditEvents              AuditEvent[]
   notifications            Notification[]
+  communicationMessages    CommunicationMessage[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -741,6 +791,7 @@ model UserAccount {
   createdNotifications       Notification[]            @relation("NotificationCreatedBy")
   notificationRecipients     NotificationRecipient[]
   notificationPreferences    NotificationPreference[]
+  communicationMessages      CommunicationMessage[]    @relation("CommunicationMessageRecipientUser")
 
   @@index([status])
   @@index([deletedAt])
@@ -2297,10 +2348,11 @@ model Notification {
   createdByUserId String                     @map("created_by_user_id") @db.Uuid
   createdAt       DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  tenant     Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet     Outlet?                 @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  createdBy  UserAccount             @relation("NotificationCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  recipients NotificationRecipient[]
+  tenant                Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet                Outlet?                 @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  createdBy             UserAccount             @relation("NotificationCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  recipients            NotificationRecipient[]
+  communicationMessages CommunicationMessage[]
 
   @@unique([tenantId, id])
   @@index([tenantId, createdAt], map: "notifications_tenant_created_idx")
@@ -2348,6 +2400,106 @@ model NotificationPreference {
   @@unique([tenantId, userId, category])
   @@index([tenantId, userId], map: "notification_preferences_user_idx")
   @@map("notification_preferences")
+}
+
+model CommunicationProvider {
+  id              String                      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String                      @map("tenant_id") @db.Uuid
+  channel         CommunicationChannel
+  providerKey     String                      @map("provider_key") @db.VarChar(80)
+  displayName     String                      @map("display_name") @db.VarChar(160)
+  status          CommunicationProviderStatus @default(INACTIVE)
+  priority        Int                         @default(100)
+  secretReference String?                     @map("secret_reference") @db.VarChar(255)
+  configMetadata  Json?                       @map("config_metadata") @db.JsonB
+  capabilities    Json?                       @db.JsonB
+  version         Int                         @default(1)
+  createdAt       DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant   Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  messages CommunicationMessage[]
+  attempts CommunicationAttempt[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, channel, providerKey])
+  @@index([tenantId, channel, status, priority], map: "communication_providers_selection_idx")
+  @@map("communication_providers")
+}
+
+model CommunicationMessage {
+  id                         String                     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId                   String                     @map("tenant_id") @db.Uuid
+  outletId                   String?                    @map("outlet_id") @db.Uuid
+  notificationId             String?                    @map("notification_id") @db.Uuid
+  providerId                 String?                    @map("provider_id") @db.Uuid
+  channel                    CommunicationChannel
+  recipientType              CommunicationRecipientType @map("recipient_type")
+  recipientUserId            String?                    @map("recipient_user_id") @db.Uuid
+  recipientReferenceId       String?                    @map("recipient_reference_id") @db.Uuid
+  recipientAddressCiphertext String                     @map("recipient_address_ciphertext") @db.Text
+  recipientAddressHash       String                     @map("recipient_address_hash") @db.Char(64)
+  recipientAddressMasked     String                     @map("recipient_address_masked") @db.VarChar(255)
+  subjectSnapshot            String?                    @map("subject_snapshot") @db.VarChar(500)
+  bodySnapshot               String                     @map("body_snapshot") @db.Text
+  locale                     String                     @default("en") @db.VarChar(35)
+  status                     CommunicationMessageStatus @default(QUEUED)
+  idempotencyKey             String                     @map("idempotency_key") @db.VarChar(160)
+  requestFingerprint         String                     @map("request_fingerprint") @db.Char(64)
+  metadata                   Json?                      @db.JsonB
+  scheduledAt                DateTime?                  @map("scheduled_at") @db.Timestamptz(3)
+  availableAt                DateTime                   @default(now()) @map("available_at") @db.Timestamptz(3)
+  processingStartedAt        DateTime?                  @map("processing_started_at") @db.Timestamptz(3)
+  sentAt                     DateTime?                  @map("sent_at") @db.Timestamptz(3)
+  deliveredAt                DateTime?                  @map("delivered_at") @db.Timestamptz(3)
+  failedAt                   DateTime?                  @map("failed_at") @db.Timestamptz(3)
+  cancelledAt                DateTime?                  @map("cancelled_at") @db.Timestamptz(3)
+  createdAt                  DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                  DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet        Outlet?                @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  notification  Notification?          @relation(fields: [tenantId, notificationId], references: [tenantId, id], onDelete: Restrict)
+  provider      CommunicationProvider? @relation(fields: [tenantId, providerId], references: [tenantId, id], onDelete: Restrict)
+  recipientUser UserAccount?           @relation("CommunicationMessageRecipientUser", fields: [recipientUserId], references: [id], onDelete: Restrict)
+  attempts      CommunicationAttempt[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, channel, idempotencyKey])
+  @@index([tenantId, status, availableAt], map: "communication_messages_queue_idx")
+  @@index([tenantId, outletId, createdAt], map: "communication_messages_outlet_created_idx")
+  @@index([tenantId, notificationId], map: "communication_messages_notification_idx")
+  @@index([tenantId, recipientAddressHash, createdAt], map: "communication_messages_recipient_idx")
+  @@map("communication_messages")
+}
+
+model CommunicationAttempt {
+  id                  String                     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId            String                     @map("tenant_id") @db.Uuid
+  messageId           String                     @map("message_id") @db.Uuid
+  providerId          String                     @map("provider_id") @db.Uuid
+  attemptNumber       Int                        @map("attempt_number")
+  status              CommunicationAttemptStatus @default(PENDING)
+  providerMessageId   String?                    @map("provider_message_id") @db.VarChar(255)
+  errorCode           String?                    @map("error_code") @db.VarChar(120)
+  errorClassification String?                    @map("error_classification") @db.VarChar(80)
+  requestMetadata     Json?                      @map("request_metadata") @db.JsonB
+  responseMetadata    Json?                      @map("response_metadata") @db.JsonB
+  startedAt           DateTime?                  @map("started_at") @db.Timestamptz(3)
+  completedAt         DateTime?                  @map("completed_at") @db.Timestamptz(3)
+  nextRetryAt         DateTime?                  @map("next_retry_at") @db.Timestamptz(3)
+  createdAt           DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant   Tenant                @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  message  CommunicationMessage  @relation(fields: [tenantId, messageId], references: [tenantId, id], onDelete: Restrict)
+  provider CommunicationProvider @relation(fields: [tenantId, providerId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, messageId, attemptNumber])
+  @@index([tenantId, status, nextRetryAt], map: "communication_attempts_retry_idx")
+  @@index([tenantId, providerId, createdAt], map: "communication_attempts_provider_idx")
+  @@map("communication_attempts")
 }
 
 model EmployeeProfile {

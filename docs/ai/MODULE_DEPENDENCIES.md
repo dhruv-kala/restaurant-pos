@@ -70,6 +70,8 @@ flowchart TD
     KITCHEN --> NOTIFICATIONS
     PAYMENTS --> NOTIFICATIONS
     LOYALTY --> NOTIFICATIONS
+    NOTIFICATIONS --> COMMUNICATION["Communication Delivery"]
+    AUDIT --> COMMUNICATION
 ```
 
 ## Module Ownership
@@ -95,7 +97,8 @@ flowchart TD
 | Reports | Read models, aggregates, generation audit | Operational modules |
 | Loyalty | Points, tiers, wallet, rewards, referrals | Customers, orders, payments |
 | Audit | Immutable security and business activity events | All protected modules |
-| Notifications | Delivery templates, messages, attempts, preferences | Domain events, audit |
+| Notifications | In-app notification intent, recipients, read state, preferences | Domain events, audit |
+| Communication | External templates, providers, outbound snapshots, attempts, webhooks | Notifications, domain events, audit |
 | Subscriptions | SaaS plans, entitlements, limits, invoices | Tenants, platform auth |
 | Offline sync | Device operations, idempotency, cursors, conflicts | Operational APIs |
 
@@ -114,4 +117,3 @@ identity and tenancy
 
 Use the module-specific document under `docs/specifications` for exceptions and
 exact invariants.
-

@@ -4,9 +4,9 @@ Last updated: 2026-06-12
 
 ## Current Position
 
-- Completed through: **Task 26**
-- Current module: **Notification Center**
-- Next provisional task: **Task 27 - Communication Module**
+- Completed through: **Task 27.1**
+- Current module: **Communication Infrastructure Foundation**
+- Next provisional task: **Task 27.2 - Communication Template Management**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -22,6 +22,7 @@ Last updated: 2026-06-12
 | 24.5 | AI-first documentation, standards, task index, and prompt framework |
 | 25 | Immutable audit ledger, hash-chain integrity, protected APIs, security/RBAC/report integrations, and admin explorer |
 | 26 | Tenant/outlet/user in-app notifications, recipient/read state, preferences, publishing APIs, shared clients, and Flutter notification centers |
+| 27.1 | Provider/message/attempt schema, protected addressing, idempotent enqueue service, abstraction contracts, and state rules |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -40,6 +41,8 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   integrity
 - Tenant-isolated in-app notifications with immutable content, per-recipient
   state, user preferences, audit integration, and shared Flutter clients
+- Tenant-isolated provider metadata, outbound message snapshots, delivery
+  attempts, provider abstraction contracts, and transactional enqueueing
 
 ## Known Environment Limitation
 
@@ -50,19 +53,20 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 27 - Communication Module
+### Task 27.2 - Communication Template Management
 
 Read:
 
-- `docs/specifications/notification-module.md`
+- `docs/specifications/communication-module.md`
+- `docs/tasks/027-communication/27.2-templates.md`
 - `docs/ai/SECURITY_RULES.md`
 - `docs/ai/MULTI_TENANCY_RULES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Define external email, SMS, WhatsApp, and push channels, templates, consent,
-provider adapters, delivery attempts, idempotency, retries, webhooks, and
-outbox/worker boundaries. Do not implement Task 27 unless explicitly requested.
+Define template CRUD, immutable version creation, variable validation, preview,
+authorization, and audit behavior. Do not implement Task 27.2 unless explicitly
+requested.
 
 ## Status Maintenance
 

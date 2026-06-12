@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 26 are complete at the foundation level.
+Tasks 1 through 27.1 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -187,8 +187,12 @@ Task 26 implemented tenant/outlet/user in-app notifications, immutable content,
 per-recipient delivery/read state, category preferences, authorized publishing,
 audit integration, shared clients, admin UI, and restaurant-app foundations.
 
-Task 27 is next provisionally: implement the Communication Module for external
-email, SMS, WhatsApp, and push delivery.
+Task 27.1 implemented provider-neutral communication persistence, protected
+recipient addressing, idempotent transactional enqueueing, adapter contracts,
+and delivery-state rules. Templates, provider implementations, webhooks, UI,
+and analytics remain deferred.
+
+Task 27.2 is next provisionally: implement Communication Template Management.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

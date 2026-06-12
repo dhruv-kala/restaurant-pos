@@ -1,0 +1,224 @@
+# Communication Module
+
+## Status
+
+Task 27.1 infrastructure foundation implemented. Tasks 27.2 through 27.9 remain
+planned.
+
+Task 27 is split into:
+
+* Task 27.1 Communication Infrastructure Foundation
+* Task 27.2 Communication Template Management
+* Task 27.3 Email Delivery Providers
+* Task 27.4 SMS Delivery Providers
+* Task 27.5 WhatsApp Delivery Providers
+* Task 27.6 Push Notification Delivery
+* Task 27.7 Webhooks and Delivery Tracking
+* Task 27.8 Communication Center UI
+* Task 27.9 Communication Analytics
+
+## Objective
+
+Provide a tenant-isolated, provider-agnostic communication platform for:
+
+* Email
+* SMS
+* WhatsApp
+* Push Notifications
+
+The Communication Module executes message delivery.
+
+The Notification Module determines what should be delivered, to whom, and under which business rules.
+
+Communication handles provider integration, delivery tracking, retries, webhooks, and delivery status synchronization.
+
+## Ownership
+
+* communication templates
+* template version history
+* provider configuration
+* provider selection
+* rendered message snapshots
+* communication delivery attempts
+* delivery status tracking
+* retry orchestration
+* webhook processing
+* delivery analytics
+* provider-neutral channel abstractions
+
+Business modules continue to own:
+
+* domain events
+* business workflows
+* customer segmentation
+* loyalty rules
+* campaign logic
+
+## Data Model
+
+* `CommunicationProvider`: provider configuration metadata and capabilities
+* `CommunicationTemplate`: reusable communication template definition
+* `CommunicationTemplateVersion`: immutable version history
+* `CommunicationMessage`: rendered outbound communication snapshot
+* `CommunicationAttempt`: individual provider delivery attempt
+* `CommunicationWebhook`: provider webhook event history
+
+All tenant-owned records carry tenant scope and use forced PostgreSQL row-level security.
+
+Provider secrets must not be stored directly in tenant-editable records.
+
+Task 27.1 implements only `CommunicationProvider`, `CommunicationMessage`, and
+`CommunicationAttempt` foundations, provider abstraction contracts, delivery
+state rules, and idempotent internal enqueueing. Template and webhook models
+remain deferred to their dedicated subtasks.
+
+## Invariants
+
+* Business modules never call external providers directly.
+* Notification and domain events create communication requests through approved services.
+* Communication messages retain immutable rendered content snapshots.
+* Template updates create new versions.
+* Delivery attempts are append-only.
+* Retry operations create new attempts rather than mutating history.
+* Provider webhooks never bypass authorization or tenant validation.
+* Duplicate delivery is prevented through idempotency controls.
+* Provider credentials are never exposed through APIs or logs.
+* Communication history cannot be edited after creation.
+* Cross-tenant communication access is prohibited.
+
+## Authorization
+
+* All communication access is tenant scoped.
+* `SUPER_ADMIN` may inspect communication operations across tenants.
+* `TENANT_ADMIN` may manage templates, providers, and communication history within their tenant.
+* `MANAGER` may view authorized outlet communication history.
+* Communication administration requires explicit permissions.
+* Backend authorization is authoritative.
+
+Suggested permissions:
+
+* `COMMUNICATION_VIEW`
+* `COMMUNICATION_SEND`
+* `COMMUNICATION_TEMPLATE_VIEW`
+* `COMMUNICATION_TEMPLATE_MANAGE`
+* `COMMUNICATION_PROVIDER_VIEW`
+* `COMMUNICATION_PROVIDER_MANAGE`
+* `COMMUNICATION_HISTORY_VIEW`
+
+## API
+
+Provider Management:
+
+* `GET /communication/providers`
+* `GET /communication/providers/:id`
+* `POST /communication/providers`
+* `PATCH /communication/providers/:id`
+
+Template Management:
+
+* `GET /communication/templates`
+* `GET /communication/templates/:id`
+* `POST /communication/templates`
+* `PATCH /communication/templates/:id`
+* `GET /communication/templates/:id/versions`
+
+Communication History:
+
+* `GET /communication/messages`
+* `GET /communication/messages/:id`
+* `GET /communication/messages/:id/attempts`
+
+Webhook Processing:
+
+* `POST /communication/webhooks/:provider`
+
+Administrative Actions:
+
+* `POST /communication/messages/:id/resend`
+
+Endpoint availability depends on which Task 27.x implementation has been completed.
+
+## Flutter
+
+Admin Communication Center:
+
+* communication dashboard
+* provider management
+* template management
+* communication history
+* delivery attempt inspection
+* resend operations
+
+Restaurant applications consume communication state through Notification and business workflows and do not directly manage provider configuration.
+
+Shared:
+
+* communication models
+* repository layer
+* typed Dio client
+* Riverpod providers
+
+## Delivery Channels
+
+Supported channels:
+
+### Email
+
+Examples:
+
+* password reset
+* invoices
+* receipts
+* subscription notifications
+
+### SMS
+
+Examples:
+
+* OTP
+* order updates
+* operational alerts
+
+### WhatsApp
+
+Examples:
+
+* order confirmation
+* order ready
+* loyalty notifications
+
+### Push Notifications
+
+Examples:
+
+* order status
+* loyalty updates
+* promotions
+* operational alerts
+
+## Audit Requirements
+
+Audit events must be generated for:
+
+* provider configuration changes
+* template creation
+* template updates
+* template version creation
+* resend operations
+* webhook verification failures
+* communication administration actions
+
+Sensitive values must never be written to audit logs.
+
+## Non-Goals
+
+* marketing automation
+* customer segmentation
+* campaign management
+* AI-generated communication content
+* social media integrations
+* CRM workflow orchestration
+* notification preference management
+* in-app notification delivery
+
+These concerns belong to dedicated modules and are not part of the Communication Module.
