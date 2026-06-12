@@ -55,7 +55,10 @@ Current status:
   export foundations, typed clients, and admin reporting screens.
 - Task 23 implemented user-linked employee profiles, shifts, attendance,
   performance projections, typed clients, and admin workforce screens.
-- Task 24 is next: implement the RBAC & User Management Module.
+- Task 24 implemented tenant-safe user provisioning, lifecycle management,
+  roles, granular permissions, outlet access, effective JWT permissions, typed
+  clients, Riverpod providers, and admin RBAC screens.
+- Task 25 is next: implement the Audit & Activity Logging Module.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,

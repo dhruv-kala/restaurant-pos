@@ -5,4 +5,5 @@ export interface AuthenticatedUser {
   tenantId: string | null;
   outletId: string | null;
   roles: string[];
+  permissions?: string[];
 }

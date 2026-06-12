@@ -122,6 +122,7 @@ describe('AuthService', () => {
       tenantId: null,
       outletId: null,
       roles: ['SUPER_ADMIN'],
+      permissions: ['*'],
     });
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
   });
@@ -172,6 +173,7 @@ describe('AuthService', () => {
       tenantId,
       outletId,
       roles: ['TENANT_ADMIN'],
+      permissions: [],
     });
     expect(result.user).not.toHaveProperty('passwordHash');
     expect(createdRefreshToken?.userId).toBe(userId);

@@ -31,6 +31,7 @@ enum OutletStatus {
 enum UserStatus {
   INVITED
   ACTIVE
+  INACTIVE
   SUSPENDED
   DISABLED
 
@@ -40,6 +41,7 @@ enum UserStatus {
 enum MembershipStatus {
   INVITED
   ACTIVE
+  INACTIVE
   SUSPENDED
   REVOKED
 
@@ -716,15 +718,17 @@ model TenantMembership {
 }
 
 model Role {
-  id        String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
-  tenantId  String    @map("tenant_id") @db.Uuid
-  name      String    @db.Citext
-  systemKey String?   @map("system_key") @db.VarChar(80)
-  isSystem  Boolean   @default(false) @map("is_system")
-  version   Int       @default(1)
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  id          String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  name        String    @db.Citext
+  systemKey   String?   @map("system_key") @db.VarChar(80)
+  description String?   @db.VarChar(500)
+  isSystem    Boolean   @default(false) @map("is_system")
+  isActive    Boolean   @default(true) @map("is_active")
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   tenant                Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   membershipAssignments MembershipRole[]
@@ -742,7 +746,9 @@ model Permission {
   id            String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   permissionKey String   @unique @map("permission_key") @db.VarChar(120)
   module        String   @db.VarChar(50)
+  action        String   @db.VarChar(80)
   description   String   @db.VarChar(255)
+  isActive      Boolean  @default(true) @map("is_active")
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 

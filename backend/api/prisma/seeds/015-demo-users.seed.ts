@@ -31,8 +31,14 @@ export async function seedDemoUsers(context: SeedContext): Promise<void> {
     }
     const role = await context.prisma.role.upsert({
       where: { tenantId_systemKey: { tenantId, systemKey: roleKey } },
-      update: { name, isSystem: true, deletedAt: null },
-      create: { tenantId, name, systemKey: roleKey, isSystem: true },
+      update: { name, isSystem: true, isActive: true, deletedAt: null },
+      create: {
+        tenantId,
+        name,
+        systemKey: roleKey,
+        isSystem: true,
+        isActive: true,
+      },
     });
     context.demo.roleIds[roleKey] = role.id;
     const template = templates.find(

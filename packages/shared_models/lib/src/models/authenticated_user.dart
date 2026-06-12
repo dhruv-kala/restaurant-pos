@@ -5,6 +5,7 @@ class AuthenticatedUser {
     required this.id,
     required this.email,
     required this.roles,
+    this.permissions = const <String>[],
     this.name,
     this.tenantId,
     this.outletId,
@@ -24,6 +25,9 @@ class AuthenticatedUser {
       roles: rolesValue
           .map<UserRole>(UserRole.fromJson)
           .toList(growable: false),
+      permissions: (json['permissions'] as List<dynamic>? ?? const [])
+          .map((value) => value.toString())
+          .toList(growable: false),
     );
   }
 
@@ -33,8 +37,11 @@ class AuthenticatedUser {
   final String? tenantId;
   final String? outletId;
   final List<UserRole> roles;
+  final List<String> permissions;
 
   bool hasRole(UserRole role) => roles.contains(role);
+  bool hasPermission(String permission) =>
+      permissions.contains('*') || permissions.contains(permission);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'id': id,
@@ -43,6 +50,7 @@ class AuthenticatedUser {
     'tenantId': tenantId,
     'outletId': outletId,
     'roles': roles.map((role) => role.toJson()).toList(growable: false),
+    'permissions': permissions,
   };
 }
 

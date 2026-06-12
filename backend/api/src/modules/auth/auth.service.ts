@@ -70,7 +70,10 @@ export class AuthService {
     );
     const tokens = await this.issueTokenPair(user);
 
-    return { ...tokens, user };
+    return {
+      ...tokens,
+      user: { ...user, permissions: user.permissions ?? [] },
+    };
   }
 
   async refresh(dto: RefreshTokenDto): Promise<TokenPairResponseDto> {
@@ -169,6 +172,7 @@ export class AuthService {
         tenantId: null,
         outletId: null,
         roles: ['SUPER_ADMIN'],
+        permissions: ['*'],
       };
     }
 
@@ -193,6 +197,7 @@ export class AuthService {
           tenantId: null,
           outletId: null,
           roles: [],
+          permissions: [],
         };
       }
 
@@ -215,7 +220,18 @@ export class AuthService {
             where: { role: { deletedAt: null } },
             orderBy: { assignedAt: 'asc' },
             select: {
-              role: { select: { name: true, systemKey: true } },
+              role: {
+                select: {
+                  name: true,
+                  systemKey: true,
+                  permissionAssignments: {
+                    where: { permission: { isActive: true } },
+                    select: {
+                      permission: { select: { permissionKey: true } },
+                    },
+                  },
+                },
+              },
             },
           },
           outletAssignments: {
@@ -244,6 +260,15 @@ export class AuthService {
         roles: scopedMembership.roleAssignments.map(({ role }) =>
           (role.systemKey ?? role.name).toUpperCase(),
         ),
+        permissions: [
+          ...new Set(
+            scopedMembership.roleAssignments.flatMap(({ role }) =>
+              (role.permissionAssignments ?? []).map(
+                ({ permission }) => permission.permissionKey,
+              ),
+            ),
+          ),
+        ],
       };
     });
   }
@@ -332,6 +357,7 @@ export class AuthService {
       tenantId: user.tenantId,
       outletId: user.outletId,
       roles: user.roles,
+      permissions: user.permissions ?? [],
       type: 'access',
     };
 

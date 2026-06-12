@@ -114,7 +114,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 23.5 are complete at the foundation level.
+Tasks 1 through 24 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -169,7 +169,11 @@ Task 23.5 implemented platform master-data tables, system settings, application
 modules, global role templates, 184 permissions, role mappings, environment-aware
 idempotent seed commands, and a complete development demo restaurant dataset.
 
-Task 24 is next: implement the RBAC & User Management Module.
+Task 24 implemented tenant-safe user administration, custom/system role
+protection, permission visibility and assignment, multi-outlet access, shared
+clients, Riverpod providers, and admin access-management screens.
+
+Task 25 is next: implement the Audit & Activity Logging Module.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

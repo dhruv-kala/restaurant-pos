@@ -22,7 +22,7 @@ class KitchenReportScreen extends ConsumerWidget {
                 .map(
                   (entry) => ReportMetricCard(
                     label: entry.key,
-                  value: entry.value as Object? ?? 0,
+                    value: entry.value as Object? ?? 0,
                   ),
                 )
                 .toList(),

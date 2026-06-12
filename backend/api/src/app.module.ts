@@ -22,6 +22,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ReceiptsModule } from './modules/receipts/receipts.module';
 import { RecipesModule } from './modules/recipes/recipes.module';
+import { RbacModule } from './modules/rbac/rbac.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { TablesModule } from './modules/tables/tables.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
@@ -49,6 +50,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PaymentsModule,
     ReceiptsModule,
     RecipesModule,
+    RbacModule,
     ReportsModule,
     TablesModule,
     TenantsModule,

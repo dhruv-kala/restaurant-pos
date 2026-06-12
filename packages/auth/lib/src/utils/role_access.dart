@@ -38,6 +38,8 @@ abstract final class RoleAccess {
       UserRole.cashier,
       UserRole.waiter,
       UserRole.kitchenStaff,
+      UserRole.inventoryManager,
+      UserRole.hrManager,
       UserRole.customer,
     ];
     for (final role in precedence) {

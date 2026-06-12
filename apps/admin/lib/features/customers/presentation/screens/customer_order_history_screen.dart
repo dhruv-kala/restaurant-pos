@@ -11,9 +11,9 @@ class CustomerOrderHistoryScreen extends ConsumerWidget {
     body: FutureBuilder(
       future: ref.read(customersRepositoryProvider).orders(customerId),
       builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
         return ListView(
           children: [
             for (final order in snapshot.data!)

@@ -328,6 +328,9 @@ The repository currently contains:
 - Existing-user-linked employee profiles, tenant roles, outlet assignments,
   effective shifts, attendance, operational performance projections, typed
   clients, Riverpod providers, and admin workforce screens
+- Tenant-safe RBAC user administration, custom role management, effective
+  permission visibility in JWT sessions, role/permission and multi-outlet
+  assignment APIs, shared clients, and admin access-management screens
 
 ## Authoritative References
 

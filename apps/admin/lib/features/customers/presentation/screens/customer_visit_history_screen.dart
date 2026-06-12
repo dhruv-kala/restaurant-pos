@@ -11,9 +11,9 @@ class CustomerVisitHistoryScreen extends ConsumerWidget {
     body: FutureBuilder(
       future: ref.read(customersRepositoryProvider).visits(customerId),
       builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
         return ListView(
           children: [
             for (final visit in snapshot.data!)

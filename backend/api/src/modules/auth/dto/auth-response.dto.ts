@@ -24,6 +24,12 @@ export class AuthenticatedUserDto {
 
   @ApiProperty({ example: ['TENANT_ADMIN'], type: [String] })
   roles!: string[];
+
+  @ApiProperty({
+    example: ['roles.read', 'roles.update', 'users.read'],
+    type: [String],
+  })
+  permissions!: string[];
 }
 
 export class TokenPairResponseDto {

@@ -27,6 +27,10 @@ abstract final class ApiEndpoints {
   static const String reports = '/reports';
   static const String dashboard = '/dashboard';
   static const String inventoryWastage = '/inventory/wastage';
+  static const String rbacUsers = '/rbac/users';
+  static const String rbacRoles = '/rbac/roles';
+  static const String rbacPermissions = '/rbac/permissions';
+  static const String rbacGroupedPermissions = '$rbacPermissions/grouped';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -144,6 +148,15 @@ abstract final class ApiEndpoints {
   static String customerVisits(String id) => '${customer(id)}/visits';
   static String customerStats(String id) => '${customer(id)}/stats';
   static String employee(String id) => '$employees/$id';
+  static String rbacUser(String id) => '$rbacUsers/$id';
+  static String rbacUserStatus(String id) => '${rbacUser(id)}/status';
+  static String rbacUserResetPassword(String id) =>
+      '${rbacUser(id)}/reset-password';
+  static String rbacUserRoles(String id) => '${rbacUser(id)}/roles';
+  static String rbacUserOutlets(String id) => '${rbacUser(id)}/outlets';
+  static const String rbacInviteUser = '$rbacUsers/invite';
+  static String rbacRole(String id) => '$rbacRoles/$id';
+  static String rbacRolePermissions(String id) => '${rbacRole(id)}/permissions';
   static String employeePerformance(String id) => '${employee(id)}/performance';
   static const String employeeDashboard = '$employees/dashboard';
   static String shift(String id) => '$shifts/$id';

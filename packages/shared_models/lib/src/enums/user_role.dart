@@ -5,6 +5,8 @@ enum UserRole {
   cashier,
   waiter,
   kitchenStaff,
+  inventoryManager,
+  hrManager,
   customer;
 
   static UserRole fromJson(Object? value) {
@@ -15,6 +17,8 @@ enum UserRole {
       'CASHIER' => UserRole.cashier,
       'WAITER' => UserRole.waiter,
       'KITCHEN' || 'KITCHEN_STAFF' => UserRole.kitchenStaff,
+      'INVENTORY_MANAGER' => UserRole.inventoryManager,
+      'HR_MANAGER' => UserRole.hrManager,
       'CUSTOMER' => UserRole.customer,
       _ => throw FormatException('Unsupported user role: $value'),
     };
@@ -28,6 +32,8 @@ enum UserRole {
       UserRole.cashier => 'CASHIER',
       UserRole.waiter => 'WAITER',
       UserRole.kitchenStaff => 'KITCHEN_STAFF',
+      UserRole.inventoryManager => 'INVENTORY_MANAGER',
+      UserRole.hrManager => 'HR_MANAGER',
       UserRole.customer => 'CUSTOMER',
     };
   }

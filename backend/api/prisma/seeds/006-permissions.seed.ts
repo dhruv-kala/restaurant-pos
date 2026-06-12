@@ -31,6 +31,7 @@ export const PERMISSIONS = Object.entries(moduleActions).flatMap(
     actions.map((action) => ({
       permissionKey: `${module}.${action}`,
       module,
+      action,
       description: `${action.replaceAll('_', ' ')} ${module}`,
     })),
 );
@@ -41,7 +42,9 @@ export async function seedPermissions({ prisma }: SeedContext): Promise<void> {
       where: { permissionKey: permission.permissionKey },
       update: {
         module: permission.module,
+        action: permission.action,
         description: permission.description,
+        isActive: true,
       },
       create: permission,
     });

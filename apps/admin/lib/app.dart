@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:restaurant_pos_auth/restaurant_pos_auth.dart' hide UserRole;
+import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 import 'features/menu/presentation/screens/menu_dashboard.dart';
@@ -6,6 +9,7 @@ import 'features/inventory/presentation/screens/inventory_dashboard.dart';
 import 'features/customers/presentation/screens/customer_dashboard.dart';
 import 'features/employees/presentation/screens/employee_dashboard.dart';
 import 'features/recipes/presentation/screens/recipe_dashboard.dart';
+import 'features/rbac/presentation/screens/user_management_dashboard.dart';
 import 'features/reports/presentation/screens/reports_dashboard.dart';
 import 'features/tables/presentation/screens/table_layout_screen.dart';
 
@@ -23,52 +27,69 @@ class AdminApp extends StatelessWidget {
   }
 }
 
-class AdminDashboard extends StatefulWidget {
+class AdminDashboard extends ConsumerStatefulWidget {
   const AdminDashboard({super.key});
 
   @override
-  State<AdminDashboard> createState() => _AdminDashboardState();
+  ConsumerState<AdminDashboard> createState() => _AdminDashboardState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> {
+class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   int _index = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children: const <Widget>[
-          MenuDashboard(),
-          TableLayoutScreen(),
-          InventoryDashboard(),
-          RecipeDashboard(),
-          CustomerDashboard(),
-          ReportsDashboard(),
-          EmployeeDashboard(),
-        ],
+    final user = ref.watch(authNotifierProvider).user;
+    final canManageRbac =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('roles.update') == true ||
+        user?.hasPermission('users.update') == true;
+    final screens = <Widget>[
+      const MenuDashboard(),
+      const TableLayoutScreen(),
+      const InventoryDashboard(),
+      const RecipeDashboard(),
+      const CustomerDashboard(),
+      const ReportsDashboard(),
+      const EmployeeDashboard(),
+      if (canManageRbac) const UserManagementDashboard(),
+    ];
+    final destinations = <NavigationDestination>[
+      const NavigationDestination(
+        icon: Icon(Icons.restaurant_menu),
+        label: 'Menu',
       ),
+      const NavigationDestination(
+        icon: Icon(Icons.table_restaurant),
+        label: 'Tables',
+      ),
+      const NavigationDestination(
+        icon: Icon(Icons.inventory),
+        label: 'Inventory',
+      ),
+      const NavigationDestination(
+        icon: Icon(Icons.menu_book),
+        label: 'Recipes',
+      ),
+      const NavigationDestination(icon: Icon(Icons.people), label: 'Customers'),
+      const NavigationDestination(
+        icon: Icon(Icons.analytics),
+        label: 'Reports',
+      ),
+      const NavigationDestination(icon: Icon(Icons.badge), label: 'Employees'),
+      if (canManageRbac)
+        const NavigationDestination(
+          icon: Icon(Icons.admin_panel_settings),
+          label: 'Access',
+        ),
+    ];
+    return Scaffold(
+      body: screens[_index.clamp(0, screens.length - 1)],
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
+        selectedIndex: _index.clamp(0, destinations.length - 1),
         onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const <NavigationDestination>[
-          NavigationDestination(
-            icon: Icon(Icons.restaurant_menu),
-            label: 'Menu',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.table_restaurant),
-            label: 'Tables',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.inventory),
-            label: 'Inventory',
-          ),
-          NavigationDestination(icon: Icon(Icons.menu_book), label: 'Recipes'),
-          NavigationDestination(icon: Icon(Icons.people), label: 'Customers'),
-          NavigationDestination(icon: Icon(Icons.analytics), label: 'Reports'),
-          NavigationDestination(icon: Icon(Icons.badge), label: 'Employees'),
-        ],
+        destinations: destinations,
       ),
     );
   }

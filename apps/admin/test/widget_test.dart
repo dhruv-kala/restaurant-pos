@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:restaurant_pos_api_client/restaurant_pos_api_client.dart';
 import 'package:restaurant_pos_admin/app.dart';
 import 'package:restaurant_pos_admin/features/menu/presentation/providers/menu_providers.dart';
+import 'package:restaurant_pos_auth/restaurant_pos_auth.dart';
 import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 
 void main() {
@@ -10,6 +11,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          apiClientConfigProvider.overrideWithValue(
+            const ApiClientConfig(baseUrl: 'https://example.invalid'),
+          ),
           menuApiServiceProvider.overrideWithValue(_FakeMenuApiService()),
         ],
         child: const AdminApp(),

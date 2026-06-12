@@ -11,12 +11,12 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 23.5 are complete at the requested foundation level.
+Tasks 1 through 24 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 24 is next: implement the RBAC & User Management Module.
+Task 25 is next: implement the Audit & Activity Logging Module.
 
 ## Task History
 
@@ -46,7 +46,62 @@ Task 24 is next: implement the RBAC & User Management Module.
 | 22. Implement Reports Module | COMPLETE | Business-date reports, dashboard KPIs, tenant/outlet authorization, audit history, export foundation, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
 | 23. Implement Employee & Staff Management Module | COMPLETE | User-linked profiles, shifts, assignments, attendance, performance projections, events, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
 | 23.5. Implement Master Data & Database Seed Framework | COMPLETE | Global locale/settings/module/role-template masters, 184 permissions, role mappings, environment-aware idempotent seeds, and a complete development demo restaurant dataset are implemented. |
-| 24. Implement RBAC & User Management Module | NEXT | Not started. Define user provisioning, invitations, memberships, role/permission administration, outlet access, and audit boundaries before UI. |
+| 24. Implement RBAC & User Management Module | COMPLETE | Tenant-safe user provisioning, lifecycle controls, roles, granular permissions, outlet access, effective JWT permissions, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
+| 25. Implement Audit & Activity Logging Module | NEXT | Not started. Define append-only audit event ownership, actor and tenant context, sensitive-data controls, query contracts, retention, and administrative visibility before UI. |
+
+## Task 24 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Tenant-scoped user creation, invitation, listing, search, details, updates,
+  activation/deactivation, and secure password-reset initiation
+- Role CRUD with protected system roles, active state, descriptions, and
+  safeguards against deleting assigned custom roles
+- Global granular permission catalog with module grouping and role-permission
+  replacement APIs
+- User-role and user-outlet assignment APIs with tenant-aware validation
+- Super-admin, tenant-admin, and outlet-manager access boundaries using trusted
+  authentication scope
+- Effective permission flattening into authenticated-user and JWT contracts
+  while preserving backend authorization as authoritative
+- Prisma schema changes and migration
+  `20260613140000_add_rbac_user_management`
+- Shared Dart RBAC models and typed `RbacApiService`
+- Riverpod repositories and providers for users, roles, permissions, access,
+  and dashboard metrics
+- Admin user dashboard, directory, add/edit/details, role management,
+  permission matrix, user-role assignment, and outlet-access screens
+- Super-admin RBAC foundation notes and API, database, and specification
+  documentation
+- UUID validation compatible with the repository's UUIDv7 identifiers
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:generate`: passed
+- `npm run prisma:validate`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 146 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models, API client, and auth: passed
+- `flutter pub get` for admin: passed
+- `flutter analyze` for admin: passed
+- `flutter test` for admin: passed, 1 test
+- `flutter build web` for admin: passed
+
+Known limitations:
+
+- Migration `20260613140000_add_rbac_user_management` was not deployed because
+  project history records invalid local PostgreSQL credentials.
+- Invitation delivery is represented by secure account provisioning; outbound
+  email and one-time invitation-token delivery remain future infrastructure.
+- Password reset stores a new random hash without returning or logging the
+  secret. A user-facing reset-token delivery flow remains future work.
+- The super-admin application records the platform RBAC integration boundary;
+  full platform UI composition remains a later super-admin task.
 
 ## Task 23.5 Completion
 
@@ -1002,18 +1057,19 @@ Known limitation:
 
 ## Next Task
 
-### Task 24: Implement RBAC & User Management Module
+### Task 25: Implement Audit & Activity Logging Module
 
-Do not start Task 24 unless explicitly requested. Define user provisioning,
-invitations, memberships, role/permission administration, outlet access, and
-audit boundaries before Flutter screens.
+Do not start Task 25 unless explicitly requested. Define append-only event
+ownership, actor and impersonation context, tenant/outlet scope, sensitive-data
+redaction, retention, query/export contracts, and authorization before Flutter
+screens.
 
 ## Future Work
 
 - Add password reset, verification, MFA, and explicit tenant switching when
   those contracts are approved.
-- Replace minimal role checks with permission guards when the full RBAC task is
-  approved.
+- Extend permission guards across legacy modules incrementally without
+  weakening their existing role and tenant checks.
 - Define menu, pricing, tax, order, kitchen, payment, inventory, customer, and
   loyalty contracts in backend-first order.
 - Extend Socket.IO beyond kitchen workflows only after durable events and
