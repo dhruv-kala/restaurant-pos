@@ -3,6 +3,8 @@ import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 import 'features/menu/presentation/screens/menu_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
+import 'features/customers/presentation/screens/customer_dashboard.dart';
+import 'features/recipes/presentation/screens/recipe_dashboard.dart';
 import 'features/tables/presentation/screens/table_layout_screen.dart';
 
 class AdminApp extends StatelessWidget {
@@ -38,6 +40,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
           MenuDashboard(),
           TableLayoutScreen(),
           InventoryDashboard(),
+          RecipeDashboard(),
+          CustomerDashboard(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -56,6 +60,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
             icon: Icon(Icons.inventory),
             label: 'Inventory',
           ),
+          NavigationDestination(icon: Icon(Icons.menu_book), label: 'Recipes'),
+          NavigationDestination(icon: Icon(Icons.people), label: 'Customers'),
         ],
       ),
     );

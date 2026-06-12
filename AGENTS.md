@@ -114,7 +114,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 19 are complete at the foundation level.
+Tasks 1 through 21 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -149,7 +149,15 @@ Task 19 implemented tenant-scoped inventory master data, outlet stock balances,
 append-only movements, adjustments, transfers, vendors, purchase orders,
 receiving, batches, alerts, valuation, shared clients, and admin screens.
 
-Task 20 is next: implement the Recipe & Stock Consumption Engine.
+Task 20 implemented recipes, production recipes, yield and portion
+calculations, cost snapshots, profitability, idempotent order-triggered stock
+consumption, immutable wastage, typed clients, and admin workflows.
+
+Task 21 implemented tenant customer profiles, duplicate-safe contact lookup,
+addresses, append-only notes and visits, payment-driven stats, customer
+history, typed clients, admin workflows, and restaurant customer lookup.
+
+Task 22 is next: implement the Reports Module.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

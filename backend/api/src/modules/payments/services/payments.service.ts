@@ -16,6 +16,7 @@ import {
 import { applyDatabaseRequestContext } from '../../../common/database/request-context.util';
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
+import { CustomerStatsService } from '../../customers/services/customer-stats.service';
 import type { CreatePaymentDto } from '../dto/create-payment.dto';
 import type { PaymentQueryDto } from '../dto/payment-query.dto';
 import type {
@@ -60,6 +61,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: PaymentEventsService,
+    private readonly customerStats: CustomerStatsService,
   ) {}
 
   async create(dto: CreatePaymentDto, user: AuthenticatedUser): Promise<PaymentResponseDto> {
@@ -167,6 +169,7 @@ export class PaymentsService {
         include: paymentInclude,
       });
       await this.reconcileBill(tx, payment.billId);
+      if (successful) await this.customerStats.recordSuccessfulPayment(tx, payment.id);
       if (dto.status === PaymentStatus.FAILED) {
         this.events.publishFailed({
           type: 'PaymentFailed',
@@ -365,6 +368,7 @@ export class PaymentsService {
         include: paymentInclude,
       });
       await this.reconcileBill(tx, lockedBill.id);
+      await this.customerStats.recordSuccessfulPayment(tx, payment.id);
       this.events.publishCreated({
         type: 'PaymentCreated',
         tenantId: payment.tenantId,

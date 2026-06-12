@@ -267,6 +267,44 @@ enum InventoryConsumptionTrigger {
   @@map("inventory_consumption_trigger")
 }
 
+enum CustomerGender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+
+  @@map("customer_gender")
+}
+
+enum CustomerType {
+  WALK_IN
+  REGULAR
+  VIP
+  CORPORATE
+  DELIVERY
+
+  @@map("customer_type")
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+
+  @@map("customer_status")
+}
+
+enum CustomerSource {
+  POS
+  WAITER_APP
+  QR_ORDER
+  ONLINE_ORDER
+  CUSTOMER_APP
+  IMPORT
+
+  @@map("customer_source")
+}
+
 model Tenant {
   id           String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   slug         String       @unique @db.VarChar(63)
@@ -332,6 +370,11 @@ model Tenant {
   productionRecipeIngredients ProductionRecipeIngredient[]
   inventoryConsumptions       InventoryConsumption[]
   inventoryWastages           InventoryWastage[]
+  customers                   Customer[]
+  customerAddresses           CustomerAddress[]
+  customerNotes               CustomerNote[]
+  customerVisits              CustomerVisit[]
+  customerStats               CustomerStats[]
 
   @@index([status])
   @@index([deletedAt])
@@ -389,6 +432,8 @@ model Outlet {
   inventoryAlerts       InventoryAlert[]
   inventoryConsumptions InventoryConsumption[]
   inventoryWastages     InventoryWastage[]
+  customerVisits        CustomerVisit[]
+  favoriteCustomerStats CustomerStats[]              @relation("CustomerFavoriteOutlet")
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -438,6 +483,7 @@ model UserAccount {
   updatedProductionRecipes   ProductionRecipe[]     @relation("ProductionRecipeUpdatedBy")
   triggeredConsumptions      InventoryConsumption[] @relation("ConsumptionTriggeredBy")
   recordedWastages           InventoryWastage[]     @relation("WastageRecordedBy")
+  customerNotes              CustomerNote[]         @relation("CustomerNoteCreatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -844,9 +890,11 @@ model Order {
   outlet                Outlet                 @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
   table                 DiningTable?           @relation(fields: [tenantId, outletId, tableId], references: [tenantId, outletId, id], onDelete: Restrict)
   waiter                UserAccount?           @relation("OrderWaiter", fields: [waiterId], references: [id], onDelete: Restrict)
+  customer              Customer?              @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
   items                 OrderItem[]
   bills                 Bill[]
   inventoryConsumptions InventoryConsumption[]
+  customerVisits        CustomerVisit[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, orderNumber])
@@ -1036,15 +1084,16 @@ model Bill {
   createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt             DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet      Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  order       Order        @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
-  generatedBy UserAccount  @relation("BillGeneratedBy", fields: [generatedByUserId], references: [id], onDelete: Restrict)
-  voidedBy    UserAccount? @relation("BillVoidedBy", fields: [voidedByUserId], references: [id], onDelete: Restrict)
-  items       BillItem[]
-  taxes       BillTax[]
-  payments    Payment[]
-  receipts    Receipt[]
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet         Outlet          @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  order          Order           @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  generatedBy    UserAccount     @relation("BillGeneratedBy", fields: [generatedByUserId], references: [id], onDelete: Restrict)
+  voidedBy       UserAccount?    @relation("BillVoidedBy", fields: [voidedByUserId], references: [id], onDelete: Restrict)
+  items          BillItem[]
+  taxes          BillTax[]
+  payments       Payment[]
+  receipts       Receipt[]
+  customerVisits CustomerVisit[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, billNumber])
@@ -1152,14 +1201,15 @@ model Payment {
   createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet       Outlet               @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  bill         Bill                 @relation(fields: [tenantId, billId], references: [tenantId, id], onDelete: Restrict)
-  createdBy    UserAccount          @relation("PaymentCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  paidBy       UserAccount?         @relation("PaymentPaidBy", fields: [paidByUserId], references: [id], onDelete: Restrict)
-  transactions PaymentTransaction[]
-  refunds      PaymentRefund[]
-  receipts     Receipt[]
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet         Outlet               @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  bill           Bill                 @relation(fields: [tenantId, billId], references: [tenantId, id], onDelete: Restrict)
+  createdBy      UserAccount          @relation("PaymentCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  paidBy         UserAccount?         @relation("PaymentPaidBy", fields: [paidByUserId], references: [id], onDelete: Restrict)
+  transactions   PaymentTransaction[]
+  refunds        PaymentRefund[]
+  receipts       Receipt[]
+  customerVisits CustomerVisit[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, paymentNumber])
@@ -1787,4 +1837,135 @@ model InventoryWastage {
   @@unique([tenantId, id])
   @@index([tenantId, outletId, ingredientId, recordedAt])
   @@map("inventory_wastages")
+}
+
+model Customer {
+  id              String          @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String          @map("tenant_id") @db.Uuid
+  firstName       String?         @map("first_name") @db.VarChar(100)
+  lastName        String?         @map("last_name") @db.VarChar(100)
+  displayName     String          @map("display_name") @db.VarChar(160)
+  phone           String?         @db.VarChar(20)
+  email           String?         @db.Citext
+  gender          CustomerGender?
+  dateOfBirth     DateTime?       @map("date_of_birth") @db.Date
+  anniversaryDate DateTime?       @map("anniversary_date") @db.Date
+  gstNumber       String?         @map("gst_number") @db.VarChar(32)
+  customerType    CustomerType    @default(WALK_IN) @map("customer_type")
+  status          CustomerStatus  @default(ACTIVE)
+  notes           String?         @db.VarChar(1000)
+  source          CustomerSource  @default(POS)
+  smsOptIn        Boolean         @default(false) @map("sms_opt_in")
+  emailOptIn      Boolean         @default(false) @map("email_opt_in")
+  whatsappOptIn   Boolean         @default(false) @map("whatsapp_opt_in")
+  version         Int             @default(1)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime?       @map("deleted_at") @db.Timestamptz(3)
+
+  tenant    Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  addresses CustomerAddress[]
+  notesLog  CustomerNote[]
+  visits    CustomerVisit[]
+  stats     CustomerStats?
+  orders    Order[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, phone])
+  @@unique([tenantId, email])
+  @@index([tenantId, displayName, status, deletedAt])
+  @@index([tenantId, customerType, source, createdAt])
+  @@map("customers")
+}
+
+model CustomerAddress {
+  id           String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  customerId   String    @map("customer_id") @db.Uuid
+  label        String    @default("Other") @db.VarChar(60)
+  addressLine1 String    @map("address_line_1") @db.VarChar(200)
+  addressLine2 String?   @map("address_line_2") @db.VarChar(200)
+  city         String?   @db.VarChar(100)
+  state        String?   @db.VarChar(100)
+  country      String?   @db.VarChar(2)
+  postalCode   String?   @map("postal_code") @db.VarChar(20)
+  latitude     Decimal?  @db.Decimal(9, 6)
+  longitude    Decimal?  @db.Decimal(9, 6)
+  isDefault    Boolean   @default(false) @map("is_default")
+  version      Int       @default(1)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  customer Customer @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, customerId, isDefault, deletedAt])
+  @@map("customer_addresses")
+}
+
+model CustomerNote {
+  id              String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  customerId      String   @map("customer_id") @db.Uuid
+  note            String   @db.VarChar(1000)
+  createdByUserId String   @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  customer  Customer    @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
+  createdBy UserAccount @relation("CustomerNoteCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, customerId, createdAt])
+  @@map("customer_notes")
+}
+
+model CustomerVisit {
+  id         String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  outletId   String   @map("outlet_id") @db.Uuid
+  customerId String   @map("customer_id") @db.Uuid
+  orderId    String?  @map("order_id") @db.Uuid
+  billId     String?  @map("bill_id") @db.Uuid
+  paymentId  String?  @map("payment_id") @db.Uuid
+  visitDate  DateTime @map("visit_date") @db.Timestamptz(3)
+  totalSpend Int      @map("total_spend_minor")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet   Outlet   @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  customer Customer @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
+  order    Order?   @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  bill     Bill?    @relation(fields: [tenantId, billId], references: [tenantId, id], onDelete: Restrict)
+  payment  Payment? @relation(fields: [tenantId, paymentId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, paymentId])
+  @@index([tenantId, customerId, visitDate])
+  @@index([tenantId, outletId, visitDate])
+  @@map("customer_visits")
+}
+
+model CustomerStats {
+  id                String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  customerId        String    @map("customer_id") @db.Uuid
+  totalOrders       Int       @default(0) @map("total_orders")
+  totalSpend        Int       @default(0) @map("total_spend_minor")
+  averageOrderValue Int       @default(0) @map("average_order_value_minor")
+  lastVisitAt       DateTime? @map("last_visit_at") @db.Timestamptz(3)
+  firstVisitAt      DateTime? @map("first_visit_at") @db.Timestamptz(3)
+  favoriteOutletId  String?   @map("favorite_outlet_id") @db.Uuid
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  customer       Customer @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
+  favoriteOutlet Outlet?  @relation("CustomerFavoriteOutlet", fields: [tenantId, favoriteOutletId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, customerId])
+  @@index([tenantId, favoriteOutletId])
+  @@map("customer_stats")
 }

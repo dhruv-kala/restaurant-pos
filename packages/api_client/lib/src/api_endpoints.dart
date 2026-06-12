@@ -17,6 +17,11 @@ abstract final class ApiEndpoints {
   static const String payments = '/payments';
   static const String receipts = '/receipts';
   static const String inventory = '/inventory';
+  static const String recipes = '/recipes';
+  static const String productionRecipes = '/production-recipes';
+  static const String consumption = '/consumption';
+  static const String customers = '/customers';
+  static const String inventoryWastage = '/inventory/wastage';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -114,4 +119,23 @@ abstract final class ApiEndpoints {
       '${purchaseOrder(id)}/receive';
   static String resolveInventoryAlert(String id) =>
       '$inventoryAlerts/$id/resolve';
+  static String recipe(String id) => '$recipes/$id';
+  static String recipeIngredients(String id) => '${recipe(id)}/ingredients';
+  static String recipeIngredient(String recipeId, String ingredientId) =>
+      '${recipeIngredients(recipeId)}/$ingredientId';
+  static String recipeCost(String id) => '${recipe(id)}/cost';
+  static const String recipeProfitability = '$recipes/profitability';
+  static String productionRecipe(String id) => '$productionRecipes/$id';
+  static String consumptionDetail(String id) => '$consumption/$id';
+  static const String customerSearch = '$customers/search';
+  static const String customerDashboard = '$customers/dashboard';
+  static String customer(String id) => '$customers/$id';
+  static String customerAddresses(String id) => '${customer(id)}/addresses';
+  static String customerAddress(String id) => '$customers/addresses/$id';
+  static String customerNotes(String id) => '${customer(id)}/notes';
+  static String customerOrders(String id) => '${customer(id)}/orders';
+  static String customerBills(String id) => '${customer(id)}/bills';
+  static String customerPayments(String id) => '${customer(id)}/payments';
+  static String customerVisits(String id) => '${customer(id)}/visits';
+  static String customerStats(String id) => '${customer(id)}/stats';
 }

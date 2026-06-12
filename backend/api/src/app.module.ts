@@ -10,6 +10,7 @@ import { appConfig } from './config/app.config';
 import { validateEnvironment } from './config/environment.validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { CustomersModule } from './modules/customers/customers.module';
 import { HealthModule } from './modules/health/health.module';
 import { KdsModule } from './modules/kds/kds.module';
 import { KitchenModule } from './modules/kitchen/kitchen.module';
@@ -19,6 +20,7 @@ import { OutletsModule } from './modules/outlets/outlets.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ReceiptsModule } from './modules/receipts/receipts.module';
+import { RecipesModule } from './modules/recipes/recipes.module';
 import { TablesModule } from './modules/tables/tables.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -34,6 +36,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     AuthModule,
     BillingModule,
+    CustomersModule,
     HealthModule,
     KdsModule,
     KitchenModule,
@@ -42,6 +45,7 @@ import { PrismaModule } from './prisma/prisma.module';
     OrdersModule,
     PaymentsModule,
     ReceiptsModule,
+    RecipesModule,
     TablesModule,
     TenantsModule,
     OutletsModule,

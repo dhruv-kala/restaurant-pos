@@ -11,12 +11,12 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 19 are complete at the requested foundation level.
+Tasks 1 through 21 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 20 is next: implement the Recipe & Stock Consumption Engine.
+Task 22 is next: implement the Reports Module.
 
 ## Task History
 
@@ -41,7 +41,124 @@ Task 20 is next: implement the Recipe & Stock Consumption Engine.
 | 17. Implement Receipt & Invoice Module | COMPLETE | Immutable receipt and tax-invoice snapshots, numbering, PDF/thermal rendering, print audit, protected APIs, shared clients, and Flutter screens are implemented. |
 | 18. Complete Kitchen Display System | COMPLETE | First-class stations, station routing, item actor audits, preparation metrics, authenticated Socket.IO events, typed clients, Riverpod providers, and KDS screens are implemented. |
 | 19. Implement Inventory Module | COMPLETE | Tenant inventory masters, outlet balances, append-only movements, adjustments, transfers, purchasing, batches, alerts, valuation, typed clients, and admin screens are implemented. |
-| 20. Implement Recipe & Stock Consumption Engine | NEXT | Not started. Define recipe versions, menu-item yields, order consumption, reversals, wastage, and idempotency before UI. |
+| 20. Implement Recipe & Stock Consumption Engine | COMPLETE | Recipes, production recipes, costing, profitability, idempotent order consumption, wastage, typed clients, and admin screens are implemented. |
+| 21. Implement Customer Management Module | COMPLETE | Customer profiles, duplicate-safe lookup, addresses, notes, payment visits, stats/history, typed clients, admin screens, and restaurant lookup are implemented. |
+| 22. Implement Reports Module | NEXT | Not started. Define report ownership, business dates, metrics, filters, exports, and authorization before UI. |
+
+## Task 21 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Tenant-scoped customer profiles with customer type, status, source, personal
+  dates, GST number, notes, versioning, and soft deletion
+- SMS, email, and WhatsApp consent fields defaulting to opt-out
+- Normalized tenant-local phone uniqueness and case-insensitive email
+  uniqueness with explicit duplicate conflicts
+- Customer addresses with coordinate validation and one live default address
+- Append-only operational customer notes with actor/time audit
+- Immutable payment-linked customer visits with outlet, order, bill, payment,
+  date, and minor-unit spend snapshots
+- Rebuilt customer stats for distinct orders, spend, average order value,
+  first/last visit, and favorite outlet
+- Payment completion integration for immediate and asynchronous successful
+  payments with idempotent visit recording
+- Tenant-aware `Order.customerId` foreign key and blocked/cross-tenant customer
+  validation during order create/update
+- Protected customer CRUD, search, dashboard, addresses, notes, orders, bills,
+  payments, visits, and stats APIs
+- Platform, tenant admin, manager, cashier, waiter-limited, kitchen-denied, and
+  future-customer-self-service authorization boundaries
+- Shared Dart customer models and typed `CustomersApiService`
+- Riverpod customer list, detail, search, dashboard, and stats providers
+- Admin dashboard, list, details, add/edit, address, notes, visit history, and
+  order history screens
+- Restaurant-app phone/name customer lookup integrated into delivery order
+  creation
+- API, schema/ERD, duplicate, visit, stats, and privacy documentation
+
+Validation:
+
+- `npx.cmd prisma format`: passed
+- `npm.cmd run prisma:generate`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run test -- --runInBand`: passed, 106 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get` for admin and restaurant-app: passed
+- `flutter analyze` for admin and restaurant-app: passed
+- `flutter test` for admin: passed, 1 test
+- `flutter test` for restaurant-app: passed, 9 tests
+- `flutter build web` for admin: passed
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed because existing project history records
+  invalid local PostgreSQL credentials.
+- Customer self-profile ownership, merge/deduplication, marketing campaigns,
+  loyalty, wallet, referrals, and consent audit history require later tasks.
+- Refunds do not rewrite immutable visit spend; a future compensating customer
+  value event is required for net-spend analytics.
+
+## Task 20 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Tenant-scoped menu-item and variant recipes with yield, portion, wastage,
+  audit, version, and soft-delete fields
+- Production recipes for semi-finished goods and optional output ingredients
+- Unit normalization and duplicate-composition validation
+- Purchase-weighted average recipe costing with master-cost fallback and
+  immutable changed-cost snapshots
+- Menu and outlet-price profitability calculations
+- Configurable outlet consumption trigger at `READY` or `COMPLETED`
+- Transactional recipe lookup, stock row locking, stock deduction, immutable
+  consumption history, and append-only `CONSUMPTION` stock transactions
+- Order-item/ingredient uniqueness for retry-safe idempotency
+- Outlet negative-stock policy with conflict behavior and inventory alerts
+- Immutable wastage with reason, actor, cost, stock movement, and damaged stock
+- Typed `RecipeUpdated`, `InventoryConsumed`, `RecipeCostChanged`, and
+  `InventoryShortageDetected` event boundaries without Socket.IO transport
+- Protected recipe, production, costing, profitability, consumption, and
+  wastage endpoints
+- Shared Dart models, typed `RecipesApiService`, Riverpod providers, and admin
+  recipe dashboard, list, builder, costing, profitability, consumption, and
+  wastage screens
+- API, database/ERD, calculation, consumption, costing, and profitability docs
+
+Validation:
+
+- `dart format packages/shared_models/lib packages/api_client/lib apps/admin/lib`: passed
+- `npm.cmd run prisma:validate`: passed
+- `npm.cmd run build`: passed
+- `npm.cmd run lint`: passed
+- `npm.cmd run test -- --runInBand`: passed, 95 tests
+- `npm.cmd run test:e2e -- --runInBand`: passed, 7 tests
+- `dart analyze` for shared models and API client: passed
+- `flutter pub get` for admin: passed
+- `flutter analyze` for admin: passed
+- `flutter test` for admin: passed, 1 test
+- `flutter build web` for admin: passed
+- `git diff --check`: passed
+
+Known limitations:
+
+- The migration was not deployed because existing project history records
+  invalid local PostgreSQL credentials.
+- Production batch execution and finished-goods stock conversion require a
+  later task.
+- Consumption reversal requires an explicit compensating workflow in a later
+  task.
+- Costing does not yet implement FIFO or batch depletion.
+- Durable event transport and Socket.IO publication remain deferred.
+- The built admin web artifact could not be smoke-tested in the in-app browser
+  because local `file://` navigation is blocked in this environment.
 
 ## Task 19 Completion
 
@@ -721,11 +838,11 @@ Known limitation:
 
 ## Next Task
 
-### Task 20: Implement Recipe & Stock Consumption Engine
+### Task 22: Implement Reports Module
 
-Do not start Task 20 unless explicitly requested. Define recipe versions,
-menu-item yields, order consumption, reversals, wastage, authorization,
-idempotency, and API contracts before Flutter screens.
+Do not start Task 22 unless explicitly requested. Define report ownership,
+business-date semantics, metrics, filters, exports, authorization, and API
+contracts before Flutter screens.
 
 ## Future Work
 

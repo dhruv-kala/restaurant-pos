@@ -1,9 +1,15 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { OrderItemStatus, OrderStatus, Prisma } from '@prisma/client';
+import {
+  InventoryConsumptionTrigger,
+  OrderItemStatus,
+  OrderStatus,
+  Prisma,
+} from '@prisma/client';
 import { applyDatabaseRequestContext } from '../../../common/database/request-context.util';
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 import { canTransitionOrder } from '../../orders/services/order-lifecycle.util';
+import { ConsumptionService } from '../../recipes/services/consumption.service';
 import { kitchenSlaStatus } from '../../kds/services/kds-sla.util';
 import type { KitchenQueryDto } from '../dto/kitchen-query.dto';
 import type { UpdateItemStatusDto } from '../dto/update-item-status.dto';
@@ -40,6 +46,7 @@ export class KitchenService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: KitchenEventsService,
+    private readonly consumption: ConsumptionService,
   ) {}
 
   async queue(query: KitchenQueryDto, user: AuthenticatedUser) {
@@ -174,6 +181,14 @@ export class KitchenService {
         },
       });
       const ticket = await this.syncOrder(tx, item.orderId);
+      if (ticket.status === OrderStatus.READY) {
+        await this.consumption.consumeOrderInTransaction(
+          tx,
+          ticket.id,
+          InventoryConsumptionTrigger.READY,
+          user.id,
+        );
+      }
       this.publish(ticket, item.id, item.kitchenStationId, dto.status);
       return this.toTicket(ticket);
     });
@@ -206,6 +221,12 @@ export class KitchenService {
           },
           include: ticketInclude,
         });
+        await this.consumption.consumeOrderInTransaction(
+          tx,
+          completed.id,
+          InventoryConsumptionTrigger.COMPLETED,
+          user.id,
+        );
         this.publishOrder(completed);
         return this.toTicket(completed);
       }
@@ -235,6 +256,14 @@ export class KitchenService {
         });
       }
       const ticket = await this.syncOrder(tx, id);
+      if (ticket.status === OrderStatus.READY) {
+        await this.consumption.consumeOrderInTransaction(
+          tx,
+          ticket.id,
+          InventoryConsumptionTrigger.READY,
+          user.id,
+        );
+      }
       this.publishOrder(ticket);
       return this.toTicket(ticket);
     });

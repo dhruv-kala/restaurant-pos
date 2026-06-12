@@ -31,7 +31,7 @@ Initial deployment constraints:
 - No mandatory cloud dependency initially
 
 Current status:
-- Tasks 1 through 19 are complete at the foundation level.
+- Tasks 1 through 21 are complete at the foundation level.
 - Task 11 implemented the menu schema, protected NestJS menu APIs, shared menu
   models/API client, and Flutter admin menu management screens.
 - Local migration deployment and seed execution remain unverified because the
@@ -45,7 +45,13 @@ Current status:
 - Task 19 implemented inventory master data, outlet balances, append-only
   movements, transfers, purchasing, batches, alerts, valuation, typed clients,
   Riverpod providers, and admin screens.
-- Task 20 is next: implement the Recipe & Stock Consumption Engine.
+- Task 20 implemented recipes, production recipes, costing, profitability,
+  configurable idempotent order consumption, wastage, typed clients, Riverpod
+  providers, and admin screens.
+- Task 21 implemented tenant customer profiles, duplicate prevention,
+  addresses, notes, payment visits, customer stats/history, typed clients,
+  admin CRM screens, and restaurant customer lookup.
+- Task 22 is next: implement the Reports Module.
 
 Work only on the task I provide. Do not implement later tasks opportunistically.
 Keep changes scoped, validate the affected area, update relevant documentation,

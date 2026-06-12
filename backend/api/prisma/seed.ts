@@ -52,6 +52,15 @@ const permissions = [
   ['inventory.read', 'inventory', 'View stock, purchasing, alerts, and valuation'],
   ['inventory.update', 'inventory', 'Adjust and transfer stock and update purchasing'],
   ['inventory.receive', 'inventory', 'Receive purchase orders into outlet stock'],
+  ['recipes.create', 'recipes', 'Create recipes and production recipes'],
+  ['recipes.read', 'recipes', 'View recipes, costing, and profitability'],
+  ['recipes.update', 'recipes', 'Update recipes and ingredient composition'],
+  ['inventory.consume', 'inventory', 'Consume recipe ingredients from outlet stock'],
+  ['inventory.wastage', 'inventory', 'Record immutable inventory wastage'],
+  ['customers.create', 'customers', 'Create customer profiles'],
+  ['customers.read', 'customers', 'Search customers and view history'],
+  ['customers.update', 'customers', 'Update customer profiles and addresses'],
+  ['customers.notes', 'customers', 'Create customer operational notes'],
 ] as const;
 
 const LOCAL_ADMIN_EMAIL = 'admin@example.com';

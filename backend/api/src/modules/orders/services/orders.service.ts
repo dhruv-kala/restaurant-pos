@@ -4,10 +4,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DiningTableStatus, OrderItemStatus, OrderStatus, OrderType, Prisma } from '@prisma/client';
+import {
+  DiningTableStatus,
+  InventoryConsumptionTrigger,
+  OrderItemStatus,
+  OrderStatus,
+  OrderType,
+  Prisma,
+} from '@prisma/client';
 import { applyDatabaseRequestContext } from '../../../common/database/request-context.util';
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
+import { ConsumptionService } from '../../recipes/services/consumption.service';
 import type { AddOrderItemDto } from '../dto/add-order-item.dto';
 import type { CancelOrderDto } from '../dto/cancel-order.dto';
 import type { CreateOrderDto } from '../dto/create-order.dto';
@@ -63,6 +71,7 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: OrderEventsService,
+    private readonly consumption: ConsumptionService,
   ) {}
 
   async create(dto: CreateOrderDto, user: AuthenticatedUser): Promise<OrderResponseDto> {
@@ -84,6 +93,7 @@ export class OrdersService {
         await this.requireAvailableTable(tx, outlet.tenantId, outlet.id, dto.tableId, true);
       }
       await this.assertWaiter(tx, outlet.tenantId, outlet.id, dto.waiterId);
+      await this.assertCustomer(tx, outlet.tenantId, dto.customerId);
       const orderNumber = await this.nextOrderNumber(tx, outlet.tenantId, outlet.id);
       const itemData = await Promise.all(
         dto.items.map((item) => this.buildItem(tx, outlet.tenantId, outlet.id, item)),
@@ -199,6 +209,7 @@ export class OrdersService {
     return this.withOrder(id, user, async (tx, order) => {
       this.assertMutable(order);
       await this.assertWaiter(tx, order.tenantId, order.outletId, dto.waiterId);
+      await this.assertCustomer(tx, order.tenantId, dto.customerId);
       const updated = await tx.order.update({
         where: { id },
         data: {
@@ -246,6 +257,16 @@ export class OrdersService {
       });
       if (dto.status === OrderStatus.COMPLETED && order.tableId !== null) {
         await this.setTableStatus(tx, order.tableId, DiningTableStatus.CLEANING);
+      }
+      if (dto.status === OrderStatus.READY || dto.status === OrderStatus.COMPLETED) {
+        await this.consumption.consumeOrderInTransaction(
+          tx,
+          id,
+          dto.status === OrderStatus.READY
+            ? InventoryConsumptionTrigger.READY
+            : InventoryConsumptionTrigger.COMPLETED,
+          user.id,
+        );
       }
       this.events.publishStatusChanged({
         type: 'OrderStatusChanged',
@@ -523,6 +544,25 @@ export class OrdersService {
       select: { id: true },
     });
     if (membership === null) throw new BadRequestException('Waiter is not assigned to this outlet');
+  }
+
+  private async assertCustomer(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    customerId?: string,
+  ): Promise<void> {
+    if (!customerId) return;
+    const exists = await tx.customer.count({
+      where: {
+        id: customerId,
+        tenantId,
+        status: { not: 'BLOCKED' },
+        deletedAt: null,
+      },
+    });
+    if (exists !== 1) {
+      throw new BadRequestException('Customer is unavailable or belongs to another tenant');
+    }
   }
 
   private async requireAvailableTable(

@@ -5,6 +5,7 @@ import 'package:restaurant_pos_auth/restaurant_pos_auth.dart';
 import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 
 import '../providers/orders_providers.dart';
+import '../../../customers/presentation/widgets/customer_lookup_widget.dart';
 
 final _menuApiProvider = Provider<MenuApiService>(
   (ref) => MenuApiService(ref.watch(dioProvider)),
@@ -84,9 +85,9 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
                   onChanged: (value) => _tableId = value,
                 ),
               if (_type == OrderType.delivery)
-                TextField(
-                  decoration: const InputDecoration(labelText: 'Customer ID'),
-                  onChanged: (value) => _customerId = value.trim(),
+                CustomerLookupWidget(
+                  required: true,
+                  onSelected: (customer) => _customerId = customer?.id,
                 ),
               const SizedBox(height: 20),
               Text('Menu Items', style: Theme.of(context).textTheme.titleLarge),
@@ -131,9 +132,15 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
 
   Future<void> _create() async {
     final selected = _quantities.entries.where((entry) => entry.value > 0);
-    if (selected.isEmpty || (_type == OrderType.dineIn && _tableId == null)) {
+    if (selected.isEmpty ||
+        (_type == OrderType.dineIn && _tableId == null) ||
+        (_type == OrderType.delivery && _customerId == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select a table and at least one item.')),
+        const SnackBar(
+          content: Text(
+            'Select required customer/table and at least one item.',
+          ),
+        ),
       );
       return;
     }

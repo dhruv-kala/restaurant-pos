@@ -2,6 +2,7 @@ library;
 
 export 'src/billing/billing_models.dart';
 export 'src/converters/date_time_converter.dart';
+export 'src/customers/customer_models.dart';
 export 'src/enums/outlet_status.dart';
 export 'src/enums/tenant_status.dart';
 export 'src/enums/user_role.dart';
@@ -17,4 +18,5 @@ export 'src/models/token_pair.dart';
 export 'src/orders/order_models.dart';
 export 'src/payments/payment_models.dart';
 export 'src/receipts/receipt_models.dart';
+export 'src/recipes/recipe_models.dart';
 export 'src/tables/table_models.dart';

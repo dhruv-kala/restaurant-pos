@@ -310,6 +310,16 @@ The repository currently contains:
   stock receipt
 - Shared inventory models, typed API client, Riverpod providers, and admin
   inventory dashboard and workflows
+- Tenant-scoped menu-item/variant recipes, production recipes, yield and
+  portion controls, immutable cost snapshots, and profitability calculations
+- Configurable READY/COMPLETED idempotent stock consumption, append-only
+  movement history, outlet negative-stock policy, and immutable wastage
+- Shared recipe models, typed API client, Riverpod providers, and admin recipe
+  builder, costing, profitability, consumption, and wastage screens
+- Tenant-scoped customer profiles with normalized duplicate-safe contact
+  lookup, addresses, consent flags, append-only notes and payment visits
+- Rebuilt customer spend/repeat/favorite-outlet stats, customer-linked order
+  history, typed clients, admin CRM screens, and restaurant customer lookup
 
 ## Authoritative References
 
