@@ -1,83 +1,28 @@
 # Codex Start Prompt
 
-Use the following prompt when opening a new Codex conversation for this
-repository:
+Use this compact prompt for a new conversation:
 
 ```text
-You are continuing work on the Restaurant POS SaaS repository located in the
-root folder `restaurant-pos`.
+Repository: restaurant-pos
 
-Before making changes:
-1. Read `AGENTS.md`.
-2. Read `docs/ai/PROJECT_CONTEXT.md`.
-3. Read `docs/ai/DEVELOPMENT_RULES.md`.
-4. Read `docs/ai/TASK_LOG.md`.
-5. Inspect `git status` and preserve all existing uncommitted work.
-6. Read the architecture, database, API, and source files relevant to the active
-   task.
+Read:
 
-Project rule: backend/domain/API contracts first, then Flutter screens. Do not
-start UI work before the relevant contracts exist.
+1. AGENTS.md
+2. docs/ai/CURRENT_STATUS.md
+3. docs/ai/TASK_EXECUTION_RULES.md
+4. The specification for the requested module under docs/specifications/
 
-Repository root name must remain `restaurant-pos`.
-
-Initial deployment constraints:
-- NestJS, PostgreSQL, and Prisma
-- Flutter/Flutter Web, Riverpod, Dio, SQLite, and GoRouter
-- Ubuntu VPS with PostgreSQL installed directly
-- PM2 and Nginx later
-- No Docker
-- No Kubernetes
-- No mandatory cloud dependency initially
-
-Current status:
-- Tasks 1 through 23 are complete at the foundation level.
-- Task 11 implemented the menu schema, protected NestJS menu APIs, shared menu
-  models/API client, and Flutter admin menu management screens.
-- Local migration deployment and seed execution remain unverified because the
-  configured PostgreSQL connection failed on 2026-06-10.
-- Task 17 implemented immutable receipts and tax invoices, outlet/day numbering,
-  print/reprint audit, PDF and thermal layouts, protected APIs, shared contracts,
-  and receipt screens.
-- Task 18 completed first-class kitchen stations, station-aware routing,
-  preparation auditing and metrics, authenticated Socket.IO kitchen events,
-  typed clients, Riverpod providers, and KDS screens.
-- Task 19 implemented inventory master data, outlet balances, append-only
-  movements, transfers, purchasing, batches, alerts, valuation, typed clients,
-  Riverpod providers, and admin screens.
-- Task 20 implemented recipes, production recipes, costing, profitability,
-  configurable idempotent order consumption, wastage, typed clients, Riverpod
-  providers, and admin screens.
-- Task 21 implemented tenant customer profiles, duplicate prevention,
-  addresses, notes, payment visits, customer stats/history, typed clients,
-  admin CRM screens, and restaurant customer lookup.
-- Task 22 implemented business-date reports, dashboard metrics, audit records,
-  export foundations, typed clients, and admin reporting screens.
-- Task 23 implemented user-linked employee profiles, shifts, attendance,
-  performance projections, typed clients, and admin workforce screens.
-- Task 24 implemented tenant-safe user provisioning, lifecycle management,
-  roles, granular permissions, outlet access, effective JWT permissions, typed
-  clients, Riverpod providers, and admin RBAC screens.
-- Task 25 is next: implement the Audit & Activity Logging Module.
-
-Work only on the task I provide. Do not implement later tasks opportunistically.
-Keep changes scoped, validate the affected area, update relevant documentation,
-and update `docs/ai/TASK_LOG.md` before finishing.
+Load only the concern-specific docs/ai standards needed by the task.
+Inspect the worktree and preserve unrelated changes.
+Implement only the explicitly requested task.
+Follow backend/API contracts before Flutter UI.
+Update docs/ai/CURRENT_STATUS.md and docs/ai/TASK_LOG.md after substantive work.
 
 Active task:
-[REPLACE THIS LINE WITH THE REQUEST]
+[INSERT TASK REQUEST]
 ```
 
-## Restart Checklist
+For a reusable detailed form, use `docs/ai/PROMPT_TEMPLATE.md`.
 
-A fresh agent should be able to answer these questions before editing:
-
-- What is the active task?
-- Is the task backend-first, and what contracts must exist before UI work?
-- Which records are tenant-owned?
-- What outlet scope and permissions apply?
-- What invariants belong in PostgreSQL constraints?
-- What idempotency or optimistic concurrency behavior is required?
-- Which existing uncommitted files must be preserved?
-- Which validation commands are relevant?
-- Which documentation and task-log entries must be updated?
+Current repository status is intentionally not duplicated here. It belongs in
+`docs/ai/CURRENT_STATUS.md` so this prompt does not become stale.

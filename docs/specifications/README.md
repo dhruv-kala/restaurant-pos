@@ -1,4 +1,33 @@
 # Specifications
 
-Product and system specifications that span multiple applications and backend
-modules.
+Module specifications are the task-level source of business scope and
+acceptance boundaries. AI agents should read the relevant file rather than
+loading the complete enterprise design.
+
+## Implemented Foundations
+
+- `menu-module.md`
+- `table-management-module.md`
+- `order-module.md`
+- `kitchen-display-system.md`
+- `kitchen-module.md`
+- `billing-module.md`
+- `payment-module.md`
+- `receipt-module.md`
+- `inventory-module.md`
+- `recipe-module.md`
+- `customer-module.md`
+- `reports-module.md`
+- `employee-module.md`
+- `rbac-module.md`
+
+## Planned Modules
+
+- `audit-module.md`
+- `notification-module.md`
+- `loyalty-module.md`
+
+## Broad Reference
+
+`enterprise-system-design.md` remains the broad product reference. It is not the
+default task prompt because it is intentionally comprehensive.

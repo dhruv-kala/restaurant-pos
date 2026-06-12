@@ -1,0 +1,116 @@
+# Restaurant POS Task Roadmap
+
+Last updated: 2026-06-12
+
+## Roadmap Rules
+
+- `COMPLETE` and `NEXT` reflect current repository status.
+- `PLANNED` entries are sequencing guidance, not authorization to implement.
+- Task names after Task 25 are provisional and may be split, reordered, renamed,
+  or removed by an explicit user decision.
+- Execute only the task explicitly requested.
+- Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
+
+## Foundation and Core SaaS
+
+| Task | Status | Provisional scope |
+|---|---|---|
+| 24 | COMPLETE | RBAC and user management |
+| 24.5 | COMPLETE | AI development optimization framework |
+| 25 | NEXT | Audit and activity logging |
+| 26 | PLANNED | Notification templates, preferences, and delivery foundation |
+| 27 | PLANNED | Loyalty points, tiers, rewards, and referrals |
+| 28 | PLANNED | SaaS plans, subscriptions, entitlements, and limits |
+| 29 | PLANNED | Promotions, coupons, and discount policy engine |
+| 30 | PLANNED | Tax configuration and fiscal policy administration |
+| 31 | PLANNED | Business-day opening, shifts, cash drawer, and closing |
+| 32 | PLANNED | Device registration, trusted sessions, and terminal management |
+| 33 | PLANNED | Offline SQLite operation and synchronization protocol |
+| 34 | PLANNED | Transactional outbox, background jobs, and scheduler |
+| 35 | PLANNED | File/document storage abstraction and retention |
+| 36 | PLANNED | Webhooks, API integrations, and integration credentials |
+
+## Restaurant and Customer Expansion
+
+| Task | Status | Provisional scope |
+|---|---|---|
+| 37 | PLANNED | Customer ordering application foundation |
+| 38 | PLANNED | QR ordering and table self-service |
+| 39 | PLANNED | Delivery, pickup, fulfillment, and address zones |
+| 40 | PLANNED | Advanced reservations, waitlist, and guest seating |
+| 41 | PLANNED | Purchase requisitions, approvals, and procurement policies |
+| 42 | PLANNED | Vendor invoices, payable reconciliation, and purchase costing |
+| 43 | PLANNED | Central kitchen, commissary production, and outlet dispatch |
+| 44 | PLANNED | Stock counts, wastage approvals, and variance workflows |
+| 45 | PLANNED | Demand forecasting and replenishment recommendations |
+| 46 | PLANNED | Payroll foundation and compensation records |
+| 47 | PLANNED | Leave, availability, scheduling, and approval workflows |
+| 48 | PLANNED | Tips, incentives, commissions, and allocation rules |
+| 49 | PLANNED | Customer segmentation, consent, and lifecycle cohorts |
+| 50 | PLANNED | Campaign management and marketing automation foundation |
+| 51 | PLANNED | Wallet, gift cards, stored value, and liability ledger |
+
+## Platform Administration
+
+| Task | Status | Provisional scope |
+|---|---|---|
+| 52 | PLANNED | Super-admin tenant lifecycle portal |
+| 53 | PLANNED | Subscription billing, invoicing, and collections |
+| 54 | PLANNED | Feature entitlements, usage limits, and metering |
+| 55 | PLANNED | Support cases and audited tenant impersonation |
+| 56 | PLANNED | Platform analytics and operational health dashboards |
+| 57 | PLANNED | Feature flags and staged rollout controls |
+| 58 | PLANNED | White-label branding and custom domains |
+| 59 | PLANNED | Franchise hierarchy, policy inheritance, and overrides |
+| 60 | PLANNED | Localization, language, regional formats, and translation |
+
+## Security, Reliability, and Operations
+
+| Task | Status | Provisional scope |
+|---|---|---|
+| 61 | PLANNED | Security hardening and threat-model remediation |
+| 62 | PLANNED | MFA, step-up authentication, and recovery |
+| 63 | PLANNED | Enterprise SSO and identity federation |
+| 64 | PLANNED | API keys, service accounts, and scoped machine access |
+| 65 | PLANNED | Rate limiting, abuse prevention, and account lockout |
+| 66 | PLANNED | Secrets, environment configuration, and key rotation |
+| 67 | PLANNED | Privacy, retention, deletion, and data export controls |
+| 68 | PLANNED | PostgreSQL backup, restore, and verification automation |
+| 69 | PLANNED | Disaster recovery and business continuity runbooks |
+| 70 | PLANNED | Structured logging, metrics, tracing, and alerting |
+| 71 | PLANNED | PM2 process management and worker topology |
+| 72 | PLANNED | Nginx TLS, static hosting, proxy, and Socket.IO configuration |
+| 73 | PLANNED | Ubuntu VPS provisioning and production hardening |
+| 74 | PLANNED | CI quality gates and automated validation |
+| 75 | PLANNED | Release, migration, rollback, and change-management process |
+| 76 | PLANNED | API and Flutter performance optimization |
+| 77 | PLANNED | PostgreSQL query, index, partition, and archive optimization |
+| 78 | PLANNED | Automated tenant-isolation and RLS verification suite |
+| 79 | PLANNED | Load, stress, soak, and capacity testing |
+| 80 | PLANNED | Accessibility and responsive-design compliance |
+
+## Product Completion and Scale
+
+| Task | Status | Provisional scope |
+|---|---|---|
+| 81 | PLANNED | Restaurant mobile release readiness |
+| 82 | PLANNED | Admin web production readiness |
+| 83 | PLANNED | Customer mobile/web production readiness |
+| 84 | PLANNED | Kitchen display deployment and device hardening |
+| 85 | PLANNED | Thermal printer, cash drawer, and peripheral integrations |
+| 86 | PLANNED | Payment gateway adapters and settlement reconciliation |
+| 87 | PLANNED | Fiscal device and government tax integrations |
+| 88 | PLANNED | Accounting export and ERP integration |
+| 89 | PLANNED | Marketplace and delivery aggregator integrations |
+| 90 | PLANNED | Advanced BI datasets and governed analytics exports |
+| 91 | PLANNED | Scheduled reports and report distribution |
+| 92 | PLANNED | Data import, migration, and tenant onboarding toolkit |
+| 93 | PLANNED | Sandbox/demo tenant lifecycle and sales enablement |
+| 94 | PLANNED | Automated end-to-end critical workflow suite |
+| 95 | PLANNED | Security audit and penetration-test remediation |
+| 96 | PLANNED | Financial, inventory, loyalty, and audit reconciliation suite |
+| 97 | PLANNED | Operational runbooks, support tooling, and incident response |
+| 98 | PLANNED | Pilot rollout, telemetry review, and stabilization |
+| 99 | PLANNED | Production launch checklist and go-live rehearsal |
+| 100 | PLANNED | General availability readiness review |
+

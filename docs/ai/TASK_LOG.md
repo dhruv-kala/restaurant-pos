@@ -11,7 +11,7 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 24 are complete at the requested foundation level.
+Tasks 1 through 24.5 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
@@ -47,7 +47,57 @@ Task 25 is next: implement the Audit & Activity Logging Module.
 | 23. Implement Employee & Staff Management Module | COMPLETE | User-linked profiles, shifts, assignments, attendance, performance projections, events, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
 | 23.5. Implement Master Data & Database Seed Framework | COMPLETE | Global locale/settings/module/role-template masters, 184 permissions, role mappings, environment-aware idempotent seeds, and a complete development demo restaurant dataset are implemented. |
 | 24. Implement RBAC & User Management Module | COMPLETE | Tenant-safe user provisioning, lifecycle controls, roles, granular permissions, outlet access, effective JWT permissions, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
+| 24.5. AI Development Optimization Framework | COMPLETE | Concern-specific AI standards, concise status, dependency map, module specifications, Task 24-100 roadmap, prompt template, and optimized restart instructions are implemented. |
 | 25. Implement Audit & Activity Logging Module | NEXT | Not started. Define append-only audit event ownership, actor and tenant context, sensitive-data controls, query contracts, retention, and administrative visibility before UI. |
+
+## Task 24.5 Completion
+
+Completed on 2026-06-12.
+
+Implemented:
+
+- Split AI references for architecture, technology stack, coding, database,
+  API, Flutter, security, and multi-tenancy standards
+- Complete module dependency and ownership map
+- Minimal-read task execution rules that avoid routine full-repository analysis
+- Concise `CURRENT_STATUS.md` for restart context without loading historical
+  task evidence
+- Reusable short and detailed prompt templates
+- Audit, notification, and loyalty module specifications
+- Specification index preserving existing implemented module contracts
+- Provisional Task 24 through Task 100 roadmap with completed, next, and planned
+  statuses
+- Updated `AGENTS.md`, project context, development rules, and Codex restart
+  prompt to use the optimized documentation structure
+
+Decisions:
+
+- `TASK_LOG.md` remains the detailed historical evidence store but is no longer
+  part of the default routine read set.
+- `CURRENT_STATUS.md` is the short authoritative status handoff and must be
+  updated after every substantive task.
+- Unapproved roadmap entries after Task 25 are provisional planning slots and
+  do not authorize implementation.
+- Future prompts should reference repository documents rather than repeat
+  architecture, stack, folder, security, tenancy, and generic output rules.
+- A typical 1,500-2,000-line repeated prompt should shrink to 10-30
+  task-specific lines, an estimated 70-90% reduction in prompt tokens.
+
+Validation:
+
+- Required AI documentation file presence: passed
+- Required module specification file presence: passed
+- Task roadmap includes Task 24 through Task 100: passed
+- AI status and next-task consistency checks: passed
+- Markdown path/link target checks: passed
+- `git diff --check`: passed
+
+Known limitations:
+
+- Token reduction is an estimate and varies with task-specific acceptance
+  criteria and the amount of code inspection required.
+- The roadmap after Task 25 is intentionally provisional and must not override
+  explicit future product decisions.
 
 ## Task 24 Completion
 

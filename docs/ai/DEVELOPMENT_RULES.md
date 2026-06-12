@@ -1,5 +1,16 @@
 # Development Rules
 
+This is the compatibility-level consolidated rule set. For lower-token task
+execution, prefer the split references:
+
+- `CODING_STANDARDS.md`
+- `DATABASE_STANDARDS.md`
+- `API_STANDARDS.md`
+- `FLUTTER_STANDARDS.md`
+- `SECURITY_RULES.md`
+- `MULTI_TENANCY_RULES.md`
+- `TASK_EXECUTION_RULES.md`
+
 ## 1. Contract-First Delivery
 
 Backend/API contracts must be designed before Flutter screens.

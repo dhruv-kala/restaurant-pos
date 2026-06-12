@@ -3,10 +3,12 @@
 This file is the primary persistent context for AI coding agents working in this
 repository. Read it before planning or changing code. Then read:
 
-1. `docs/ai/PROJECT_CONTEXT.md`
-2. `docs/ai/DEVELOPMENT_RULES.md`
-3. `docs/ai/TASK_LOG.md`
+1. `docs/ai/CURRENT_STATUS.md`
+2. `docs/ai/TASK_EXECUTION_RULES.md`
+3. The relevant file under `docs/specifications/`
 
+Load concern-specific standards from `docs/ai/` only when relevant. Do not load
+the complete `TASK_LOG.md` for routine starts; it is historical evidence.
 Use `docs/ai/CODEX_START_PROMPT.md` when starting a new Codex conversation.
 
 ## Repository Identity
@@ -114,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 24 are complete at the foundation level.
+Tasks 1 through 24.5 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -172,6 +174,10 @@ idempotent seed commands, and a complete development demo restaurant dataset.
 Task 24 implemented tenant-safe user administration, custom/system role
 protection, permission visibility and assignment, multi-outlet access, shared
 clients, Riverpod providers, and admin access-management screens.
+
+Task 24.5 created the AI-first documentation framework, split architecture and
+engineering standards, module dependency map, concise current status, module
+specifications, Task 24-100 roadmap, and reusable prompt template.
 
 Task 25 is next: implement the Audit & Activity Logging Module.
 Do not implement it unless the active user request explicitly asks for it.

@@ -335,6 +335,17 @@ The repository currently contains:
 ## Authoritative References
 
 - `AGENTS.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/ARCHITECTURE.md`
+- `docs/ai/TECH_STACK.md`
+- `docs/ai/CODING_STANDARDS.md`
+- `docs/ai/DATABASE_STANDARDS.md`
+- `docs/ai/API_STANDARDS.md`
+- `docs/ai/FLUTTER_STANDARDS.md`
+- `docs/ai/SECURITY_RULES.md`
+- `docs/ai/MULTI_TENANCY_RULES.md`
+- `docs/ai/MODULE_DEPENDENCIES.md`
+- `docs/ai/TASK_EXECUTION_RULES.md`
 - `docs/ai/DEVELOPMENT_RULES.md`
 - `docs/ai/TASK_LOG.md`
 - `docs/architecture/system-overview.md`
@@ -345,3 +356,6 @@ The repository currently contains:
 When documents conflict, do not silently choose one. Prefer the latest explicit
 user decision, update the affected documentation, and record the decision in the
 task log.
+
+For routine task starts, use `CURRENT_STATUS.md` and the relevant concern files
+instead of loading this complete context and historical task log.
