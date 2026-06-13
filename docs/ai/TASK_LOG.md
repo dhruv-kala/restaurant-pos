@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 27.4 are complete at the requested foundation level.
+Tasks 1 through 27.5 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27.5, WhatsApp Delivery Providers, is the next provisional roadmap item. It
+Task 27.6, Push Notification Delivery, is the next provisional roadmap item. It
 is not approved for implementation until explicitly requested.
 
 ## Task History
@@ -55,6 +55,71 @@ is not approved for implementation until explicitly requested.
 | 27.2. Communication Template Management | COMPLETE | Tenant template CRUD, immutable versions, strict variable rendering, preview, permissions, audit events, and exact message version references are implemented. |
 | 27.3. Email Delivery Providers | COMPLETE | SMTP execution, protected recipient decryption, append-only attempts, status tracking, history APIs, permissions, and audit events are implemented. |
 | 27.4. SMS Delivery Providers | COMPLETE | Twilio SMS execution, E.164 validation, protected credentials, shared delivery orchestration, attempts/status, and audit events are implemented. |
+| 27.5. WhatsApp Delivery Providers | COMPLETE | Twilio WhatsApp approved-template execution, protected credentials, delivered/read status foundation, and audit events are implemented. |
+
+## Task 27.5 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Twilio Messages REST API adapter for `WHATSAPP`
+- E.164 recipient and sender validation with WhatsApp channel addressing
+- Environment-backed Twilio auth-token resolution through existing
+  `secretReference` contracts
+- Mandatory immutable internal template and template-version references
+- Provider configuration allowlist mapping each approved internal template
+  version ID to a Twilio Content SID
+- Strict scalar `whatsappVariables` validation against optional approved
+  variable-name contracts
+- Shared Twilio Messages HTTP client reused by SMS and WhatsApp adapters
+- Twilio content and address retention privacy request controls
+- Internal tenant-scoped provider status service for monotonic `DELIVERED` and
+  `READ` updates
+- `CommunicationMessageStatus.READ`, `readAt`, and provider-message lookup
+  indexing
+- Transactional `communication.whatsapp.sent`, `.failed`, `.delivered`, and
+  `.read` audit events without credentials or recipient addresses
+- WhatsApp schema, provider, delegation, delivery-state, and regression tests
+
+Decisions:
+
+- Twilio is the initial WhatsApp provider; Meta WhatsApp Business remains a
+  future adapter behind the existing provider contract.
+- Only approved Twilio Content templates may be sent. The immutable message body
+  remains a local history snapshot and is never submitted as arbitrary
+  WhatsApp `Body` content.
+- Delivery/read status application is an internal service contract. Public
+  callback routes, provider signature verification, and webhook persistence
+  remain Task 27.7.
+- Automatic retries, workers, scheduling, UI, analytics, and push delivery were
+  not introduced.
+- No Flutter or shared Dart changes were required because Task 27.5 adds no
+  public API contract.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npx tsc -p prisma/tsconfig.seed.json --noEmit`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 202 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Focused WhatsApp, Twilio SMS regression, state, and schema tests: passed, 14
+  tests
+- `npm audit --omit=dev`: passed, 0 vulnerabilities
+- `git diff --check`: passed
+- `npm run prisma:migrate:deploy`: failed with the existing local Prisma
+  schema-engine error before migration deployment
+
+Known limitations:
+
+- Twilio execution was tested with mocked HTTP responses because no live
+  account credentials or approved production templates were available.
+- Public webhook verification, callback ingestion, and provider delivery
+  synchronization remain deferred to Task 27.7.
 
 ## Task 27.4 Completion
 

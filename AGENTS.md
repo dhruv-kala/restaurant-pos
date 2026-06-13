@@ -204,7 +204,12 @@ Task 27.4 implemented Twilio SMS execution, E.164 validation, protected
 auth-token references, provider privacy controls, shared delivery
 orchestration, append-only attempts, and SMS delivery audit events.
 
-Task 27.5 is next provisionally: implement WhatsApp Delivery Providers.
+Task 27.5 implemented Twilio WhatsApp approved-template execution, protected
+auth-token references, immutable internal template-version to Content SID
+mappings, E.164 channel addressing, delivered/read state foundations, and
+WhatsApp audit events.
+
+Task 27.6 is next provisionally: implement Push Notification Delivery.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

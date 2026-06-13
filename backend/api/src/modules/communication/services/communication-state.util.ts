@@ -12,7 +12,8 @@ const messageTransitions: Record<
     CommunicationMessageStatus.CANCELLED,
   ],
   SENT: [CommunicationMessageStatus.DELIVERED, CommunicationMessageStatus.FAILED],
-  DELIVERED: [],
+  DELIVERED: [CommunicationMessageStatus.READ],
+  READ: [],
   FAILED: [],
   CANCELLED: [],
 };

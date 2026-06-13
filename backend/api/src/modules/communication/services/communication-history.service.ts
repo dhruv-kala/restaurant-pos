@@ -149,6 +149,7 @@ export class CommunicationHistoryService {
       processingStartedAt: record.processingStartedAt,
       sentAt: record.sentAt,
       deliveredAt: record.deliveredAt,
+      readAt: record.readAt,
       failedAt: record.failedAt,
       cancelledAt: record.cancelledAt,
       createdAt: record.createdAt,

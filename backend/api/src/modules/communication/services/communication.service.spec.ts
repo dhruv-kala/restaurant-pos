@@ -47,6 +47,7 @@ describe('CommunicationService', () => {
             processingStartedAt: null,
             sentAt: null,
             deliveredAt: null,
+            readAt: null,
             failedAt: null,
             cancelledAt: null,
             status: CommunicationMessageStatus.QUEUED,

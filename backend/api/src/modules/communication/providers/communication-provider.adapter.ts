@@ -9,8 +9,11 @@ export interface CommunicationProviderRequest {
   secretReference: string | null;
   channel: CommunicationChannel;
   destination: string;
+  templateId?: string | null;
+  templateVersionId?: string | null;
   subject?: string | null;
   body: string;
+  metadata?: Prisma.JsonValue | null;
   idempotencyKey: string;
 }
 

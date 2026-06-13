@@ -346,6 +346,9 @@ The repository currently contains:
 - Twilio SMS execution with E.164 validation, provider privacy controls,
   channel-neutral delivery orchestration, append-only attempts, and audited
   status tracking
+- Twilio WhatsApp approved-template execution with protected auth-token
+  references, immutable Content SID allowlists, E.164 channel addressing,
+  delivered/read receipt state, and audit events
 
 ## Authoritative References
 

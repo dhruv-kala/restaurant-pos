@@ -70,6 +70,7 @@ function setup(sendResult: Promise<unknown>) {
     processingStartedAt: null,
     sentAt: null,
     deliveredAt: null,
+    readAt: null,
     failedAt: null,
     cancelledAt: null,
     createdAt: new Date(),

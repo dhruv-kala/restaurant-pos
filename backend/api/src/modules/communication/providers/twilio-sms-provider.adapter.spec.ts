@@ -4,6 +4,7 @@ import {
   CommunicationProviderError,
   type CommunicationProviderRequest,
 } from './communication-provider.adapter';
+import { TwilioMessagesClient } from './twilio-messages.client';
 import { TwilioSmsProviderAdapter } from './twilio-sms-provider.adapter';
 import { CommunicationSecretResolver } from '../services/communication-secret-resolver';
 
@@ -52,7 +53,10 @@ describe('TwilioSmsProviderAdapter', () => {
         num_segments: '1',
       }),
     );
-    const adapter = new TwilioSmsProviderAdapter(new CommunicationSecretResolver());
+    const adapter = new TwilioSmsProviderAdapter(
+      new CommunicationSecretResolver(),
+      new TwilioMessagesClient(),
+    );
 
     await expect(adapter.send(request)).resolves.toMatchObject({
       providerMessageId: `SM${'b'.repeat(32)}`,
@@ -70,7 +74,10 @@ describe('TwilioSmsProviderAdapter', () => {
   });
 
   it('rejects invalid phone numbers before calling Twilio', async () => {
-    const adapter = new TwilioSmsProviderAdapter(new CommunicationSecretResolver());
+    const adapter = new TwilioSmsProviderAdapter(
+      new CommunicationSecretResolver(),
+      new TwilioMessagesClient(),
+    );
 
     await expect(adapter.send({ ...request, destination: '9876543210' })).rejects.toMatchObject<
       Partial<CommunicationProviderError>
@@ -83,7 +90,10 @@ describe('TwilioSmsProviderAdapter', () => {
 
   it('classifies rate limits as retryable without exposing provider messages', async () => {
     fetchMock.mockResolvedValue(response(429, { code: 20429, message: 'sensitive' }));
-    const adapter = new TwilioSmsProviderAdapter(new CommunicationSecretResolver());
+    const adapter = new TwilioSmsProviderAdapter(
+      new CommunicationSecretResolver(),
+      new TwilioMessagesClient(),
+    );
 
     await expect(adapter.send(request)).rejects.toMatchObject<Partial<CommunicationProviderError>>({
       code: 'TWILIO_20429',

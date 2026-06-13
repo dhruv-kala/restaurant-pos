@@ -3,8 +3,8 @@
 ## Status
 
 Tasks 27.1 infrastructure foundation, 27.2 template management, 27.3 SMTP email
-delivery, and 27.4 Twilio SMS delivery are implemented. Tasks 27.5 through
-27.9 remain planned.
+delivery, 27.4 Twilio SMS delivery, and 27.5 Twilio WhatsApp delivery are
+implemented. Tasks 27.6 through 27.9 remain planned.
 
 Task 27 is split into:
 
@@ -87,6 +87,12 @@ Task 27.4 implements Twilio SMS execution with E.164 validation, protected
 auth-token references, provider privacy options, a shared channel-neutral
 delivery executor, append-only attempts, safe failure classification, and SMS
 audit events. Provider/carrier delivery confirmation remains Task 27.7.
+
+Task 27.5 implements Twilio WhatsApp template execution with E.164 channel
+addressing, environment-backed auth-token references, immutable internal
+template-version to approved Content SID mappings, strict scalar template
+variables, and `DELIVERED`/`READ` status application contracts. Public webhook
+verification and callback endpoints remain Task 27.7.
 
 ## Invariants
 

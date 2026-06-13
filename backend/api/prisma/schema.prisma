@@ -402,6 +402,7 @@ enum CommunicationMessageStatus {
   PROCESSING
   SENT
   DELIVERED
+  READ
   FAILED
   CANCELLED
 
@@ -2510,6 +2511,7 @@ model CommunicationMessage {
   processingStartedAt        DateTime?                  @map("processing_started_at") @db.Timestamptz(3)
   sentAt                     DateTime?                  @map("sent_at") @db.Timestamptz(3)
   deliveredAt                DateTime?                  @map("delivered_at") @db.Timestamptz(3)
+  readAt                     DateTime?                  @map("read_at") @db.Timestamptz(3)
   failedAt                   DateTime?                  @map("failed_at") @db.Timestamptz(3)
   cancelledAt                DateTime?                  @map("cancelled_at") @db.Timestamptz(3)
   createdAt                  DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -2560,6 +2562,7 @@ model CommunicationAttempt {
   @@unique([tenantId, messageId, attemptNumber])
   @@index([tenantId, status, nextRetryAt], map: "communication_attempts_retry_idx")
   @@index([tenantId, providerId, createdAt], map: "communication_attempts_provider_idx")
+  @@index([tenantId, providerMessageId], map: "communication_attempts_provider_message_idx")
   @@map("communication_attempts")
 }
 

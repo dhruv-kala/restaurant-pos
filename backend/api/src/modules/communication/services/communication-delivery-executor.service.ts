@@ -87,8 +87,11 @@ export class CommunicationDeliveryExecutor {
         secretReference: provider.secretReference,
         channel: claimed.message.channel,
         destination,
+        templateId: claimed.message.templateId,
+        templateVersionId: claimed.message.templateVersionId,
         subject: claimed.message.subjectSnapshot,
         body: claimed.message.bodySnapshot,
+        metadata: claimed.message.metadata,
         idempotencyKey: claimed.message.idempotencyKey,
       };
       result = await definition.adapter.send(providerRequest);

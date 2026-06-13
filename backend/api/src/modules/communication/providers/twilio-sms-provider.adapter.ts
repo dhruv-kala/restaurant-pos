@@ -7,6 +7,7 @@ import {
   type CommunicationProviderRequest,
   type CommunicationProviderResult,
 } from './communication-provider.adapter';
+import { TwilioMessagesClient } from './twilio-messages.client';
 import { CommunicationSecretResolver } from '../services/communication-secret-resolver';
 
 interface TwilioSmsConfiguration {
@@ -16,20 +17,15 @@ interface TwilioSmsConfiguration {
   timeoutMs: number;
 }
 
-interface TwilioMessageResponse {
-  sid?: unknown;
-  status?: unknown;
-  code?: unknown;
-  error_code?: unknown;
-  num_segments?: unknown;
-}
-
 @Injectable()
 export class TwilioSmsProviderAdapter implements CommunicationProviderAdapter {
   readonly providerKey = 'twilio';
   readonly channel = CommunicationChannel.SMS;
 
-  constructor(private readonly secrets: CommunicationSecretResolver) {}
+  constructor(
+    private readonly secrets: CommunicationSecretResolver,
+    private readonly client: TwilioMessagesClient,
+  ) {}
 
   async send(request: CommunicationProviderRequest): Promise<CommunicationProviderResult> {
     if (request.channel !== CommunicationChannel.SMS) {
@@ -76,48 +72,13 @@ export class TwilioSmsProviderAdapter implements CommunicationProviderAdapter {
       form.set('MessagingServiceSid', configuration.messagingServiceSid!);
     }
 
-    let response: Response;
-    try {
-      response = await fetch(
-        `https://api.twilio.com/2010-04-01/Accounts/${configuration.accountSid}/Messages.json`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Basic ${Buffer.from(
-              `${configuration.accountSid}:${authToken}`,
-            ).toString('base64')}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: form,
-          signal: AbortSignal.timeout(configuration.timeoutMs),
-        },
-      );
-    } catch {
-      throw new CommunicationProviderError(
-        'Twilio SMS request failed',
-        'TWILIO_NETWORK_ERROR',
-        true,
-      );
-    }
-
-    const payload = await this.response(response);
-    if (!response.ok) {
-      const errorCode =
-        typeof payload.code === 'number'
-          ? payload.code
-          : typeof payload.error_code === 'number'
-            ? payload.error_code
-            : undefined;
-      const providerCode =
-        errorCode !== undefined
-          ? `TWILIO_${errorCode}`
-          : `TWILIO_HTTP_${response.status}`;
-      throw new CommunicationProviderError(
-        'Twilio rejected the SMS request',
-        providerCode,
-        response.status === 408 || response.status === 429 || response.status >= 500,
-      );
-    }
+    const payload = await this.client.send(
+      configuration.accountSid,
+      authToken,
+      configuration.timeoutMs,
+      form,
+      'SMS',
+    );
 
     const providerMessageId = typeof payload.sid === 'string' ? payload.sid : undefined;
     const status = typeof payload.status === 'string' ? payload.status : 'accepted';
@@ -172,15 +133,6 @@ export class TwilioSmsProviderAdapter implements CommunicationProviderAdapter {
       messagingServiceSid,
       timeoutMs: this.integer(input.timeoutMs, 1000, 120000) ?? 15000,
     };
-  }
-
-  private async response(response: Response): Promise<TwilioMessageResponse> {
-    try {
-      const value: unknown = await response.json();
-      return value !== null && typeof value === 'object' && !Array.isArray(value) ? value : {};
-    } catch {
-      return {};
-    }
   }
 
   private invalidConfiguration(): CommunicationProviderError {

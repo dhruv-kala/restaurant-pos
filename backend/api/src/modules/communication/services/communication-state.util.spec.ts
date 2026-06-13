@@ -19,12 +19,18 @@ describe('communication state transitions', () => {
         CommunicationMessageStatus.DELIVERED,
       ),
     ).toBe(true);
+    expect(
+      canTransitionCommunicationMessage(
+        CommunicationMessageStatus.DELIVERED,
+        CommunicationMessageStatus.READ,
+      ),
+    ).toBe(true);
   });
 
   it('does not reopen terminal message states', () => {
     expect(
       canTransitionCommunicationMessage(
-        CommunicationMessageStatus.DELIVERED,
+        CommunicationMessageStatus.READ,
         CommunicationMessageStatus.QUEUED,
       ),
     ).toBe(false);
