@@ -219,7 +219,12 @@ immutable tenant-scoped event history, replay protection, delivery status
 synchronization, bounce/complaint handling, WhatsApp read tracking, attempt
 inspection, and audit events.
 
-Task 27.8 is next provisionally: implement the Communication Center UI.
+Task 27.8 implemented tenant-safe provider administration, environment-only
+secret references, shared communication models and clients, Riverpod state,
+and the admin Communication Center for dashboard totals, templates, message
+history, delivery attempts, and provider configuration.
+
+Task 27.9 is next provisionally: implement Communication Analytics.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

@@ -5,6 +5,7 @@ import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
 import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 
 import 'features/menu/presentation/screens/menu_dashboard.dart';
+import 'features/communication/presentation/screens/communication_center_screen.dart';
 import 'features/notifications/presentation/screens/notification_center_screen.dart';
 import 'features/audit/presentation/screens/audit_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
@@ -51,6 +52,14 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasRole(UserRole.superAdmin) == true ||
         user?.hasRole(UserRole.tenantAdmin) == true ||
         user?.hasPermission('audit.read') == true;
+    final canViewCommunication =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('communication.history_view') == true ||
+        user?.hasPermission('communication.template_view') == true ||
+        user?.hasPermission('communication.template_manage') == true ||
+        user?.hasPermission('communication.provider_view') == true ||
+        user?.hasPermission('communication.provider_manage') == true;
     final screens = <Widget>[
       const MenuDashboard(),
       const TableLayoutScreen(),
@@ -60,6 +69,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       const ReportsDashboard(),
       const EmployeeDashboard(),
       const NotificationCenterScreen(),
+      if (canViewCommunication) const CommunicationCenterScreen(),
       if (canManageRbac) const UserManagementDashboard(),
       if (canViewAudit) const AuditDashboard(),
     ];
@@ -90,6 +100,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         icon: Icon(Icons.notifications),
         label: 'Notifications',
       ),
+      if (canViewCommunication)
+        const NavigationDestination(
+          icon: Icon(Icons.outgoing_mail),
+          label: 'Communication',
+        ),
       if (canManageRbac)
         const NavigationDestination(
           icon: Icon(Icons.admin_panel_settings),

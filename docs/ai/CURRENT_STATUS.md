@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 27.7**
-- Current module: **Webhooks and Delivery Tracking**
-- Next provisional task: **Task 27.8 - Communication Center UI**
+- Completed through: **Task 27.8**
+- Current module: **Communication Center UI**
+- Next provisional task: **Task 27.9 - Communication Analytics**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -29,6 +29,7 @@ Last updated: 2026-06-13
 | 27.5 | Twilio WhatsApp approved-template execution, protected credentials, delivery/read state foundation, and audit events |
 | 27.6 | FCM HTTP v1 delivery, encrypted tenant/user device registration, invalid-token deactivation, and audit events |
 | 27.7 | Verified provider webhooks, immutable idempotent event history, and monotonic delivery-state synchronization |
+| 27.8 | Provider administration APIs, shared communication clients, and admin dashboard/template/history/provider screens |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -65,6 +66,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Verified Twilio and provider-neutral HMAC webhooks with immutable event
   history, replay protection, sanitized metadata, and centralized delivery,
   failure, bounce, complaint, and WhatsApp read-state synchronization
+- Tenant-safe provider administration with environment-only secret references,
+  optimistic versioning, audit events, typed Dart clients, Riverpod state, and
+  an admin Communication Center for dashboard totals, templates, history,
+  attempts, and provider configuration
 
 ## Known Environment Limitation
 
@@ -75,18 +80,19 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 27.8 - Communication Center UI
+### Task 27.9 - Communication Analytics
 
 Read:
 
 - `docs/specifications/communication-module.md`
-- `docs/tasks/027-communication/27.8-admin-ui.md`
-- `docs/ai/FLUTTER_STANDARDS.md`
+- `docs/tasks/027-communication/27.9-analytics.md`
+- `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
+- `docs/ai/FLUTTER_STANDARDS.md`
 
-Implement the communication administration UI only against the established
-provider, template, message history, attempts, push-device, and webhook
-contracts. Do not implement Task 27.8 unless explicitly requested.
+Define durable communication metrics, provider performance, channel reporting,
+and delivery trends before extending the dashboard. Do not implement Task 27.9
+unless explicitly requested.
 
 ## Status Maintenance
 

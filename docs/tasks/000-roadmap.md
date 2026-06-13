@@ -26,8 +26,8 @@ Last updated: 2026-06-13
 | 27.5 | COMPLETE | WhatsApp delivery providers |
 | 27.6 | COMPLETE | Push notification delivery |
 | 27.7 | COMPLETE | Webhooks and delivery tracking |
-| 27.8 | NEXT | Communication center UI |
-| 27.9 | PLANNED | Communication analytics |
+| 27.8 | COMPLETE | Communication center UI |
+| 27.9 | NEXT | Communication analytics |
 | 28 | PLANNED | SaaS plans, subscriptions, entitlements, and limits |
 | 29 | PLANNED | Promotions, coupons, and discount policy engine |
 | 30 | PLANNED | Tax configuration and fiscal policy administration |

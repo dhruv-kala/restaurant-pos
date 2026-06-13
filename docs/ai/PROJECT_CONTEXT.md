@@ -250,7 +250,7 @@ The repository currently contains:
 - A committed tenancy and authorization migration with UUIDv7 generation,
   tenant-aware constraints, and forced row-level security
 - An environment-aware, transactional seed framework with platform master data,
-  global role templates, 188 permissions, role mappings, system settings,
+  global role templates, 190 permissions, role mappings, system settings,
   application modules, and an idempotent development demo restaurant
 - Email/password authentication with Passport JWT
 - Hashed, rotating, revocable refresh-token persistence
@@ -355,6 +355,9 @@ The repository currently contains:
 - Verified Twilio and provider-neutral HMAC webhook ingestion with immutable
   tenant-scoped events, replay protection, sanitized metadata, centralized
   delivery/failure/bounce/complaint synchronization, and WhatsApp read tracking
+- Tenant-safe communication provider administration, shared Dart models and
+  typed API clients, Riverpod state, and an admin Communication Center covering
+  operational totals, templates, message history, attempts, and providers
 
 ## Authoritative References
 

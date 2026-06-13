@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { CommunicationMessagesController } from './controllers/communication-messages.controller';
+import { CommunicationProvidersController } from './controllers/communication-providers.controller';
 import { CommunicationTemplatesController } from './controllers/communication-templates.controller';
 import { CommunicationWebhooksController } from './controllers/communication-webhooks.controller';
 import { PushDevicesController } from './controllers/push-devices.controller';
@@ -15,6 +16,7 @@ import { CommunicationAddressProtector } from './services/communication-address-
 import { CommunicationDeliveryExecutor } from './services/communication-delivery-executor.service';
 import { CommunicationDeliveryStatusService } from './services/communication-delivery-status.service';
 import { CommunicationHistoryService } from './services/communication-history.service';
+import { CommunicationProvidersService } from './services/communication-providers.service';
 import { CommunicationSecretResolver } from './services/communication-secret-resolver';
 import { CommunicationTemplateRenderer } from './services/communication-template-renderer';
 import { CommunicationWebhookNormalizer } from './services/communication-webhook-normalizer';
@@ -31,6 +33,7 @@ import { WhatsAppDeliveryStatusService } from './services/whatsapp-delivery-stat
 @Module({
   controllers: [
     CommunicationMessagesController,
+    CommunicationProvidersController,
     CommunicationTemplatesController,
     CommunicationWebhooksController,
     PushDevicesController,
@@ -40,6 +43,7 @@ import { WhatsAppDeliveryStatusService } from './services/whatsapp-delivery-stat
     CommunicationDeliveryExecutor,
     CommunicationDeliveryStatusService,
     CommunicationHistoryService,
+    CommunicationProvidersService,
     CommunicationSecretResolver,
     CommunicationService,
     CommunicationTemplateRenderer,

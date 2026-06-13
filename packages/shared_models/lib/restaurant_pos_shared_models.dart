@@ -2,6 +2,7 @@ library;
 
 export 'src/audit/audit_models.dart';
 export 'src/billing/billing_models.dart';
+export 'src/communication/communication_models.dart';
 export 'src/converters/date_time_converter.dart';
 export 'src/customers/customer_models.dart';
 export 'src/employees/employee_models.dart';

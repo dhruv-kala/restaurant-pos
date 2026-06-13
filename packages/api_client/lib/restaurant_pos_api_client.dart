@@ -8,6 +8,7 @@ export 'src/interceptors/error_interceptor.dart';
 export 'src/services/audit_api_service.dart';
 export 'src/services/auth_api_service.dart';
 export 'src/services/billing_api_service.dart';
+export 'src/services/communication_api_service.dart';
 export 'src/services/customers_api_service.dart';
 export 'src/services/employees_api_service.dart';
 export 'src/services/inventory_api_service.dart';

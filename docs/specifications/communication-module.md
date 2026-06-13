@@ -2,9 +2,9 @@
 
 ## Status
 
-Tasks 27.1 through 27.7 are implemented, including templates, SMTP email,
-Twilio SMS and WhatsApp, Firebase push, and verified webhook delivery tracking.
-Tasks 27.8 and 27.9 remain planned.
+Tasks 27.1 through 27.8 are implemented, including templates, SMTP email,
+Twilio SMS and WhatsApp, Firebase push, verified webhook delivery tracking, and
+the tenant admin Communication Center. Task 27.9 remains planned.
 
 Task 27 is split into:
 
@@ -106,6 +106,13 @@ Supported normalized outcomes are delivered, failed, bounced, complaint, and
 WhatsApp read. Raw provider payloads, credentials, and recipient addresses are
 not retained.
 
+Task 27.8 implements protected provider administration APIs, shared Dart
+communication contracts, a typed Dio client, Riverpod repositories/providers,
+and the admin Communication Center for operational totals, templates, message
+history, delivery attempts, and provider configuration. Provider credentials
+remain environment references; metadata containing embedded credential values
+is rejected.
+
 ## Invariants
 
 * Business modules never call external providers directly.
@@ -138,6 +145,14 @@ Suggested permissions:
 * `COMMUNICATION_PROVIDER_VIEW`
 * `COMMUNICATION_PROVIDER_MANAGE`
 * `COMMUNICATION_HISTORY_VIEW`
+
+Implemented permission keys use lowercase names:
+
+* `communication.template_view`
+* `communication.template_manage`
+* `communication.provider_view`
+* `communication.provider_manage`
+* `communication.history_view`
 
 ## API
 
@@ -177,7 +192,7 @@ Administrative Actions:
 * `POST /communication/messages/:id/resend`
 
 The listed provider, template, history, push-device, attempt, and webhook
-endpoints are available through Task 27.7. Resend remains deferred.
+endpoints are available through Task 27.8. Resend remains deferred.
 
 ## Flutter
 
@@ -198,6 +213,10 @@ Shared:
 * repository layer
 * typed Dio client
 * Riverpod providers
+
+The Task 27.8 dashboard derives current totals from authorized paginated message
+queries. Delivery trends, provider performance, and dedicated reporting APIs
+remain Task 27.9.
 
 ## Delivery Channels
 

@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 27.7 are complete at the requested foundation level.
+Tasks 1 through 27.8 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27.8, Communication Center UI, is the next provisional roadmap item. It is
+Task 27.9, Communication Analytics, is the next provisional roadmap item. It is
 not approved for implementation until explicitly requested.
 
 ## Task History
@@ -58,6 +58,78 @@ not approved for implementation until explicitly requested.
 | 27.5. WhatsApp Delivery Providers | COMPLETE | Twilio WhatsApp approved-template execution, protected credentials, delivered/read status foundation, and audit events are implemented. |
 | 27.6. Push Notification Delivery | COMPLETE | FCM HTTP v1 delivery, encrypted tenant/user devices, invalid-token deactivation, attempts/status, and audit events are implemented. |
 | 27.7. Webhooks and Delivery Tracking | COMPLETE | Verified Twilio and provider-neutral callbacks, immutable idempotent webhook events, centralized delivery synchronization, and audit events are implemented. |
+| 27.8. Communication Center UI | COMPLETE | Provider administration APIs, shared communication contracts, typed clients, Riverpod state, and admin dashboard/template/history/provider screens are implemented. |
+
+## Task 27.8 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Tenant-scoped provider list, detail, create, and update APIs
+- Optimistic provider version checks and channel/provider-key uniqueness
+- `communication.provider_view` and `communication.provider_manage`
+  permissions, increasing the current permission catalog to 190 entries
+- Provider create/update audit events without credential values
+- Environment-reference-only provider credentials and recursive rejection of
+  embedded passwords, tokens, secrets, private keys, or credentials in metadata
+- Shared Dart communication channel/status enums and provider, template,
+  version, preview, message, and delivery-attempt models
+- Typed Dio clients for providers, templates, versions, previews, message
+  history, details, and attempts
+- Admin communication repository, query contracts, and Riverpod providers
+- Permission-aware Communication Center navigation and tab visibility
+- Operational dashboard for total messages, delivered/read success rate,
+  failures, and channel usage
+- Template search/filter, create/update, variable definition, preview, and
+  immutable version-history UI
+- Message search/filter, protected content detail, and delivery-attempt
+  inspection UI
+- Provider status, priority, environment reference, configuration JSON, and
+  capabilities administration UI
+
+Decisions:
+
+- Current dashboard totals are derived from existing authorized paginated
+  message counts. Dedicated metric facts, trends, latency, and provider
+  performance remain Task 27.9.
+- Provider keys and channels are immutable after creation. Mutable provider
+  settings use optimistic versioning.
+- Provider status represents configured operational availability; Task 27.8
+  does not add external network health probes.
+- Secret values cannot be entered into provider metadata. Configuration stores
+  environment references only and never returns resolved credentials.
+- Resend operations, campaigns, segmentation, analytics reports, and
+  restaurant-app communication administration remain out of scope.
+
+Validation:
+
+- Backend `npm run lint`: passed
+- Backend `npm run build`: passed
+- Backend `npm run test -- --runInBand`: passed, 226 tests
+- Backend `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Seed TypeScript compile: passed
+- Admin `flutter pub get`: passed
+- Shared models `flutter analyze`: passed
+- API client `flutter analyze`: passed
+- Admin `flutter analyze`: passed
+- Admin `flutter test`: passed, 1 test
+- Admin `flutter build web`: passed
+- Browser preview loaded the compiled application title; Flutter canvas
+  semantics and screenshot capture were unavailable in the desktop browser
+  session, so interactive visual verification was not completed
+
+Known limitations:
+
+- Live provider CRUD and communication data rendering were not exercised
+  against PostgreSQL because the existing local database configuration remains
+  unavailable.
+- The Flutter web build reported a pre-existing Socket.IO WebAssembly
+  compatibility warning; the JavaScript web build completed successfully.
+
+Next task:
+
+- Task 27.9 Communication Analytics, only when explicitly requested.
 
 ## Task 27.7 Completion
 
@@ -371,7 +443,7 @@ Decisions:
 - Durable attachment storage/retrieval remains deferred because the approved
   file-storage abstraction is Task 35.
 - SendGrid, Mailgun, and Amazon SES remain future adapters.
-- The permission catalog now contains 188 permissions; historical task counts
+- The permission catalog now contains 190 permissions; historical task counts
   remain unchanged.
 
 Validation:

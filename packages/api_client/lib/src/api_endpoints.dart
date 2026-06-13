@@ -38,6 +38,10 @@ abstract final class ApiEndpoints {
   static const String notificationUnreadCount = '$notifications/unread-count';
   static const String notificationPreferences = '$notifications/preferences';
   static const String notificationReadAll = '$notifications/read-all';
+  static const String communication = '/communication';
+  static const String communicationProviders = '$communication/providers';
+  static const String communicationTemplates = '$communication/templates';
+  static const String communicationMessages = '$communication/messages';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -168,6 +172,17 @@ abstract final class ApiEndpoints {
   static String notification(String id) => '$notifications/$id';
   static String notificationRead(String id) => '${notification(id)}/read';
   static String notificationAdminDetail(String id) => '$notificationAdmin/$id';
+  static String communicationProvider(String id) =>
+      '$communicationProviders/$id';
+  static String communicationTemplate(String id) =>
+      '$communicationTemplates/$id';
+  static String communicationTemplateVersions(String id) =>
+      '${communicationTemplate(id)}/versions';
+  static String communicationTemplatePreview(String id) =>
+      '${communicationTemplate(id)}/preview';
+  static String communicationMessage(String id) => '$communicationMessages/$id';
+  static String communicationMessageAttempts(String id) =>
+      '${communicationMessage(id)}/attempts';
   static String employeePerformance(String id) => '${employee(id)}/performance';
   static const String employeeDashboard = '$employees/dashboard';
   static String shift(String id) => '$shifts/$id';
