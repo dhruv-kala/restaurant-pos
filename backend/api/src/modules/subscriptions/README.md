@@ -1,8 +1,9 @@
 # Subscriptions Module
 
-Tasks 28.1 through 28.5 implement platform-managed, versioned subscription
+Tasks 28.1 through 28.6 implement platform-managed, versioned subscription
 plans, tenant subscription lifecycle, feature entitlement evaluation, central
-usage-limit enforcement, and trial management under `/subscriptions`.
+usage-limit enforcement, trial management, and shared Flutter administration
+contracts under `/subscriptions`.
 
 Activated plan versions are immutable. Updating an activated or deactivated
 version creates the next draft version, preserving stable historical
@@ -25,4 +26,4 @@ Trials create linked `TRIAL` tenant subscriptions, support extension, expiry,
 due-expiry processing, and conversion to paid `ACTIVE` subscriptions. Trial
 history is append-only and audited.
 
-Billing and administration UI remain deferred.
+Billing, invoicing, collections, and payment gateway workflows remain deferred.

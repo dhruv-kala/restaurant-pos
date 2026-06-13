@@ -8,6 +8,9 @@ Last updated: 2026-06-14
 - Current module: **Subscription Administration UI**
 - Next provisional task: **Task 29 - Promotions, Coupons, and Discount Policy Engine**
 - Later roadmap entries: **Provisional until explicitly approved**
+- Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
+  leakage in subscription implementation; one shared Dart response contract was
+  corrected to match the subscription backend.
 
 ## Completed Tasks
 

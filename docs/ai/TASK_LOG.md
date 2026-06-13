@@ -68,6 +68,46 @@ explicitly requested.
 | 28.5. Trial Management | COMPLETE | Trial subscriptions, immutable trial history, extension, expiry, due-expiry processing, paid conversion, RLS, tests, and audit events are implemented. |
 | 28.6. Subscription Admin UI | COMPLETE | Shared subscription models/client, Riverpod providers, and admin plan, subscription, entitlement, usage, and trial screens are implemented. |
 
+## Task 28.1-28.6 Repair Review
+
+Completed on 2026-06-14.
+
+Reason:
+
+- Some Task 28 prompts had incorrectly referenced
+  `docs/specifications/communication-module.md` instead of
+  `docs/specifications/subscription-module.md`.
+
+Review result:
+
+- No Task 28 implementation files, APIs, models, providers, screens, or task
+  documents referenced `communication-module.md`.
+- No subscription module code was created under communication paths.
+- No communication providers, messages, templates, webhooks, delivery tracking,
+  email, SMS, WhatsApp, or push concepts were found inside the Task 28
+  subscription implementation.
+- References to `communication` as a feature key example are valid subscription
+  entitlement examples and were retained.
+
+Repairs:
+
+- Corrected the shared `TenantSubscription` Dart contract to use
+  `SubscriptionPlanSummary`, matching the backend Task 28.2 response shape.
+- Updated subscription module documentation that still described
+  administration UI as deferred after Task 28.6 completion.
+
+Validation:
+
+- `flutter analyze` in `packages/shared_models`: passed
+- `flutter analyze` in `packages/api_client`: passed
+- `flutter analyze` in `apps/admin`: passed
+- `git diff --check`: passed with only existing LF-to-CRLF warnings
+
+Backend validation:
+
+- Not run for this repair because no backend TypeScript, Prisma schema, or
+  migration files changed. Only a backend README was updated.
+
 ## Task 28.6 Completion
 
 Completed on 2026-06-14.

@@ -10,6 +10,8 @@ Last updated: 2026-06-14
   or removed by an explicit user decision.
 - Execute only the task explicitly requested.
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
+- Task 28.1-28.6 were reviewed against the subscription specification on
+  2026-06-14; Task 29 remains the next provisional task.
 
 ## Foundation and Core SaaS
 

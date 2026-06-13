@@ -238,7 +238,7 @@ class TenantSubscription {
         suspendedAt: _optionalDate(json['suspendedAt']),
         expiredAt: _optionalDate(json['expiredAt']),
         cancelledAt: _optionalDate(json['cancelledAt']),
-        plan: SubscriptionPlan.fromJson(_requiredMap(json, 'plan')),
+        plan: SubscriptionPlanSummary.fromJson(_requiredMap(json, 'plan')),
         version: _requiredInt(json, 'version'),
         createdAt: _date(json, 'createdAt'),
         updatedAt: _date(json, 'updatedAt'),
@@ -252,7 +252,7 @@ class TenantSubscription {
   final DateTime? suspendedAt;
   final DateTime? expiredAt;
   final DateTime? cancelledAt;
-  final SubscriptionPlan plan;
+  final SubscriptionPlanSummary plan;
   final int version;
   final DateTime createdAt;
   final DateTime updatedAt;
