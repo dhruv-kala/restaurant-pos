@@ -25,8 +25,8 @@ Last updated: 2026-06-13
 | 27.4 | COMPLETE | SMS delivery providers |
 | 27.5 | COMPLETE | WhatsApp delivery providers |
 | 27.6 | COMPLETE | Push notification delivery |
-| 27.7 | NEXT | Webhooks and delivery tracking |
-| 27.8 | PLANNED | Communication center UI |
+| 27.7 | COMPLETE | Webhooks and delivery tracking |
+| 27.8 | NEXT | Communication center UI |
 | 27.9 | PLANNED | Communication analytics |
 | 28 | PLANNED | SaaS plans, subscriptions, entitlements, and limits |
 | 29 | PLANNED | Promotions, coupons, and discount policy engine |

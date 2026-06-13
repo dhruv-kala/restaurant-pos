@@ -13,7 +13,7 @@ describe('communication infrastructure schema', () => {
     for (const model of ['CommunicationProvider', 'CommunicationMessage', 'CommunicationAttempt']) {
       expect(schema).toContain(`model ${model} {`);
     }
-    expect(schema).not.toContain('model CommunicationWebhook {');
+    expect(schema).toContain('model CommunicationWebhook {');
   });
 
   it('forces tenant isolation on every communication table', () => {

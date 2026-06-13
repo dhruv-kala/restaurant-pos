@@ -127,6 +127,14 @@ export class CommunicationHistoryService {
     });
   }
 
+  async attempts(id: string, query: CommunicationMessageScopeDto, actor: AuthenticatedUser) {
+    const detail = await this.detail(id, query, actor);
+    return {
+      messageId: detail.id,
+      attempts: detail.attempts,
+    };
+  }
+
   private response(record: MessageRecord) {
     return {
       id: record.id,

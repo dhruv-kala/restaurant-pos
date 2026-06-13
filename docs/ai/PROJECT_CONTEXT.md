@@ -352,6 +352,9 @@ The repository currently contains:
 - Firebase Cloud Messaging HTTP v1 delivery with protected service-account
   references, encrypted tenant/user device registrations, immutable push
   payloads, append-only attempts, and automatic invalid-token deactivation
+- Verified Twilio and provider-neutral HMAC webhook ingestion with immutable
+  tenant-scoped events, replay protection, sanitized metadata, centralized
+  delivery/failure/bounce/complaint synchronization, and WhatsApp read tracking
 
 ## Authoritative References
 

@@ -214,7 +214,12 @@ environment-referenced service-account authentication, encrypted tenant/user
 device registrations, immutable push payloads, append-only attempts,
 invalid-token deactivation, and push audit events.
 
-Task 27.7 is next provisionally: implement Webhooks and Delivery Tracking.
+Task 27.7 implemented verified Twilio and provider-neutral HMAC webhooks,
+immutable tenant-scoped event history, replay protection, delivery status
+synchronization, bounce/complaint handling, WhatsApp read tracking, attempt
+inspection, and audit events.
+
+Task 27.8 is next provisionally: implement the Communication Center UI.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

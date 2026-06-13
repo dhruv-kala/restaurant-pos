@@ -11,7 +11,7 @@ import { parseCorsOrigins } from './common/utils/parse-cors-origins.util';
 import type { EnvironmentVariables } from './config/environment.validation';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const configService = app.get(ConfigService<EnvironmentVariables, true>);
 
   const appName = configService.get('APP_NAME', { infer: true });

@@ -2,10 +2,9 @@
 
 ## Status
 
-Tasks 27.1 infrastructure foundation, 27.2 template management, 27.3 SMTP email
-delivery, 27.4 Twilio SMS delivery, and 27.5 Twilio WhatsApp delivery are
-implemented. Task 27.6 Firebase push delivery is also implemented. Tasks 27.7
-through 27.9 remain planned.
+Tasks 27.1 through 27.7 are implemented, including templates, SMTP email,
+Twilio SMS and WhatsApp, Firebase push, and verified webhook delivery tracking.
+Tasks 27.8 and 27.9 remain planned.
 
 Task 27 is split into:
 
@@ -76,24 +75,22 @@ state rules, and idempotent internal enqueueing.
 Task 27.2 implements tenant-scoped `CommunicationTemplate` and immutable
 `CommunicationTemplateVersion` records, strict scalar placeholder rendering,
 preview, protected administration APIs, exact message version references, and
-transactional audit events. Webhook models remain deferred.
+transactional audit events.
 
 Task 27.3 implements SMTP provider execution, environment-backed secret
 references, authenticated recipient-address encryption, atomic message
 claiming, append-only attempts, SMTP acceptance/failure tracking, protected
-message history, and delivery audit events. SMTP acceptance maps to `SENT`;
-provider-confirmed `DELIVERED` remains Task 27.7.
+message history, and delivery audit events. SMTP acceptance maps to `SENT`.
 
 Task 27.4 implements Twilio SMS execution with E.164 validation, protected
 auth-token references, provider privacy options, a shared channel-neutral
 delivery executor, append-only attempts, safe failure classification, and SMS
-audit events. Provider/carrier delivery confirmation remains Task 27.7.
+audit events.
 
 Task 27.5 implements Twilio WhatsApp template execution with E.164 channel
 addressing, environment-backed auth-token references, immutable internal
 template-version to approved Content SID mappings, strict scalar template
-variables, and `DELIVERED`/`READ` status application contracts. Public webhook
-verification and callback endpoints remain Task 27.7.
+variables, and `DELIVERED`/`READ` status application contracts.
 
 Task 27.6 implements Firebase Cloud Messaging HTTP v1 execution,
 environment-referenced service-account authentication, encrypted tenant/user
@@ -101,6 +98,13 @@ device registrations, immutable push notification/data payloads, append-only
 attempt tracking, and automatic invalid-token deactivation. FCM provider
 acceptance maps to `SENT`; retries and generalized provider callback handling
 remain deferred.
+
+Task 27.7 implements immutable webhook event history, Twilio signature
+verification, a signed provider-neutral HMAC envelope, duplicate-event
+suppression, and centralized monotonic message/attempt state synchronization.
+Supported normalized outcomes are delivered, failed, bounced, complaint, and
+WhatsApp read. Raw provider payloads, credentials, and recipient addresses are
+not retained.
 
 ## Invariants
 
@@ -172,7 +176,8 @@ Administrative Actions:
 
 * `POST /communication/messages/:id/resend`
 
-Endpoint availability depends on which Task 27.x implementation has been completed.
+The listed provider, template, history, push-device, attempt, and webhook
+endpoints are available through Task 27.7. Resend remains deferred.
 
 ## Flutter
 

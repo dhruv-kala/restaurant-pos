@@ -9,10 +9,9 @@ describe('WhatsApp delivery schema', () => {
     'utf8',
   );
 
-  it('persists read status and timestamp without adding webhook storage', () => {
+  it('persists read status and timestamp', () => {
     expect(schema).toContain('READ');
     expect(schema).toContain('readAt');
-    expect(schema).not.toContain('model CommunicationWebhook {');
     expect(migration).toContain('communication_messages_read_status_check');
   });
 

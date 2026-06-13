@@ -11,13 +11,13 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 27.6 are complete at the requested foundation level.
+Tasks 1 through 27.7 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27.7, Webhooks and Delivery Tracking, is the next provisional roadmap item. It
-is not approved for implementation until explicitly requested.
+Task 27.8, Communication Center UI, is the next provisional roadmap item. It is
+not approved for implementation until explicitly requested.
 
 ## Task History
 
@@ -57,6 +57,84 @@ is not approved for implementation until explicitly requested.
 | 27.4. SMS Delivery Providers | COMPLETE | Twilio SMS execution, E.164 validation, protected credentials, shared delivery orchestration, attempts/status, and audit events are implemented. |
 | 27.5. WhatsApp Delivery Providers | COMPLETE | Twilio WhatsApp approved-template execution, protected credentials, delivered/read status foundation, and audit events are implemented. |
 | 27.6. Push Notification Delivery | COMPLETE | FCM HTTP v1 delivery, encrypted tenant/user devices, invalid-token deactivation, attempts/status, and audit events are implemented. |
+| 27.7. Webhooks and Delivery Tracking | COMPLETE | Verified Twilio and provider-neutral callbacks, immutable idempotent webhook events, centralized delivery synchronization, and audit events are implemented. |
+
+## Task 27.7 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Tenant-scoped immutable `CommunicationWebhook` persistence with forced RLS,
+  provider/message/attempt relations, and protected foreign keys
+- Tenant/provider/provider-event uniqueness plus transaction advisory locking
+  for idempotent replay handling
+- Tenant/provider/provider-message attempt uniqueness for deterministic
+  callback correlation
+- Public `POST /communication/webhooks/:provider` ingestion with raw request
+  body access and required provider identity
+- Official Twilio request-signature verification against the configured exact
+  public webhook URL
+- Provider-neutral HMAC-SHA256 verification for future email and push adapters,
+  including signed provider identity to prevent cross-provider replay
+- Canonical Twilio form normalization and strict generic JSON event contracts
+- Sanitized, bounded scalar event metadata without retaining raw payloads,
+  signatures, credentials, recipient addresses, or provider error descriptions
+- Central monotonic delivery synchronization for delivered, failed, bounced,
+  complaint, and WhatsApp read outcomes
+- Protection against late failure callbacks regressing delivered/read history
+- Duplicate callbacks returning the existing event without repeating status
+  updates or audit events
+- Protected `GET /communication/messages/:id/attempts` history endpoint
+- Transactional webhook-processed/ignored and delivery-state audit events plus
+  isolated signature-verification failure auditing
+- Official `twilio` SDK dependency for maintained signature verification
+- Schema, signature, replay, synchronization, WhatsApp regression, and service
+  tests
+
+Decisions:
+
+- Twilio callbacks are correlated by provider ID and provider message SID. The
+  route provider key, provider record, configured URL, and signature must agree.
+- Generic callbacks must sign a JSON envelope containing the provider ID,
+  provider event ID, provider message ID, event type, and optional occurrence
+  and error data.
+- Webhook events are append-only. Corrections arrive as new provider events;
+  existing events cannot be updated or deleted.
+- SMTP and FCM do not provide one universal native delivery webhook contract.
+  Future provider-specific adapters can normalize into the generic signed
+  envelope without changing persistence or state synchronization.
+- Task 27.7 adds no Flutter UI, templates, retries, analytics, campaign
+  tracking, or generalized integration webhook framework.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npx tsc -p prisma/tsconfig.seed.json --noEmit`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 221 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- `npm audit --omit=dev`: passed, 0 vulnerabilities
+- `git diff --check`: passed with line-ending warnings only
+- `npm run prisma:migrate:deploy`: failed with the existing local Prisma
+  schema-engine error before migration deployment
+
+Known limitations:
+
+- Provider callback execution was verified through unit/service tests because
+  no live Twilio, email callback provider, Firebase callback source, or valid
+  local PostgreSQL deployment was available.
+- The committed migration is
+  `backend/api/prisma/migrations/20260614180000_add_communication_webhooks/migration.sql`.
+- Migration deployment remains subject to the existing invalid local
+  PostgreSQL configuration.
+
+Next task:
+
+- Task 27.8 Communication Center UI, only when explicitly requested.
 
 ## Task 27.6 Completion
 

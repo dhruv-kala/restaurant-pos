@@ -30,4 +30,13 @@ export class CommunicationMessagesController {
   ) {
     return this.history.detail(id, query, actor);
   }
+
+  @Get(':id/attempts')
+  attempts(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: CommunicationMessageScopeDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.history.attempts(id, query, actor);
+  }
 }

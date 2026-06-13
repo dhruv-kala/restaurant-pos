@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 27.6**
-- Current module: **Push Notification Delivery**
-- Next provisional task: **Task 27.7 - Webhooks and Delivery Tracking**
+- Completed through: **Task 27.7**
+- Current module: **Webhooks and Delivery Tracking**
+- Next provisional task: **Task 27.8 - Communication Center UI**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -28,6 +28,7 @@ Last updated: 2026-06-13
 | 27.4 | Twilio SMS execution, E.164 validation, shared delivery orchestration, attempt/status tracking, and audit events |
 | 27.5 | Twilio WhatsApp approved-template execution, protected credentials, delivery/read state foundation, and audit events |
 | 27.6 | FCM HTTP v1 delivery, encrypted tenant/user device registration, invalid-token deactivation, and audit events |
+| 27.7 | Verified provider webhooks, immutable idempotent event history, and monotonic delivery-state synchronization |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -61,6 +62,9 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Firebase push delivery with environment-referenced service-account
   authentication, encrypted tenant/user device tokens, immutable payloads,
   append-only attempts, and automatic invalid-token deactivation
+- Verified Twilio and provider-neutral HMAC webhooks with immutable event
+  history, replay protection, sanitized metadata, and centralized delivery,
+  failure, bounce, complaint, and WhatsApp read-state synchronization
 
 ## Known Environment Limitation
 
@@ -71,20 +75,18 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 27.7 - Webhooks and Delivery Tracking
+### Task 27.8 - Communication Center UI
 
 Read:
 
 - `docs/specifications/communication-module.md`
-- `docs/tasks/027-communication/27.7-webhooks.md`
-- `docs/ai/SECURITY_RULES.md`
-- `docs/ai/MULTI_TENANCY_RULES.md`
-- `docs/ai/DATABASE_STANDARDS.md`
+- `docs/tasks/027-communication/27.8-admin-ui.md`
+- `docs/ai/FLUTTER_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Define provider webhook verification, idempotent event persistence, tenant-safe
-message/attempt status synchronization, and replay handling. Do not implement
-Task 27.7 unless explicitly requested.
+Implement the communication administration UI only against the established
+provider, template, message history, attempts, push-device, and webhook
+contracts. Do not implement Task 27.8 unless explicitly requested.
 
 ## Status Maintenance
 
