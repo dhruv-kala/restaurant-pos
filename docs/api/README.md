@@ -7,3 +7,4 @@ versioning policy belong here once the NestJS API is implemented.
 
 - [Authentication API](authentication.md)
 - [Tenant and outlet management API](tenant-outlet-management.md)
+- [Communication Template API](communication-templates.md)

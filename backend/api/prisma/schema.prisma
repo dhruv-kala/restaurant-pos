@@ -419,6 +419,14 @@ enum CommunicationAttemptStatus {
   @@map("communication_attempt_status")
 }
 
+enum CommunicationTemplateStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+
+  @@map("communication_template_status")
+}
+
 enum EmploymentType {
   FULL_TIME
   PART_TIME
@@ -595,72 +603,74 @@ model Tenant {
   updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt    DateTime?    @map("deleted_at") @db.Timestamptz(3)
 
-  outlets                     Outlet[]
-  memberships                 TenantMembership[]
-  roles                       Role[]
-  menuCategories              MenuCategory[]
-  menuItems                   MenuItem[]
-  menuItemVariants            MenuItemVariant[]
-  menuItemAddons              MenuItemAddon[]
-  outletMenuPrices            OutletMenuPrice[]
-  tableSections               TableSection[]
-  diningTables                DiningTable[]
-  tableReservations           TableReservation[]
-  mergedTables                MergedTable[]
-  orders                      Order[]
-  orderItems                  OrderItem[]
-  orderCounters               OrderNumberCounter[]
-  kitchenCategories           KitchenCategory[]
-  kitchenStations             KitchenStation[]
-  stationAssignments          KitchenStationAssignment[]
-  bills                       Bill[]
-  billItems                   BillItem[]
-  billTaxes                   BillTax[]
-  billCounters                BillNumberCounter[]
-  payments                    Payment[]
-  paymentTransactions         PaymentTransaction[]
-  paymentRefunds              PaymentRefund[]
-  paymentCounters             PaymentNumberCounter[]
-  receipts                    Receipt[]
-  receiptPrintLogs            ReceiptPrintLog[]
-  receiptCounters             ReceiptNumberCounter[]
-  invoiceCounters             InvoiceNumberCounter[]
-  inventoryCategories         InventoryCategory[]
-  unitsOfMeasure              UnitOfMeasure[]
-  ingredients                 Ingredient[]
-  inventoryStocks             InventoryStock[]
-  inventoryBatches            InventoryBatch[]
-  stockTransactions           StockTransaction[]
-  vendors                     Vendor[]
-  purchaseOrders              PurchaseOrder[]
-  purchaseOrderItems          PurchaseOrderItem[]
-  purchaseOrderCounters       PurchaseOrderNumberCounter[]
-  inventoryAlerts             InventoryAlert[]
-  recipes                     Recipe[]
-  recipeIngredients           RecipeIngredient[]
-  recipeCostSnapshots         RecipeCostSnapshot[]
-  productionRecipes           ProductionRecipe[]
-  productionRecipeIngredients ProductionRecipeIngredient[]
-  inventoryConsumptions       InventoryConsumption[]
-  inventoryWastages           InventoryWastage[]
-  customers                   Customer[]
-  customerAddresses           CustomerAddress[]
-  customerNotes               CustomerNote[]
-  customerVisits              CustomerVisit[]
-  customerStats               CustomerStats[]
-  reportGenerationAudits      ReportGenerationAudit[]
-  employeeProfiles            EmployeeProfile[]
-  shifts                      Shift[]
-  employeeShiftAssignments    EmployeeShiftAssignment[]
-  attendanceRecords           Attendance[]
-  employeePerformance         EmployeePerformance[]
-  auditEvents                 AuditEvent[]
-  notifications               Notification[]
-  notificationRecipients      NotificationRecipient[]
-  notificationPreferences     NotificationPreference[]
-  communicationProviders      CommunicationProvider[]
-  communicationMessages       CommunicationMessage[]
-  communicationAttempts       CommunicationAttempt[]
+  outlets                       Outlet[]
+  memberships                   TenantMembership[]
+  roles                         Role[]
+  menuCategories                MenuCategory[]
+  menuItems                     MenuItem[]
+  menuItemVariants              MenuItemVariant[]
+  menuItemAddons                MenuItemAddon[]
+  outletMenuPrices              OutletMenuPrice[]
+  tableSections                 TableSection[]
+  diningTables                  DiningTable[]
+  tableReservations             TableReservation[]
+  mergedTables                  MergedTable[]
+  orders                        Order[]
+  orderItems                    OrderItem[]
+  orderCounters                 OrderNumberCounter[]
+  kitchenCategories             KitchenCategory[]
+  kitchenStations               KitchenStation[]
+  stationAssignments            KitchenStationAssignment[]
+  bills                         Bill[]
+  billItems                     BillItem[]
+  billTaxes                     BillTax[]
+  billCounters                  BillNumberCounter[]
+  payments                      Payment[]
+  paymentTransactions           PaymentTransaction[]
+  paymentRefunds                PaymentRefund[]
+  paymentCounters               PaymentNumberCounter[]
+  receipts                      Receipt[]
+  receiptPrintLogs              ReceiptPrintLog[]
+  receiptCounters               ReceiptNumberCounter[]
+  invoiceCounters               InvoiceNumberCounter[]
+  inventoryCategories           InventoryCategory[]
+  unitsOfMeasure                UnitOfMeasure[]
+  ingredients                   Ingredient[]
+  inventoryStocks               InventoryStock[]
+  inventoryBatches              InventoryBatch[]
+  stockTransactions             StockTransaction[]
+  vendors                       Vendor[]
+  purchaseOrders                PurchaseOrder[]
+  purchaseOrderItems            PurchaseOrderItem[]
+  purchaseOrderCounters         PurchaseOrderNumberCounter[]
+  inventoryAlerts               InventoryAlert[]
+  recipes                       Recipe[]
+  recipeIngredients             RecipeIngredient[]
+  recipeCostSnapshots           RecipeCostSnapshot[]
+  productionRecipes             ProductionRecipe[]
+  productionRecipeIngredients   ProductionRecipeIngredient[]
+  inventoryConsumptions         InventoryConsumption[]
+  inventoryWastages             InventoryWastage[]
+  customers                     Customer[]
+  customerAddresses             CustomerAddress[]
+  customerNotes                 CustomerNote[]
+  customerVisits                CustomerVisit[]
+  customerStats                 CustomerStats[]
+  reportGenerationAudits        ReportGenerationAudit[]
+  employeeProfiles              EmployeeProfile[]
+  shifts                        Shift[]
+  employeeShiftAssignments      EmployeeShiftAssignment[]
+  attendanceRecords             Attendance[]
+  employeePerformance           EmployeePerformance[]
+  auditEvents                   AuditEvent[]
+  notifications                 Notification[]
+  notificationRecipients        NotificationRecipient[]
+  notificationPreferences       NotificationPreference[]
+  communicationProviders        CommunicationProvider[]
+  communicationTemplates        CommunicationTemplate[]
+  communicationTemplateVersions CommunicationTemplateVersion[]
+  communicationMessages         CommunicationMessage[]
+  communicationAttempts         CommunicationAttempt[]
 
   @@index([status])
   @@index([deletedAt])
@@ -750,48 +760,49 @@ model UserAccount {
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime?  @map("deleted_at") @db.Timestamptz(3)
 
-  memberships                TenantMembership[]
-  refreshTokens              RefreshToken[]
-  waitedOrders               Order[]                   @relation("OrderWaiter")
-  generatedBills             Bill[]                    @relation("BillGeneratedBy")
-  voidedBills                Bill[]                    @relation("BillVoidedBy")
-  createdPayments            Payment[]                 @relation("PaymentCreatedBy")
-  paidPayments               Payment[]                 @relation("PaymentPaidBy")
-  paymentRefunds             PaymentRefund[]           @relation("PaymentRefundedBy")
-  generatedReceipts          Receipt[]                 @relation("ReceiptGeneratedBy")
-  receiptPrintLogs           ReceiptPrintLog[]         @relation("ReceiptPrintedBy")
-  startedKitchenItems        OrderItem[]               @relation("KitchenItemStartedBy")
-  readiedKitchenItems        OrderItem[]               @relation("KitchenItemReadiedBy")
-  servedKitchenItems         OrderItem[]               @relation("KitchenItemServedBy")
-  createdIngredients         Ingredient[]              @relation("IngredientCreatedBy")
-  updatedIngredients         Ingredient[]              @relation("IngredientUpdatedBy")
-  performedStockTransactions StockTransaction[]        @relation("StockTransactionPerformedBy")
-  createdVendors             Vendor[]                  @relation("VendorCreatedBy")
-  updatedVendors             Vendor[]                  @relation("VendorUpdatedBy")
-  createdPurchaseOrders      PurchaseOrder[]           @relation("PurchaseOrderCreatedBy")
-  updatedPurchaseOrders      PurchaseOrder[]           @relation("PurchaseOrderUpdatedBy")
-  receivedPurchaseOrders     PurchaseOrder[]           @relation("PurchaseOrderReceivedBy")
-  resolvedInventoryAlerts    InventoryAlert[]          @relation("InventoryAlertResolvedBy")
-  createdRecipes             Recipe[]                  @relation("RecipeCreatedBy")
-  updatedRecipes             Recipe[]                  @relation("RecipeUpdatedBy")
-  createdProductionRecipes   ProductionRecipe[]        @relation("ProductionRecipeCreatedBy")
-  updatedProductionRecipes   ProductionRecipe[]        @relation("ProductionRecipeUpdatedBy")
-  triggeredConsumptions      InventoryConsumption[]    @relation("ConsumptionTriggeredBy")
-  recordedWastages           InventoryWastage[]        @relation("WastageRecordedBy")
-  customerNotes              CustomerNote[]            @relation("CustomerNoteCreatedBy")
-  generatedReports           ReportGenerationAudit[]   @relation("ReportGeneratedBy")
-  employeeProfiles           EmployeeProfile[]         @relation("EmployeeUser")
-  createdEmployeeProfiles    EmployeeProfile[]         @relation("EmployeeCreatedBy")
-  updatedEmployeeProfiles    EmployeeProfile[]         @relation("EmployeeUpdatedBy")
-  assignedEmployeeShifts     EmployeeShiftAssignment[] @relation("ShiftAssignedBy")
-  recordedAttendance         Attendance[]              @relation("AttendanceRecordedBy")
-  auditEvents                AuditEvent[]              @relation("AuditActor")
-  effectiveAuditEvents       AuditEvent[]              @relation("AuditEffectiveActor")
-  impersonatedAuditEvents    AuditEvent[]              @relation("AuditImpersonator")
-  createdNotifications       Notification[]            @relation("NotificationCreatedBy")
-  notificationRecipients     NotificationRecipient[]
-  notificationPreferences    NotificationPreference[]
-  communicationMessages      CommunicationMessage[]    @relation("CommunicationMessageRecipientUser")
+  memberships                          TenantMembership[]
+  refreshTokens                        RefreshToken[]
+  waitedOrders                         Order[]                        @relation("OrderWaiter")
+  generatedBills                       Bill[]                         @relation("BillGeneratedBy")
+  voidedBills                          Bill[]                         @relation("BillVoidedBy")
+  createdPayments                      Payment[]                      @relation("PaymentCreatedBy")
+  paidPayments                         Payment[]                      @relation("PaymentPaidBy")
+  paymentRefunds                       PaymentRefund[]                @relation("PaymentRefundedBy")
+  generatedReceipts                    Receipt[]                      @relation("ReceiptGeneratedBy")
+  receiptPrintLogs                     ReceiptPrintLog[]              @relation("ReceiptPrintedBy")
+  startedKitchenItems                  OrderItem[]                    @relation("KitchenItemStartedBy")
+  readiedKitchenItems                  OrderItem[]                    @relation("KitchenItemReadiedBy")
+  servedKitchenItems                   OrderItem[]                    @relation("KitchenItemServedBy")
+  createdIngredients                   Ingredient[]                   @relation("IngredientCreatedBy")
+  updatedIngredients                   Ingredient[]                   @relation("IngredientUpdatedBy")
+  performedStockTransactions           StockTransaction[]             @relation("StockTransactionPerformedBy")
+  createdVendors                       Vendor[]                       @relation("VendorCreatedBy")
+  updatedVendors                       Vendor[]                       @relation("VendorUpdatedBy")
+  createdPurchaseOrders                PurchaseOrder[]                @relation("PurchaseOrderCreatedBy")
+  updatedPurchaseOrders                PurchaseOrder[]                @relation("PurchaseOrderUpdatedBy")
+  receivedPurchaseOrders               PurchaseOrder[]                @relation("PurchaseOrderReceivedBy")
+  resolvedInventoryAlerts              InventoryAlert[]               @relation("InventoryAlertResolvedBy")
+  createdRecipes                       Recipe[]                       @relation("RecipeCreatedBy")
+  updatedRecipes                       Recipe[]                       @relation("RecipeUpdatedBy")
+  createdProductionRecipes             ProductionRecipe[]             @relation("ProductionRecipeCreatedBy")
+  updatedProductionRecipes             ProductionRecipe[]             @relation("ProductionRecipeUpdatedBy")
+  triggeredConsumptions                InventoryConsumption[]         @relation("ConsumptionTriggeredBy")
+  recordedWastages                     InventoryWastage[]             @relation("WastageRecordedBy")
+  customerNotes                        CustomerNote[]                 @relation("CustomerNoteCreatedBy")
+  generatedReports                     ReportGenerationAudit[]        @relation("ReportGeneratedBy")
+  employeeProfiles                     EmployeeProfile[]              @relation("EmployeeUser")
+  createdEmployeeProfiles              EmployeeProfile[]              @relation("EmployeeCreatedBy")
+  updatedEmployeeProfiles              EmployeeProfile[]              @relation("EmployeeUpdatedBy")
+  assignedEmployeeShifts               EmployeeShiftAssignment[]      @relation("ShiftAssignedBy")
+  recordedAttendance                   Attendance[]                   @relation("AttendanceRecordedBy")
+  auditEvents                          AuditEvent[]                   @relation("AuditActor")
+  effectiveAuditEvents                 AuditEvent[]                   @relation("AuditEffectiveActor")
+  impersonatedAuditEvents              AuditEvent[]                   @relation("AuditImpersonator")
+  createdNotifications                 Notification[]                 @relation("NotificationCreatedBy")
+  notificationRecipients               NotificationRecipient[]
+  notificationPreferences              NotificationPreference[]
+  communicationMessages                CommunicationMessage[]         @relation("CommunicationMessageRecipientUser")
+  createdCommunicationTemplateVersions CommunicationTemplateVersion[] @relation("CommunicationTemplateVersionCreatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -2427,12 +2438,59 @@ model CommunicationProvider {
   @@map("communication_providers")
 }
 
+model CommunicationTemplate {
+  id          String                      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId    String                      @map("tenant_id") @db.Uuid
+  templateKey String                      @map("template_key") @db.VarChar(120)
+  channel     CommunicationChannel
+  name        String                      @db.VarChar(160)
+  description String?                     @db.VarChar(500)
+  status      CommunicationTemplateStatus @default(DRAFT)
+  version     Int                         @default(1)
+  createdAt   DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant   Tenant                         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  versions CommunicationTemplateVersion[]
+  messages CommunicationMessage[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, channel, templateKey])
+  @@index([tenantId, status, channel, name], map: "communication_templates_directory_idx")
+  @@map("communication_templates")
+}
+
+model CommunicationTemplateVersion {
+  id              String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  templateId      String   @map("template_id") @db.Uuid
+  versionNumber   Int      @map("version_number")
+  subjectTemplate String?  @map("subject_template") @db.VarChar(500)
+  bodyTemplate    String   @map("body_template") @db.Text
+  variableSchema  Json     @map("variable_schema") @db.JsonB
+  createdByUserId String   @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant    Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  template  CommunicationTemplate  @relation(fields: [tenantId, templateId], references: [tenantId, id], onDelete: Restrict)
+  createdBy UserAccount            @relation("CommunicationTemplateVersionCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  messages  CommunicationMessage[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, templateId, id])
+  @@unique([tenantId, templateId, versionNumber])
+  @@index([tenantId, templateId, createdAt], map: "communication_template_versions_history_idx")
+  @@map("communication_template_versions")
+}
+
 model CommunicationMessage {
   id                         String                     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   tenantId                   String                     @map("tenant_id") @db.Uuid
   outletId                   String?                    @map("outlet_id") @db.Uuid
   notificationId             String?                    @map("notification_id") @db.Uuid
   providerId                 String?                    @map("provider_id") @db.Uuid
+  templateId                 String?                    @map("template_id") @db.Uuid
+  templateVersionId          String?                    @map("template_version_id") @db.Uuid
   channel                    CommunicationChannel
   recipientType              CommunicationRecipientType @map("recipient_type")
   recipientUserId            String?                    @map("recipient_user_id") @db.Uuid
@@ -2457,18 +2515,21 @@ model CommunicationMessage {
   createdAt                  DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt                  DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet        Outlet?                @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  notification  Notification?          @relation(fields: [tenantId, notificationId], references: [tenantId, id], onDelete: Restrict)
-  provider      CommunicationProvider? @relation(fields: [tenantId, providerId], references: [tenantId, id], onDelete: Restrict)
-  recipientUser UserAccount?           @relation("CommunicationMessageRecipientUser", fields: [recipientUserId], references: [id], onDelete: Restrict)
-  attempts      CommunicationAttempt[]
+  tenant          Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet          Outlet?                       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  notification    Notification?                 @relation(fields: [tenantId, notificationId], references: [tenantId, id], onDelete: Restrict)
+  provider        CommunicationProvider?        @relation(fields: [tenantId, providerId], references: [tenantId, id], onDelete: Restrict)
+  template        CommunicationTemplate?        @relation(fields: [tenantId, templateId], references: [tenantId, id], onDelete: Restrict)
+  templateVersion CommunicationTemplateVersion? @relation(fields: [tenantId, templateId, templateVersionId], references: [tenantId, templateId, id], onDelete: Restrict)
+  recipientUser   UserAccount?                  @relation("CommunicationMessageRecipientUser", fields: [recipientUserId], references: [id], onDelete: Restrict)
+  attempts        CommunicationAttempt[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, channel, idempotencyKey])
   @@index([tenantId, status, availableAt], map: "communication_messages_queue_idx")
   @@index([tenantId, outletId, createdAt], map: "communication_messages_outlet_created_idx")
   @@index([tenantId, notificationId], map: "communication_messages_notification_idx")
+  @@index([tenantId, templateVersionId], map: "communication_messages_template_version_idx")
   @@index([tenantId, recipientAddressHash, createdAt], map: "communication_messages_recipient_idx")
   @@map("communication_messages")
 }

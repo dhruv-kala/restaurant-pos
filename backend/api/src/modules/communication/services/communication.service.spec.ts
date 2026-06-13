@@ -38,6 +38,8 @@ describe('CommunicationService', () => {
             outletId: null,
             notificationId: null,
             providerId: null,
+            templateId: null,
+            templateVersionId: null,
             recipientUserId: null,
             recipientReferenceId: null,
             subjectSnapshot: null,

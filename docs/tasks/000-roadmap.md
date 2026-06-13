@@ -1,6 +1,6 @@
 # Restaurant POS Task Roadmap
 
-Last updated: 2026-06-12
+Last updated: 2026-06-13
 
 ## Roadmap Rules
 
@@ -20,8 +20,8 @@ Last updated: 2026-06-12
 | 25 | COMPLETE | Audit and activity logging |
 | 26 | COMPLETE | In-app Notification Center, preferences, read state, publishing, shared clients, and Flutter foundations |
 | 27.1 | COMPLETE | Communication infrastructure foundation |
-| 27.2 | NEXT | Communication template management |
-| 27.3 | PLANNED | Email delivery providers |
+| 27.2 | COMPLETE | Communication template management |
+| 27.3 | NEXT | Email delivery providers |
 | 27.4 | PLANNED | SMS delivery providers |
 | 27.5 | PLANNED | WhatsApp delivery providers |
 | 27.6 | PLANNED | Push notification delivery |

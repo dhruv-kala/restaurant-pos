@@ -250,7 +250,7 @@ The repository currently contains:
 - A committed tenancy and authorization migration with UUIDv7 generation,
   tenant-aware constraints, and forced row-level security
 - An environment-aware, transactional seed framework with platform master data,
-  global role templates, 184 permissions, role mappings, system settings,
+  global role templates, 186 permissions, role mappings, system settings,
   application modules, and an idempotent development demo restaurant
 - Email/password authentication with Passport JWT
 - Hashed, rotating, revocable refresh-token persistence

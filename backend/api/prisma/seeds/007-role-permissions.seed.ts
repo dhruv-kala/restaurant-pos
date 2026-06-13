@@ -26,6 +26,7 @@ const roleModules: Record<string, readonly string[]> = {
     'settings',
     'audit',
     'notifications',
+    'communication',
   ],
   MANAGER: [
     'menu',

@@ -1,6 +1,6 @@
 # AI Task Log
 
-Last updated: 2026-06-12
+Last updated: 2026-06-13
 
 ## Status Legend
 
@@ -11,13 +11,13 @@ Last updated: 2026-06-12
 
 ## Current Summary
 
-Tasks 1 through 27.1 are complete at the requested foundation level.
+Tasks 1 through 27.2 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27.2, Communication Template Management, is the next provisional roadmap
-item. It is not approved for implementation until explicitly requested.
+Task 27.3, Email Delivery Providers, is the next provisional roadmap item. It
+is not approved for implementation until explicitly requested.
 
 ## Task History
 
@@ -52,6 +52,68 @@ item. It is not approved for implementation until explicitly requested.
 | 25. Implement Audit & Activity Logging Module | COMPLETE | Immutable tenant/platform events, per-scope hash chains, forced RLS, protected APIs, transactional security integrations, typed clients, Riverpod providers, admin explorer, tests, and documentation are implemented. |
 | 26. Implement Notification Center Module | COMPLETE | Tenant/outlet/user in-app notifications, recipient delivery/read state, preferences, publishing APIs, shared clients, admin center, and restaurant-app foundation are implemented. |
 | 27.1. Communication Infrastructure Foundation | COMPLETE | Provider/message/attempt schema, protected recipient addressing, immutable communication history, idempotent enqueueing, abstraction contracts, and state rules are implemented. |
+| 27.2. Communication Template Management | COMPLETE | Tenant template CRUD, immutable versions, strict variable rendering, preview, permissions, audit events, and exact message version references are implemented. |
+
+## Task 27.2 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- `CommunicationTemplate` and immutable `CommunicationTemplateVersion` Prisma
+  models with tenant-aware composite keys and exact message version references
+- Migration `20260614060000_add_communication_templates` with forced RLS,
+  content checks, directory/history indexes, message reference integrity, and
+  immutable version triggers
+- Protected create, list, detail, update, version-history, and preview APIs
+- Aggregate optimistic concurrency; each accepted patch creates the next
+  immutable version
+- Strict `{{variableName}}` parsing with exact declarations and scalar-only
+  render values
+- Required subjects for email templates and required non-empty bodies for all
+  channels
+- `communication.template_view` and `communication.template_manage`
+  permissions, assigned to tenant administrators by default
+- Transactional audit events for template creation/update and every version
+  creation without copying template content into audit metadata
+- Communication message enqueue contracts that retain both template and exact
+  template-version identifiers
+- API, database, specification, roadmap, current-status, and restart-context
+  documentation
+
+Decisions:
+
+- Task 27.2 adds no provider delivery, scheduling, campaigns, localization,
+  webhooks, Flutter UI, or analytics.
+- Template keys are normalized to lowercase and unique per tenant/channel.
+- Template updates do not mutate historical versions, including metadata-only
+  changes.
+- Preview rejects missing, unknown, object, array, and null values to keep the
+  rendering contract deterministic.
+- The permission catalog now contains 186 permissions; the historical Task
+  23.5 baseline remains 184.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npx tsc -p prisma/tsconfig.seed.json --noEmit`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 179 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Focused communication template tests: passed, 10 tests
+- `git diff --check`: passed
+- `npm run prisma:migrate:deploy`: failed with the existing local Prisma
+  schema-engine error before migration deployment
+
+Known limitations:
+
+- The new migration was not deployed to local PostgreSQL because Prisma's
+  schema engine fails before applying migrations in the current environment.
+- Delivery providers and workers remain absent until their dedicated tasks.
+- Template administration UI remains deferred to Task 27.8.
 
 ## Task 27.1 Completion
 

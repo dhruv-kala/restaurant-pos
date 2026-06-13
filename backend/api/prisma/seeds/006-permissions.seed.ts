@@ -97,6 +97,7 @@ const moduleActions: Record<string, readonly string[]> = {
     'configure',
   ],
   notifications: ['read', 'create', 'manage', 'send', 'preferences', 'tenant', 'outlet', 'user'],
+  communication: ['template_view', 'template_manage'],
 };
 
 export const PERMISSIONS = Object.entries(moduleActions).flatMap(([module, actions]) =>

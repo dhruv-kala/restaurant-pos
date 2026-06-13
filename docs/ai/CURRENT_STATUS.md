@@ -1,12 +1,12 @@
 # Current Status
 
-Last updated: 2026-06-12
+Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 27.1**
-- Current module: **Communication Infrastructure Foundation**
-- Next provisional task: **Task 27.2 - Communication Template Management**
+- Completed through: **Task 27.2**
+- Current module: **Communication Template Management**
+- Next provisional task: **Task 27.3 - Email Delivery Providers**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -23,6 +23,7 @@ Last updated: 2026-06-12
 | 25 | Immutable audit ledger, hash-chain integrity, protected APIs, security/RBAC/report integrations, and admin explorer |
 | 26 | Tenant/outlet/user in-app notifications, recipient/read state, preferences, publishing APIs, shared clients, and Flutter notification centers |
 | 27.1 | Provider/message/attempt schema, protected addressing, idempotent enqueue service, abstraction contracts, and state rules |
+| 27.2 | Tenant template CRUD, immutable versions, strict placeholder preview/rendering, authorization, audit integration, and exact message version references |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -43,6 +44,8 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   state, user preferences, audit integration, and shared Flutter clients
 - Tenant-isolated provider metadata, outbound message snapshots, delivery
   attempts, provider abstraction contracts, and transactional enqueueing
+- Tenant-isolated communication templates with immutable version history,
+  strict variable contracts, preview rendering, and audited administration
 
 ## Known Environment Limitation
 
@@ -53,20 +56,20 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 27.2 - Communication Template Management
+### Task 27.3 - Email Delivery Providers
 
 Read:
 
 - `docs/specifications/communication-module.md`
-- `docs/tasks/027-communication/27.2-templates.md`
+- `docs/tasks/027-communication/27.3-email.md`
 - `docs/ai/SECURITY_RULES.md`
 - `docs/ai/MULTI_TENANCY_RULES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Define template CRUD, immutable version creation, variable validation, preview,
-authorization, and audit behavior. Do not implement Task 27.2 unless explicitly
-requested.
+Define provider configuration, adapter selection, authorized credential
+references, email delivery attempts, and provider-neutral failure mapping. Do
+not implement Task 27.3 unless explicitly requested.
 
 ## Status Maintenance
 

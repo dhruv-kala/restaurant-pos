@@ -35,6 +35,8 @@ export class CommunicationService {
           outletId: input.outletId,
           notificationId: input.notificationId,
           providerId: input.providerId,
+          templateId: input.templateId,
+          templateVersionId: input.templateVersionId,
           channel: input.channel,
           recipientType: input.recipientType,
           recipientUserId: input.recipientUserId,
@@ -97,6 +99,9 @@ export class CommunicationService {
     ) {
       throw new BadRequestException('recipientReferenceId is required for CUSTOMER recipients');
     }
+    if (Boolean(input.templateId) !== Boolean(input.templateVersionId)) {
+      throw new BadRequestException('templateId and templateVersionId must be provided together');
+    }
   }
 
   private isUniqueConflict(error: unknown): boolean {
@@ -120,6 +125,8 @@ export class CommunicationService {
       outletId: input.outletId ?? null,
       notificationId: input.notificationId ?? null,
       providerId: input.providerId ?? null,
+      templateId: input.templateId ?? null,
+      templateVersionId: input.templateVersionId ?? null,
       channel: input.channel,
       recipientType: input.recipientType,
       recipientUserId: input.recipientUserId ?? null,

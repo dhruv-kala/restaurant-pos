@@ -5,6 +5,8 @@ export interface EnqueueCommunicationMessage {
   outletId?: string | null;
   notificationId?: string | null;
   providerId?: string | null;
+  templateId?: string | null;
+  templateVersionId?: string | null;
   channel: CommunicationChannel;
   recipientType: CommunicationRecipientType;
   recipientUserId?: string | null;
