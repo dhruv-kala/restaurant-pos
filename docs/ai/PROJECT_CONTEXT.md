@@ -364,6 +364,9 @@ The repository currently contains:
 - Platform-managed subscription plans with stable codes, immutable numbered
   versions, draft feature snapshots, integer minor-unit pricing, protected
   lifecycle APIs, optimistic concurrency, and platform audit events
+- Tenant-scoped subscription lifecycle with exact plan-version references, one
+  current subscription per tenant, idempotent transitions, forced RLS,
+  append-only event history, tenant self-read, and platform audit integration
 
 ## Authoritative References
 

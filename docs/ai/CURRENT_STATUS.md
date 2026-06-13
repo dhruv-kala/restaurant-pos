@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 28.1**
-- Current module: **Subscription Plan Management**
-- Next provisional task: **Task 28.2 - Subscription Lifecycle**
+- Completed through: **Task 28.2**
+- Current module: **Subscription Lifecycle**
+- Next provisional task: **Task 28.3 - Feature Entitlements**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -32,6 +32,7 @@ Last updated: 2026-06-13
 | 27.8 | Provider administration APIs, shared communication clients, and admin dashboard/template/history/provider screens |
 | 27.9 | Tenant/outlet communication KPIs, channel/provider performance, delivery trends, typed clients, and admin reporting |
 | 28.1 | Global versioned plan catalog, feature snapshots, immutable activated versions, platform APIs, and audit events |
+| 28.2 | Tenant subscription lifecycle, exact plan references, idempotent commands, append-only history, RLS, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -78,6 +79,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Platform-managed subscription plans with stable codes, numbered versions,
   draft-only feature editing, immutable activated snapshots, optimistic
   concurrency, lifecycle APIs, and platform audit events
+- Tenant subscription aggregates with exact plan-version references, one
+  current record per tenant, idempotent and optimistic lifecycle transitions,
+  forced RLS, immutable event history, tenant self-read, and platform-only
+  mutation
 
 ## Known Environment Limitation
 
@@ -88,18 +93,18 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 28.2 - Subscription Lifecycle
+### Task 28.3 - Feature Entitlements
 
 Read:
 
 - `docs/specifications/subscription-module.md`
-- `docs/tasks/028-subscription-module/28.2-subscription-lifecycle.md`
+- `docs/tasks/028-subscription-module/28.3-feature-entitlements.md`
 - `docs/ai/MODULE_DEPENDENCIES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement tenant subscription lifecycle and append-only history against exact
-Task 28.1 plan-version references. Do not implement Task 28.2 unless explicitly
+Implement tenant entitlement evaluation from exact subscription plan-version
+features and approved overrides. Do not implement Task 28.3 unless explicitly
 requested.
 
 ## Status Maintenance

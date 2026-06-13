@@ -232,9 +232,13 @@ Task 28.1 implemented the global subscription plan catalog, stable plan codes,
 numbered versions, draft feature snapshots, immutable activated versions,
 platform-only APIs, optimistic concurrency, and audit events.
 
-Task 28.2 is next provisionally: implement tenant subscription lifecycle and
-append-only history. Do not implement it unless the active user request
-explicitly asks for it.
+Task 28.2 implemented tenant-scoped subscription aggregates, exact plan-version
+references, idempotent lifecycle commands, optimistic concurrency, forced RLS,
+append-only transition history, platform mutation, tenant self-read, and audit
+events.
+
+Task 28.3 is next provisionally: implement feature entitlement evaluation. Do
+not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

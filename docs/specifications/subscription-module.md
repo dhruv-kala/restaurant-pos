@@ -2,8 +2,8 @@
 
 ## Status
 
-Task 28.1 Plan Management is implemented. Tasks 28.2 through 28.6 remain
-planned.
+Tasks 28.1 Plan Management and 28.2 Subscription Lifecycle are implemented.
+Tasks 28.3 through 28.6 remain planned.
 
 Task 28 is split into:
 
@@ -56,6 +56,11 @@ Draft versions are mutable with optimistic concurrency; activated versions and
 their feature snapshots are immutable. Updating an activated or deactivated
 version creates the next draft version.
 
+Task 28.2 implements tenant-scoped `TenantSubscription` current-state
+aggregates and append-only `TenantSubscriptionEvent` history. Lifecycle
+commands reference exact plan versions, use tenant-scoped idempotency keys and
+optimistic concurrency, and preserve every status and plan transition.
+
 All tenant-owned records carry tenant scope.
 
 ## Invariants
@@ -70,6 +75,9 @@ All tenant-owned records carry tenant scope.
 * Only one active version exists for each plan code.
 * Activating a replacement version deactivates the previous active version.
 * Plan prices use integer minor units and ISO currency codes.
+* Tenant subscription aggregates cannot be deleted.
+* Lifecycle events cannot be updated or deleted.
+* Only one trial, active, or suspended subscription exists per tenant.
 
 ## Authorization
 
@@ -118,8 +126,30 @@ All Task 28.1 endpoints require authenticated `SUPER_ADMIN` platform access:
 * `POST /subscriptions/plans/:id/activate`
 * `POST /subscriptions/plans/:id/deactivate`
 
-Task 28.1 does not implement tenant subscriptions, entitlement evaluation,
-usage enforcement, trials, billing, or Flutter administration.
+Task 28.1 plan endpoints do not manage tenant subscriptions. Entitlement
+evaluation, usage enforcement, trials, billing, and Flutter administration are
+outside Task 28.1.
+
+## Task 28.2 API
+
+Read endpoints are available to `SUPER_ADMIN` and the tenant's own
+`TENANT_ADMIN`. Mutation endpoints require `SUPER_ADMIN`:
+
+* `POST /subscriptions/tenants/:tenantId/activate`
+* `GET /subscriptions/tenants/:tenantId`
+* `GET /subscriptions/tenants/:tenantId/current`
+* `GET /subscriptions/tenants/:tenantId/history`
+* `GET /subscriptions/tenants/:tenantId/subscriptions/:id`
+* `POST /subscriptions/tenants/:tenantId/subscriptions/:id/upgrade`
+* `POST /subscriptions/tenants/:tenantId/subscriptions/:id/downgrade`
+* `POST /subscriptions/tenants/:tenantId/subscriptions/:id/suspend`
+* `POST /subscriptions/tenants/:tenantId/subscriptions/:id/resume`
+* `POST /subscriptions/tenants/:tenantId/subscriptions/:id/expire`
+* `POST /subscriptions/tenants/:tenantId/subscriptions/:id/cancel`
+
+`TRIAL` is represented in the lifecycle state machine, but trial creation and
+automatic expiration remain Task 28.5. Task 28.2 does not implement entitlement
+evaluation, usage enforcement, billing, or Flutter administration.
 
 ## Non-Goals
 

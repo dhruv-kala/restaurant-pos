@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 28.1 are complete at the requested foundation level.
+Tasks 1 through 28.2 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 28.2, Subscription Lifecycle, is the next provisional roadmap item. It is
+Task 28.3, Feature Entitlements, is the next provisional roadmap item. It is
 not approved for implementation until explicitly requested.
 
 ## Task History
@@ -61,6 +61,70 @@ not approved for implementation until explicitly requested.
 | 27.8. Communication Center UI | COMPLETE | Provider administration APIs, shared communication contracts, typed clients, Riverpod state, and admin dashboard/template/history/provider screens are implemented. |
 | 27.9. Communication Analytics | COMPLETE | Tenant/outlet KPIs, channel/provider delivery performance, webhook latency, trends, typed clients, and admin reporting are implemented. |
 | 28.1. Plan Management | COMPLETE | Platform-managed versioned plans, feature snapshots, immutable activated versions, protected APIs, tests, and audit events are implemented. |
+| 28.2. Subscription Lifecycle | COMPLETE | Tenant subscription aggregates, exact plan references, idempotent transitions, append-only history, RLS, tests, and audit events are implemented. |
+
+## Task 28.2 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Tenant-scoped `TenantSubscription` current-state aggregates
+- Immutable `TenantSubscriptionEvent` history with prior/new status and exact
+  prior/new plan-version references
+- `TRIAL`, `ACTIVE`, `SUSPENDED`, `EXPIRED`, and `CANCELLED` lifecycle states
+- Initial activation plus upgrade, downgrade, suspend, resume, expire, and
+  cancel commands
+- One current `TRIAL`, `ACTIVE`, or `SUSPENDED` subscription per tenant
+- Active-plan validation for initial activation and plan changes while
+  preserving already assigned historical plan references
+- Tenant-scoped idempotency keys with request fingerprints
+- Optimistic aggregate version checks and tenant advisory locking
+- Subscription period and status timestamp database constraints
+- Restrictive tenant, plan, actor, aggregate, and event foreign keys
+- Forced PostgreSQL RLS on subscription aggregates and events
+- Database triggers preventing aggregate deletion and event update/delete
+- Platform-only lifecycle mutation and tenant-admin self-read authorization
+- Tenant-scoped audit events for every lifecycle transition
+- Protected list, current, detail, history, activation, plan-change, status,
+  expiration, and cancellation APIs
+- API, module, specification, roadmap, and AI-context documentation
+- Focused schema, access, transition, idempotency, and validation tests
+
+Decisions:
+
+- Tenant subscriptions reference exact Task 28.1 plan-version IDs.
+- Upgrade and downgrade are explicit platform intent rather than price-derived
+  classifications because currencies and billing intervals are not directly
+  comparable.
+- Plan changes are allowed only while the subscription is active.
+- `TRIAL` is included in the lifecycle state machine, but trial creation and
+  automatic expiration remain Task 28.5.
+- Entitlement evaluation, usage enforcement, billing, shared Flutter
+  contracts, and administration UI remain out of scope.
+
+Validation:
+
+- Backend `npm run prisma:format`: passed
+- Backend `npm run prisma:validate`: passed
+- Backend `npm run prisma:generate`: passed
+- Backend `npm run lint`: passed
+- Backend `npm run build`: passed
+- Backend `npm run test -- --runInBand`: passed, 252 tests
+- Backend `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Seed TypeScript compile: passed
+- Focused subscription tests: passed, 22 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitation:
+
+- The migration was not deployed because the recorded local PostgreSQL
+  credentials remain unavailable. Prisma validation and schema contract tests
+  passed.
+
+Next task:
+
+- Task 28.3 Feature Entitlements, only when explicitly requested.
 
 ## Task 28.1 Completion
 
