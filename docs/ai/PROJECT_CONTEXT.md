@@ -367,6 +367,9 @@ The repository currently contains:
 - Tenant-scoped subscription lifecycle with exact plan-version references, one
   current subscription per tenant, idempotent transitions, forced RLS,
   append-only event history, tenant self-read, and platform audit integration
+- Tenant feature entitlement evaluation with exact plan-version baselines,
+  effective-dated override precedence, fail-closed subscription eligibility,
+  reusable NestJS guard/decorator enforcement, and audited administration
 
 ## Authoritative References
 

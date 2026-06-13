@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 28.2 are complete at the requested foundation level.
+Tasks 1 through 28.3 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 28.3, Feature Entitlements, is the next provisional roadmap item. It is
+Task 28.4, Usage Limits, is the next provisional roadmap item. It is
 not approved for implementation until explicitly requested.
 
 ## Task History
@@ -62,6 +62,50 @@ not approved for implementation until explicitly requested.
 | 27.9. Communication Analytics | COMPLETE | Tenant/outlet KPIs, channel/provider delivery performance, webhook latency, trends, typed clients, and admin reporting are implemented. |
 | 28.1. Plan Management | COMPLETE | Platform-managed versioned plans, feature snapshots, immutable activated versions, protected APIs, tests, and audit events are implemented. |
 | 28.2. Subscription Lifecycle | COMPLETE | Tenant subscription aggregates, exact plan references, idempotent transitions, append-only history, RLS, tests, and audit events are implemented. |
+| 28.3. Feature Entitlements | COMPLETE | Tenant overrides, exact plan-version evaluation, fail-closed subscription checks, reusable enforcement, RLS, tests, and audit events are implemented. |
+
+## Task 28.3 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Tenant-scoped `TenantEntitlement` records with unique feature overrides
+- Exact subscribed plan-version features as the baseline entitlement source
+- Active, effective-dated override precedence over plan features
+- Fail-closed access for missing, suspended, expired, cancelled, future, or
+  ended subscriptions
+- Explicit override revocation with plan fallback and delete prevention
+- Optional limit metadata reserved for Task 28.4 enforcement
+- Tenant-scoped idempotency keys, request fingerprints, advisory locks, and
+  optimistic versions
+- Forced PostgreSQL RLS and restrictive tenant/user foreign keys
+- `TenantEntitlementsService` for administration and trusted actor evaluation
+- `@RequiresEntitlement()` and `EntitlementGuard` for business route
+  enforcement
+- Platform-only mutation, tenant-admin self-read, and platform support bypass
+- Audited create, update, and revoke operations
+- Protected list, evaluate, upsert, and revoke APIs
+- API, module, specification, roadmap, and AI-context documentation
+- Focused schema, precedence, fail-closed, actor-enforcement, and guard tests
+
+Decisions:
+
+- Overrides cannot grant features unless the tenant has a current, in-period
+  `ACTIVE` or `TRIAL` subscription.
+- Existing business modules were not gated en masse because existing tenants
+  have not yet been migrated to subscription records; the reusable enforcement
+  boundary is ready for deliberate rollout.
+- Usage consumption and counters remain Task 28.4.
+
+Validation:
+
+- `npm run prisma:generate`: passed
+- `npm run prisma:validate`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm test -- --runInBand`: passed, 77 suites and 263 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
 
 ## Task 28.2 Completion
 

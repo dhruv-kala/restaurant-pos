@@ -237,8 +237,14 @@ references, idempotent lifecycle commands, optimistic concurrency, forced RLS,
 append-only transition history, platform mutation, tenant self-read, and audit
 events.
 
-Task 28.3 is next provisionally: implement feature entitlement evaluation. Do
-not implement it unless the active user request explicitly asks for it.
+Task 28.3 implemented tenant-scoped feature overrides, exact plan-version
+baseline evaluation, active override precedence, subscription eligibility,
+fail-closed access, reusable NestJS guard/decorator enforcement, forced RLS,
+optimistic/idempotent administration, and audit events.
+
+Task 28.4 is next provisionally: implement centralized usage limits and
+counters. Do not implement it unless the active user request explicitly asks
+for it.
 
 ## Working Practices
 

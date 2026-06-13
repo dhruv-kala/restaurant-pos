@@ -23,7 +23,7 @@ loading the complete enterprise design.
 - `audit-module.md`
 - `notification-module.md`
 - `communication-module.md` (Tasks 27.1-27.9 implemented)
-- `subscription-module.md` (Tasks 28.1-28.2 implemented; later subtasks planned)
+- `subscription-module.md` (Tasks 28.1-28.3 implemented; later subtasks planned)
 
 ## Planned Modules
 

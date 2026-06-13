@@ -30,8 +30,8 @@ Last updated: 2026-06-13
 | 27.9 | COMPLETE | Communication analytics |
 | 28.1 | COMPLETE | Platform-managed versioned subscription plans and feature snapshots |
 | 28.2 | COMPLETE | Tenant subscription lifecycle and append-only history |
-| 28.3 | NEXT | Feature entitlement evaluation |
-| 28.4 | PLANNED | Usage limits and counters |
+| 28.3 | COMPLETE | Feature entitlement evaluation and enforcement boundary |
+| 28.4 | NEXT | Usage limits and counters |
 | 28.5 | PLANNED | Trial management |
 | 28.6 | PLANNED | Subscription administration UI |
 | 29 | PLANNED | Promotions, coupons, and discount policy engine |

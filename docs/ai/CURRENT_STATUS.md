@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 28.2**
-- Current module: **Subscription Lifecycle**
-- Next provisional task: **Task 28.3 - Feature Entitlements**
+- Completed through: **Task 28.3**
+- Current module: **Feature Entitlements**
+- Next provisional task: **Task 28.4 - Usage Limits**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -33,6 +33,7 @@ Last updated: 2026-06-13
 | 27.9 | Tenant/outlet communication KPIs, channel/provider performance, delivery trends, typed clients, and admin reporting |
 | 28.1 | Global versioned plan catalog, feature snapshots, immutable activated versions, platform APIs, and audit events |
 | 28.2 | Tenant subscription lifecycle, exact plan references, idempotent commands, append-only history, RLS, and audit events |
+| 28.3 | Tenant feature overrides, fail-closed evaluation, route guard/decorator enforcement, RLS, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -83,6 +84,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   current record per tenant, idempotent and optimistic lifecycle transitions,
   forced RLS, immutable event history, tenant self-read, and platform-only
   mutation
+- Tenant feature entitlement evaluation with exact plan-version baselines,
+  effective-dated override precedence, subscription eligibility checks,
+  fail-closed results, forced RLS, audited mutation, and a reusable NestJS
+  guard/decorator contract
 
 ## Known Environment Limitation
 
@@ -93,19 +98,18 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 28.3 - Feature Entitlements
+### Task 28.4 - Usage Limits
 
 Read:
 
 - `docs/specifications/subscription-module.md`
-- `docs/tasks/028-subscription-module/28.3-feature-entitlements.md`
+- `docs/tasks/028-subscription-module/28.4-usage-limits.md`
 - `docs/ai/MODULE_DEPENDENCIES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement tenant entitlement evaluation from exact subscription plan-version
-features and approved overrides. Do not implement Task 28.3 unless explicitly
-requested.
+Implement centralized usage counters and limit enforcement against effective
+entitlements. Do not implement Task 28.4 unless explicitly requested.
 
 ## Status Maintenance
 

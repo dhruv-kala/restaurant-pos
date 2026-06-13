@@ -2,8 +2,8 @@
 
 ## Status
 
-Tasks 28.1 Plan Management and 28.2 Subscription Lifecycle are implemented.
-Tasks 28.3 through 28.6 remain planned.
+Tasks 28.1 Plan Management, 28.2 Subscription Lifecycle, and 28.3 Feature
+Entitlements are implemented. Tasks 28.4 through 28.6 remain planned.
 
 Task 28 is split into:
 
@@ -61,6 +61,11 @@ aggregates and append-only `TenantSubscriptionEvent` history. Lifecycle
 commands reference exact plan versions, use tenant-scoped idempotency keys and
 optimistic concurrency, and preserve every status and plan transition.
 
+Task 28.3 implements tenant-scoped `TenantEntitlement` overrides and one
+authoritative evaluation service. Exact subscribed plan-version features form
+the baseline, active overrides take precedence, and access fails closed unless
+the tenant has a current, in-period `ACTIVE` or `TRIAL` subscription.
+
 All tenant-owned records carry tenant scope.
 
 ## Invariants
@@ -78,6 +83,10 @@ All tenant-owned records carry tenant scope.
 * Tenant subscription aggregates cannot be deleted.
 * Lifecycle events cannot be updated or deleted.
 * Only one trial, active, or suspended subscription exists per tenant.
+* Tenant overrides cannot grant access without an eligible subscription.
+* Active tenant overrides take precedence over exact plan-version features.
+* Missing feature keys fail closed.
+* Entitlement records are revoked instead of deleted.
 
 ## Authorization
 
@@ -150,6 +159,24 @@ Read endpoints are available to `SUPER_ADMIN` and the tenant's own
 `TRIAL` is represented in the lifecycle state machine, but trial creation and
 automatic expiration remain Task 28.5. Task 28.2 does not implement entitlement
 evaluation, usage enforcement, billing, or Flutter administration.
+
+## Task 28.3 API
+
+Read endpoints are available to `SUPER_ADMIN` and the tenant's own
+`TENANT_ADMIN`. Mutation endpoints require `SUPER_ADMIN`:
+
+* `GET /subscriptions/tenants/:tenantId/entitlements`
+* `GET /subscriptions/tenants/:tenantId/entitlements/:featureKey`
+* `PUT /subscriptions/tenants/:tenantId/entitlements/:featureKey`
+* `POST /subscriptions/tenants/:tenantId/entitlements/:featureKey/revoke`
+
+Business modules enforce access through `TenantEntitlementsService`,
+`@RequiresEntitlement()`, and `EntitlementGuard`. Platform administrators may
+bypass feature gates for support operations. Ordinary tenant actors are always
+evaluated against their trusted authentication tenant.
+
+Task 28.3 stores optional `limitValue` metadata but does not consume or enforce
+quotas. Central usage counters remain Task 28.4.
 
 ## Non-Goals
 

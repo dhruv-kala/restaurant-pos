@@ -746,6 +746,7 @@ model Tenant {
   communicationWebhooks         CommunicationWebhook[]
   subscriptions                 TenantSubscription[]
   subscriptionEvents            TenantSubscriptionEvent[]
+  entitlements                  TenantEntitlement[]
 
   @@index([status])
   @@index([deletedAt])
@@ -885,6 +886,8 @@ model UserAccount {
   createdTenantSubscriptions           TenantSubscription[]           @relation("TenantSubscriptionCreatedBy")
   updatedTenantSubscriptions           TenantSubscription[]           @relation("TenantSubscriptionUpdatedBy")
   tenantSubscriptionEvents             TenantSubscriptionEvent[]      @relation("TenantSubscriptionEventActor")
+  createdTenantEntitlements            TenantEntitlement[]            @relation("TenantEntitlementCreatedBy")
+  updatedTenantEntitlements            TenantEntitlement[]            @relation("TenantEntitlementUpdatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -2812,6 +2815,36 @@ model TenantSubscriptionEvent {
   @@index([tenantId, subscriptionId, occurredAt], map: "tenant_subscription_events_history_idx")
   @@index([tenantId, eventType, occurredAt], map: "tenant_subscription_events_type_idx")
   @@map("tenant_subscription_events")
+}
+
+model TenantEntitlement {
+  id                     String    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId               String    @map("tenant_id") @db.Uuid
+  featureKey             String    @map("feature_key") @db.VarChar(120)
+  isEnabled              Boolean   @map("is_enabled")
+  limitValue             Int?      @map("limit_value")
+  metadata               Json?     @db.JsonB
+  reason                 String    @db.VarChar(500)
+  effectiveFrom          DateTime  @default(now()) @map("effective_from") @db.Timestamptz(3)
+  effectiveTo            DateTime? @map("effective_to") @db.Timestamptz(3)
+  revokedAt              DateTime? @map("revoked_at") @db.Timestamptz(3)
+  createdByUserId        String    @map("created_by_user_id") @db.Uuid
+  updatedByUserId        String    @map("updated_by_user_id") @db.Uuid
+  lastIdempotencyKey     String    @map("last_idempotency_key") @db.VarChar(160)
+  lastRequestFingerprint String    @map("last_request_fingerprint") @db.Char(64)
+  version                Int       @default(1)
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  createdBy UserAccount @relation("TenantEntitlementCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy UserAccount @relation("TenantEntitlementUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "tenant_entitlements_tenant_id_id_key")
+  @@unique([tenantId, featureKey], map: "tenant_entitlements_tenant_feature_key")
+  @@unique([tenantId, lastIdempotencyKey], map: "tenant_entitlements_idempotency_key")
+  @@index([tenantId, revokedAt, effectiveFrom, effectiveTo], map: "tenant_entitlements_effective_idx")
+  @@map("tenant_entitlements")
 }
 
 model EmployeeProfile {
