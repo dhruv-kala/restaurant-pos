@@ -2,9 +2,9 @@
 
 ## Status
 
-Tasks 27.1 through 27.8 are implemented, including templates, SMTP email,
+Tasks 27.1 through 27.9 are implemented, including templates, SMTP email,
 Twilio SMS and WhatsApp, Firebase push, verified webhook delivery tracking, and
-the tenant admin Communication Center. Task 27.9 remains planned.
+the tenant admin Communication Center with operational analytics.
 
 Task 27 is split into:
 
@@ -113,6 +113,12 @@ history, delivery attempts, and provider configuration. Provider credentials
 remain environment references; metadata containing embedded credential values
 is rejected.
 
+Task 27.9 implements tenant/outlet-scoped communication analytics over
+immutable message and webhook history. It provides bounded UTC date filtering,
+daily/weekly/monthly trends, terminal delivery success/failure rates, channel
+volume and latency, and provider delivery/webhook performance through protected
+APIs and the admin Communication Center.
+
 ## Invariants
 
 * Business modules never call external providers directly.
@@ -152,6 +158,7 @@ Implemented permission keys use lowercase names:
 * `communication.template_manage`
 * `communication.provider_view`
 * `communication.provider_manage`
+* `communication.analytics_view`
 * `communication.history_view`
 
 ## API
@@ -187,12 +194,20 @@ Webhook Processing:
 
 * `POST /communication/webhooks/:provider`
 
+Communication Analytics:
+
+* `GET /communication/analytics`
+* `GET /communication/analytics/summary`
+* `GET /communication/analytics/channels`
+* `GET /communication/analytics/providers`
+* `GET /communication/analytics/trends`
+
 Administrative Actions:
 
 * `POST /communication/messages/:id/resend`
 
-The listed provider, template, history, push-device, attempt, and webhook
-endpoints are available through Task 27.8. Resend remains deferred.
+The listed provider, template, history, push-device, attempt, webhook, and
+analytics endpoints are available through Task 27.9. Resend remains deferred.
 
 ## Flutter
 
@@ -214,9 +229,8 @@ Shared:
 * typed Dio client
 * Riverpod providers
 
-The Task 27.8 dashboard derives current totals from authorized paginated message
-queries. Delivery trends, provider performance, and dedicated reporting APIs
-remain Task 27.9.
+The Communication Center dashboard consumes the dedicated Task 27.9 analytics
+API and supports UTC date ranges plus daily, weekly, and monthly trends.
 
 ## Delivery Channels
 

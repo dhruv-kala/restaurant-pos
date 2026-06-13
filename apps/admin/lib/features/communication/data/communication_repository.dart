@@ -41,30 +41,8 @@ class CommunicationRepository {
   Future<List<CommunicationAttempt>> attempts(String messageId) =>
       _api.getMessageAttempts(messageId);
 
-  Future<CommunicationDashboardSummary> dashboard() async {
-    final results = await Future.wait([
-      _api.getMessages(limit: 1, status: CommunicationMessageStatus.sent),
-      _api.getMessages(limit: 1, status: CommunicationMessageStatus.delivered),
-      _api.getMessages(limit: 1, status: CommunicationMessageStatus.read),
-      _api.getMessages(limit: 1, status: CommunicationMessageStatus.failed),
-      ...CommunicationChannel.values.map(
-        (channel) => _api.getMessages(limit: 1, channel: channel),
-      ),
-    ]);
-    final channelUsage = <CommunicationChannel, int>{};
-    for (var index = 0; index < CommunicationChannel.values.length; index++) {
-      channelUsage[CommunicationChannel.values[index]] =
-          results[index + 4].meta.total;
-    }
-    return CommunicationDashboardSummary(
-      totalMessages:
-          results[0].meta.total +
-          results[1].meta.total +
-          results[2].meta.total +
-          results[3].meta.total,
-      successfulMessages: results[1].meta.total + results[2].meta.total,
-      failedMessages: results[3].meta.total,
-      channelUsage: channelUsage,
-    );
-  }
+  Future<CommunicationAnalyticsReport> analytics(
+    CommunicationAnalyticsQuery query,
+  ) =>
+      _api.getAnalytics(from: query.from, to: query.to, groupBy: query.groupBy);
 }

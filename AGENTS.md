@@ -224,8 +224,13 @@ secret references, shared communication models and clients, Riverpod state,
 and the admin Communication Center for dashboard totals, templates, message
 history, delivery attempts, and provider configuration.
 
-Task 27.9 is next provisionally: implement Communication Analytics.
-Do not implement it unless the active user request explicitly asks for it.
+Task 27.9 implemented tenant/outlet-scoped communication KPIs, bounded UTC
+report ranges, daily/weekly/monthly trends, channel and provider performance,
+delivery and webhook latency, typed clients, and admin reporting controls.
+
+Task 28 is next provisionally: implement SaaS Plans, Subscriptions,
+Entitlements, and Limits. Do not implement it unless the active user request
+explicitly asks for it.
 
 ## Working Practices
 

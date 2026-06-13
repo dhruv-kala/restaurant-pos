@@ -19,6 +19,8 @@ class CommunicationCenterScreen extends ConsumerWidget {
         user?.hasRole(UserRole.tenantAdmin) == true;
     final canViewHistory =
         isAdmin || user?.hasPermission('communication.history_view') == true;
+    final canViewAnalytics =
+        isAdmin || user?.hasPermission('communication.analytics_view') == true;
     final canViewTemplates =
         isAdmin ||
         user?.hasPermission('communication.template_view') == true ||
@@ -28,7 +30,7 @@ class CommunicationCenterScreen extends ConsumerWidget {
         user?.hasPermission('communication.provider_view') == true ||
         user?.hasPermission('communication.provider_manage') == true;
     final tabs = <Tab>[
-      if (canViewHistory)
+      if (canViewAnalytics)
         const Tab(icon: Icon(Icons.dashboard_outlined), text: 'Dashboard'),
       if (canViewTemplates)
         const Tab(icon: Icon(Icons.article_outlined), text: 'Templates'),
@@ -37,7 +39,7 @@ class CommunicationCenterScreen extends ConsumerWidget {
         const Tab(icon: Icon(Icons.hub_outlined), text: 'Providers'),
     ];
     final views = <Widget>[
-      if (canViewHistory) const CommunicationDashboardScreen(),
+      if (canViewAnalytics) const CommunicationDashboardScreen(),
       if (canViewTemplates) const CommunicationTemplatesScreen(),
       if (canViewHistory) const CommunicationHistoryScreen(),
       if (canViewProviders) const CommunicationProvidersScreen(),

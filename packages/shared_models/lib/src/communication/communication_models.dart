@@ -101,6 +101,24 @@ enum CommunicationAttemptStatus {
   };
 }
 
+enum CommunicationAnalyticsGroup {
+  day,
+  week,
+  month;
+
+  factory CommunicationAnalyticsGroup.fromJson(Object? value) =>
+      switch (value) {
+        'DAY' => CommunicationAnalyticsGroup.day,
+        'WEEK' => CommunicationAnalyticsGroup.week,
+        'MONTH' => CommunicationAnalyticsGroup.month,
+        _ => throw FormatException(
+          'Unsupported communication analytics group: $value',
+        ),
+      };
+
+  String get wireName => name.toUpperCase();
+}
+
 class CommunicationProvider {
   const CommunicationProvider({
     required this.id,
@@ -435,6 +453,177 @@ class CommunicationMessage {
   final DateTime updatedAt;
 }
 
+class CommunicationAnalyticsScope {
+  const CommunicationAnalyticsScope({
+    required this.tenantId,
+    required this.from,
+    required this.to,
+    required this.groupBy,
+    this.outletId,
+  });
+
+  factory CommunicationAnalyticsScope.fromJson(Map<String, dynamic> json) =>
+      CommunicationAnalyticsScope(
+        tenantId: _requiredString(json, 'tenantId'),
+        outletId: json['outletId']?.toString(),
+        from: _date(json, 'from'),
+        to: _date(json, 'to'),
+        groupBy: CommunicationAnalyticsGroup.fromJson(json['groupBy']),
+      );
+
+  final String tenantId;
+  final String? outletId;
+  final DateTime from;
+  final DateTime to;
+  final CommunicationAnalyticsGroup groupBy;
+}
+
+class CommunicationDeliveryMetrics {
+  const CommunicationDeliveryMetrics({
+    required this.totalMessages,
+    required this.deliveredMessages,
+    required this.failedMessages,
+    required this.pendingMessages,
+    required this.cancelledMessages,
+    required this.successRate,
+    required this.failureRate,
+  });
+
+  factory CommunicationDeliveryMetrics.fromJson(Map<String, dynamic> json) =>
+      CommunicationDeliveryMetrics(
+        totalMessages: _requiredInt(json, 'totalMessages'),
+        deliveredMessages: _requiredInt(json, 'deliveredMessages'),
+        failedMessages: _requiredInt(json, 'failedMessages'),
+        pendingMessages: _requiredInt(json, 'pendingMessages'),
+        cancelledMessages: _requiredInt(json, 'cancelledMessages'),
+        successRate: _requiredDouble(json, 'successRate'),
+        failureRate: _requiredDouble(json, 'failureRate'),
+      );
+
+  final int totalMessages;
+  final int deliveredMessages;
+  final int failedMessages;
+  final int pendingMessages;
+  final int cancelledMessages;
+  final double successRate;
+  final double failureRate;
+}
+
+class CommunicationChannelAnalytics {
+  const CommunicationChannelAnalytics({
+    required this.channel,
+    required this.metrics,
+    this.averageDeliveryTimeMs,
+  });
+
+  factory CommunicationChannelAnalytics.fromJson(Map<String, dynamic> json) =>
+      CommunicationChannelAnalytics(
+        channel: CommunicationChannel.fromJson(json['channel']),
+        metrics: CommunicationDeliveryMetrics.fromJson(json),
+        averageDeliveryTimeMs: _optionalDouble(json['averageDeliveryTimeMs']),
+      );
+
+  final CommunicationChannel channel;
+  final CommunicationDeliveryMetrics metrics;
+  final double? averageDeliveryTimeMs;
+}
+
+class CommunicationProviderAnalytics {
+  const CommunicationProviderAnalytics({
+    required this.id,
+    required this.channel,
+    required this.providerKey,
+    required this.displayName,
+    required this.status,
+    required this.metrics,
+    this.averageDeliveryTimeMs,
+    this.averageWebhookLatencyMs,
+  });
+
+  factory CommunicationProviderAnalytics.fromJson(Map<String, dynamic> json) =>
+      CommunicationProviderAnalytics(
+        id: _requiredString(json, 'id'),
+        channel: CommunicationChannel.fromJson(json['channel']),
+        providerKey: _requiredString(json, 'providerKey'),
+        displayName: _requiredString(json, 'displayName'),
+        status: CommunicationProviderStatus.fromJson(json['status']),
+        metrics: CommunicationDeliveryMetrics.fromJson(json),
+        averageDeliveryTimeMs: _optionalDouble(json['averageDeliveryTimeMs']),
+        averageWebhookLatencyMs: _optionalDouble(
+          json['averageWebhookLatencyMs'],
+        ),
+      );
+
+  final String id;
+  final CommunicationChannel channel;
+  final String providerKey;
+  final String displayName;
+  final CommunicationProviderStatus status;
+  final CommunicationDeliveryMetrics metrics;
+  final double? averageDeliveryTimeMs;
+  final double? averageWebhookLatencyMs;
+}
+
+class CommunicationTrendPoint {
+  const CommunicationTrendPoint({
+    required this.periodStart,
+    required this.totalMessages,
+    required this.deliveredMessages,
+    required this.failedMessages,
+    required this.successRate,
+  });
+
+  factory CommunicationTrendPoint.fromJson(Map<String, dynamic> json) =>
+      CommunicationTrendPoint(
+        periodStart: _date(json, 'periodStart'),
+        totalMessages: _requiredInt(json, 'totalMessages'),
+        deliveredMessages: _requiredInt(json, 'deliveredMessages'),
+        failedMessages: _requiredInt(json, 'failedMessages'),
+        successRate: _requiredDouble(json, 'successRate'),
+      );
+
+  final DateTime periodStart;
+  final int totalMessages;
+  final int deliveredMessages;
+  final int failedMessages;
+  final double successRate;
+}
+
+class CommunicationAnalyticsReport {
+  const CommunicationAnalyticsReport({
+    required this.scope,
+    required this.summary,
+    required this.channels,
+    required this.providers,
+    required this.trends,
+  });
+
+  factory CommunicationAnalyticsReport.fromJson(Map<String, dynamic> json) =>
+      CommunicationAnalyticsReport(
+        scope: CommunicationAnalyticsScope.fromJson(
+          _requiredMap(json, 'scope'),
+        ),
+        summary: CommunicationDeliveryMetrics.fromJson(
+          _requiredMap(json, 'summary'),
+        ),
+        channels: _mapList(
+          json['channels'],
+        ).map(CommunicationChannelAnalytics.fromJson).toList(growable: false),
+        providers: _mapList(
+          json['providers'],
+        ).map(CommunicationProviderAnalytics.fromJson).toList(growable: false),
+        trends: _mapList(
+          json['trends'],
+        ).map(CommunicationTrendPoint.fromJson).toList(growable: false),
+      );
+
+  final CommunicationAnalyticsScope scope;
+  final CommunicationDeliveryMetrics summary;
+  final List<CommunicationChannelAnalytics> channels;
+  final List<CommunicationProviderAnalytics> providers;
+  final List<CommunicationTrendPoint> trends;
+}
+
 String _requiredString(Map<String, dynamic> json, String key) {
   final value = json[key];
   if (value is String && value.isNotEmpty) return value;
@@ -446,6 +635,15 @@ int _requiredInt(Map<String, dynamic> json, String key) {
   if (value is int) return value;
   throw FormatException('Expected an integer for "$key".');
 }
+
+double _requiredDouble(Map<String, dynamic> json, String key) {
+  final value = json[key];
+  if (value is num) return value.toDouble();
+  throw FormatException('Expected a number for "$key".');
+}
+
+double? _optionalDouble(Object? value) =>
+    value is num ? value.toDouble() : null;
 
 DateTime _date(Map<String, dynamic> json, String key) =>
     DateTime.parse(_requiredString(json, key)).toUtc();

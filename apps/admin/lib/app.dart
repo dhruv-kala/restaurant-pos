@@ -56,6 +56,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasRole(UserRole.superAdmin) == true ||
         user?.hasRole(UserRole.tenantAdmin) == true ||
         user?.hasPermission('communication.history_view') == true ||
+        user?.hasPermission('communication.analytics_view') == true ||
         user?.hasPermission('communication.template_view') == true ||
         user?.hasPermission('communication.template_manage') == true ||
         user?.hasPermission('communication.provider_view') == true ||

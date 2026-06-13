@@ -441,7 +441,7 @@ class _CommunicationTemplatesScreenState
         );
       }
       ref.invalidate(communicationTemplatesProvider);
-      ref.invalidate(communicationDashboardProvider);
+      ref.invalidate(communicationAnalyticsProvider);
     } catch (error) {
       _showError(error);
     }

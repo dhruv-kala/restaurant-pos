@@ -260,6 +260,27 @@ class CommunicationApiService {
         )
         .toList(growable: false);
   }
+
+  Future<CommunicationAnalyticsReport> getAnalytics({
+    String? tenantId,
+    String? outletId,
+    DateTime? from,
+    DateTime? to,
+    CommunicationAnalyticsGroup groupBy = CommunicationAnalyticsGroup.day,
+  }) async => CommunicationAnalyticsReport.fromJson(
+    _map(
+      await _dio.get<Object?>(
+        ApiEndpoints.communicationAnalytics,
+        queryParameters: {
+          if (tenantId != null) 'tenantId': tenantId,
+          if (outletId != null) 'outletId': outletId,
+          if (from != null) 'from': from.toUtc().toIso8601String(),
+          if (to != null) 'to': to.toUtc().toIso8601String(),
+          'groupBy': groupBy.wireName,
+        },
+      ),
+    ),
+  );
 }
 
 Map<String, dynamic> _map(Response<Object?> response) {

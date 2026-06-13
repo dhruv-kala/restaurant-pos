@@ -42,6 +42,7 @@ abstract final class ApiEndpoints {
   static const String communicationProviders = '$communication/providers';
   static const String communicationTemplates = '$communication/templates';
   static const String communicationMessages = '$communication/messages';
+  static const String communicationAnalytics = '$communication/analytics';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 

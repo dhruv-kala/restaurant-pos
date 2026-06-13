@@ -11,12 +11,13 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 27.8 are complete at the requested foundation level.
+Tasks 1 through 27.9 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27.9, Communication Analytics, is the next provisional roadmap item. It is
+Task 28, SaaS Plans, Subscriptions, Entitlements, and Limits, is the next
+provisional roadmap item. It is
 not approved for implementation until explicitly requested.
 
 ## Task History
@@ -59,6 +60,75 @@ not approved for implementation until explicitly requested.
 | 27.6. Push Notification Delivery | COMPLETE | FCM HTTP v1 delivery, encrypted tenant/user devices, invalid-token deactivation, attempts/status, and audit events are implemented. |
 | 27.7. Webhooks and Delivery Tracking | COMPLETE | Verified Twilio and provider-neutral callbacks, immutable idempotent webhook events, centralized delivery synchronization, and audit events are implemented. |
 | 27.8. Communication Center UI | COMPLETE | Provider administration APIs, shared communication contracts, typed clients, Riverpod state, and admin dashboard/template/history/provider screens are implemented. |
+| 27.9. Communication Analytics | COMPLETE | Tenant/outlet KPIs, channel/provider delivery performance, webhook latency, trends, typed clients, and admin reporting are implemented. |
+
+## Task 27.9 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Protected `GET /communication/analytics` aggregate report
+- Focused summary, channel, provider, and trend analytics endpoints
+- Tenant and optional outlet isolation using trusted authentication context,
+  tenant-aware filtering, and forced RLS
+- Explicit `communication.analytics_view` permission, increasing the current
+  permission catalog to 191 entries
+- Default rolling 30-day reporting and a maximum 366-day UTC range
+- Daily, weekly, and monthly UTC trend buckets
+- Total, delivered/read, failed, pending, and cancelled message KPIs
+- Terminal delivery success and failure rates that exclude non-terminal states
+- Per-channel volume, delivery success/failure, and average delivery latency
+- Per-provider volume, final outcome rates, average delivery latency, and
+  immutable webhook processing latency
+- Database-side aggregation without loading communication history into memory
+- Shared Dart analytics scope, metric, channel, provider, and trend contracts
+- Typed Dio analytics client and Riverpod family provider keyed by report range
+- Admin date controls, trend grouping, KPI cards, channel performance,
+  provider performance, latency display, and delivery trend visualization
+- Focused analytics authorization, aggregation, range, and dashboard widget
+  regression tests
+
+Decisions:
+
+- `DELIVERED` and `READ` are terminal successes; `FAILED` is terminal failure.
+  Success/failure rates exclude queued, processing, sent, and cancelled records.
+- Delivery latency measures non-negative time from provider acceptance
+  (`sentAt`) to confirmed delivery (`deliveredAt`).
+- Webhook latency measures non-negative provider event occurrence to local
+  processing using immutable webhook timestamps.
+- Trend buckets use UTC to avoid deployment/session timezone differences.
+- Analytics remain live database aggregates. Materialized facts, scheduled
+  rollups, exports, campaign attribution, and AI recommendations are out of
+  scope.
+
+Validation:
+
+- Backend `npm run lint`: passed
+- Backend `npm run build`: passed
+- Backend `npm run test -- --runInBand`: passed, 230 tests
+- Backend `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Seed TypeScript compile: passed
+- Focused communication analytics tests: passed, 4 tests
+- Shared models `flutter analyze`: passed
+- API client `flutter analyze`: passed
+- Admin `flutter analyze`: passed
+- Admin `flutter test`: passed, 2 tests
+- Admin `flutter build web`: passed
+- In-app browser smoke check of the compiled admin web build: passed
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- Live database aggregation was not exercised because the existing local
+  PostgreSQL configuration remains unavailable.
+- The Flutter web build continues to report the pre-existing Socket.IO
+  WebAssembly compatibility warning; the JavaScript web build succeeds.
+
+Next task:
+
+- Task 28 SaaS Plans, Subscriptions, Entitlements, and Limits, only when
+  explicitly requested.
 
 ## Task 27.8 Completion
 
@@ -443,7 +513,7 @@ Decisions:
 - Durable attachment storage/retrieval remains deferred because the approved
   file-storage abstraction is Task 35.
 - SendGrid, Mailgun, and Amazon SES remain future adapters.
-- The permission catalog now contains 190 permissions; historical task counts
+- The permission catalog now contains 191 permissions; historical task counts
   remain unchanged.
 
 Validation:

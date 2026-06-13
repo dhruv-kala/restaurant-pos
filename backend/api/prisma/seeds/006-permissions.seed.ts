@@ -102,6 +102,7 @@ const moduleActions: Record<string, readonly string[]> = {
     'template_manage',
     'provider_view',
     'provider_manage',
+    'analytics_view',
     'history_view',
     'send',
   ],

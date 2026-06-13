@@ -86,21 +86,42 @@ class CommunicationMessageQuery {
   int get hashCode => Object.hash(page, limit, channel, status, search);
 }
 
-class CommunicationDashboardSummary {
-  const CommunicationDashboardSummary({
-    required this.totalMessages,
-    required this.successfulMessages,
-    required this.failedMessages,
-    required this.channelUsage,
+class CommunicationAnalyticsQuery {
+  const CommunicationAnalyticsQuery({
+    required this.from,
+    required this.to,
+    this.groupBy = CommunicationAnalyticsGroup.day,
   });
 
-  final int totalMessages;
-  final int successfulMessages;
-  final int failedMessages;
-  final Map<CommunicationChannel, int> channelUsage;
-
-  double get successRate {
-    final terminalMessages = successfulMessages + failedMessages;
-    return terminalMessages == 0 ? 0 : successfulMessages / terminalMessages;
+  factory CommunicationAnalyticsQuery.last30Days() {
+    final to = DateTime.now().toUtc();
+    return CommunicationAnalyticsQuery(
+      from: to.subtract(const Duration(days: 29)),
+      to: to,
+    );
   }
+
+  final DateTime from;
+  final DateTime to;
+  final CommunicationAnalyticsGroup groupBy;
+
+  CommunicationAnalyticsQuery copyWith({
+    DateTime? from,
+    DateTime? to,
+    CommunicationAnalyticsGroup? groupBy,
+  }) => CommunicationAnalyticsQuery(
+    from: from ?? this.from,
+    to: to ?? this.to,
+    groupBy: groupBy ?? this.groupBy,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is CommunicationAnalyticsQuery &&
+      other.from == from &&
+      other.to == to &&
+      other.groupBy == groupBy;
+
+  @override
+  int get hashCode => Object.hash(from, to, groupBy);
 }

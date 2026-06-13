@@ -12,9 +12,10 @@ final communicationApiServiceProvider = Provider<CommunicationApiService>(
 final communicationRepositoryProvider = Provider<CommunicationRepository>(
   (ref) => CommunicationRepository(ref.watch(communicationApiServiceProvider)),
 );
-final communicationDashboardProvider =
-    FutureProvider.autoDispose<CommunicationDashboardSummary>(
-      (ref) => ref.watch(communicationRepositoryProvider).dashboard(),
+final communicationAnalyticsProvider = FutureProvider.autoDispose
+    .family<CommunicationAnalyticsReport, CommunicationAnalyticsQuery>(
+      (ref, query) =>
+          ref.watch(communicationRepositoryProvider).analytics(query),
     );
 final communicationTemplatesProvider = FutureProvider.autoDispose
     .family<

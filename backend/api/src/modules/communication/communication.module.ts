@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { CommunicationMessagesController } from './controllers/communication-messages.controller';
+import { CommunicationAnalyticsController } from './controllers/communication-analytics.controller';
 import { CommunicationProvidersController } from './controllers/communication-providers.controller';
 import { CommunicationTemplatesController } from './controllers/communication-templates.controller';
 import { CommunicationWebhooksController } from './controllers/communication-webhooks.controller';
@@ -13,6 +14,7 @@ import { TwilioMessagesClient } from './providers/twilio-messages.client';
 import { TwilioSmsProviderAdapter } from './providers/twilio-sms-provider.adapter';
 import { TwilioWhatsAppProviderAdapter } from './providers/twilio-whatsapp-provider.adapter';
 import { CommunicationAddressProtector } from './services/communication-address-protector';
+import { CommunicationAnalyticsService } from './services/communication-analytics.service';
 import { CommunicationDeliveryExecutor } from './services/communication-delivery-executor.service';
 import { CommunicationDeliveryStatusService } from './services/communication-delivery-status.service';
 import { CommunicationHistoryService } from './services/communication-history.service';
@@ -32,6 +34,7 @@ import { WhatsAppDeliveryStatusService } from './services/whatsapp-delivery-stat
 
 @Module({
   controllers: [
+    CommunicationAnalyticsController,
     CommunicationMessagesController,
     CommunicationProvidersController,
     CommunicationTemplatesController,
@@ -40,6 +43,7 @@ import { WhatsAppDeliveryStatusService } from './services/whatsapp-delivery-stat
   ],
   providers: [
     CommunicationAddressProtector,
+    CommunicationAnalyticsService,
     CommunicationDeliveryExecutor,
     CommunicationDeliveryStatusService,
     CommunicationHistoryService,
