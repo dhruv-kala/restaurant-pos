@@ -4,7 +4,8 @@
 
 Tasks 27.1 infrastructure foundation, 27.2 template management, 27.3 SMTP email
 delivery, 27.4 Twilio SMS delivery, and 27.5 Twilio WhatsApp delivery are
-implemented. Tasks 27.6 through 27.9 remain planned.
+implemented. Task 27.6 Firebase push delivery is also implemented. Tasks 27.7
+through 27.9 remain planned.
 
 Task 27 is split into:
 
@@ -94,6 +95,13 @@ template-version to approved Content SID mappings, strict scalar template
 variables, and `DELIVERED`/`READ` status application contracts. Public webhook
 verification and callback endpoints remain Task 27.7.
 
+Task 27.6 implements Firebase Cloud Messaging HTTP v1 execution,
+environment-referenced service-account authentication, encrypted tenant/user
+device registrations, immutable push notification/data payloads, append-only
+attempt tracking, and automatic invalid-token deactivation. FCM provider
+acceptance maps to `SENT`; retries and generalized provider callback handling
+remain deferred.
+
 ## Invariants
 
 * Business modules never call external providers directly.
@@ -149,6 +157,12 @@ Communication History:
 * `GET /communication/messages`
 * `GET /communication/messages/:id`
 * `GET /communication/messages/:id/attempts`
+
+Push Devices:
+
+* `GET /communication/push/devices`
+* `POST /communication/push/devices`
+* `DELETE /communication/push/devices/:id`
 
 Webhook Processing:
 

@@ -110,6 +110,8 @@ function setup(sendResult: Promise<unknown>) {
   const delivery = new CommunicationDeliveryExecutor(prisma, audit, addresses);
   return {
     service: new EmailDeliveryService(delivery, smtp),
+    delivery,
+    smtp,
     transaction,
     attemptUpdate,
     auditAppend,
@@ -187,5 +189,34 @@ describe('EmailDeliveryService', () => {
       CommunicationAttemptStatus.PROCESSING,
       CommunicationAttemptStatus.ACCEPTED,
     ]);
+  });
+
+  it('runs channel failure cleanup inside the finalization transaction', async () => {
+    const failure = new CommunicationProviderError(
+      'Invalid destination',
+      'DESTINATION_INVALID',
+      false,
+      true,
+    );
+    const { delivery, smtp, transaction } = setup(Promise.reject(failure));
+    const onFailure = jest.fn().mockResolvedValue(undefined);
+
+    await expect(
+      delivery.deliver('message-1', actor, {
+        channel: CommunicationChannel.EMAIL,
+        auditChannel: 'email',
+        adapter: smtp,
+        onFailure,
+      }),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    expect(onFailure).toHaveBeenCalledWith(
+      transaction,
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        messageId: 'message-1',
+        recipientAddressHash: 'a'.repeat(64),
+        error: failure,
+      }),
+    );
   });
 });

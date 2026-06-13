@@ -46,6 +46,20 @@ export interface CommunicationDeliveryDefinition {
   channel: CommunicationChannel;
   auditChannel: string;
   adapter: CommunicationProviderAdapter;
+  onFailure?: (
+    transaction: Prisma.TransactionClient,
+    context: CommunicationDeliveryFailureContext,
+  ) => Promise<void>;
+}
+
+export interface CommunicationDeliveryFailureContext {
+  tenantId: string;
+  outletId: string | null;
+  messageId: string;
+  recipientAddressHash: string;
+  error: CommunicationProviderError;
+  actor: AuthenticatedUser;
+  request: AuditRequestMetadata;
 }
 
 @Injectable()
@@ -313,6 +327,17 @@ export class CommunicationDeliveryExecutor {
           failedAt: new Date(),
         },
       });
+      if (definition.onFailure) {
+        await definition.onFailure(tx, {
+          tenantId: claimed.message.tenantId,
+          outletId: claimed.message.outletId,
+          messageId: claimed.message.id,
+          recipientAddressHash: claimed.message.recipientAddressHash,
+          error: failure,
+          actor,
+          request,
+        });
+      }
       await this.audit.append(tx, {
         tenantId: claimed.message.tenantId,
         outletId: claimed.message.outletId,

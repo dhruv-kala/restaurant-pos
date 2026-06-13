@@ -428,6 +428,32 @@ enum CommunicationTemplateStatus {
   @@map("communication_template_status")
 }
 
+enum CommunicationPushPlatform {
+  ANDROID
+  IOS
+  WEB
+
+  @@map("communication_push_platform")
+}
+
+enum CommunicationPushApplication {
+  RESTAURANT_APP
+  ADMIN
+  SUPER_ADMIN
+  CUSTOMER
+  KITCHEN_DISPLAY
+
+  @@map("communication_push_application")
+}
+
+enum CommunicationPushDeviceStatus {
+  ACTIVE
+  INACTIVE
+  INVALID
+
+  @@map("communication_push_device_status")
+}
+
 enum EmploymentType {
   FULL_TIME
   PART_TIME
@@ -672,6 +698,7 @@ model Tenant {
   communicationTemplateVersions CommunicationTemplateVersion[]
   communicationMessages         CommunicationMessage[]
   communicationAttempts         CommunicationAttempt[]
+  communicationPushDevices      CommunicationPushDevice[]
 
   @@index([status])
   @@index([deletedAt])
@@ -740,6 +767,7 @@ model Outlet {
   auditEvents              AuditEvent[]
   notifications            Notification[]
   communicationMessages    CommunicationMessage[]
+  communicationPushDevices CommunicationPushDevice[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -804,6 +832,7 @@ model UserAccount {
   notificationPreferences              NotificationPreference[]
   communicationMessages                CommunicationMessage[]         @relation("CommunicationMessageRecipientUser")
   createdCommunicationTemplateVersions CommunicationTemplateVersion[] @relation("CommunicationTemplateVersionCreatedBy")
+  communicationPushDevices             CommunicationPushDevice[]
 
   @@index([status])
   @@index([deletedAt])
@@ -2564,6 +2593,37 @@ model CommunicationAttempt {
   @@index([tenantId, providerId, createdAt], map: "communication_attempts_provider_idx")
   @@index([tenantId, providerMessageId], map: "communication_attempts_provider_message_idx")
   @@map("communication_attempts")
+}
+
+model CommunicationPushDevice {
+  id               String                        @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId         String                        @map("tenant_id") @db.Uuid
+  outletId         String?                       @map("outlet_id") @db.Uuid
+  userId           String                        @map("user_id") @db.Uuid
+  application      CommunicationPushApplication
+  platform         CommunicationPushPlatform
+  deviceId         String                        @map("device_id") @db.VarChar(160)
+  tokenCiphertext  String                        @map("token_ciphertext") @db.Text
+  tokenHash        String                        @map("token_hash") @db.Char(64)
+  tokenMasked      String                        @map("token_masked") @db.VarChar(32)
+  status           CommunicationPushDeviceStatus @default(ACTIVE)
+  lastRegisteredAt DateTime                      @default(now()) @map("last_registered_at") @db.Timestamptz(3)
+  lastSeenAt       DateTime                      @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  deactivatedAt    DateTime?                     @map("deactivated_at") @db.Timestamptz(3)
+  invalidatedAt    DateTime?                     @map("invalidated_at") @db.Timestamptz(3)
+  invalidReason    String?                       @map("invalid_reason") @db.VarChar(120)
+  createdAt        DateTime                      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime                      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet Outlet?     @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  user   UserAccount @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, userId, application, deviceId])
+  @@index([tenantId, tokenHash], map: "communication_push_devices_token_idx")
+  @@index([tenantId, userId, status, lastSeenAt], map: "communication_push_devices_user_status_idx")
+  @@map("communication_push_devices")
 }
 
 model EmployeeProfile {

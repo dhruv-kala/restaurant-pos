@@ -209,7 +209,12 @@ auth-token references, immutable internal template-version to Content SID
 mappings, E.164 channel addressing, delivered/read state foundations, and
 WhatsApp audit events.
 
-Task 27.6 is next provisionally: implement Push Notification Delivery.
+Task 27.6 implemented Firebase Cloud Messaging HTTP v1 delivery,
+environment-referenced service-account authentication, encrypted tenant/user
+device registrations, immutable push payloads, append-only attempts,
+invalid-token deactivation, and push audit events.
+
+Task 27.7 is next provisionally: implement Webhooks and Delivery Tracking.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

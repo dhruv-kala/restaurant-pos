@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 27.5**
-- Current module: **WhatsApp Delivery Providers**
-- Next provisional task: **Task 27.6 - Push Notification Delivery**
+- Completed through: **Task 27.6**
+- Current module: **Push Notification Delivery**
+- Next provisional task: **Task 27.7 - Webhooks and Delivery Tracking**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -27,6 +27,7 @@ Last updated: 2026-06-13
 | 27.3 | SMTP execution, protected recipient decryption, delivery attempts/status, history APIs, authorization, and audit events |
 | 27.4 | Twilio SMS execution, E.164 validation, shared delivery orchestration, attempt/status tracking, and audit events |
 | 27.5 | Twilio WhatsApp approved-template execution, protected credentials, delivery/read state foundation, and audit events |
+| 27.6 | FCM HTTP v1 delivery, encrypted tenant/user device registration, invalid-token deactivation, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -57,6 +58,9 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Twilio WhatsApp template delivery with immutable approved Content SID
   mappings, protected credentials, E.164 channel addressing, and internal
   delivered/read receipt state application
+- Firebase push delivery with environment-referenced service-account
+  authentication, encrypted tenant/user device tokens, immutable payloads,
+  append-only attempts, and automatic invalid-token deactivation
 
 ## Known Environment Limitation
 
@@ -67,20 +71,20 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 27.6 - Push Notification Delivery
+### Task 27.7 - Webhooks and Delivery Tracking
 
 Read:
 
 - `docs/specifications/communication-module.md`
-- `docs/tasks/027-communication/27.6-push.md`
+- `docs/tasks/027-communication/27.7-webhooks.md`
 - `docs/ai/SECURITY_RULES.md`
 - `docs/ai/MULTI_TENANCY_RULES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Define push provider adapters, device-token ownership, protected credentials,
-delivery execution, and provider-neutral status mapping. Do not implement Task
-27.6 unless explicitly requested.
+Define provider webhook verification, idempotent event persistence, tenant-safe
+message/attempt status synchronization, and replay handling. Do not implement
+Task 27.7 unless explicitly requested.
 
 ## Status Maintenance
 

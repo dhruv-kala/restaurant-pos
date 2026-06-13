@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 27.5 are complete at the requested foundation level.
+Tasks 1 through 27.6 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27.6, Push Notification Delivery, is the next provisional roadmap item. It
+Task 27.7, Webhooks and Delivery Tracking, is the next provisional roadmap item. It
 is not approved for implementation until explicitly requested.
 
 ## Task History
@@ -56,6 +56,76 @@ is not approved for implementation until explicitly requested.
 | 27.3. Email Delivery Providers | COMPLETE | SMTP execution, protected recipient decryption, append-only attempts, status tracking, history APIs, permissions, and audit events are implemented. |
 | 27.4. SMS Delivery Providers | COMPLETE | Twilio SMS execution, E.164 validation, protected credentials, shared delivery orchestration, attempts/status, and audit events are implemented. |
 | 27.5. WhatsApp Delivery Providers | COMPLETE | Twilio WhatsApp approved-template execution, protected credentials, delivered/read status foundation, and audit events are implemented. |
+| 27.6. Push Notification Delivery | COMPLETE | FCM HTTP v1 delivery, encrypted tenant/user devices, invalid-token deactivation, attempts/status, and audit events are implemented. |
+
+## Task 27.6 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Firebase Cloud Messaging HTTP v1 provider adapter for `PUSH`
+- OAuth access-token generation with `google-auth-library` and the Firebase
+  Messaging scope
+- Environment-referenced service-account JSON or key-file credentials
+- Strict Firebase project ID, timeout, device-token, title, body, and scalar
+  data validation
+- Tenant/user-scoped Android, iOS, and web push device records with forced RLS
+- AES-256-GCM token encryption, SHA-256 lookup hashes, and masked API responses
+- Active-token uniqueness within each tenant and installation-based token
+  rotation
+- Authenticated `GET`, `POST`, and `DELETE /communication/push/devices`
+  endpoints for the current tenant user
+- Internal active-device destination resolution for transactional
+  communication enqueueing
+- Shared delivery-executor failure hook for channel-specific cleanup
+- Automatic token invalidation only for token-specific FCM `UNREGISTERED` and
+  `INVALID_ARGUMENT` errors
+- Append-only communication attempts and transactional
+  `communication.push.sent`, `.failed`, `push_device.registered`,
+  `.unregistered`, and `.invalidated` audit events
+- Push schema, registration, provider, delegation, invalidation, and regression
+  tests
+
+Decisions:
+
+- Firebase Cloud Messaging is the initial push provider.
+- Provider configuration stores only `projectId` and optional timeout.
+  Credentials remain behind an environment `secretReference`.
+- FCM provider acceptance maps to local message `SENT` and attempt `ACCEPTED`.
+  FCM does not provide a general per-device delivery webhook through the send
+  API, so no false `DELIVERED` transition is recorded.
+- Push notification title, body, and scalar `pushData` come only from immutable
+  communication message snapshots.
+- Device APIs are self-service for the authenticated tenant user and never
+  return plaintext tokens, ciphertext, or token hashes.
+- Automatic retries, workers, client Firebase SDK wiring, UI, analytics, and
+  generalized webhook processing remain deferred.
+- No Flutter changes were made because backend contracts and device ownership
+  must precede application SDK integration.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npx tsc -p prisma/tsconfig.seed.json --noEmit`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 211 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Focused push schema, FCM adapter, device, and delivery tests: passed, 8 tests
+- `npm audit --omit=dev`: passed, 0 vulnerabilities
+- `git diff --check`: passed
+- `npm run prisma:migrate:deploy`: failed with the existing local Prisma
+  schema-engine error before migration deployment
+
+Known limitations:
+
+- FCM execution was tested with mocked HTTP responses because no live Firebase
+  project credentials or client registrations were available.
+- Migration deployment remains subject to the existing invalid local
+  PostgreSQL configuration.
 
 ## Task 27.5 Completion
 

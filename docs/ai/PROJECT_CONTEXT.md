@@ -349,6 +349,9 @@ The repository currently contains:
 - Twilio WhatsApp approved-template execution with protected auth-token
   references, immutable Content SID allowlists, E.164 channel addressing,
   delivered/read receipt state, and audit events
+- Firebase Cloud Messaging HTTP v1 delivery with protected service-account
+  references, encrypted tenant/user device registrations, immutable push
+  payloads, append-only attempts, and automatic invalid-token deactivation
 
 ## Authoritative References
 

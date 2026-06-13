@@ -28,6 +28,7 @@ export class CommunicationProviderError extends Error {
     message: string,
     readonly code: string,
     readonly retryable: boolean,
+    readonly invalidDestination = false,
   ) {
     super(message);
     this.name = CommunicationProviderError.name;
