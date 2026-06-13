@@ -3,8 +3,8 @@
 ## Status
 
 Tasks 28.1 Plan Management, 28.2 Subscription Lifecycle, 28.3 Feature
-Entitlements, 28.4 Usage Limits, and 28.5 Trial Management are implemented.
-Task 28.6 remains planned.
+Entitlements, 28.4 Usage Limits, 28.5 Trial Management, and 28.6 Subscription
+Admin UI are implemented.
 
 Task 28 is split into:
 
@@ -26,6 +26,7 @@ The module controls:
 * feature entitlements
 * usage limits
 * trial management
+* administration visibility and workflows
 
 This module determines what a tenant is allowed to use.
 
@@ -78,6 +79,12 @@ records in `TRIAL` status, expire to `EXPIRED` so entitlement checks fail
 closed, and convert to `ACTIVE` paid subscriptions with exact plan-version
 references.
 
+Task 28.6 implements shared Flutter subscription models, a typed subscription
+API client, Riverpod state, and the admin Subscription Administration center.
+The UI manages platform plan versions, tenant lifecycle commands, entitlement
+overrides, usage reconciliation, and trial operations through the existing
+backend APIs.
+
 All tenant-owned records carry tenant scope.
 
 ## Invariants
@@ -108,6 +115,10 @@ All tenant-owned records carry tenant scope.
 * Trial history is append-only and trial aggregates cannot be deleted.
 * Expired trials lose access through the normal entitlement evaluator.
 * Converted trials keep trial history while activating the linked subscription.
+* Subscription administration UI never bypasses backend authorization.
+* Tenant-admin UI scope is limited to the authenticated tenant.
+* Platform UI mutations use idempotency keys for lifecycle, entitlement,
+  usage, and trial commands.
 
 ## Authorization
 
@@ -245,6 +256,21 @@ Read endpoints are available to `SUPER_ADMIN` and the tenant's own
 `expire-due` is a platform-callable processor hook for scheduler integration in
 a later operational task. This task does not introduce a scheduler, queue, or
 new infrastructure.
+
+## Task 28.6 UI
+
+Task 28.6 adds Flutter administration over the existing subscription APIs:
+
+* Shared contracts are exported from `restaurant_pos_shared_models`.
+* `SubscriptionApiService` is exported from `restaurant_pos_api_client`.
+* The admin app exposes a Subscription Administration center.
+* `SUPER_ADMIN` can manage plan versions, tenant subscriptions, entitlement
+  overrides, usage reconciliation, and trials.
+* `TENANT_ADMIN` can view their authenticated tenant's subscription,
+  entitlements, and usage.
+
+Task 28.6 does not add new backend tables, migrations, provider integrations,
+payment collection, subscription invoicing, or scheduler infrastructure.
 
 ## Non-Goals
 

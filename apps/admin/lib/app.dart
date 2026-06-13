@@ -14,6 +14,7 @@ import 'features/employees/presentation/screens/employee_dashboard.dart';
 import 'features/recipes/presentation/screens/recipe_dashboard.dart';
 import 'features/rbac/presentation/screens/user_management_dashboard.dart';
 import 'features/reports/presentation/screens/reports_dashboard.dart';
+import 'features/subscriptions/presentation/screens/subscription_admin_screen.dart';
 import 'features/tables/presentation/screens/table_layout_screen.dart';
 
 class AdminApp extends StatelessWidget {
@@ -61,6 +62,20 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasPermission('communication.template_manage') == true ||
         user?.hasPermission('communication.provider_view') == true ||
         user?.hasPermission('communication.provider_manage') == true;
+    final canViewSubscriptions =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('subscription.read') == true ||
+        user?.hasPermission('subscription.plan.read') == true ||
+        user?.hasPermission('subscription.plan.manage') == true ||
+        user?.hasPermission('subscription.lifecycle.read') == true ||
+        user?.hasPermission('subscription.lifecycle.manage') == true ||
+        user?.hasPermission('subscription.entitlement.read') == true ||
+        user?.hasPermission('subscription.entitlement.manage') == true ||
+        user?.hasPermission('subscription.usage.read') == true ||
+        user?.hasPermission('subscription.usage.manage') == true ||
+        user?.hasPermission('subscription.trial.read') == true ||
+        user?.hasPermission('subscription.trial.manage') == true;
     final screens = <Widget>[
       const MenuDashboard(),
       const TableLayoutScreen(),
@@ -71,6 +86,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       const EmployeeDashboard(),
       const NotificationCenterScreen(),
       if (canViewCommunication) const CommunicationCenterScreen(),
+      if (canViewSubscriptions) const SubscriptionAdminScreen(),
       if (canManageRbac) const UserManagementDashboard(),
       if (canViewAudit) const AuditDashboard(),
     ];
@@ -105,6 +121,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         const NavigationDestination(
           icon: Icon(Icons.outgoing_mail),
           label: 'Communication',
+        ),
+      if (canViewSubscriptions)
+        const NavigationDestination(
+          icon: Icon(Icons.workspace_premium),
+          label: 'Subscriptions',
         ),
       if (canManageRbac)
         const NavigationDestination(

@@ -252,8 +252,14 @@ enforcement, linked `TRIAL` subscription creation, extension, expiry,
 due-expiry processing, paid conversion, immutable trial history, forced RLS,
 protected APIs, and audit events.
 
-Task 28.6 is next provisionally: implement subscription administration UI. Do
-not implement it unless the active user request explicitly asks for it.
+Task 28.6 implemented shared subscription Dart contracts, typed API clients,
+Riverpod state, and the admin Subscription Administration center for plan
+management, tenant subscription lifecycle actions, entitlement overrides, usage
+reconciliation, and trial management.
+
+Task 29 is next provisionally: implement promotions, coupons, and discount
+policy engine. Do not implement it unless the active user request explicitly
+asks for it.
 
 ## Working Practices
 

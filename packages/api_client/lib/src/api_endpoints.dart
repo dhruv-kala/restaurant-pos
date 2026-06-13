@@ -43,6 +43,10 @@ abstract final class ApiEndpoints {
   static const String communicationTemplates = '$communication/templates';
   static const String communicationMessages = '$communication/messages';
   static const String communicationAnalytics = '$communication/analytics';
+  static const String subscriptions = '/subscriptions';
+  static const String subscriptionPlans = '$subscriptions/plans';
+  static const String subscriptionTenants = '$subscriptions/tenants';
+  static const String subscriptionTrials = '$subscriptions/trials';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -184,6 +188,65 @@ abstract final class ApiEndpoints {
   static String communicationMessage(String id) => '$communicationMessages/$id';
   static String communicationMessageAttempts(String id) =>
       '${communicationMessage(id)}/attempts';
+  static String subscriptionPlan(String id) => '$subscriptionPlans/$id';
+  static String subscriptionPlanVersions(String id) =>
+      '${subscriptionPlan(id)}/versions';
+  static String subscriptionPlanFeatures(String id) =>
+      '${subscriptionPlan(id)}/features';
+  static String subscriptionPlanActivate(String id) =>
+      '${subscriptionPlan(id)}/activate';
+  static String subscriptionPlanDeactivate(String id) =>
+      '${subscriptionPlan(id)}/deactivate';
+  static String tenantSubscriptions(String tenantId) =>
+      '$subscriptionTenants/$tenantId';
+  static String tenantSubscriptionActivate(String tenantId) =>
+      '${tenantSubscriptions(tenantId)}/activate';
+  static String tenantSubscriptionCurrent(String tenantId) =>
+      '${tenantSubscriptions(tenantId)}/current';
+  static String tenantSubscriptionHistory(String tenantId) =>
+      '${tenantSubscriptions(tenantId)}/history';
+  static String tenantSubscription(String tenantId, String id) =>
+      '${tenantSubscriptions(tenantId)}/subscriptions/$id';
+  static String tenantSubscriptionUpgrade(String tenantId, String id) =>
+      '${tenantSubscription(tenantId, id)}/upgrade';
+  static String tenantSubscriptionDowngrade(String tenantId, String id) =>
+      '${tenantSubscription(tenantId, id)}/downgrade';
+  static String tenantSubscriptionSuspend(String tenantId, String id) =>
+      '${tenantSubscription(tenantId, id)}/suspend';
+  static String tenantSubscriptionResume(String tenantId, String id) =>
+      '${tenantSubscription(tenantId, id)}/resume';
+  static String tenantSubscriptionExpire(String tenantId, String id) =>
+      '${tenantSubscription(tenantId, id)}/expire';
+  static String tenantSubscriptionCancel(String tenantId, String id) =>
+      '${tenantSubscription(tenantId, id)}/cancel';
+  static String tenantEntitlements(String tenantId) =>
+      '${tenantSubscriptions(tenantId)}/entitlements';
+  static String tenantEntitlement(String tenantId, String featureKey) =>
+      '${tenantEntitlements(tenantId)}/$featureKey';
+  static String tenantEntitlementRevoke(String tenantId, String featureKey) =>
+      '${tenantEntitlement(tenantId, featureKey)}/revoke';
+  static String tenantUsage(String tenantId) =>
+      '${tenantSubscriptions(tenantId)}/usage';
+  static String tenantUsageFeature(String tenantId, String featureKey) =>
+      '${tenantUsage(tenantId)}/$featureKey';
+  static String tenantUsageAdjust(String tenantId, String featureKey) =>
+      '${tenantUsageFeature(tenantId, featureKey)}/adjust';
+  static String tenantTrials(String tenantId) =>
+      '${tenantSubscriptions(tenantId)}/trials';
+  static String tenantTrialStart(String tenantId) =>
+      '${tenantTrials(tenantId)}/start';
+  static String tenantTrial(String tenantId, String id) =>
+      '${tenantTrials(tenantId)}/$id';
+  static String tenantTrialHistory(String tenantId, String id) =>
+      '${tenantTrial(tenantId, id)}/history';
+  static String tenantTrialExtend(String tenantId, String id) =>
+      '${tenantTrial(tenantId, id)}/extend';
+  static String tenantTrialExpire(String tenantId, String id) =>
+      '${tenantTrial(tenantId, id)}/expire';
+  static String tenantTrialConvert(String tenantId, String id) =>
+      '${tenantTrial(tenantId, id)}/convert';
+  static const String subscriptionTrialsExpireDue =
+      '$subscriptionTrials/expire-due';
   static String employeePerformance(String id) => '${employee(id)}/performance';
   static const String employeeDashboard = '$employees/dashboard';
   static String shift(String id) => '$shifts/$id';

@@ -376,6 +376,10 @@ The repository currently contains:
 - Tenant trial management with one-trial-per-tenant enforcement, linked
   `TRIAL` subscription creation, extension, expiry, due-expiry processing,
   paid conversion, immutable trial history, and audited lifecycle events
+- Shared subscription Dart contracts, typed subscription API clients, Riverpod
+  state, and admin Subscription Administration screens for plan management,
+  tenant subscription lifecycle actions, entitlement overrides, usage
+  reconciliation, and trial management
 
 ## Authoritative References
 

@@ -1,6 +1,6 @@
 # AI Task Log
 
-Last updated: 2026-06-13
+Last updated: 2026-06-14
 
 ## Status Legend
 
@@ -11,13 +11,14 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 28.5 are complete at the requested foundation level.
+Tasks 1 through 28.6 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 28.6, Subscription Admin UI, is the next provisional roadmap item. It is
-not approved for implementation until explicitly requested.
+Task 29, Promotions, Coupons, and Discount Policy Engine, is the next
+provisional roadmap item. It is not approved for implementation until
+explicitly requested.
 
 ## Task History
 
@@ -65,6 +66,63 @@ not approved for implementation until explicitly requested.
 | 28.3. Feature Entitlements | COMPLETE | Tenant overrides, exact plan-version evaluation, fail-closed subscription checks, reusable enforcement, RLS, tests, and audit events are implemented. |
 | 28.4. Usage Limits | COMPLETE | Tenant counters, immutable idempotent operations, atomic limit enforcement, configurable over-limit policies, RLS, tests, and audit events are implemented. |
 | 28.5. Trial Management | COMPLETE | Trial subscriptions, immutable trial history, extension, expiry, due-expiry processing, paid conversion, RLS, tests, and audit events are implemented. |
+| 28.6. Subscription Admin UI | COMPLETE | Shared subscription models/client, Riverpod providers, and admin plan, subscription, entitlement, usage, and trial screens are implemented. |
+
+## Task 28.6 Completion
+
+Completed on 2026-06-14.
+
+Implemented:
+
+- Shared Dart subscription contracts for plans, plan features, tenant
+  subscriptions, lifecycle history, entitlement evaluations, usage counters,
+  usage-limit evaluations, trials, trial events, and due-expiry results
+- Typed `SubscriptionApiService` covering Task 28.1 through 28.5 subscription
+  endpoints
+- Admin subscription repository and Riverpod providers
+- Admin Subscription Administration center
+- Plan catalog screen with create, activate, deactivate, feature replacement,
+  and version inspection actions
+- Tenant subscription screen with tenant-scoped listing, lifecycle history,
+  activation, plan change, and status transition actions
+- Entitlements screen with effective entitlement visibility plus override and
+  revoke actions for platform admins
+- Usage screen with tenant usage counter visibility and reconciliation action
+- Trial management screen with start, extend, expire, convert, and expire-due
+  actions
+- Admin navigation entry gated by platform, tenant-admin, or subscription
+  permissions
+- Subscription module, roadmap, status, and AI-context documentation updates
+
+Decisions:
+
+- No backend schema, migration, or controller changes were required; Task 28.6
+  consumes the APIs implemented in Tasks 28.1 through 28.5.
+- Backend authorization remains authoritative. The admin UI hides mutation
+  controls from tenant admins but does not rely on client checks for security.
+- Tenant admins view their authenticated tenant scope; super admins can enter a
+  tenant ID for platform support and administration.
+- Idempotency keys are generated per UI mutation command with stable prefixes
+  and UTC microsecond timestamps.
+
+Validation:
+
+- `flutter pub get` in `apps/admin`: passed
+- `flutter pub get` in `packages/api_client`: passed
+- `flutter pub get` in `packages/shared_models`: passed
+- `flutter analyze` in `packages/shared_models`: passed
+- `flutter analyze` in `packages/api_client`: passed
+- `flutter analyze` in `apps/admin`: passed
+
+Known limitations:
+
+- Live UI workflows were not exercised against a running backend in this task.
+- Backend tests were not rerun because Task 28.6 did not change backend code.
+
+Next task:
+
+- Task 29: Promotions, Coupons, and Discount Policy Engine remains provisional.
+  Do not implement it unless explicitly requested.
 
 ## Task 28.5 Completion
 
@@ -105,7 +163,7 @@ Decisions:
   creating a second current subscription.
 - `expire-due` is a platform-callable hook only; no scheduler, queue, or new
   infrastructure was introduced.
-- Subscription administration UI remains Task 28.6.
+- Subscription administration UI was completed in Task 28.6.
 
 Validation:
 

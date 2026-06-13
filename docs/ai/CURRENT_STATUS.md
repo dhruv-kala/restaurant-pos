@@ -1,12 +1,12 @@
 # Current Status
 
-Last updated: 2026-06-13
+Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 28.5**
-- Current module: **Trial Management**
-- Next provisional task: **Task 28.6 - Subscription Admin UI**
+- Completed through: **Task 28.6**
+- Current module: **Subscription Administration UI**
+- Next provisional task: **Task 29 - Promotions, Coupons, and Discount Policy Engine**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -36,6 +36,7 @@ Last updated: 2026-06-13
 | 28.3 | Tenant feature overrides, fail-closed evaluation, route guard/decorator enforcement, RLS, and audit events |
 | 28.4 | Tenant usage counters, immutable operations, atomic enforcement, configurable over-limit policies, RLS, and audit events |
 | 28.5 | Trial subscriptions, immutable trial history, extension, expiry, paid conversion, RLS, and audit events |
+| 28.6 | Shared subscription contracts, typed clients, Riverpod providers, and admin plan/subscription/entitlement/usage/trial screens |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -96,6 +97,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Tenant trial subscriptions with one-trial-per-tenant enforcement,
   time-bound access, immutable lifecycle history, linked subscription status
   updates, due-expiry processing, paid conversion, forced RLS, and audit events
+- Subscription administration UI with shared Dart contracts, typed API service,
+  Riverpod providers, platform plan management, tenant subscription lifecycle
+  actions, entitlement visibility/overrides, usage counter reconciliation, and
+  trial management screens
 
 ## Known Environment Limitation
 
@@ -106,18 +111,18 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 28.6 - Subscription Admin UI
+### Task 29 - Promotions, Coupons, and Discount Policy Engine
 
 Read:
 
-- `docs/specifications/subscription-module.md`
-- `docs/tasks/028-subscription-module/28.6-subscription-admin-ui.md`
+- `docs/tasks/000-roadmap.md`
 - `docs/ai/MODULE_DEPENDENCIES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement subscription administration UI and shared client contracts. Do not
-implement Task 28.6 unless explicitly requested.
+Define promotion ownership, discount stacking rules, coupon redemption
+contracts, tenant/outlet scope, audit requirements, and backend-first APIs
+before Flutter screens. Do not implement Task 29 unless explicitly requested.
 
 ## Status Maintenance
 

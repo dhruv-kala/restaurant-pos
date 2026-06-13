@@ -1,6 +1,6 @@
 # Restaurant POS Task Roadmap
 
-Last updated: 2026-06-13
+Last updated: 2026-06-14
 
 ## Roadmap Rules
 
@@ -33,8 +33,8 @@ Last updated: 2026-06-13
 | 28.3 | COMPLETE | Feature entitlement evaluation and enforcement boundary |
 | 28.4 | COMPLETE | Central usage limits, counters, and over-limit policies |
 | 28.5 | COMPLETE | Trial lifecycle, expiry handling, and paid conversion |
-| 28.6 | NEXT | Subscription administration UI |
-| 29 | PLANNED | Promotions, coupons, and discount policy engine |
+| 28.6 | COMPLETE | Subscription administration UI |
+| 29 | NEXT | Promotions, coupons, and discount policy engine |
 | 30 | PLANNED | Tax configuration and fiscal policy administration |
 | 31 | PLANNED | Business-day opening, shifts, cash drawer, and closing |
 | 32 | PLANNED | Device registration, trusted sessions, and terminal management |
