@@ -498,6 +498,29 @@ enum TenantSubscriptionEventType {
   @@map("tenant_subscription_event_type")
 }
 
+enum UsageCounterPeriod {
+  LIFETIME
+  DAILY
+  MONTHLY
+
+  @@map("usage_counter_period")
+}
+
+enum UsageLimitAction {
+  BLOCK
+  WARN
+  ALLOW
+
+  @@map("usage_limit_action")
+}
+
+enum UsageCounterOperation {
+  CONSUME
+  SET
+
+  @@map("usage_counter_operation")
+}
+
 enum EmploymentType {
   FULL_TIME
   PART_TIME
@@ -747,6 +770,8 @@ model Tenant {
   subscriptions                 TenantSubscription[]
   subscriptionEvents            TenantSubscriptionEvent[]
   entitlements                  TenantEntitlement[]
+  usageCounters                 UsageCounter[]
+  usageCounterEvents            UsageCounterEvent[]
 
   @@index([status])
   @@index([deletedAt])
@@ -888,6 +913,7 @@ model UserAccount {
   tenantSubscriptionEvents             TenantSubscriptionEvent[]      @relation("TenantSubscriptionEventActor")
   createdTenantEntitlements            TenantEntitlement[]            @relation("TenantEntitlementCreatedBy")
   updatedTenantEntitlements            TenantEntitlement[]            @relation("TenantEntitlementUpdatedBy")
+  usageCounterEvents                   UsageCounterEvent[]            @relation("UsageCounterEventActor")
 
   @@index([status])
   @@index([deletedAt])
@@ -2845,6 +2871,58 @@ model TenantEntitlement {
   @@unique([tenantId, lastIdempotencyKey], map: "tenant_entitlements_idempotency_key")
   @@index([tenantId, revokedAt, effectiveFrom, effectiveTo], map: "tenant_entitlements_effective_idx")
   @@map("tenant_entitlements")
+}
+
+model UsageCounter {
+  id          String             @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId    String             @map("tenant_id") @db.Uuid
+  featureKey  String             @map("feature_key") @db.VarChar(120)
+  period      UsageCounterPeriod
+  periodKey   String             @map("period_key") @db.VarChar(40)
+  periodStart DateTime           @map("period_start") @db.Timestamptz(3)
+  periodEnd   DateTime?          @map("period_end") @db.Timestamptz(3)
+  usageValue  BigInt             @default(0) @map("usage_value")
+  version     Int                @default(1)
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  events UsageCounterEvent[]
+
+  @@unique([tenantId, id], map: "usage_counters_tenant_id_id_key")
+  @@unique([tenantId, featureKey, periodKey], map: "usage_counters_tenant_feature_period_key")
+  @@index([tenantId, featureKey, periodStart], map: "usage_counters_feature_period_idx")
+  @@map("usage_counters")
+}
+
+model UsageCounterEvent {
+  id                 String                @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId           String                @map("tenant_id") @db.Uuid
+  counterId          String                @map("counter_id") @db.Uuid
+  featureKey         String                @map("feature_key") @db.VarChar(120)
+  operation          UsageCounterOperation
+  deltaValue         BigInt                @map("delta_value")
+  previousValue      BigInt                @map("previous_value")
+  currentValue       BigInt                @map("current_value")
+  limitValue         BigInt?               @map("limit_value")
+  limitAction        UsageLimitAction      @map("limit_action")
+  allowed            Boolean
+  overLimit          Boolean               @map("over_limit")
+  actorUserId        String?               @map("actor_user_id") @db.Uuid
+  reason             String?               @db.VarChar(500)
+  idempotencyKey     String                @map("idempotency_key") @db.VarChar(160)
+  requestFingerprint String                @map("request_fingerprint") @db.Char(64)
+  occurredAt         DateTime              @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  tenant  Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  counter UsageCounter @relation(fields: [tenantId, counterId], references: [tenantId, id], onDelete: Restrict)
+  actor   UserAccount? @relation("UsageCounterEventActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "usage_counter_events_tenant_id_id_key")
+  @@unique([tenantId, idempotencyKey], map: "usage_counter_events_idempotency_key")
+  @@index([tenantId, counterId, occurredAt], map: "usage_counter_events_history_idx")
+  @@index([tenantId, featureKey], map: "usage_counter_events_feature_idx")
+  @@map("usage_counter_events")
 }
 
 model EmployeeProfile {

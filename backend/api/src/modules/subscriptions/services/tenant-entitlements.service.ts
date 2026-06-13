@@ -71,10 +71,10 @@ export class TenantEntitlementsService {
 
   async evaluate(tenantId: string, featureKey: string, actor: AuthenticatedUser) {
     const scope = resolveTenantSubscriptionReadScope(actor, tenantId);
-    const key = this.featureKey(featureKey);
+    const key = this.normalizeFeatureKey(featureKey);
     return this.prisma.$transaction(async (tx) => {
       await applyDatabaseRequestContext(tx, actor, scope);
-      return this.evaluateInTransaction(tx, scope, key, new Date());
+      return this.evaluateForTenantInTransaction(tx, scope, key, new Date());
     });
   }
 
@@ -114,7 +114,7 @@ export class TenantEntitlementsService {
     request: AuditRequestMetadata,
   ) {
     requireTenantSubscriptionMutation(actor);
-    const key = this.featureKey(featureKey);
+    const key = this.normalizeFeatureKey(featureKey);
     const reason = this.requiredReason(dto.reason);
     const effectiveFrom = dto.effectiveFrom ? new Date(dto.effectiveFrom) : new Date();
     const effectiveTo = dto.effectiveTo ? new Date(dto.effectiveTo) : null;
@@ -142,7 +142,12 @@ export class TenantEntitlementsService {
         fingerprint,
       );
       if (duplicate) {
-        return this.evaluateInTransaction(tx, tenantId, duplicate.featureKey, new Date());
+        return this.evaluateForTenantInTransaction(
+          tx,
+          tenantId,
+          duplicate.featureKey,
+          new Date(),
+        );
       }
 
       await this.requireTenant(tx, tenantId);
@@ -201,7 +206,7 @@ export class TenantEntitlementsService {
       }
 
       await this.auditChange(tx, entitlement, actor, request, action);
-      return this.evaluateInTransaction(tx, tenantId, key, new Date());
+      return this.evaluateForTenantInTransaction(tx, tenantId, key, new Date());
     });
   }
 
@@ -213,7 +218,7 @@ export class TenantEntitlementsService {
     request: AuditRequestMetadata,
   ) {
     requireTenantSubscriptionMutation(actor);
-    const key = this.featureKey(featureKey);
+    const key = this.normalizeFeatureKey(featureKey);
     const reason = this.requiredReason(dto.reason);
     const fingerprint = this.fingerprint({
       action: 'REVOKE',
@@ -233,7 +238,12 @@ export class TenantEntitlementsService {
         fingerprint,
       );
       if (duplicate) {
-        return this.evaluateInTransaction(tx, tenantId, duplicate.featureKey, new Date());
+        return this.evaluateForTenantInTransaction(
+          tx,
+          tenantId,
+          duplicate.featureKey,
+          new Date(),
+        );
       }
 
       const existing = await this.requireOverride(tx, tenantId, key);
@@ -254,12 +264,12 @@ export class TenantEntitlementsService {
       if (changed.count !== 1) throw this.concurrentUpdate();
       const entitlement = await this.requireOverride(tx, tenantId, key);
       await this.auditChange(tx, entitlement, actor, request, 'revoked');
-      return this.evaluateInTransaction(tx, tenantId, key, new Date());
+      return this.evaluateForTenantInTransaction(tx, tenantId, key, new Date());
     });
   }
 
   async requireForActor(actor: AuthenticatedUser, featureKey: string) {
-    const key = this.featureKey(featureKey);
+    const key = this.normalizeFeatureKey(featureKey);
     if (hasRole(actor, PLATFORM_ADMIN_ROLE)) {
       return {
         featureKey: key,
@@ -270,7 +280,7 @@ export class TenantEntitlementsService {
     const tenantId = requireTenantId(actor);
     const result = await this.prisma.$transaction(async (tx) => {
       await applyDatabaseRequestContext(tx, actor, tenantId);
-      return this.evaluateInTransaction(tx, tenantId, key, new Date());
+      return this.evaluateForTenantInTransaction(tx, tenantId, key, new Date());
     });
     if (!result.enabled) {
       throw new ForbiddenException(`Feature entitlement '${key}' is not enabled`);
@@ -278,7 +288,7 @@ export class TenantEntitlementsService {
     return result;
   }
 
-  private async evaluateInTransaction(
+  async evaluateForTenantInTransaction(
     tx: Prisma.TransactionClient,
     tenantId: string,
     featureKey: string,
@@ -429,7 +439,7 @@ export class TenantEntitlementsService {
     if (!tenant) throw new NotFoundException('Tenant not found');
   }
 
-  private featureKey(value: string): string {
+  normalizeFeatureKey(value: string): string {
     const normalized = value.trim().toLowerCase();
     if (!/^[a-z][a-z0-9_.-]*$/.test(normalized) || normalized.length > 120) {
       throw new BadRequestException('Feature key is invalid');

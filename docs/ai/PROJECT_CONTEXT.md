@@ -370,6 +370,9 @@ The repository currently contains:
 - Tenant feature entitlement evaluation with exact plan-version baselines,
   effective-dated override precedence, fail-closed subscription eligibility,
   reusable NestJS guard/decorator enforcement, and audited administration
+- Tenant usage-limit enforcement with BigInt counters, UTC
+  lifetime/daily/monthly periods, immutable idempotent operations, atomic
+  consumption, configurable block/warn/allow behavior, and audited exceptions
 
 ## Authoritative References
 

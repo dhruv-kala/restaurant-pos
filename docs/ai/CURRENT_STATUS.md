@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 28.3**
-- Current module: **Feature Entitlements**
-- Next provisional task: **Task 28.4 - Usage Limits**
+- Completed through: **Task 28.4**
+- Current module: **Usage Limits**
+- Next provisional task: **Task 28.5 - Trial Management**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -34,6 +34,7 @@ Last updated: 2026-06-13
 | 28.1 | Global versioned plan catalog, feature snapshots, immutable activated versions, platform APIs, and audit events |
 | 28.2 | Tenant subscription lifecycle, exact plan references, idempotent commands, append-only history, RLS, and audit events |
 | 28.3 | Tenant feature overrides, fail-closed evaluation, route guard/decorator enforcement, RLS, and audit events |
+| 28.4 | Tenant usage counters, immutable operations, atomic enforcement, configurable over-limit policies, RLS, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -88,6 +89,9 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   effective-dated override precedence, subscription eligibility checks,
   fail-closed results, forced RLS, audited mutation, and a reusable NestJS
   guard/decorator contract
+- Tenant usage counters with UTC lifetime/daily/monthly periods, immutable
+  idempotent operations, atomic consumption, block/warn/allow policies,
+  BigInt-safe contracts, forced RLS, and audited reconciliation/overages
 
 ## Known Environment Limitation
 
@@ -98,18 +102,18 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 28.4 - Usage Limits
+### Task 28.5 - Trial Management
 
 Read:
 
 - `docs/specifications/subscription-module.md`
-- `docs/tasks/028-subscription-module/28.4-usage-limits.md`
+- `docs/tasks/028-subscription-module/28.5-trial-management.md`
 - `docs/ai/MODULE_DEPENDENCIES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement centralized usage counters and limit enforcement against effective
-entitlements. Do not implement Task 28.4 unless explicitly requested.
+Implement trial subscription creation, eligibility, expiration, and conversion
+rules. Do not implement Task 28.5 unless explicitly requested.
 
 ## Status Maintenance
 

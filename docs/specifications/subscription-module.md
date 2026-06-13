@@ -2,8 +2,9 @@
 
 ## Status
 
-Tasks 28.1 Plan Management, 28.2 Subscription Lifecycle, and 28.3 Feature
-Entitlements are implemented. Tasks 28.4 through 28.6 remain planned.
+Tasks 28.1 Plan Management, 28.2 Subscription Lifecycle, 28.3 Feature
+Entitlements, and 28.4 Usage Limits are implemented. Tasks 28.5 and 28.6 remain
+planned.
 
 Task 28 is split into:
 
@@ -66,6 +67,11 @@ authoritative evaluation service. Exact subscribed plan-version features form
 the baseline, active overrides take precedence, and access fails closed unless
 the tenant has a current, in-period `ACTIVE` or `TRIAL` subscription.
 
+Task 28.4 implements tenant-scoped `UsageCounter` current-period projections
+and immutable `UsageCounterEvent` operations. Centralized consumption resolves
+the effective entitlement limit, applies UTC lifetime/daily/monthly periods,
+and enforces configurable block, warn, or allow behavior atomically.
+
 All tenant-owned records carry tenant scope.
 
 ## Invariants
@@ -87,6 +93,11 @@ All tenant-owned records carry tenant scope.
 * Active tenant overrides take precedence over exact plan-version features.
 * Missing feature keys fail closed.
 * Entitlement records are revoked instead of deleted.
+* Usage counter values cannot be negative.
+* Usage operations are idempotent and append-only.
+* Counter updates are serialized by tenant, feature, and period.
+* Limit enforcement uses the current effective entitlement.
+* BigInt usage values are serialized as decimal strings.
 
 ## Authorization
 
@@ -177,6 +188,35 @@ evaluated against their trusted authentication tenant.
 
 Task 28.3 stores optional `limitValue` metadata but does not consume or enforce
 quotas. Central usage counters remain Task 28.4.
+
+## Task 28.4 Policy
+
+The effective entitlement `limitValue` is the usage ceiling. Optional
+entitlement metadata configures:
+
+* `usagePeriod`: `LIFETIME`, `DAILY`, or `MONTHLY`
+* `overLimitAction`: `BLOCK`, `WARN`, or `ALLOW`
+
+Missing metadata defaults to `LIFETIME` and `BLOCK`. A null limit is unlimited
+while the feature entitlement remains enabled.
+
+Business services enforce metered actions through
+`UsageLimitsService.consumeForActor()`. Retryable consumption requires a
+tenant-scoped idempotency key. Blocked and allowed-overage decisions are
+persisted and audited.
+
+## Task 28.4 API
+
+Read endpoints are available to `SUPER_ADMIN` and the tenant's own
+`TENANT_ADMIN`. Reconciliation requires `SUPER_ADMIN`:
+
+* `GET /subscriptions/tenants/:tenantId/usage`
+* `GET /subscriptions/tenants/:tenantId/usage/:featureKey`
+* `POST /subscriptions/tenants/:tenantId/usage/:featureKey/adjust`
+
+Counter reconciliation uses decimal strings, reasons, idempotency keys, and
+optimistic versions. Ordinary business consumption is an internal service
+contract rather than a client-callable endpoint.
 
 ## Non-Goals
 

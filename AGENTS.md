@@ -242,9 +242,13 @@ baseline evaluation, active override precedence, subscription eligibility,
 fail-closed access, reusable NestJS guard/decorator enforcement, forced RLS,
 optimistic/idempotent administration, and audit events.
 
-Task 28.4 is next provisionally: implement centralized usage limits and
-counters. Do not implement it unless the active user request explicitly asks
-for it.
+Task 28.4 implemented tenant-scoped BigInt usage counters, UTC
+lifetime/daily/monthly periods, immutable idempotent operations, atomic
+consumption, block/warn/allow over-limit policies, forced RLS, protected
+evaluation/reconciliation APIs, and audit events.
+
+Task 28.5 is next provisionally: implement trial management. Do not implement
+it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

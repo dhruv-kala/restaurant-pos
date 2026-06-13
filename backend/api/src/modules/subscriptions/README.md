@@ -1,8 +1,8 @@
 # Subscriptions Module
 
-Tasks 28.1 through 28.3 implement platform-managed, versioned subscription
-plans, tenant subscription lifecycle, and feature entitlement evaluation under
-`/subscriptions`.
+Tasks 28.1 through 28.4 implement platform-managed, versioned subscription
+plans, tenant subscription lifecycle, feature entitlement evaluation, and
+central usage-limit enforcement under `/subscriptions`.
 
 Activated plan versions are immutable. Updating an activated or deactivated
 version creates the next draft version, preserving stable historical
@@ -17,5 +17,8 @@ features. Evaluation fails closed without an active or trial subscription.
 Business routes can enforce features with `@RequiresEntitlement()` and
 `EntitlementGuard`.
 
-Usage enforcement, trial creation/automation, billing, and administration UI
-remain deferred.
+Usage counters support lifetime, daily, and monthly UTC periods with atomic,
+idempotent consumption and configurable block, warn, or allow behavior.
+Counter history is append-only, and platform reconciliation is audited.
+
+Trial creation/automation, billing, and administration UI remain deferred.

@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 28.3 are complete at the requested foundation level.
+Tasks 1 through 28.4 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 28.4, Usage Limits, is the next provisional roadmap item. It is
+Task 28.5, Trial Management, is the next provisional roadmap item. It is
 not approved for implementation until explicitly requested.
 
 ## Task History
@@ -63,6 +63,54 @@ not approved for implementation until explicitly requested.
 | 28.1. Plan Management | COMPLETE | Platform-managed versioned plans, feature snapshots, immutable activated versions, protected APIs, tests, and audit events are implemented. |
 | 28.2. Subscription Lifecycle | COMPLETE | Tenant subscription aggregates, exact plan references, idempotent transitions, append-only history, RLS, tests, and audit events are implemented. |
 | 28.3. Feature Entitlements | COMPLETE | Tenant overrides, exact plan-version evaluation, fail-closed subscription checks, reusable enforcement, RLS, tests, and audit events are implemented. |
+| 28.4. Usage Limits | COMPLETE | Tenant counters, immutable idempotent operations, atomic limit enforcement, configurable over-limit policies, RLS, tests, and audit events are implemented. |
+
+## Task 28.4 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Tenant-scoped `UsageCounter` current-period projections using PostgreSQL
+  `BIGINT`
+- Immutable `UsageCounterEvent` operation history with tenant-scoped
+  idempotency keys and request fingerprints
+- UTC `LIFETIME`, `DAILY`, and `MONTHLY` counter periods
+- Effective-entitlement `limitValue` enforcement
+- Entitlement metadata policies for `BLOCK`, `WARN`, and `ALLOW` overages
+- Lifetime/block defaults and unlimited null-limit behavior
+- Atomic consumption with tenant/feature/period advisory locking
+- Persisted denied decisions and allowed overages
+- BigInt-safe decimal-string API responses
+- Platform-only counter reconciliation with optimistic versions and reasons
+- Tenant-admin self-read and platform cross-tenant read authorization
+- Forced PostgreSQL RLS, non-negative/period constraints, restrictive foreign
+  keys, retained counters, and append-only event triggers
+- Audited denied operations, allowed overages, and privileged adjustments
+- Protected counter list, evaluation, and reconciliation APIs
+- Internal `UsageLimitsService.consumeForActor()` enforcement contract
+- API, module, specification, roadmap, and AI-context documentation
+- Focused schema, period, atomic consumption, blocking, warning, and audit tests
+
+Decisions:
+
+- Period and over-limit behavior are configured through effective entitlement
+  metadata keys `usagePeriod` and `overLimitAction`.
+- Regular successful consumption writes immutable usage history but does not
+  create high-volume audit ledger events.
+- Existing business modules were not mass-integrated because existing tenants
+  have not yet been migrated to subscription records; integrations must use the
+  centralized service during deliberate rollout.
+- Trial behavior remains Task 28.5.
+
+Validation:
+
+- `npm run prisma:generate`: passed
+- `npm run prisma:validate`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm test -- --runInBand`: passed, 79 suites and 271 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
 
 ## Task 28.3 Completion
 
