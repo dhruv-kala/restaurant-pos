@@ -149,9 +149,7 @@ export class SmtpProviderAdapter implements CommunicationProviderAdapter {
 
   private providerError(error: unknown): CommunicationProviderError {
     const candidate =
-      error !== null && typeof error === 'object'
-        ? (error as Record<string, unknown>)
-        : {};
+      error !== null && typeof error === 'object' ? (error as Record<string, unknown>) : {};
     const code = typeof candidate.code === 'string' ? candidate.code : 'SMTP_SEND_FAILED';
     const responseCode =
       typeof candidate.responseCode === 'number' ? candidate.responseCode : undefined;
@@ -162,9 +160,7 @@ export class SmtpProviderAdapter implements CommunicationProviderAdapter {
   }
 
   private string(value: unknown): string | undefined {
-    return typeof value === 'string' &&
-      value.trim() &&
-      !/[\r\n\0]/.test(value)
+    return typeof value === 'string' && value.trim() && !/[\r\n\0]/.test(value)
       ? value.trim()
       : undefined;
   }

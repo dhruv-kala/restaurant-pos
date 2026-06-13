@@ -9,3 +9,4 @@ versioning policy belong here once the NestJS API is implemented.
 - [Tenant and outlet management API](tenant-outlet-management.md)
 - [Communication Template API](communication-templates.md)
 - [Communication Email Delivery](communication-email.md)
+- [Communication SMS Delivery](communication-sms.md)

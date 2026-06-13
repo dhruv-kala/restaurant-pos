@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 27.3 are complete at the requested foundation level.
+Tasks 1 through 27.4 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27.4, SMS Delivery Providers, is the next provisional roadmap item. It
+Task 27.5, WhatsApp Delivery Providers, is the next provisional roadmap item. It
 is not approved for implementation until explicitly requested.
 
 ## Task History
@@ -54,6 +54,69 @@ is not approved for implementation until explicitly requested.
 | 27.1. Communication Infrastructure Foundation | COMPLETE | Provider/message/attempt schema, protected recipient addressing, immutable communication history, idempotent enqueueing, abstraction contracts, and state rules are implemented. |
 | 27.2. Communication Template Management | COMPLETE | Tenant template CRUD, immutable versions, strict variable rendering, preview, permissions, audit events, and exact message version references are implemented. |
 | 27.3. Email Delivery Providers | COMPLETE | SMTP execution, protected recipient decryption, append-only attempts, status tracking, history APIs, permissions, and audit events are implemented. |
+| 27.4. SMS Delivery Providers | COMPLETE | Twilio SMS execution, E.164 validation, protected credentials, shared delivery orchestration, attempts/status, and audit events are implemented. |
+
+## Task 27.4 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Twilio Messages REST API adapter for `SMS`
+- E.164 recipient validation before provider access
+- Strict Twilio Account SID, sender number, Messaging Service SID, and timeout
+  configuration validation
+- Environment-backed auth-token resolution through existing
+  `secretReference` contracts
+- Twilio `ContentRetention=discard` and `AddressRetention=obfuscate` privacy
+  request options
+- Channel-neutral `CommunicationDeliveryExecutor` shared by SMTP email and
+  Twilio SMS delivery
+- Atomic queued-message claims, active tenant/provider validation, and
+  append-only numbered attempts
+- SMS progression from `QUEUED` to `PROCESSING`, then `SENT` or `FAILED`
+- Safe HTTP/provider/network failure classification, including retryable 408,
+  429, 5xx, timeout, and network outcomes
+- Transactional `communication.sms.sent` and `communication.sms.failed` audit
+  events without credentials, phone numbers, or provider error messages
+- SMS API, database, environment, specification, roadmap, current-status, and
+  restart-context documentation
+
+Decisions:
+
+- Twilio is the single initial SMS provider; MSG91 and TextLocal remain future
+  adapters.
+- Twilio acceptance maps to local `SENT`; carrier delivery confirmation remains
+  Task 27.7.
+- SMS bodies are limited to 1600 characters and stored only in the existing
+  immutable communication message snapshot.
+- No public send/resend API, scheduler, worker, retry execution, webhook, or
+  Flutter UI is introduced.
+- No new permissions or database migration were required; SMS reuses the Task
+  27.3 communication send/history permissions and foundation schema.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npx tsc -p prisma/tsconfig.seed.json --noEmit`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm run test -- --runInBand`: passed, 194 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Focused Twilio adapter, SMS delegation, and shared delivery regression tests:
+  passed, 7 tests
+- `npm audit --omit=dev`: passed, 0 vulnerabilities
+- `git diff --check`: passed
+- `npm run prisma:migrate:deploy`: failed with the existing local Prisma
+  schema-engine error before migration deployment
+
+Known limitations:
+
+- Twilio execution was tested with mocked HTTP responses because no live
+  account credentials were available.
+- Automatic retries and provider delivery receipts remain deferred.
 
 ## Task 27.3 Completion
 

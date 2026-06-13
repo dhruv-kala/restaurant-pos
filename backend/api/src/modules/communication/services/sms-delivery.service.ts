@@ -3,14 +3,14 @@ import { CommunicationChannel } from '@prisma/client';
 
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 import type { AuditRequestMetadata } from '../../audit/models/audit-event.model';
-import { SmtpProviderAdapter } from '../providers/smtp-provider.adapter';
+import { TwilioSmsProviderAdapter } from '../providers/twilio-sms-provider.adapter';
 import { CommunicationDeliveryExecutor } from './communication-delivery-executor.service';
 
 @Injectable()
-export class EmailDeliveryService {
+export class SmsDeliveryService {
   constructor(
     private readonly delivery: CommunicationDeliveryExecutor,
-    private readonly smtp: SmtpProviderAdapter,
+    private readonly twilio: TwilioSmsProviderAdapter,
   ) {}
 
   deliver(
@@ -23,9 +23,9 @@ export class EmailDeliveryService {
       messageId,
       actor,
       {
-        channel: CommunicationChannel.EMAIL,
-        auditChannel: 'email',
-        adapter: this.smtp,
+        channel: CommunicationChannel.SMS,
+        auditChannel: 'sms',
+        adapter: this.twilio,
       },
       requestedTenantId,
       request,

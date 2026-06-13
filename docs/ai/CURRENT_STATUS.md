@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 27.3**
-- Current module: **Email Delivery Providers**
-- Next provisional task: **Task 27.4 - SMS Delivery Providers**
+- Completed through: **Task 27.4**
+- Current module: **SMS Delivery Providers**
+- Next provisional task: **Task 27.5 - WhatsApp Delivery Providers**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -25,6 +25,7 @@ Last updated: 2026-06-13
 | 27.1 | Provider/message/attempt schema, protected addressing, idempotent enqueue service, abstraction contracts, and state rules |
 | 27.2 | Tenant template CRUD, immutable versions, strict placeholder preview/rendering, authorization, audit integration, and exact message version references |
 | 27.3 | SMTP execution, protected recipient decryption, delivery attempts/status, history APIs, authorization, and audit events |
+| 27.4 | Twilio SMS execution, E.164 validation, shared delivery orchestration, attempt/status tracking, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -50,6 +51,8 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - SMTP email delivery with secret references, AES-256-GCM recipient protection,
   atomic claims, append-only attempts, safe failure classification, and
   tenant/outlet-scoped message history
+- Twilio SMS delivery with protected auth-token references, provider privacy
+  controls, E.164 validation, and shared channel-neutral delivery execution
 
 ## Known Environment Limitation
 
@@ -60,20 +63,20 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 27.4 - SMS Delivery Providers
+### Task 27.5 - WhatsApp Delivery Providers
 
 Read:
 
 - `docs/specifications/communication-module.md`
-- `docs/tasks/027-communication/27.4-sms.md`
+- `docs/tasks/027-communication/27.5-whatsapp.md`
 - `docs/ai/SECURITY_RULES.md`
 - `docs/ai/MULTI_TENANCY_RULES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Define SMS provider adapters, protected credentials, phone destination
-handling, provider execution, and status mapping. Do not implement Task 27.4
-unless explicitly requested.
+Define WhatsApp provider adapters, approved template-message rules, protected
+credentials, destination validation, execution, and status mapping. Do not
+implement Task 27.5 unless explicitly requested.
 
 ## Status Maintenance
 

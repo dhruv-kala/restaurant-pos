@@ -22,8 +22,8 @@ Last updated: 2026-06-13
 | 27.1 | COMPLETE | Communication infrastructure foundation |
 | 27.2 | COMPLETE | Communication template management |
 | 27.3 | COMPLETE | Email delivery providers |
-| 27.4 | NEXT | SMS delivery providers |
-| 27.5 | PLANNED | WhatsApp delivery providers |
+| 27.4 | COMPLETE | SMS delivery providers |
+| 27.5 | NEXT | WhatsApp delivery providers |
 | 27.6 | PLANNED | Push notification delivery |
 | 27.7 | PLANNED | Webhooks and delivery tracking |
 | 27.8 | PLANNED | Communication center UI |

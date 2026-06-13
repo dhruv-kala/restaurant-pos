@@ -77,9 +77,7 @@ describe('SmtpProviderAdapter', () => {
     });
     const adapter = new SmtpProviderAdapter(new CommunicationSecretResolver());
 
-    await expect(adapter.send(request)).rejects.toMatchObject<
-      Partial<CommunicationProviderError>
-    >({
+    await expect(adapter.send(request)).rejects.toMatchObject<Partial<CommunicationProviderError>>({
       code: 'ETIMEDOUT',
       retryable: true,
       message: 'SMTP delivery failed',

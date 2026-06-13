@@ -34,3 +34,7 @@ Task 27.3 uses the existing provider, message, and attempt tables. SMTP
 credentials remain outside PostgreSQL and are referenced through
 `secret_reference`. SMTP acceptance updates the mutable delivery-state fields
 while immutable recipient/content/idempotency snapshots remain protected.
+
+Task 27.4 also uses the existing communication tables. Twilio auth tokens remain
+environment-backed secret references. Phone destinations stay encrypted at
+rest and are exposed through history APIs only in masked form.

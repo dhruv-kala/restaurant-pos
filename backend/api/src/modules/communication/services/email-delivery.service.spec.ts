@@ -14,6 +14,7 @@ import type { AuditService } from '../../audit/services/audit.service';
 import { CommunicationProviderError } from '../providers/communication-provider.adapter';
 import type { SmtpProviderAdapter } from '../providers/smtp-provider.adapter';
 import type { CommunicationAddressProtector } from './communication-address-protector';
+import { CommunicationDeliveryExecutor } from './communication-delivery-executor.service';
 import { EmailDeliveryService } from './email-delivery.service';
 
 const actor: AuthenticatedUser = {
@@ -75,9 +76,7 @@ function setup(sendResult: Promise<unknown>) {
     updatedAt: new Date(),
     provider,
   };
-  const attemptUpdate = jest
-    .fn<Promise<unknown>, [unknown]>()
-    .mockResolvedValue({});
+  const attemptUpdate = jest.fn<Promise<unknown>, [unknown]>().mockResolvedValue({});
   const transaction = {
     $queryRaw: jest.fn(),
     communicationMessage: {
@@ -94,14 +93,11 @@ function setup(sendResult: Promise<unknown>) {
     },
   };
   const prisma = {
-    $transaction: jest.fn(
-      (callback: (tx: Prisma.TransactionClient) => Promise<unknown>) =>
-        callback(transaction as unknown as Prisma.TransactionClient),
+    $transaction: jest.fn((callback: (tx: Prisma.TransactionClient) => Promise<unknown>) =>
+      callback(transaction as unknown as Prisma.TransactionClient),
     ),
   } as unknown as PrismaService;
-  const auditAppend = jest
-    .fn<Promise<unknown>, [unknown, unknown]>()
-    .mockResolvedValue({});
+  const auditAppend = jest.fn<Promise<unknown>, [unknown, unknown]>().mockResolvedValue({});
   const audit = { append: auditAppend } as unknown as AuditService;
   const addresses = {
     decrypt: jest.fn().mockReturnValue('customer@example.test'),
@@ -110,8 +106,9 @@ function setup(sendResult: Promise<unknown>) {
     providerKey: 'smtp',
     send: jest.fn().mockReturnValue(sendResult),
   } as unknown as SmtpProviderAdapter;
+  const delivery = new CommunicationDeliveryExecutor(prisma, audit, addresses);
   return {
-    service: new EmailDeliveryService(prisma, audit, addresses, smtp),
+    service: new EmailDeliveryService(delivery, smtp),
     transaction,
     attemptUpdate,
     auditAppend,
@@ -149,9 +146,7 @@ describe('EmailDeliveryService', () => {
 
   it('records a failed attempt without scheduling a retry', async () => {
     const { service, attemptUpdate, auditAppend } = setup(
-      Promise.reject(
-        new CommunicationProviderError('SMTP delivery failed', 'ETIMEDOUT', true),
-      ),
+      Promise.reject(new CommunicationProviderError('SMTP delivery failed', 'ETIMEDOUT', true)),
     );
 
     await expect(service.deliver('message-1', actor)).rejects.toBeInstanceOf(

@@ -343,6 +343,9 @@ The repository currently contains:
 - SMTP email execution with environment-backed secret references,
   authenticated recipient-address encryption, append-only attempts, protected
   history APIs, and audited delivery status
+- Twilio SMS execution with E.164 validation, provider privacy controls,
+  channel-neutral delivery orchestration, append-only attempts, and audited
+  status tracking
 
 ## Authoritative References
 
