@@ -1,8 +1,12 @@
-import type { CommunicationChannel } from '@prisma/client';
+import type { CommunicationChannel, Prisma } from '@prisma/client';
 
 export interface CommunicationProviderRequest {
   messageId: string;
   tenantId: string;
+  providerId: string;
+  providerKey: string;
+  configuration: Prisma.JsonValue | null;
+  secretReference: string | null;
   channel: CommunicationChannel;
   destination: string;
   subject?: string | null;
@@ -14,6 +18,17 @@ export interface CommunicationProviderResult {
   providerMessageId?: string;
   acceptedAt: Date;
   metadata?: Record<string, unknown>;
+}
+
+export class CommunicationProviderError extends Error {
+  constructor(
+    message: string,
+    readonly code: string,
+    readonly retryable: boolean,
+  ) {
+    super(message);
+    this.name = CommunicationProviderError.name;
+  }
 }
 
 export interface CommunicationProviderAdapter {

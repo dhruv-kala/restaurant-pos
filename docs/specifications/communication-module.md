@@ -2,8 +2,8 @@
 
 ## Status
 
-Tasks 27.1 infrastructure foundation and 27.2 template management are
-implemented. Tasks 27.3 through 27.9 remain planned.
+Tasks 27.1 infrastructure foundation, 27.2 template management, and 27.3 SMTP
+email delivery are implemented. Tasks 27.4 through 27.9 remain planned.
 
 Task 27 is split into:
 
@@ -75,6 +75,12 @@ Task 27.2 implements tenant-scoped `CommunicationTemplate` and immutable
 `CommunicationTemplateVersion` records, strict scalar placeholder rendering,
 preview, protected administration APIs, exact message version references, and
 transactional audit events. Webhook models remain deferred.
+
+Task 27.3 implements SMTP provider execution, environment-backed secret
+references, authenticated recipient-address encryption, atomic message
+claiming, append-only attempts, SMTP acceptance/failure tracking, protected
+message history, and delivery audit events. SMTP acceptance maps to `SENT`;
+provider-confirmed `DELIVERED` remains Task 27.7.
 
 ## Invariants
 

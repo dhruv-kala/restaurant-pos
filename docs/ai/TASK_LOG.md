@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 27.2 are complete at the requested foundation level.
+Tasks 1 through 27.3 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 27.3, Email Delivery Providers, is the next provisional roadmap item. It
+Task 27.4, SMS Delivery Providers, is the next provisional roadmap item. It
 is not approved for implementation until explicitly requested.
 
 ## Task History
@@ -53,6 +53,74 @@ is not approved for implementation until explicitly requested.
 | 26. Implement Notification Center Module | COMPLETE | Tenant/outlet/user in-app notifications, recipient delivery/read state, preferences, publishing APIs, shared clients, admin center, and restaurant-app foundation are implemented. |
 | 27.1. Communication Infrastructure Foundation | COMPLETE | Provider/message/attempt schema, protected recipient addressing, immutable communication history, idempotent enqueueing, abstraction contracts, and state rules are implemented. |
 | 27.2. Communication Template Management | COMPLETE | Tenant template CRUD, immutable versions, strict variable rendering, preview, permissions, audit events, and exact message version references are implemented. |
+| 27.3. Email Delivery Providers | COMPLETE | SMTP execution, protected recipient decryption, append-only attempts, status tracking, history APIs, permissions, and audit events are implemented. |
+
+## Task 27.3 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Nodemailer 8 SMTP adapter for `EMAIL` messages
+- Strict provider configuration validation for host, port, TLS, sender,
+  reply-to, authentication, and bounded connection timeouts
+- Environment-backed `env:VARIABLE_NAME` secret resolution without persisting
+  or logging SMTP passwords
+- AES-256-GCM recipient-address encryption/decryption using
+  `COMMUNICATION_ADDRESS_ENCRYPTION_KEY`
+- Atomic queued-message claiming with active tenant SMTP provider selection
+- Append-only numbered attempts progressing through `PENDING`, `PROCESSING`,
+  and `ACCEPTED`, `RETRYABLE_FAILED`, or `TERMINAL_FAILED`
+- Message progression from `QUEUED` to `PROCESSING`, then `SENT` or `FAILED`
+- Safe SMTP failure classification without storing provider exception messages
+  or credentials
+- Protected `GET /communication/messages` and
+  `GET /communication/messages/:id` history APIs that expose masked addresses
+  and safe attempt data only
+- `communication.history_view` and `communication.send` permissions; tenant
+  administrators receive both and managers receive outlet-scoped history only
+- Transactional `communication.email.sent` and
+  `communication.email.failed` audit events
+- SMTP configuration, API, security, environment, specification, roadmap, and
+  restart-context documentation
+
+Decisions:
+
+- SMTP acceptance maps to message `SENT` and attempt `ACCEPTED`; provider
+  confirmation of `DELIVERED` remains Task 27.7.
+- Delivery execution is an internal service. Task 27.3 adds no public
+  send/resend endpoint, scheduler, queue worker, or automatic retry behavior.
+- Retryable failures are classified for future orchestration but no
+  `nextRetryAt` is assigned.
+- Durable attachment storage/retrieval remains deferred because the approved
+  file-storage abstraction is Task 35.
+- SendGrid, Mailgun, and Amazon SES remain future adapters.
+- The permission catalog now contains 188 permissions; historical task counts
+  remain unchanged.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npx tsc -p prisma/tsconfig.seed.json --noEmit`: passed
+- `npm run test -- --runInBand`: passed, 190 tests
+- `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Focused SMTP, encryption, access, and delivery tests: passed, 11 tests
+- `npm audit --omit=dev`: passed, 0 vulnerabilities
+- `git diff --check`: passed
+- `npm run prisma:migrate:deploy`: failed with the existing local Prisma
+  schema-engine error before migration deployment
+
+Known limitations:
+
+- No live SMTP credentials or external SMTP server were available, so provider
+  execution was validated with a mocked Nodemailer transport.
+- No background worker invokes queued delivery automatically.
+- No delivery webhook can promote `SENT` to `DELIVERED` until Task 27.7.
+- No durable email attachment storage exists until the approved storage task.
 
 ## Task 27.2 Completion
 

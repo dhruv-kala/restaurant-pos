@@ -29,3 +29,8 @@ applicable, and have forced row-level security.
 
 Queue, retry, and provider indexes support later Task 27 delivery workers
 without adding an external queue dependency.
+
+Task 27.3 uses the existing provider, message, and attempt tables. SMTP
+credentials remain outside PostgreSQL and are referenced through
+`secret_reference`. SMTP acceptance updates the mutable delivery-state fields
+while immutable recipient/content/idempotency snapshots remain protected.

@@ -250,7 +250,7 @@ The repository currently contains:
 - A committed tenancy and authorization migration with UUIDv7 generation,
   tenant-aware constraints, and forced row-level security
 - An environment-aware, transactional seed framework with platform master data,
-  global role templates, 186 permissions, role mappings, system settings,
+  global role templates, 188 permissions, role mappings, system settings,
   application modules, and an idempotent development demo restaurant
 - Email/password authentication with Passport JWT
 - Hashed, rotating, revocable refresh-token persistence
@@ -340,6 +340,9 @@ The repository currently contains:
 - Provider-neutral communication provider/message/attempt persistence for
   email, SMS, WhatsApp, and push with protected recipient addressing,
   idempotent outbound snapshots, and an internal transactional enqueue service
+- SMTP email execution with environment-backed secret references,
+  authenticated recipient-address encryption, append-only attempts, protected
+  history APIs, and audited delivery status
 
 ## Authoritative References
 

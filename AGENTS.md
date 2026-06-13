@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 27.2 are complete at the foundation level.
+Tasks 1 through 27.3 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -196,7 +196,11 @@ Task 27.2 implemented tenant-scoped communication templates, immutable version
 history, strict placeholder validation and preview rendering, protected CRUD
 APIs, exact message version references, permissions, and audit events.
 
-Task 27.3 is next provisionally: implement Email Delivery Providers.
+Task 27.3 implemented SMTP email execution, environment-backed secret
+references, AES-256-GCM recipient protection, atomic message claims,
+append-only attempts, protected history APIs, and delivery audit events.
+
+Task 27.4 is next provisionally: implement SMS Delivery Providers.
 Do not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
