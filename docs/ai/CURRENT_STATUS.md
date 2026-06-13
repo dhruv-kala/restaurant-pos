@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 27.9**
-- Current module: **Communication Analytics**
-- Next provisional task: **Task 28 - SaaS Plans, Subscriptions, Entitlements, and Limits**
+- Completed through: **Task 28.1**
+- Current module: **Subscription Plan Management**
+- Next provisional task: **Task 28.2 - Subscription Lifecycle**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -31,6 +31,7 @@ Last updated: 2026-06-13
 | 27.7 | Verified provider webhooks, immutable idempotent event history, and monotonic delivery-state synchronization |
 | 27.8 | Provider administration APIs, shared communication clients, and admin dashboard/template/history/provider screens |
 | 27.9 | Tenant/outlet communication KPIs, channel/provider performance, delivery trends, typed clients, and admin reporting |
+| 28.1 | Global versioned plan catalog, feature snapshots, immutable activated versions, platform APIs, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -74,6 +75,9 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Tenant/outlet-scoped communication analytics with bounded UTC ranges,
   daily/weekly/monthly trends, terminal success/failure rates, channel delivery
   latency, provider performance, webhook latency, and admin reporting controls
+- Platform-managed subscription plans with stable codes, numbered versions,
+  draft-only feature editing, immutable activated snapshots, optimistic
+  concurrency, lifecycle APIs, and platform audit events
 
 ## Known Environment Limitation
 
@@ -84,19 +88,19 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 28 - SaaS Plans, Subscriptions, Entitlements, and Limits
+### Task 28.2 - Subscription Lifecycle
 
 Read:
 
-- `docs/specifications/communication-module.md`
-- `docs/tasks/000-roadmap.md`
+- `docs/specifications/subscription-module.md`
+- `docs/tasks/028-subscription-module/28.2-subscription-lifecycle.md`
 - `docs/ai/MODULE_DEPENDENCIES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Define plan ownership, tenant subscriptions, entitlements, limits, billing
-boundaries, and enforcement contracts before UI work. Do not implement Task 28
-unless explicitly requested.
+Implement tenant subscription lifecycle and append-only history against exact
+Task 28.1 plan-version references. Do not implement Task 28.2 unless explicitly
+requested.
 
 ## Status Maintenance
 

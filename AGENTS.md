@@ -228,8 +228,12 @@ Task 27.9 implemented tenant/outlet-scoped communication KPIs, bounded UTC
 report ranges, daily/weekly/monthly trends, channel and provider performance,
 delivery and webhook latency, typed clients, and admin reporting controls.
 
-Task 28 is next provisionally: implement SaaS Plans, Subscriptions,
-Entitlements, and Limits. Do not implement it unless the active user request
+Task 28.1 implemented the global subscription plan catalog, stable plan codes,
+numbered versions, draft feature snapshots, immutable activated versions,
+platform-only APIs, optimistic concurrency, and audit events.
+
+Task 28.2 is next provisionally: implement tenant subscription lifecycle and
+append-only history. Do not implement it unless the active user request
 explicitly asks for it.
 
 ## Working Practices

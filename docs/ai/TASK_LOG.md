@@ -11,13 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 27.9 are complete at the requested foundation level.
+Tasks 1 through 28.1 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 28, SaaS Plans, Subscriptions, Entitlements, and Limits, is the next
-provisional roadmap item. It is
+Task 28.2, Subscription Lifecycle, is the next provisional roadmap item. It is
 not approved for implementation until explicitly requested.
 
 ## Task History
@@ -61,6 +60,66 @@ not approved for implementation until explicitly requested.
 | 27.7. Webhooks and Delivery Tracking | COMPLETE | Verified Twilio and provider-neutral callbacks, immutable idempotent webhook events, centralized delivery synchronization, and audit events are implemented. |
 | 27.8. Communication Center UI | COMPLETE | Provider administration APIs, shared communication contracts, typed clients, Riverpod state, and admin dashboard/template/history/provider screens are implemented. |
 | 27.9. Communication Analytics | COMPLETE | Tenant/outlet KPIs, channel/provider delivery performance, webhook latency, trends, typed clients, and admin reporting are implemented. |
+| 28.1. Plan Management | COMPLETE | Platform-managed versioned plans, feature snapshots, immutable activated versions, protected APIs, tests, and audit events are implemented. |
+
+## Task 28.1 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Global `SubscriptionPlan` and `SubscriptionPlanFeature` Prisma models
+- Stable case-insensitive plan codes with numbered versions
+- Draft, active, and inactive lifecycle with one active version per code
+- Integer minor-unit prices, ISO currency codes, monthly/yearly intervals, and
+  non-negative feature limits
+- Draft plan creation, update, feature replacement, list, detail, and version
+  history APIs
+- Updating an activated or deactivated plan creates the next draft version and
+  copies the immutable feature snapshot
+- Activation atomically deactivates the prior active version for the same code
+- Optimistic concurrency on every mutable command
+- PostgreSQL checks, restrictive foreign keys, partial active-version
+  uniqueness, and activated plan/feature immutability triggers
+- Platform-only `SUPER_ADMIN` authorization
+- Immutable platform audit events for create, update, version creation,
+  feature replacement, activation, and deactivation
+- API and module documentation plus focused schema, access, and service tests
+
+Decisions:
+
+- Plans are global platform catalog data, not tenant-owned records.
+- A future tenant subscription will reference an exact plan-version ID so
+  historical commercial and feature terms remain reproducible.
+- Activated and deactivated versions cannot be edited. Their update path
+  creates a new draft under the same stable code.
+- Feature `limitValue` is catalog metadata only in Task 28.1; enforcement is
+  deferred to Task 28.4.
+- Tenant subscriptions, entitlements, trials, billing, shared Flutter
+  contracts, and administration UI remain out of scope.
+
+Validation:
+
+- Backend `npm run prisma:format`: passed
+- Backend `npm run prisma:validate`: passed
+- Backend `npm run prisma:generate`: passed
+- Backend `npm run lint`: passed
+- Backend `npm run build`: passed
+- Backend `npm run test -- --runInBand`: passed, 241 tests
+- Backend `npm run test:e2e -- --runInBand`: passed, 7 tests
+- Seed TypeScript compile: passed
+- Focused subscription tests: passed, 11 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitation:
+
+- The migration was not deployed because the recorded local PostgreSQL
+  credentials remain unavailable. Prisma validation and schema contract tests
+  passed.
+
+Next task:
+
+- Task 28.2 Subscription Lifecycle, only when explicitly requested.
 
 ## Task 27.9 Completion
 

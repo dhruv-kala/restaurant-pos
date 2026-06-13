@@ -361,6 +361,9 @@ The repository currently contains:
 - Tenant/outlet-scoped communication analytics with UTC date bounds,
   daily/weekly/monthly trends, terminal success/failure rates, channel/provider
   delivery latency, webhook latency, typed clients, and admin reporting UI
+- Platform-managed subscription plans with stable codes, immutable numbered
+  versions, draft feature snapshots, integer minor-unit pricing, protected
+  lifecycle APIs, optimistic concurrency, and platform audit events
 
 ## Authoritative References
 

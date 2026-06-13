@@ -22,7 +22,8 @@ loading the complete enterprise design.
 - `rbac-module.md`
 - `audit-module.md`
 - `notification-module.md`
-- `communication-module.md` (Tasks 27.1-27.4 implemented; later subtasks planned)
+- `communication-module.md` (Tasks 27.1-27.9 implemented)
+- `subscription-module.md` (Task 28.1 implemented; later subtasks planned)
 
 ## Planned Modules
 

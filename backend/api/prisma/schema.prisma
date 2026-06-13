@@ -461,6 +461,21 @@ enum CommunicationWebhookProcessingStatus {
   @@map("communication_webhook_processing_status")
 }
 
+enum SubscriptionPlanStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+
+  @@map("subscription_plan_status")
+}
+
+enum SubscriptionBillingInterval {
+  MONTHLY
+  YEARLY
+
+  @@map("subscription_billing_interval")
+}
+
 enum EmploymentType {
   FULL_TIME
   PART_TIME
@@ -841,6 +856,8 @@ model UserAccount {
   communicationMessages                CommunicationMessage[]         @relation("CommunicationMessageRecipientUser")
   createdCommunicationTemplateVersions CommunicationTemplateVersion[] @relation("CommunicationTemplateVersionCreatedBy")
   communicationPushDevices             CommunicationPushDevice[]
+  createdSubscriptionPlans             SubscriptionPlan[]             @relation("SubscriptionPlanCreatedBy")
+  updatedSubscriptionPlans             SubscriptionPlan[]             @relation("SubscriptionPlanUpdatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -2665,6 +2682,50 @@ model CommunicationPushDevice {
   @@index([tenantId, tokenHash], map: "communication_push_devices_token_idx")
   @@index([tenantId, userId, status, lastSeenAt], map: "communication_push_devices_user_status_idx")
   @@map("communication_push_devices")
+}
+
+model SubscriptionPlan {
+  id              String                      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  code            String                      @db.Citext
+  versionNumber   Int                         @map("version_number")
+  name            String                      @db.VarChar(160)
+  description     String?                     @db.VarChar(1000)
+  billingInterval SubscriptionBillingInterval @map("billing_interval")
+  priceMinor      Int                         @map("price_minor")
+  currencyCode    String                      @map("currency_code") @db.Char(3)
+  status          SubscriptionPlanStatus      @default(DRAFT)
+  createdByUserId String                      @map("created_by_user_id") @db.Uuid
+  updatedByUserId String                      @map("updated_by_user_id") @db.Uuid
+  activatedAt     DateTime?                   @map("activated_at") @db.Timestamptz(3)
+  deactivatedAt   DateTime?                   @map("deactivated_at") @db.Timestamptz(3)
+  version         Int                         @default(1)
+  createdAt       DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  createdBy UserAccount               @relation("SubscriptionPlanCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy UserAccount               @relation("SubscriptionPlanUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  features  SubscriptionPlanFeature[]
+
+  @@unique([code, versionNumber], map: "subscription_plans_code_version_key")
+  @@index([status, code, versionNumber], map: "subscription_plans_directory_idx")
+  @@map("subscription_plans")
+}
+
+model SubscriptionPlanFeature {
+  id         String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  planId     String   @map("plan_id") @db.Uuid
+  featureKey String   @map("feature_key") @db.VarChar(120)
+  isEnabled  Boolean  @default(true) @map("is_enabled")
+  limitValue Int?     @map("limit_value")
+  metadata   Json?    @db.JsonB
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@unique([planId, featureKey], map: "subscription_plan_features_plan_key")
+  @@index([featureKey, isEnabled], map: "subscription_plan_features_lookup_idx")
+  @@map("subscription_plan_features")
 }
 
 model EmployeeProfile {
