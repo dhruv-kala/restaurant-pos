@@ -11,12 +11,12 @@ Last updated: 2026-06-13
 
 ## Current Summary
 
-Tasks 1 through 28.4 are complete at the requested foundation level.
+Tasks 1 through 28.5 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 28.5, Trial Management, is the next provisional roadmap item. It is
+Task 28.6, Subscription Admin UI, is the next provisional roadmap item. It is
 not approved for implementation until explicitly requested.
 
 ## Task History
@@ -64,6 +64,57 @@ not approved for implementation until explicitly requested.
 | 28.2. Subscription Lifecycle | COMPLETE | Tenant subscription aggregates, exact plan references, idempotent transitions, append-only history, RLS, tests, and audit events are implemented. |
 | 28.3. Feature Entitlements | COMPLETE | Tenant overrides, exact plan-version evaluation, fail-closed subscription checks, reusable enforcement, RLS, tests, and audit events are implemented. |
 | 28.4. Usage Limits | COMPLETE | Tenant counters, immutable idempotent operations, atomic limit enforcement, configurable over-limit policies, RLS, tests, and audit events are implemented. |
+| 28.5. Trial Management | COMPLETE | Trial subscriptions, immutable trial history, extension, expiry, due-expiry processing, paid conversion, RLS, tests, and audit events are implemented. |
+
+## Task 28.5 Completion
+
+Completed on 2026-06-13.
+
+Implemented:
+
+- Tenant-scoped `TrialSubscription` aggregate
+- Immutable `TrialSubscriptionEvent` lifecycle history
+- `ACTIVE`, `EXPIRED`, and `CONVERTED` trial statuses
+- Start trial command that creates a linked `TenantSubscription` in `TRIAL`
+  status
+- Extend command that updates the trial period and linked subscription end
+- Expire command that updates the trial and linked subscription to expired
+- Platform `expire-due` processor endpoint for future scheduler integration
+- Convert command that activates the linked subscription with an exact paid
+  plan version
+- One trial per tenant and one active trial per tenant constraints
+- Period, status timestamp, optimistic version, and tenant-aware foreign-key
+  constraints
+- Forced PostgreSQL RLS on trial aggregates and trial events
+- Delete prevention for trial aggregates and append-only event triggers
+- Tenant-admin self-read and platform-only mutation authorization
+- Tenant-scoped idempotency keys and request fingerprints
+- Tenant advisory locking for trial lifecycle commands
+- Trial lifecycle audit events for start, extension, expiry, and conversion
+- Protected list, detail, history, start, extend, expire, convert, and
+  expire-due APIs
+- API, module, specification, roadmap, and AI-context documentation
+- Focused schema, start, extend, convert, and due-expiry tests
+
+Decisions:
+
+- Trial access flows through the existing Task 28.3 entitlement evaluator by
+  using linked `TenantSubscription` status changes rather than a separate
+  trial-specific access path.
+- Conversion updates the same linked subscription to `ACTIVE` instead of
+  creating a second current subscription.
+- `expire-due` is a platform-callable hook only; no scheduler, queue, or new
+  infrastructure was introduced.
+- Subscription administration UI remains Task 28.6.
+
+Validation:
+
+- `npm run prisma:generate`: passed
+- `npm run prisma:validate`: passed
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm test -- --runInBand`: passed, 81 suites and 278 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
 
 ## Task 28.4 Completion
 

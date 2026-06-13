@@ -373,6 +373,9 @@ The repository currently contains:
 - Tenant usage-limit enforcement with BigInt counters, UTC
   lifetime/daily/monthly periods, immutable idempotent operations, atomic
   consumption, configurable block/warn/allow behavior, and audited exceptions
+- Tenant trial management with one-trial-per-tenant enforcement, linked
+  `TRIAL` subscription creation, extension, expiry, due-expiry processing,
+  paid conversion, immutable trial history, and audited lifecycle events
 
 ## Authoritative References
 

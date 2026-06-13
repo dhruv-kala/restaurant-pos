@@ -32,8 +32,8 @@ Last updated: 2026-06-13
 | 28.2 | COMPLETE | Tenant subscription lifecycle and append-only history |
 | 28.3 | COMPLETE | Feature entitlement evaluation and enforcement boundary |
 | 28.4 | COMPLETE | Central usage limits, counters, and over-limit policies |
-| 28.5 | NEXT | Trial management |
-| 28.6 | PLANNED | Subscription administration UI |
+| 28.5 | COMPLETE | Trial lifecycle, expiry handling, and paid conversion |
+| 28.6 | NEXT | Subscription administration UI |
 | 29 | PLANNED | Promotions, coupons, and discount policy engine |
 | 30 | PLANNED | Tax configuration and fiscal policy administration |
 | 31 | PLANNED | Business-day opening, shifts, cash drawer, and closing |

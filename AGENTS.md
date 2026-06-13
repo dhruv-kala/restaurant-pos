@@ -247,8 +247,13 @@ lifetime/daily/monthly periods, immutable idempotent operations, atomic
 consumption, block/warn/allow over-limit policies, forced RLS, protected
 evaluation/reconciliation APIs, and audit events.
 
-Task 28.5 is next provisionally: implement trial management. Do not implement
-it unless the active user request explicitly asks for it.
+Task 28.5 implemented tenant-scoped trial subscriptions, one-trial-per-tenant
+enforcement, linked `TRIAL` subscription creation, extension, expiry,
+due-expiry processing, paid conversion, immutable trial history, forced RLS,
+protected APIs, and audit events.
+
+Task 28.6 is next provisionally: implement subscription administration UI. Do
+not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

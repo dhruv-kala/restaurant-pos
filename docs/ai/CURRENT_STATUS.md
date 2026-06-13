@@ -4,9 +4,9 @@ Last updated: 2026-06-13
 
 ## Current Position
 
-- Completed through: **Task 28.4**
-- Current module: **Usage Limits**
-- Next provisional task: **Task 28.5 - Trial Management**
+- Completed through: **Task 28.5**
+- Current module: **Trial Management**
+- Next provisional task: **Task 28.6 - Subscription Admin UI**
 - Later roadmap entries: **Provisional until explicitly approved**
 
 ## Completed Tasks
@@ -35,6 +35,7 @@ Last updated: 2026-06-13
 | 28.2 | Tenant subscription lifecycle, exact plan references, idempotent commands, append-only history, RLS, and audit events |
 | 28.3 | Tenant feature overrides, fail-closed evaluation, route guard/decorator enforcement, RLS, and audit events |
 | 28.4 | Tenant usage counters, immutable operations, atomic enforcement, configurable over-limit policies, RLS, and audit events |
+| 28.5 | Trial subscriptions, immutable trial history, extension, expiry, paid conversion, RLS, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -92,6 +93,9 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Tenant usage counters with UTC lifetime/daily/monthly periods, immutable
   idempotent operations, atomic consumption, block/warn/allow policies,
   BigInt-safe contracts, forced RLS, and audited reconciliation/overages
+- Tenant trial subscriptions with one-trial-per-tenant enforcement,
+  time-bound access, immutable lifecycle history, linked subscription status
+  updates, due-expiry processing, paid conversion, forced RLS, and audit events
 
 ## Known Environment Limitation
 
@@ -102,18 +106,18 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 28.5 - Trial Management
+### Task 28.6 - Subscription Admin UI
 
 Read:
 
 - `docs/specifications/subscription-module.md`
-- `docs/tasks/028-subscription-module/28.5-trial-management.md`
+- `docs/tasks/028-subscription-module/28.6-subscription-admin-ui.md`
 - `docs/ai/MODULE_DEPENDENCIES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement trial subscription creation, eligibility, expiration, and conversion
-rules. Do not implement Task 28.5 unless explicitly requested.
+Implement subscription administration UI and shared client contracts. Do not
+implement Task 28.6 unless explicitly requested.
 
 ## Status Maintenance
 

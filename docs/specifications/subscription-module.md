@@ -3,8 +3,8 @@
 ## Status
 
 Tasks 28.1 Plan Management, 28.2 Subscription Lifecycle, 28.3 Feature
-Entitlements, and 28.4 Usage Limits are implemented. Tasks 28.5 and 28.6 remain
-planned.
+Entitlements, 28.4 Usage Limits, and 28.5 Trial Management are implemented.
+Task 28.6 remains planned.
 
 Task 28 is split into:
 
@@ -72,6 +72,12 @@ and immutable `UsageCounterEvent` operations. Centralized consumption resolves
 the effective entitlement limit, applies UTC lifetime/daily/monthly periods,
 and enforces configurable block, warn, or allow behavior atomically.
 
+Task 28.5 implements tenant-scoped `TrialSubscription` aggregates and immutable
+`TrialSubscriptionEvent` history. Trials create linked `TenantSubscription`
+records in `TRIAL` status, expire to `EXPIRED` so entitlement checks fail
+closed, and convert to `ACTIVE` paid subscriptions with exact plan-version
+references.
+
 All tenant-owned records carry tenant scope.
 
 ## Invariants
@@ -98,6 +104,10 @@ All tenant-owned records carry tenant scope.
 * Counter updates are serialized by tenant, feature, and period.
 * Limit enforcement uses the current effective entitlement.
 * BigInt usage values are serialized as decimal strings.
+* A tenant can have only one trial subscription.
+* Trial history is append-only and trial aggregates cannot be deleted.
+* Expired trials lose access through the normal entitlement evaluator.
+* Converted trials keep trial history while activating the linked subscription.
 
 ## Authorization
 
@@ -217,6 +227,24 @@ Read endpoints are available to `SUPER_ADMIN` and the tenant's own
 Counter reconciliation uses decimal strings, reasons, idempotency keys, and
 optimistic versions. Ordinary business consumption is an internal service
 contract rather than a client-callable endpoint.
+
+## Task 28.5 API
+
+Read endpoints are available to `SUPER_ADMIN` and the tenant's own
+`TENANT_ADMIN`. Mutation endpoints require `SUPER_ADMIN`:
+
+* `POST /subscriptions/tenants/:tenantId/trials/start`
+* `GET /subscriptions/tenants/:tenantId/trials`
+* `GET /subscriptions/tenants/:tenantId/trials/:id`
+* `GET /subscriptions/tenants/:tenantId/trials/:id/history`
+* `POST /subscriptions/tenants/:tenantId/trials/:id/extend`
+* `POST /subscriptions/tenants/:tenantId/trials/:id/expire`
+* `POST /subscriptions/tenants/:tenantId/trials/:id/convert`
+* `POST /subscriptions/trials/expire-due`
+
+`expire-due` is a platform-callable processor hook for scheduler integration in
+a later operational task. This task does not introduce a scheduler, queue, or
+new infrastructure.
 
 ## Non-Goals
 

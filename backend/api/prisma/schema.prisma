@@ -494,8 +494,29 @@ enum TenantSubscriptionEventType {
   RESUMED
   EXPIRED
   CANCELLED
+  TRIAL_STARTED
+  TRIAL_EXTENDED
+  TRIAL_EXPIRED
+  TRIAL_CONVERTED
 
   @@map("tenant_subscription_event_type")
+}
+
+enum TrialSubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CONVERTED
+
+  @@map("trial_subscription_status")
+}
+
+enum TrialSubscriptionEventType {
+  STARTED
+  EXTENDED
+  EXPIRED
+  CONVERTED
+
+  @@map("trial_subscription_event_type")
 }
 
 enum UsageCounterPeriod {
@@ -772,6 +793,8 @@ model Tenant {
   entitlements                  TenantEntitlement[]
   usageCounters                 UsageCounter[]
   usageCounterEvents            UsageCounterEvent[]
+  trialSubscriptions            TrialSubscription[]
+  trialSubscriptionEvents       TrialSubscriptionEvent[]
 
   @@index([status])
   @@index([deletedAt])
@@ -914,6 +937,9 @@ model UserAccount {
   createdTenantEntitlements            TenantEntitlement[]            @relation("TenantEntitlementCreatedBy")
   updatedTenantEntitlements            TenantEntitlement[]            @relation("TenantEntitlementUpdatedBy")
   usageCounterEvents                   UsageCounterEvent[]            @relation("UsageCounterEventActor")
+  createdTrialSubscriptions            TrialSubscription[]            @relation("TrialSubscriptionCreatedBy")
+  updatedTrialSubscriptions            TrialSubscription[]            @relation("TrialSubscriptionUpdatedBy")
+  trialSubscriptionEvents              TrialSubscriptionEvent[]       @relation("TrialSubscriptionEventActor")
 
   @@index([status])
   @@index([deletedAt])
@@ -2758,12 +2784,16 @@ model SubscriptionPlan {
   createdAt       DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  createdBy                  UserAccount               @relation("SubscriptionPlanCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  updatedBy                  UserAccount               @relation("SubscriptionPlanUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
-  features                   SubscriptionPlanFeature[]
-  subscriptions              TenantSubscription[]
-  previousSubscriptionEvents TenantSubscriptionEvent[] @relation("TenantSubscriptionEventPreviousPlan")
-  newSubscriptionEvents      TenantSubscriptionEvent[] @relation("TenantSubscriptionEventNewPlan")
+  createdBy                   UserAccount               @relation("SubscriptionPlanCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy                   UserAccount               @relation("SubscriptionPlanUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  features                    SubscriptionPlanFeature[]
+  subscriptions               TenantSubscription[]
+  previousSubscriptionEvents  TenantSubscriptionEvent[] @relation("TenantSubscriptionEventPreviousPlan")
+  newSubscriptionEvents       TenantSubscriptionEvent[] @relation("TenantSubscriptionEventNewPlan")
+  trialSubscriptions          TrialSubscription[]       @relation("TrialSubscriptionPlan")
+  convertedTrialSubscriptions TrialSubscription[]       @relation("TrialSubscriptionConvertedPlan")
+  previousTrialEvents         TrialSubscriptionEvent[]  @relation("TrialSubscriptionEventPreviousPlan")
+  newTrialEvents              TrialSubscriptionEvent[]  @relation("TrialSubscriptionEventNewPlan")
 
   @@unique([code, versionNumber], map: "subscription_plans_code_version_key")
   @@index([status, code, versionNumber], map: "subscription_plans_directory_idx")
@@ -2803,11 +2833,13 @@ model TenantSubscription {
   createdAt       DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant    Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  plan      SubscriptionPlan          @relation(fields: [planId], references: [id], onDelete: Restrict)
-  createdBy UserAccount               @relation("TenantSubscriptionCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  updatedBy UserAccount               @relation("TenantSubscriptionUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
-  events    TenantSubscriptionEvent[]
+  tenant      Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  plan        SubscriptionPlan          @relation(fields: [planId], references: [id], onDelete: Restrict)
+  createdBy   UserAccount               @relation("TenantSubscriptionCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy   UserAccount               @relation("TenantSubscriptionUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  events      TenantSubscriptionEvent[]
+  trial       TrialSubscription?
+  trialEvents TrialSubscriptionEvent[]
 
   @@unique([tenantId, id], map: "tenant_subscriptions_tenant_id_id_key")
   @@index([tenantId, status, updatedAt], map: "tenant_subscriptions_directory_idx")
@@ -2923,6 +2955,71 @@ model UsageCounterEvent {
   @@index([tenantId, counterId, occurredAt], map: "usage_counter_events_history_idx")
   @@index([tenantId, featureKey], map: "usage_counter_events_feature_idx")
   @@map("usage_counter_events")
+}
+
+model TrialSubscription {
+  id              String                  @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String                  @map("tenant_id") @db.Uuid
+  subscriptionId  String                  @map("subscription_id") @db.Uuid
+  planId          String                  @map("plan_id") @db.Uuid
+  convertedPlanId String?                 @map("converted_plan_id") @db.Uuid
+  status          TrialSubscriptionStatus @default(ACTIVE)
+  startsAt        DateTime                @map("starts_at") @db.Timestamptz(3)
+  endsAt          DateTime                @map("ends_at") @db.Timestamptz(3)
+  extendedCount   Int                     @default(0) @map("extended_count")
+  expiredAt       DateTime?               @map("expired_at") @db.Timestamptz(3)
+  convertedAt     DateTime?               @map("converted_at") @db.Timestamptz(3)
+  createdByUserId String                  @map("created_by_user_id") @db.Uuid
+  updatedByUserId String                  @map("updated_by_user_id") @db.Uuid
+  version         Int                     @default(1)
+  createdAt       DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime                @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant        Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  subscription  TenantSubscription       @relation(fields: [tenantId, subscriptionId], references: [tenantId, id], onDelete: Restrict)
+  plan          SubscriptionPlan         @relation("TrialSubscriptionPlan", fields: [planId], references: [id], onDelete: Restrict)
+  convertedPlan SubscriptionPlan?        @relation("TrialSubscriptionConvertedPlan", fields: [convertedPlanId], references: [id], onDelete: Restrict)
+  createdBy     UserAccount              @relation("TrialSubscriptionCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy     UserAccount              @relation("TrialSubscriptionUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  events        TrialSubscriptionEvent[]
+
+  @@unique([tenantId, id], map: "trial_subscriptions_tenant_id_id_key")
+  @@unique([tenantId, subscriptionId], map: "trial_subscriptions_tenant_subscription_key")
+  @@unique([tenantId], map: "trial_subscriptions_one_per_tenant_key")
+  @@index([tenantId, status, endsAt], map: "trial_subscriptions_status_due_idx")
+  @@map("trial_subscriptions")
+}
+
+model TrialSubscriptionEvent {
+  id                 String                     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId           String                     @map("tenant_id") @db.Uuid
+  trialId            String                     @map("trial_id") @db.Uuid
+  subscriptionId     String                     @map("subscription_id") @db.Uuid
+  eventType          TrialSubscriptionEventType @map("event_type")
+  previousStatus     TrialSubscriptionStatus?   @map("previous_status")
+  newStatus          TrialSubscriptionStatus    @map("new_status")
+  previousEndsAt     DateTime?                  @map("previous_ends_at") @db.Timestamptz(3)
+  newEndsAt          DateTime                   @map("new_ends_at") @db.Timestamptz(3)
+  previousPlanId     String?                    @map("previous_plan_id") @db.Uuid
+  newPlanId          String                     @map("new_plan_id") @db.Uuid
+  actorUserId        String                     @map("actor_user_id") @db.Uuid
+  reason             String?                    @db.VarChar(500)
+  idempotencyKey     String                     @map("idempotency_key") @db.VarChar(160)
+  requestFingerprint String                     @map("request_fingerprint") @db.Char(64)
+  occurredAt         DateTime                   @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  trial        TrialSubscription  @relation(fields: [tenantId, trialId], references: [tenantId, id], onDelete: Restrict)
+  subscription TenantSubscription @relation(fields: [tenantId, subscriptionId], references: [tenantId, id], onDelete: Restrict)
+  previousPlan SubscriptionPlan?  @relation("TrialSubscriptionEventPreviousPlan", fields: [previousPlanId], references: [id], onDelete: Restrict)
+  newPlan      SubscriptionPlan   @relation("TrialSubscriptionEventNewPlan", fields: [newPlanId], references: [id], onDelete: Restrict)
+  actor        UserAccount        @relation("TrialSubscriptionEventActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "trial_subscription_events_tenant_id_id_key")
+  @@unique([tenantId, idempotencyKey], map: "trial_subscription_events_idempotency_key")
+  @@index([tenantId, trialId, occurredAt], map: "trial_subscription_events_history_idx")
+  @@index([tenantId, eventType, occurredAt], map: "trial_subscription_events_type_idx")
+  @@map("trial_subscription_events")
 }
 
 model EmployeeProfile {
