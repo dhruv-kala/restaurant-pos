@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially implemented.
+Implemented at the Task 29 foundation level.
 
 Task 29 is split into:
 
@@ -11,7 +11,7 @@ Task 29 is split into:
 - Task 29.3 Promotion Campaigns - Complete
 - Task 29.4 Discount Eligibility Engine - Complete
 - Task 29.5 Redemption and Usage Tracking - Complete
-- Task 29.6 Promotions Admin UI - Next
+- Task 29.6 Promotions Admin UI - Complete
 
 ## Objective
 
@@ -176,6 +176,13 @@ Admin Promotions Center:
 - redemption history
 - discount rule preview
 - usage reporting
+
+Task 29.6 adds shared Dart promotion models, a typed Dio client, Riverpod
+providers, and the tenant-scoped admin Promotions Center. The UI supports
+dashboard counts, discount policy activation, coupon activation, campaign
+activation/deactivation, eligibility preview, and redemption history. It does
+not implement marketing automation, communication composition, AI offer
+generation, or advanced campaign analytics.
 
 Restaurant App:
 

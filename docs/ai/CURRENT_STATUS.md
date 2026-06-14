@@ -4,9 +4,9 @@ Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 29.5**
+- Completed through: **Task 29.6**
 - Current module: **Promotions, Coupons, and Discount Policy Engine**
-- Next provisional task: **Task 29.6 - Promotions Admin UI**
+- Next provisional task: **Task 30 - Tax Configuration and Fiscal Policy Administration**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -45,6 +45,7 @@ Last updated: 2026-06-14
 | 29.3 | Tenant promotion campaigns, selected-outlet targeting, campaign rules, activation/deactivation, read-only evaluation, RLS, RBAC, and audit events |
 | 29.4 | Central discount eligibility service, context validation, explicit denial reasons, deterministic candidate evaluation, and conservative stacking enforcement |
 | 29.5 | Append-only promotion redemptions, idempotent creation, coupon usage counters, per-customer usage limits, bill-level history, RLS, and audit events |
+| 29.6 | Shared promotions contracts, typed API client, Riverpod providers, and admin dashboard/policy/coupon/campaign/preview/redemption screens |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -127,6 +128,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Promotion redemption tracking with tenant-scoped append-only records,
   idempotent writes, coupon total/per-customer usage enforcement, bill/order
   history APIs, forced RLS, and audit events
+- Promotions administration UI with shared Dart contracts, typed Dio client,
+  Riverpod providers, authorized admin navigation, dashboard counts, discount
+  policy and coupon status actions, campaign lifecycle actions, eligibility
+  preview, and redemption history
 
 ## Known Environment Limitation
 
@@ -137,7 +142,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 29.6 - Promotions Admin UI
+### Task 30 - Tax Configuration and Fiscal Policy Administration
 
 Read:
 
@@ -146,10 +151,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement promotions admin UI only after reading
-`docs/specifications/promotions-module.md` and the Task 29.6 task file. Do not
-implement future marketing automation or campaign analytics unless explicitly
-requested.
+Do not implement Task 30 unless explicitly requested. Define tax/fiscal policy
+ownership, tenant/outlet scope, calculation invariants, API contracts, and
+auditability before adding UI.
 
 ## Status Maintenance
 

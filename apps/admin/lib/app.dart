@@ -7,6 +7,7 @@ import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 import 'features/menu/presentation/screens/menu_dashboard.dart';
 import 'features/communication/presentation/screens/communication_center_screen.dart';
 import 'features/notifications/presentation/screens/notification_center_screen.dart';
+import 'features/promotions/presentation/screens/promotions_admin_screen.dart';
 import 'features/audit/presentation/screens/audit_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
 import 'features/customers/presentation/screens/customer_dashboard.dart';
@@ -76,6 +77,17 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasPermission('subscription.usage.manage') == true ||
         user?.hasPermission('subscription.trial.read') == true ||
         user?.hasPermission('subscription.trial.manage') == true;
+    final canViewPromotions =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('promotions.read') == true ||
+        user?.hasPermission('promotions.policy_manage') == true ||
+        user?.hasPermission('promotions.coupon_view') == true ||
+        user?.hasPermission('promotions.coupon_manage') == true ||
+        user?.hasPermission('promotions.campaign_view') == true ||
+        user?.hasPermission('promotions.campaign_manage') == true ||
+        user?.hasPermission('promotions.eligibility_evaluate') == true ||
+        user?.hasPermission('promotions.redemption_view') == true;
     final screens = <Widget>[
       const MenuDashboard(),
       const TableLayoutScreen(),
@@ -85,6 +97,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       const ReportsDashboard(),
       const EmployeeDashboard(),
       const NotificationCenterScreen(),
+      if (canViewPromotions) const PromotionsAdminScreen(),
       if (canViewCommunication) const CommunicationCenterScreen(),
       if (canViewSubscriptions) const SubscriptionAdminScreen(),
       if (canManageRbac) const UserManagementDashboard(),
@@ -117,6 +130,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         icon: Icon(Icons.notifications),
         label: 'Notifications',
       ),
+      if (canViewPromotions)
+        const NavigationDestination(
+          icon: Icon(Icons.local_offer),
+          label: 'Promotions',
+        ),
       if (canViewCommunication)
         const NavigationDestination(
           icon: Icon(Icons.outgoing_mail),

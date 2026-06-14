@@ -2611,3 +2611,71 @@ Known limitations:
 Next task:
 
 - Task 29.6 - Promotions Admin UI
+
+## Task 29.6 Completion
+
+Date: 2026-06-14
+
+Task: Task 29.6 - Promotions Admin UI
+
+Status: Complete
+
+Files changed:
+
+- `packages/shared_models/lib/restaurant_pos_shared_models.dart`
+- `packages/shared_models/lib/src/promotions/promotions_models.dart`
+- `packages/api_client/lib/restaurant_pos_api_client.dart`
+- `packages/api_client/lib/src/api_endpoints.dart`
+- `packages/api_client/lib/src/services/promotions_api_service.dart`
+- `apps/admin/lib/app.dart`
+- `apps/admin/lib/features/promotions/domain/promotions_query.dart`
+- `apps/admin/lib/features/promotions/data/promotions_repository.dart`
+- `apps/admin/lib/features/promotions/presentation/providers/promotions_providers.dart`
+- `apps/admin/lib/features/promotions/presentation/screens/promotions_admin_screen.dart`
+- `docs/specifications/promotions-module.md`
+- `docs/tasks/029-promotions/29.6-promotions-admin-ui.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 29.6 implemented only promotions administration UI and the shared Dart
+  contracts/client needed by that UI.
+- Added typed shared models for discount policies, coupons, campaigns, rules,
+  eligibility candidates, eligibility responses, and promotion redemptions.
+- Added a typed `PromotionsApiService` over the existing backend routes.
+- Added admin Riverpod providers and repository wrappers; widgets do not call
+  Dio directly.
+- Added an authorized `Promotions` navigation destination for super admins,
+  tenant admins, and users with relevant lowercase `promotions.*` permissions.
+- The Promotions Center includes dashboard metrics, policy management, coupon
+  management, campaign lifecycle actions, discount eligibility preview, and
+  redemption history.
+- Campaign creation is deliberately minimal: all-outlet scope with one initial
+  rule. Marketing automation, communication composition, AI offer generation,
+  and advanced analytics remain out of scope.
+
+Validation:
+
+- `dart format` on changed Dart files: passed
+- `dart analyze` from `packages/shared_models`: passed
+- `dart analyze` from `packages/api_client`: passed
+- `flutter pub get` from `apps/admin`: passed
+- `flutter analyze` from `apps/admin`: passed
+- `flutter test` from `apps/admin`: passed, 2 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- Backend and Prisma were not changed in this task, so Prisma and NestJS
+  validation were not rerun.
+- The dashboard's "today" discount metric is calculated from the current
+  redemption history page because the existing redemption API does not expose
+  date-range filtering.
+- Live UI behavior still depends on the Task 29 backend migrations being
+  deployed to a PostgreSQL database.
+
+Next task:
+
+- Task 30 - Tax Configuration and Fiscal Policy Administration

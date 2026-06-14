@@ -12,8 +12,8 @@ Last updated: 2026-06-14
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.5 are complete; Task 29.6 promotions admin UI is the
-  next provisional promotions subtask.
+- Tasks 29.1-29.6 are complete; Task 30 tax configuration and fiscal policy
+  administration is the next provisional task.
 
 ## Foundation and Core SaaS
 
@@ -43,8 +43,8 @@ Last updated: 2026-06-14
 | 29.3 | COMPLETE | Promotion campaigns |
 | 29.4 | COMPLETE | Discount eligibility engine |
 | 29.5 | COMPLETE | Redemption and usage tracking |
-| 29.6 | NEXT | Promotions admin UI |
-| 30 | PLANNED | Tax configuration and fiscal policy administration |
+| 29.6 | COMPLETE | Promotions admin UI |
+| 30 | NEXT | Tax configuration and fiscal policy administration |
 | 31 | PLANNED | Business-day opening, shifts, cash drawer, and closing |
 | 32 | PLANNED | Device registration, trusted sessions, and terminal management |
 | 33 | PLANNED | Offline SQLite operation and synchronization protocol |

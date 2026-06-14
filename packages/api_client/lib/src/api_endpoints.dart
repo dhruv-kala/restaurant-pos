@@ -47,6 +47,16 @@ abstract final class ApiEndpoints {
   static const String subscriptionPlans = '$subscriptions/plans';
   static const String subscriptionTenants = '$subscriptions/tenants';
   static const String subscriptionTrials = '$subscriptions/trials';
+  static const String promotions = '/promotions';
+  static const String promotionDiscountPolicies =
+      '$promotions/discount-policies';
+  static const String promotionCoupons = '$promotions/coupons';
+  static const String promotionCouponValidate = '$promotionCoupons/validate';
+  static const String promotionCampaigns = '$promotions/campaigns';
+  static const String promotionCampaignEvaluate =
+      '$promotionCampaigns/evaluate';
+  static const String promotionEligibility = '$promotions/eligibility/evaluate';
+  static const String promotionRedemptions = '$promotions/redemptions';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -247,6 +257,15 @@ abstract final class ApiEndpoints {
       '${tenantTrial(tenantId, id)}/convert';
   static const String subscriptionTrialsExpireDue =
       '$subscriptionTrials/expire-due';
+  static String promotionDiscountPolicy(String id) =>
+      '$promotionDiscountPolicies/$id';
+  static String promotionCoupon(String id) => '$promotionCoupons/$id';
+  static String promotionCampaign(String id) => '$promotionCampaigns/$id';
+  static String promotionCampaignActivate(String id) =>
+      '${promotionCampaign(id)}/activate';
+  static String promotionCampaignDeactivate(String id) =>
+      '${promotionCampaign(id)}/deactivate';
+  static String promotionRedemption(String id) => '$promotionRedemptions/$id';
   static String employeePerformance(String id) => '${employee(id)}/performance';
   static const String employeeDashboard = '$employees/dashboard';
   static String shift(String id) => '$shifts/$id';
