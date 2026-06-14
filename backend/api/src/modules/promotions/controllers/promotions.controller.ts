@@ -37,10 +37,12 @@ import {
   PromotionCampaignQueryDto,
   UpdatePromotionCampaignDto,
 } from '../dto/promotion-campaign.dto';
+import { PromotionRedemptionQueryDto, RedeemPromotionDto } from '../dto/promotion-redemption.dto';
 import { DiscountPoliciesService } from '../services/discount-policies.service';
 import { CouponsService } from '../services/coupons.service';
 import { DiscountEligibilityService } from '../services/discount-eligibility.service';
 import { PromotionCampaignsService } from '../services/promotion-campaigns.service';
+import { PromotionRedemptionsService } from '../services/promotion-redemptions.service';
 
 @ApiTags('Promotions')
 @ApiBearerAuth()
@@ -52,6 +54,7 @@ export class PromotionsController {
     private readonly coupons: CouponsService,
     private readonly campaigns: PromotionCampaignsService,
     private readonly eligibility: DiscountEligibilityService,
+    private readonly redemptions: PromotionRedemptionsService,
   ) {}
 
   @Post('discount-policies')
@@ -115,6 +118,35 @@ export class PromotionsController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.eligibility.evaluate(dto, actor);
+  }
+
+  @Post('redemptions')
+  @ApiOperation({ summary: 'Redeem an eligible promotion and record usage' })
+  redeemPromotion(
+    @Body() dto: RedeemPromotionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.redemptions.redeem(dto, actor, auditRequestMetadata(request));
+  }
+
+  @Get('redemptions')
+  @ApiOperation({ summary: 'List promotion redemption history' })
+  listRedemptions(
+    @Query() query: PromotionRedemptionQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.redemptions.list(query, actor);
+  }
+
+  @Get('redemptions/:id')
+  @ApiOperation({ summary: 'Get a promotion redemption record' })
+  detailRedemption(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: PromotionRedemptionQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.redemptions.detail(id, query, actor);
   }
 
   @Post('coupons')

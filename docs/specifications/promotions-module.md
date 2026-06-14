@@ -10,8 +10,8 @@ Task 29 is split into:
 - Task 29.2 Coupon Management - Complete
 - Task 29.3 Promotion Campaigns - Complete
 - Task 29.4 Discount Eligibility Engine - Complete
-- Task 29.5 Redemption and Usage Tracking - Next
-- Task 29.6 Promotions Admin UI
+- Task 29.5 Redemption and Usage Tracking - Complete
+- Task 29.6 Promotions Admin UI - Next
 
 ## Objective
 
@@ -105,9 +105,11 @@ Suggested permissions:
 - `promotions.campaign_view`
 - `promotions.campaign_manage`
 - `promotions.eligibility_evaluate`
+- `promotions.redemption_view`
+- `promotions.redemption_create`
 
 The lowercase `promotions.*` permission keys match the repository's existing
-RBAC convention. Redemption-specific permissions remain planned for Task 29.5.
+RBAC convention.
 
 ## API
 
@@ -153,8 +155,14 @@ false`. The current stacking foundation is conservative:
 
 Redemptions:
 
+- `POST /promotions/redemptions`
 - `GET /promotions/redemptions`
 - `GET /promotions/redemptions/:id`
+
+Redemption creation is idempotent per tenant and source request. Coupon
+redemptions enforce total and per-customer limits before insert, increment the
+coupon usage counter after the append-only redemption row is created, and write
+an audit event. Refunds do not delete or mutate redemption history.
 
 Endpoint availability depends on which Task 29.x implementation has been completed.
 

@@ -86,6 +86,8 @@ const moduleActions: Record<string, readonly string[]> = {
     'campaign_view',
     'campaign_manage',
     'eligibility_evaluate',
+    'redemption_view',
+    'redemption_create',
   ],
   subscriptions: [
     'create',

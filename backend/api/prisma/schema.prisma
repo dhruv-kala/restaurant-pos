@@ -218,6 +218,14 @@ enum PromotionRuleType {
   @@map("promotion_rule_type")
 }
 
+enum PromotionRedemptionSource {
+  COUPON
+  CAMPAIGN_RULE
+  DISCOUNT_POLICY
+
+  @@map("promotion_redemption_source")
+}
+
 enum PaymentMethod {
   CASH
   UPI
@@ -817,6 +825,7 @@ model Tenant {
   promotionCampaigns            PromotionCampaign[]
   promotionCampaignOutlets      PromotionCampaignOutlet[]
   promotionRules                PromotionRule[]
+  promotionRedemptions          PromotionRedemption[]
   payments                      Payment[]
   paymentTransactions           PaymentTransaction[]
   paymentRefunds                PaymentRefund[]
@@ -918,6 +927,7 @@ model Outlet {
   discountApplications     DiscountApplication[]
   coupons                  Coupon[]
   promotionCampaignOutlets PromotionCampaignOutlet[]
+  promotionRedemptions     PromotionRedemption[]
   payments                 Payment[]
   paymentCounters          PaymentNumberCounter[]
   receipts                 Receipt[]
@@ -1028,6 +1038,7 @@ model UserAccount {
   createdTrialSubscriptions            TrialSubscription[]            @relation("TrialSubscriptionCreatedBy")
   updatedTrialSubscriptions            TrialSubscription[]            @relation("TrialSubscriptionUpdatedBy")
   trialSubscriptionEvents              TrialSubscriptionEvent[]       @relation("TrialSubscriptionEventActor")
+  promotionRedemptions                 PromotionRedemption[]          @relation("PromotionRedemptionRedeemedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -1453,6 +1464,7 @@ model Order {
   discountApplications  DiscountApplication[]
   inventoryConsumptions InventoryConsumption[]
   customerVisits        CustomerVisit[]
+  promotionRedemptions  PromotionRedemption[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, orderNumber])
@@ -1654,6 +1666,7 @@ model Bill {
   payments             Payment[]
   receipts             Receipt[]
   customerVisits       CustomerVisit[]
+  promotionRedemptions PromotionRedemption[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, billNumber])
@@ -1738,6 +1751,7 @@ model DiscountPolicy {
   applications   DiscountApplication[]
   coupons        Coupon[]
   promotionRules PromotionRule[]
+  redemptions    PromotionRedemption[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1817,14 +1831,15 @@ model Coupon {
   createdAt             DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt             DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet             Outlet?         @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  discountPolicy     DiscountPolicy? @relation(fields: [tenantId, discountPolicyId], references: [tenantId, id], onDelete: Restrict)
-  targetMenuCategory MenuCategory?   @relation("CouponTargetCategory", fields: [tenantId, targetMenuCategoryId], references: [tenantId, id], onDelete: Restrict)
-  targetMenuItem     MenuItem?       @relation("CouponTargetItem", fields: [tenantId, targetMenuItemId], references: [tenantId, id], onDelete: Restrict)
-  freeItemMenuItem   MenuItem?       @relation("CouponFreeItem", fields: [tenantId, freeItemMenuItemId], references: [tenantId, id], onDelete: Restrict)
-  createdBy          UserAccount     @relation("CouponCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  updatedBy          UserAccount     @relation("CouponUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  tenant             Tenant                @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet             Outlet?               @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  discountPolicy     DiscountPolicy?       @relation(fields: [tenantId, discountPolicyId], references: [tenantId, id], onDelete: Restrict)
+  targetMenuCategory MenuCategory?         @relation("CouponTargetCategory", fields: [tenantId, targetMenuCategoryId], references: [tenantId, id], onDelete: Restrict)
+  targetMenuItem     MenuItem?             @relation("CouponTargetItem", fields: [tenantId, targetMenuItemId], references: [tenantId, id], onDelete: Restrict)
+  freeItemMenuItem   MenuItem?             @relation("CouponFreeItem", fields: [tenantId, freeItemMenuItemId], references: [tenantId, id], onDelete: Restrict)
+  createdBy          UserAccount           @relation("CouponCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy          UserAccount           @relation("CouponUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  redemptions        PromotionRedemption[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1852,11 +1867,12 @@ model PromotionCampaign {
   createdAt       DateTime                     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime                     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant    Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  createdBy UserAccount               @relation("PromotionCampaignCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  updatedBy UserAccount               @relation("PromotionCampaignUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
-  outlets   PromotionCampaignOutlet[]
-  rules     PromotionRule[]
+  tenant      Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  createdBy   UserAccount               @relation("PromotionCampaignCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy   UserAccount               @relation("PromotionCampaignUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  outlets     PromotionCampaignOutlet[]
+  rules       PromotionRule[]
+  redemptions PromotionRedemption[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1903,17 +1919,67 @@ model PromotionRule {
   createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  campaign           PromotionCampaign @relation(fields: [tenantId, campaignId], references: [tenantId, id], onDelete: Restrict)
-  discountPolicy     DiscountPolicy?   @relation(fields: [tenantId, discountPolicyId], references: [tenantId, id], onDelete: Restrict)
-  targetMenuCategory MenuCategory?     @relation("PromotionRuleTargetCategory", fields: [tenantId, targetMenuCategoryId], references: [tenantId, id], onDelete: Restrict)
-  targetMenuItem     MenuItem?         @relation("PromotionRuleTargetItem", fields: [tenantId, targetMenuItemId], references: [tenantId, id], onDelete: Restrict)
-  freeItemMenuItem   MenuItem?         @relation("PromotionRuleFreeItem", fields: [tenantId, freeItemMenuItemId], references: [tenantId, id], onDelete: Restrict)
+  tenant             Tenant                @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  campaign           PromotionCampaign     @relation(fields: [tenantId, campaignId], references: [tenantId, id], onDelete: Restrict)
+  discountPolicy     DiscountPolicy?       @relation(fields: [tenantId, discountPolicyId], references: [tenantId, id], onDelete: Restrict)
+  targetMenuCategory MenuCategory?         @relation("PromotionRuleTargetCategory", fields: [tenantId, targetMenuCategoryId], references: [tenantId, id], onDelete: Restrict)
+  targetMenuItem     MenuItem?             @relation("PromotionRuleTargetItem", fields: [tenantId, targetMenuItemId], references: [tenantId, id], onDelete: Restrict)
+  freeItemMenuItem   MenuItem?             @relation("PromotionRuleFreeItem", fields: [tenantId, freeItemMenuItemId], references: [tenantId, id], onDelete: Restrict)
+  redemptions        PromotionRedemption[]
 
   @@unique([tenantId, id])
   @@index([tenantId, campaignId, isActive, priority], map: "promotion_rules_campaign_idx")
   @@index([tenantId, ruleType, isActive], map: "promotion_rules_type_active_idx")
   @@map("promotion_rules")
+}
+
+model PromotionRedemption {
+  id                  String                    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId            String                    @map("tenant_id") @db.Uuid
+  outletId            String?                   @map("outlet_id") @db.Uuid
+  billId              String                    @map("bill_id") @db.Uuid
+  orderId             String?                   @map("order_id") @db.Uuid
+  customerId          String?                   @map("customer_id") @db.Uuid
+  source              PromotionRedemptionSource
+  couponId            String?                   @map("coupon_id") @db.Uuid
+  campaignId          String?                   @map("campaign_id") @db.Uuid
+  promotionRuleId     String?                   @map("promotion_rule_id") @db.Uuid
+  discountPolicyId    String?                   @map("discount_policy_id") @db.Uuid
+  sourceCodeSnapshot  String?                   @map("source_code_snapshot") @db.VarChar(80)
+  sourceNameSnapshot  String                    @map("source_name_snapshot") @db.VarChar(160)
+  currencyCode        String                    @map("currency_code") @db.Char(3)
+  baseAmountMinor     Int                       @map("base_amount_minor")
+  discountAmountMinor Int                       @map("discount_amount_minor")
+  finalAmountMinor    Int                       @map("final_amount_minor")
+  calculationSnapshot Json                      @map("calculation_snapshot") @db.JsonB
+  eligibilitySnapshot Json                      @map("eligibility_snapshot") @db.JsonB
+  idempotencyKey      String                    @map("idempotency_key") @db.VarChar(160)
+  requestFingerprint  String                    @map("request_fingerprint") @db.Char(64)
+  metadata            Json?                     @db.JsonB
+  redeemedByUserId    String                    @map("redeemed_by_user_id") @db.Uuid
+  redeemedAt          DateTime                  @default(now()) @map("redeemed_at") @db.Timestamptz(3)
+  createdAt           DateTime                  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant         Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet         Outlet?            @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  bill           Bill               @relation(fields: [tenantId, billId], references: [tenantId, id], onDelete: Restrict)
+  order          Order?             @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  customer       Customer?          @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
+  coupon         Coupon?            @relation(fields: [tenantId, couponId], references: [tenantId, id], onDelete: Restrict)
+  campaign       PromotionCampaign? @relation(fields: [tenantId, campaignId], references: [tenantId, id], onDelete: Restrict)
+  promotionRule  PromotionRule?     @relation(fields: [tenantId, promotionRuleId], references: [tenantId, id], onDelete: Restrict)
+  discountPolicy DiscountPolicy?    @relation(fields: [tenantId, discountPolicyId], references: [tenantId, id], onDelete: Restrict)
+  redeemedBy     UserAccount        @relation("PromotionRedemptionRedeemedBy", fields: [redeemedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, outletId, redeemedAt], map: "promotion_redemptions_outlet_redeemed_idx")
+  @@index([tenantId, billId], map: "promotion_redemptions_bill_idx")
+  @@index([tenantId, orderId], map: "promotion_redemptions_order_idx")
+  @@index([tenantId, customerId, couponId], map: "promotion_redemptions_customer_coupon_idx")
+  @@index([tenantId, couponId, redeemedAt], map: "promotion_redemptions_coupon_redeemed_idx")
+  @@index([tenantId, campaignId, promotionRuleId], map: "promotion_redemptions_campaign_rule_idx")
+  @@map("promotion_redemptions")
 }
 
 model PaymentNumberCounter {
@@ -2634,12 +2700,13 @@ model Customer {
   updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime?       @map("deleted_at") @db.Timestamptz(3)
 
-  tenant    Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  addresses CustomerAddress[]
-  notesLog  CustomerNote[]
-  visits    CustomerVisit[]
-  stats     CustomerStats?
-  orders    Order[]
+  tenant      Tenant                @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  addresses   CustomerAddress[]
+  notesLog    CustomerNote[]
+  visits      CustomerVisit[]
+  stats       CustomerStats?
+  orders      Order[]
+  redemptions PromotionRedemption[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, phone])

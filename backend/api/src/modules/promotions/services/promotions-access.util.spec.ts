@@ -8,6 +8,8 @@ import {
   requireCouponValidate,
   requireDiscountOverride,
   requireEligibilityEvaluate,
+  requireRedemptionCreate,
+  requireRedemptionRead,
   resolvePromotionsScope,
 } from './promotions-access.util';
 
@@ -85,5 +87,17 @@ describe('promotions access', () => {
     expect(() => requireEligibilityEvaluate(actor({ roles: [], permissions: [] }))).toThrow(
       ForbiddenException,
     );
+  });
+
+  it('allows cashiers to create promotion redemptions', () => {
+    expect(() =>
+      requireRedemptionCreate(actor({ roles: ['CASHIER'], permissions: [] })),
+    ).not.toThrow();
+  });
+
+  it('allows explicit redemption viewers to read redemption history', () => {
+    expect(() =>
+      requireRedemptionRead(actor({ roles: [], permissions: ['promotions.redemption_view'] })),
+    ).not.toThrow();
   });
 });

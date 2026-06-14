@@ -82,6 +82,11 @@ export interface EligibilityEvaluationResponse {
   createsRedemption: false;
 }
 
+export interface EligibilityEvaluationOptions {
+  includeDefaultPolicies?: boolean;
+  includeDefaultCampaigns?: boolean;
+}
+
 @Injectable()
 export class DiscountEligibilityService {
   constructor(private readonly prisma: PrismaService) {}
@@ -99,46 +104,58 @@ export class DiscountEligibilityService {
 
     return this.prisma.$transaction(async (tx) => {
       await applyDatabaseRequestContext(tx, actor, scope.tenantId);
-      await this.assertContextRecords(tx, scope, dto);
-
-      const [policies, coupons, campaigns] = await Promise.all([
-        this.loadPolicies(tx, scope, dto, evaluatedAt),
-        this.loadCoupons(tx, scope, dto),
-        this.loadCampaigns(tx, scope, dto, evaluatedAt),
-      ]);
-
-      const candidates = [
-        ...policies.map((policy) => this.policyCandidate(policy, dto, evaluatedAt)),
-        ...coupons.map((coupon) => this.couponCandidate(coupon, dto, evaluatedAt)),
-        ...this.missingCouponCandidates(dto, coupons),
-        ...campaigns.flatMap((campaign) =>
-          campaign.rules.map((rule) => this.ruleCandidate(campaign, rule, dto, evaluatedAt)),
-        ),
-      ];
-      const withSelection = this.applyStacking(candidates);
-      return {
-        eligible: withSelection.some((candidate) => candidate.selected),
-        selected: withSelection.filter((candidate) => candidate.selected),
-        rejected: withSelection.filter((candidate) => !candidate.selected),
-        candidates: withSelection,
-        stacking: {
-          mode: 'BEST_SINGLE_DISCOUNT',
-          maxApplications: 1,
-          rejectedReason: 'STACKING_CONFLICT',
-        },
-        context: {
-          tenantId: scope.tenantId,
-          outletId: scope.outletId ?? null,
-          customerId: dto.customerId ?? null,
-          orderId: dto.orderId ?? null,
-          billId: dto.billId ?? null,
-          evaluatedAt: evaluatedAt.toISOString(),
-          subtotalMinor: dto.subtotalMinor,
-          currencyCode: dto.currencyCode,
-        },
-        createsRedemption: false,
-      };
+      return this.evaluateInTransaction(tx, dto, actor, scope, evaluatedAt);
     });
+  }
+
+  async evaluateInTransaction(
+    tx: Prisma.TransactionClient,
+    dto: EvaluateDiscountEligibilityDto,
+    actor: AuthenticatedUser,
+    scope: PromotionsScope,
+    evaluatedAt: Date,
+    options: EligibilityEvaluationOptions = {},
+  ): Promise<EligibilityEvaluationResponse> {
+    requireEligibilityEvaluate(actor);
+    await this.assertContextRecords(tx, scope, dto);
+
+    const [policies, coupons, campaigns] = await Promise.all([
+      this.loadPolicies(tx, scope, dto, evaluatedAt, options),
+      this.loadCoupons(tx, scope, dto),
+      this.loadCampaigns(tx, scope, dto, evaluatedAt, options),
+    ]);
+
+    const candidates = [
+      ...policies.map((policy) => this.policyCandidate(policy, dto, evaluatedAt)),
+      ...coupons.map((coupon) => this.couponCandidate(coupon, dto, evaluatedAt)),
+      ...this.missingCouponCandidates(dto, coupons),
+      ...campaigns.flatMap((campaign) =>
+        campaign.rules.map((rule) => this.ruleCandidate(campaign, rule, dto, evaluatedAt)),
+      ),
+    ];
+    const withSelection = this.applyStacking(candidates);
+    return {
+      eligible: withSelection.some((candidate) => candidate.selected),
+      selected: withSelection.filter((candidate) => candidate.selected),
+      rejected: withSelection.filter((candidate) => !candidate.selected),
+      candidates: withSelection,
+      stacking: {
+        mode: 'BEST_SINGLE_DISCOUNT',
+        maxApplications: 1,
+        rejectedReason: 'STACKING_CONFLICT',
+      },
+      context: {
+        tenantId: scope.tenantId,
+        outletId: scope.outletId ?? null,
+        customerId: dto.customerId ?? null,
+        orderId: dto.orderId ?? null,
+        billId: dto.billId ?? null,
+        evaluatedAt: evaluatedAt.toISOString(),
+        subtotalMinor: dto.subtotalMinor,
+        currencyCode: dto.currencyCode,
+      },
+      createsRedemption: false,
+    };
   }
 
   private async assertContextRecords(
@@ -189,8 +206,12 @@ export class DiscountEligibilityService {
     scope: PromotionsScope,
     dto: EvaluateDiscountEligibilityDto,
     evaluatedAt: Date,
+    options: EligibilityEvaluationOptions,
   ): Promise<DiscountPolicyRecord[]> {
     const ids = unique(dto.discountPolicyIds ?? []);
+    if (ids.length === 0 && options.includeDefaultPolicies === false) {
+      return Promise.resolve([]);
+    }
     const filters: Prisma.DiscountPolicyWhereInput[] = [];
     if (ids.length === 0) {
       filters.push(
@@ -235,8 +256,12 @@ export class DiscountEligibilityService {
     scope: PromotionsScope,
     dto: EvaluateDiscountEligibilityDto,
     evaluatedAt: Date,
+    options: EligibilityEvaluationOptions,
   ): Promise<CampaignRecord[]> {
     const ids = unique(dto.campaignIds ?? []);
+    if (ids.length === 0 && options.includeDefaultCampaigns === false) {
+      return Promise.resolve([]);
+    }
     return tx.promotionCampaign.findMany({
       where: {
         tenantId: scope.tenantId,

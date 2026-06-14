@@ -2533,3 +2533,81 @@ Known limitations:
 Next task:
 
 - Task 29.5 - Redemption and Usage Tracking
+
+## Task 29.5 Completion
+
+Date: 2026-06-14
+
+Task: Task 29.5 - Redemption and Usage Tracking
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616000000_add_promotion_redemptions/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/promotions/controllers/promotions.controller.ts`
+- `backend/api/src/modules/promotions/dto/promotion-redemption.dto.ts`
+- `backend/api/src/modules/promotions/promotions.module.ts`
+- `backend/api/src/modules/promotions/promotions-schema.spec.ts`
+- `backend/api/src/modules/promotions/services/discount-eligibility.service.ts`
+- `backend/api/src/modules/promotions/services/promotion-redemptions.service.ts`
+- `backend/api/src/modules/promotions/services/promotion-redemptions.service.spec.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.spec.ts`
+- `docs/specifications/promotions-module.md`
+- `docs/tasks/029-promotions/29.5-redemption-and-usage-tracking.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 29.5 implemented only redemption and usage tracking scope.
+- Added tenant-scoped `PromotionRedemption` records for coupons, campaign
+  rules, and discount policies.
+- Redemptions are append-only through PostgreSQL no-update/no-delete triggers.
+- Redemptions use tenant-scoped idempotency keys and request fingerprints.
+- Redemption creation reuses the Task 29.4 eligibility engine inside the same
+  transaction with default policy/campaign discovery disabled, so only the
+  requested source is evaluated.
+- Coupon redemption enforces total usage limits and per-customer usage limits
+  before writing the redemption.
+- Coupon usage count increments after successful redemption creation.
+- Bill, order, customer, coupon, campaign, rule, and discount policy references
+  use tenant-aware foreign keys.
+- Added read/create permissions:
+  `promotions.redemption_view` and `promotions.redemption_create`.
+- Added protected APIs:
+  `POST /promotions/redemptions`,
+  `GET /promotions/redemptions`, and
+  `GET /promotions/redemptions/:id`.
+- Refunds intentionally do not mutate or delete redemption history.
+- Loyalty wallet liability, referral rewards, promotions admin UI, and advanced
+  campaign analytics remain deferred.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run build`: passed
+- `npm test -- --runInBand src/modules/promotions/services/promotion-redemptions.service.spec.ts src/modules/promotions/services/promotions-access.util.spec.ts src/modules/promotions/promotions-schema.spec.ts`: passed, 3 suites and 21 tests
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 88 suites and 308 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- Migration was committed but not deployed to a live PostgreSQL database in this
+  task.
+- Live RLS, append-only triggers, and tenant-aware foreign keys require valid
+  local database credentials and migration deployment.
+- Campaign analytics beyond usage history remain out of scope.
+
+Next task:
+
+- Task 29.6 - Promotions Admin UI

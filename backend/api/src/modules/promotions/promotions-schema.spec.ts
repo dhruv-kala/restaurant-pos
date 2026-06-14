@@ -19,6 +19,10 @@ describe('promotions discount policy foundation schema', () => {
     join(root, 'prisma/migrations/20260615220000_add_promotion_campaigns/migration.sql'),
     'utf8',
   );
+  const redemptionMigration = readFileSync(
+    join(root, 'prisma/migrations/20260616000000_add_promotion_redemptions/migration.sql'),
+    'utf8',
+  );
 
   it('defines discount policies and immutable application snapshots', () => {
     expect(schema).toContain('model DiscountPolicy {');
@@ -58,5 +62,16 @@ describe('promotions discount policy foundation schema', () => {
       'ALTER TABLE "promotion_campaigns" FORCE ROW LEVEL SECURITY',
     );
     expect(campaignMigration).toContain('ALTER TABLE "promotion_rules" FORCE ROW LEVEL SECURITY');
+  });
+
+  it('defines append-only promotion redemptions with forced RLS', () => {
+    expect(schema).toContain('model PromotionRedemption {');
+    expect(schema).toContain('enum PromotionRedemptionSource {');
+    expect(redemptionMigration).toContain('CREATE TABLE "promotion_redemptions"');
+    expect(redemptionMigration).toContain(
+      'ALTER TABLE "promotion_redemptions" FORCE ROW LEVEL SECURITY',
+    );
+    expect(redemptionMigration).toContain('CREATE TRIGGER "promotion_redemptions_no_update"');
+    expect(redemptionMigration).toContain('CREATE TRIGGER "promotion_redemptions_no_delete"');
   });
 });

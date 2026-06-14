@@ -4,9 +4,9 @@ Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 29.4**
+- Completed through: **Task 29.5**
 - Current module: **Promotions, Coupons, and Discount Policy Engine**
-- Next provisional task: **Task 29.5 - Redemption and Usage Tracking**
+- Next provisional task: **Task 29.6 - Promotions Admin UI**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -44,6 +44,7 @@ Last updated: 2026-06-14
 | 29.2 | Tenant coupon definitions, normalized codes, validity/status management, read-only validation, usage-limit foundation, RLS, RBAC, and audit events |
 | 29.3 | Tenant promotion campaigns, selected-outlet targeting, campaign rules, activation/deactivation, read-only evaluation, RLS, RBAC, and audit events |
 | 29.4 | Central discount eligibility service, context validation, explicit denial reasons, deterministic candidate evaluation, and conservative stacking enforcement |
+| 29.5 | Append-only promotion redemptions, idempotent creation, coupon usage counters, per-customer usage limits, bill-level history, RLS, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -123,6 +124,9 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   policies, requested coupons, and active campaign rules, explicit rejection
   reasons, missing-code reporting, item/category context evaluation, and
   `BEST_SINGLE_DISCOUNT` stacking enforcement
+- Promotion redemption tracking with tenant-scoped append-only records,
+  idempotent writes, coupon total/per-customer usage enforcement, bill/order
+  history APIs, forced RLS, and audit events
 
 ## Known Environment Limitation
 
@@ -133,7 +137,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 29.5 - Redemption and Usage Tracking
+### Task 29.6 - Promotions Admin UI
 
 Read:
 
@@ -142,9 +146,10 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement redemption and usage tracking only after reading
-`docs/specifications/promotions-module.md` and the Task 29.5 task file. Do not
-implement promotions admin UI unless explicitly requested.
+Implement promotions admin UI only after reading
+`docs/specifications/promotions-module.md` and the Task 29.6 task file. Do not
+implement future marketing automation or campaign analytics unless explicitly
+requested.
 
 ## Status Maintenance
 

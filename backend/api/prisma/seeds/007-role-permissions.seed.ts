@@ -98,6 +98,8 @@ const promotionActions: Record<string, readonly string[]> = {
     'campaign_view',
     'campaign_manage',
     'eligibility_evaluate',
+    'redemption_view',
+    'redemption_create',
   ],
   CASHIER: [
     'read',
@@ -106,8 +108,18 @@ const promotionActions: Record<string, readonly string[]> = {
     'coupon_validate',
     'campaign_view',
     'eligibility_evaluate',
+    'redemption_view',
+    'redemption_create',
   ],
-  WAITER: ['read', 'coupon_view', 'coupon_validate', 'campaign_view', 'eligibility_evaluate'],
+  WAITER: [
+    'read',
+    'coupon_view',
+    'coupon_validate',
+    'campaign_view',
+    'eligibility_evaluate',
+    'redemption_view',
+    'redemption_create',
+  ],
 };
 
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {

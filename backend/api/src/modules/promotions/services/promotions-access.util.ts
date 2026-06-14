@@ -185,6 +185,33 @@ export function requireEligibilityEvaluate(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Promotion eligibility evaluation permission is required');
 }
 
+export function requireRedemptionRead(actor: AuthenticatedUser): void {
+  if (
+    DISCOUNT_POLICY_READ_ROLES.some((role) => hasRole(actor, role)) ||
+    hasPermission(actor, 'promotions.read') ||
+    hasPermission(actor, 'promotions.redemption_view') ||
+    hasPermission(actor, 'promotions.redemption_create')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Promotion redemption read permission is required');
+}
+
+export function requireRedemptionCreate(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasRole(actor, 'CASHIER') ||
+    hasRole(actor, 'WAITER') ||
+    hasPermission(actor, 'promotions.redemption_create') ||
+    hasPermission(actor, 'promotions.apply_discount')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Promotion redemption create permission is required');
+}
+
 function hasPermission(actor: AuthenticatedUser, permission: string): boolean {
   return actor.permissions?.includes('*') || actor.permissions?.includes(permission) || false;
 }
