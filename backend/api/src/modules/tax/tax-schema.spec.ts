@@ -16,6 +16,10 @@ describe('tax foundation schema', () => {
     join(root, 'prisma/migrations/20260616060000_add_fiscal_policy_administration/migration.sql'),
     'utf8',
   );
+  const calculationMigration = readFileSync(
+    join(root, 'prisma/migrations/20260616080000_add_tax_calculation_snapshots/migration.sql'),
+    'utf8',
+  );
 
   it('defines tenant-scoped tax profiles and base enums', () => {
     expect(schema).toContain('model TaxProfile {');
@@ -86,5 +90,17 @@ describe('tax foundation schema', () => {
     expect(fiscalMigration).toContain('outlet_fiscal_policies_outlet_id_fkey');
     expect(fiscalMigration).toContain('fiscal_invoice_sequences_outlet_year_prefix_key');
     expect(fiscalMigration).toContain('fiscal_invoice_sequences_last_number_check');
+  });
+
+  it('defines immutable tax calculation snapshots for finalized commercial records', () => {
+    expect(schema).toContain('model TaxCalculationSnapshot {');
+    expect(schema).toMatch(/taxCalculationSnapshots\s+TaxCalculationSnapshot\[\]/);
+    expect(calculationMigration).toContain('CREATE TABLE "tax_calculation_snapshots"');
+    expect(calculationMigration).toContain(
+      'ALTER TABLE "tax_calculation_snapshots" FORCE ROW LEVEL SECURITY',
+    );
+    expect(calculationMigration).toContain('tax_calculation_snapshots_link_check');
+    expect(calculationMigration).toContain('tax_calculation_snapshots_amounts_check');
+    expect(calculationMigration).toContain('reject_tax_calculation_snapshot_mutation');
   });
 });

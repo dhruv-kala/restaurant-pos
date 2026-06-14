@@ -4,9 +4,9 @@ Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 30.3**
+- Completed through: **Task 30.4**
 - Current module: **Tax Configuration and Fiscal Policy**
-- Next provisional task: **Task 30.4 - Tax Calculation Engine**
+- Next provisional task: **Task 30.5 - Tax Reporting Foundation**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -50,6 +50,7 @@ Last updated: 2026-06-14
 | 30.2 | Tenant-scoped tax rates, groups, rules, category/item mappings, effective dating, overlap prevention, RLS, and audit events |
 | 30.2.5 | Formal tax architecture review, tenant-default mapping correction, precedence documentation, and approval to proceed to fiscal policy |
 | 30.3 | Outlet-scoped fiscal policies, fiscal invoice sequences, monotonic number generation, RLS, permissions, and audit events |
+| 30.4 | Deterministic tax calculation engine, inclusive/exclusive support, rule precedence, immutable bill snapshots, RLS, and bill integration |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -153,6 +154,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   records, `FiscalInvoiceSequence` records, fiscal-year/prefix uniqueness,
   atomic monotonic invoice number generation, protected fiscal policy and
   sequence APIs, fiscal policy permissions, forced RLS, and audit events
+- Tax calculation engine with outlet fiscal policy context, active/default tax
+  profile resolution, item/category/tenant-default rule precedence, integer
+  minor-unit calculation, inclusive/exclusive tax support, explainable
+  component breakdowns, protected `/tax/calculate` API, immutable
+  `TaxCalculationSnapshot` records, and new bill-generation integration
 
 ## Known Environment Limitation
 
@@ -163,7 +169,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 30.4 - Tax Calculation Engine
+### Task 30.5 - Tax Reporting Foundation
 
 Read:
 
@@ -172,11 +178,11 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 30.4 unless explicitly requested. It should build on the
-Task 30.1-30.3 tax configuration foundations and implement deterministic tax
-rule resolution, item/category/default precedence, fiscal policy context,
-immutable calculation snapshots, bill/receipt tax stability, and audit
-requirements before adding UI.
+Do not implement Task 30.5 unless explicitly requested. It should build on the
+Task 30.1-30.4 tax configuration and calculation foundations and add
+tenant/outlet-scoped tax reporting projections from immutable bill and tax
+calculation data. Do not implement government filing, accounting export, or tax
+UI unless the task file explicitly requires it.
 
 ## Status Maintenance
 

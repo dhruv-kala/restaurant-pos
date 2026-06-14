@@ -2995,3 +2995,79 @@ Known limitations:
 Next task:
 
 - Task 30.4 - Tax Calculation Engine
+
+## Task 30.4 Completion
+
+Date: 2026-06-14
+
+Task: Task 30.4 - Tax Calculation Engine
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616080000_add_tax_calculation_snapshots/migration.sql`
+- `backend/api/src/modules/billing/billing.module.ts`
+- `backend/api/src/modules/billing/services/billing.service.ts`
+- `backend/api/src/modules/tax/controllers/tax-calculation.controller.ts`
+- `backend/api/src/modules/tax/dto/tax-calculation.dto.ts`
+- `backend/api/src/modules/tax/services/tax-calculation.service.ts`
+- `backend/api/src/modules/tax/services/tax-calculation.service.spec.ts`
+- `backend/api/src/modules/tax/tax-schema.spec.ts`
+- `backend/api/src/modules/tax/tax.module.ts`
+- `docs/specifications/tax-module.md`
+- `docs/tasks/030-tax/30.4-tax-calculation-engine.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 30.4 implemented only the tax calculation engine scope.
+- Added append-only, tenant/outlet-scoped `TaxCalculationSnapshot` records with
+  forced RLS, amount checks, bill/order links, calculation input JSON, and
+  explainable breakdown JSON.
+- Added protected `POST /tax/calculate` for deterministic tax calculation
+  previews.
+- Added `TaxCalculationService` that resolves outlet fiscal policy, selects the
+  configured tax profile or active default tax profile, and applies tax rule
+  precedence in this order: item mapping, category mapping, tenant default
+  mapping.
+- Used integer minor-unit arithmetic and basis-point tax rates for deterministic
+  calculations.
+- Supported both exclusive and inclusive tax modes. Inclusive mode backs tax out
+  of the customer-facing line amount; exclusive mode adds tax over the taxable
+  line amount.
+- Generated line-level, component-level, and bill-level tax breakdowns.
+- Wired new bill generation to calculate tax from live tax policy at generation
+  time and persist the immutable snapshot linked to the bill and order.
+- Existing split/merge replacement bills keep using their already-persisted bill
+  item and tax snapshots.
+- Government filing, accounting export, tax reports, shared Dart clients, and UI
+  remain deferred.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- tax-calculation.service.spec.ts --runInBand`: passed, 1 suite and
+  3 tests
+- `npm test -- --runInBand src/modules/tax`: passed, 6 suites and 24 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 94 suites and 332 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 30.4 migration was not deployed to a live PostgreSQL database.
+- Existing receipt invoice generation is not yet wired to fiscal sequences or
+  tax calculation snapshots.
+- Tax reporting remains Task 30.5 scope.
+
+Next task:
+
+- Task 30.5 - Tax Reporting Foundation

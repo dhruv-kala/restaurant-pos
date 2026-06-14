@@ -4,13 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  BillPaymentStatus,
-  BillSource,
-  BillStatus,
-  OrderStatus,
-  Prisma,
-} from '@prisma/client';
+import { BillPaymentStatus, BillSource, BillStatus, OrderStatus, Prisma } from '@prisma/client';
 import { applyDatabaseRequestContext } from '../../../common/database/request-context.util';
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
@@ -25,6 +19,10 @@ import type { MergeBillDto } from '../dto/merge-bill.dto';
 import type { SplitBillDto } from '../dto/split-bill.dto';
 import type { UpdateBillDto } from '../dto/update-bill.dto';
 import type { VoidBillDto } from '../dto/void-bill.dto';
+import {
+  TaxCalculationService,
+  type TaxCalculationResult,
+} from '../../tax/services/tax-calculation.service';
 import { GstMode, SplitBillMode } from '../enums/billing.enums';
 import { BillingEventsService } from '../events/billing-events.service';
 import {
@@ -76,6 +74,7 @@ export class BillingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: BillingEventsService,
+    private readonly taxCalculation: TaxCalculationService,
   ) {}
 
   async generate(dto: GenerateBillDto, user: AuthenticatedUser): Promise<BillResponseDto> {
@@ -108,19 +107,45 @@ export class BillingService {
       });
       if (existing !== null) throw new ConflictException('Order already has an active bill');
       const items = order.items.map((item) => this.orderItemSnapshot(item));
+      const itemGrossAmounts = items.map((item) => item.unitPrice * item.quantity);
       const itemDiscount = items.reduce((sum, item) => sum + item.discountAmount, 0);
+      const requestedDiscount = Math.max(0, dto.discountAmount ?? order.discountAmount);
+      const additionalDiscount = Math.max(0, requestedDiscount - itemDiscount);
+      const additionalDiscounts = allocate(additionalDiscount, itemGrossAmounts);
+      const taxCalculation = await this.taxCalculation.calculateForBill(tx, {
+        tenantId: order.tenantId,
+        outletId: order.outletId,
+        businessDate: order.businessDate,
+        currencyCode: order.currencyCode,
+        items: items.map((item, index) => ({
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discountAmount: item.discountAmount + additionalDiscounts[index],
+        })),
+      });
+      const itemsWithTax = items.map((item, index) => {
+        const line = taxCalculation.lines[index];
+        return {
+          ...item,
+          discountAmount: line.discountAmount,
+          taxAmount: line.taxAmount,
+          taxPercentage: new Prisma.Decimal(line.taxRateBps).div(100),
+          lineTotal: line.totalAmount,
+        };
+      });
       const money = calculateBillMoney({
-        subtotal: items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
-        discountAmount: itemDiscount + (dto.discountAmount ?? order.discountAmount - itemDiscount),
+        subtotal: taxCalculation.taxableAmount + taxCalculation.discountAmount,
+        discountAmount: taxCalculation.discountAmount,
         couponDiscountAmount: 0,
-        taxAmount: items.reduce((sum, item) => sum + item.taxAmount, 0),
+        taxAmount: taxCalculation.taxAmount,
         serviceChargeAmount: dto.serviceChargeAmount ?? order.serviceChargeAmount,
       });
-      const taxes = this.taxesForItems(items, dto.gstMode ?? GstMode.CGST_SGST);
       const bill = await this.createBill(tx, {
         tenantId: order.tenantId,
         outletId: order.outletId,
         orderId: order.id,
+        businessDate: order.businessDate,
         currencyCode: order.currencyCode,
         generatedByUserId: user.id,
         billSource: dto.billSource ?? BillSource.POS,
@@ -129,9 +154,10 @@ export class BillingService {
         customerGSTNumber: dto.customerGSTNumber,
         notes: dto.notes?.trim(),
         money,
-        items,
-        taxes,
+        items: itemsWithTax,
+        taxes: taxCalculation.billTaxes,
         sourceBillIds: [],
+        taxCalculation,
       });
       this.events.publishGenerated({
         type: 'BillGenerated',
@@ -222,7 +248,8 @@ export class BillingService {
       if (bill.paymentStatus !== BillPaymentStatus.UNPAID) {
         throw new ConflictException('Bills with payment activity cannot be voided');
       }
-      if (bill.status === BillStatus.PAID) throw new ConflictException('Paid bills cannot be voided');
+      if (bill.status === BillStatus.PAID)
+        throw new ConflictException('Paid bills cannot be voided');
       if (bill.status === BillStatus.VOID) throw new ConflictException('Bill is already void');
       if (bill.status === BillStatus.REFUNDED) {
         throw new ConflictException('Refunded bills cannot be voided');
@@ -302,10 +329,13 @@ export class BillingService {
         },
         include: billInclude,
       });
-      if (bills.length !== dto.billIds.length) throw new NotFoundException('One or more bills not found');
+      if (bills.length !== dto.billIds.length)
+        throw new NotFoundException('One or more bills not found');
       for (const bill of bills) this.assertEditable(bill);
       const first = bills[0];
-      if (bills.some((bill) => bill.tenantId !== first.tenantId || bill.outletId !== first.outletId)) {
+      if (
+        bills.some((bill) => bill.tenantId !== first.tenantId || bill.outletId !== first.outletId)
+      ) {
         throw new BadRequestException('Bills must belong to the same outlet');
       }
       const sameTable =
@@ -317,21 +347,13 @@ export class BillingService {
       if (!sameTable && !sameCustomer) {
         throw new BadRequestException('Bills must have the same customer or table');
       }
-      const items = bills.flatMap((bill) =>
-        bill.items.map((item) => this.billItemSnapshot(item)),
-      );
+      const items = bills.flatMap((bill) => bill.items.map((item) => this.billItemSnapshot(item)));
       const money: BillMoney = {
         subtotal: bills.reduce((sum, bill) => sum + bill.subtotal, 0),
         discountAmount: bills.reduce((sum, bill) => sum + bill.discountAmount, 0),
-        couponDiscountAmount: bills.reduce(
-          (sum, bill) => sum + bill.couponDiscountAmount,
-          0,
-        ),
+        couponDiscountAmount: bills.reduce((sum, bill) => sum + bill.couponDiscountAmount, 0),
         taxAmount: bills.reduce((sum, bill) => sum + bill.taxAmount, 0),
-        serviceChargeAmount: bills.reduce(
-          (sum, bill) => sum + bill.serviceChargeAmount,
-          0,
-        ),
+        serviceChargeAmount: bills.reduce((sum, bill) => sum + bill.serviceChargeAmount, 0),
         roundOffAmount: bills.reduce((sum, bill) => sum + bill.roundOffAmount, 0),
         grandTotal: bills.reduce((sum, bill) => sum + bill.grandTotal, 0),
       };
@@ -353,7 +375,12 @@ export class BillingService {
         sourceBillIds: bills.map((bill) => bill.id),
       });
       for (const bill of bills) {
-        await this.markVoided(tx, bill.id, `Superseded by merged bill ${merged.billNumber}`, user.id);
+        await this.markVoided(
+          tx,
+          bill.id,
+          `Superseded by merged bill ${merged.billNumber}`,
+          user.id,
+        );
       }
       return this.toResponse(merged);
     });
@@ -365,6 +392,7 @@ export class BillingService {
       tenantId: string;
       outletId: string;
       orderId: string;
+      businessDate?: Date;
       currencyCode: string;
       generatedByUserId: string;
       billSource: BillSource;
@@ -376,16 +404,17 @@ export class BillingService {
       items: BillItemCreate[];
       taxes: Array<{ taxName: string; taxRate: number; taxAmount: number }>;
       sourceBillIds: string[];
+      taxCalculation?: TaxCalculationResult;
     },
   ): Promise<BillRecord> {
     const billNumber = await this.nextBillNumber(tx, input.tenantId, input.outletId);
-    return tx.bill.create({
+    const bill = await tx.bill.create({
       data: {
         tenantId: input.tenantId,
         outletId: input.outletId,
         orderId: input.orderId,
         billNumber,
-        businessDate: this.businessDate(),
+        businessDate: input.businessDate ?? this.businessDate(),
         currencyCode: input.currencyCode,
         generatedByUserId: input.generatedByUserId,
         billSource: input.billSource,
@@ -406,6 +435,14 @@ export class BillingService {
       },
       include: billInclude,
     });
+    if (input.taxCalculation !== undefined) {
+      await this.taxCalculation.createBillSnapshot(tx, input.taxCalculation, {
+        orderId: input.orderId,
+        billId: bill.id,
+        createdByUserId: input.generatedByUserId,
+      });
+    }
+    return bill;
   }
 
   private orderItemSnapshot(item: {
@@ -453,10 +490,7 @@ export class BillingService {
     const totals =
       dto.splitMode === SplitBillMode.CUSTOM_AMOUNT
         ? dto.customAmounts
-        : allocate(
-            bill.grandTotal,
-            Array.from<number>({ length: dto.splitCount ?? 2 }).fill(1),
-          );
+        : allocate(bill.grandTotal, Array.from<number>({ length: dto.splitCount ?? 2 }).fill(1));
     if (totals === undefined || totals.length < 2) {
       throw new BadRequestException('Split amounts are required');
     }
@@ -465,7 +499,13 @@ export class BillingService {
     }
     const firstItem = bill.items[0];
     if (firstItem === undefined) throw new ConflictException('Bill has no items');
-    const fields = ['subtotal', 'discountAmount', 'couponDiscountAmount', 'taxAmount', 'serviceChargeAmount'] as const;
+    const fields = [
+      'subtotal',
+      'discountAmount',
+      'couponDiscountAmount',
+      'taxAmount',
+      'serviceChargeAmount',
+    ] as const;
     const allocations = Object.fromEntries(
       fields.map((field) => [field, allocate(bill[field], totals)]),
     ) as Record<(typeof fields)[number], number[]>;
@@ -527,32 +567,24 @@ export class BillingService {
     const weights = groupedItems.map((items) =>
       items.reduce((sum, item) => sum + item.lineTotal, 0),
     );
-    const itemDiscountTotal = bill.items.reduce(
-      (sum, item) => sum + item.discountAmount,
-      0,
-    );
+    const itemDiscountTotal = bill.items.reduce((sum, item) => sum + item.discountAmount, 0);
     const additionalDiscounts = allocate(
       Math.max(0, bill.discountAmount - itemDiscountTotal),
       weights,
     );
     const couponDiscounts = allocate(bill.couponDiscountAmount, weights);
     const serviceCharges = allocate(bill.serviceChargeAmount, weights);
-    const roundOffs = allocate(
-      Math.abs(bill.roundOffAmount),
-      weights,
-    ).map((amount) => (bill.roundOffAmount < 0 ? -amount : amount));
+    const roundOffs = allocate(Math.abs(bill.roundOffAmount), weights).map((amount) =>
+      bill.roundOffAmount < 0 ? -amount : amount,
+    );
     const desiredTotals = allocate(bill.grandTotal, weights);
 
     return groupedItems.map((items, index) => {
-      const subtotal = items.reduce(
-        (sum, item) => sum + item.unitPrice * item.quantity,
-        0,
-      );
+      const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
       const money: BillMoney = {
         subtotal,
         discountAmount:
-          items.reduce((sum, item) => sum + item.discountAmount, 0) +
-          additionalDiscounts[index],
+          items.reduce((sum, item) => sum + item.discountAmount, 0) + additionalDiscounts[index],
         couponDiscountAmount: couponDiscounts[index],
         taxAmount: items.reduce((sum, item) => sum + item.taxAmount, 0),
         serviceChargeAmount: serviceCharges[index],
@@ -636,8 +668,10 @@ export class BillingService {
     if (bill.paymentStatus !== BillPaymentStatus.UNPAID) {
       throw new ConflictException('Bills with payment activity cannot be changed');
     }
-    if (bill.status === BillStatus.PAID) throw new ConflictException('Paid bills cannot be changed');
-    if (bill.status === BillStatus.VOID) throw new ConflictException('Void bills cannot be changed');
+    if (bill.status === BillStatus.PAID)
+      throw new ConflictException('Paid bills cannot be changed');
+    if (bill.status === BillStatus.VOID)
+      throw new ConflictException('Void bills cannot be changed');
     if (bill.status === BillStatus.REFUNDED) {
       throw new ConflictException('Refunded bills cannot be changed');
     }

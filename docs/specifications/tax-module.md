@@ -10,7 +10,7 @@ Task 30 is split into:
 - Task 30.2 Tax Rules and Rates - Complete
 - Task 30.2.5 Tax Architecture Review and Correction - Complete
 - Task 30.3 Fiscal Policy Administration - Complete
-- Task 30.4 Tax Calculation Engine
+- Task 30.4 Tax Calculation Engine - Complete
 - Task 30.5 Tax Reporting Foundation
 - Task 30.6 Tax Admin UI
 
@@ -187,6 +187,15 @@ until a later integration task.
 Calculation:
 
 - `POST /tax/calculate`
+
+Task 30.4 implements the tenant-aware calculation engine. It resolves outlet
+fiscal policy, selects the configured profile or active default profile, applies
+mapping precedence of item rule, category rule, then tenant default rule, and
+calculates explainable line/component breakdowns using integer minor units and
+basis-point tax rates. Both inclusive and exclusive tax modes are supported.
+New bill generation uses the calculation service and writes immutable
+`TaxCalculationSnapshot` records linked to the bill/order. Historical bill
+snapshots are not recalculated from live tax rules.
 
 Reporting:
 
