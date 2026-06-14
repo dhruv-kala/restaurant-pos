@@ -12,8 +12,8 @@ Last updated: 2026-06-14
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6 are complete; Task 30 tax configuration and fiscal policy
-  administration is the next provisional task.
+- Tasks 29.1-29.6 and 30.1 are complete; Task 30.2 tax rules and rates is the
+  next provisional task.
 
 ## Foundation and Core SaaS
 
@@ -44,18 +44,11 @@ Last updated: 2026-06-14
 | 29.4 | COMPLETE | Discount eligibility engine |
 | 29.5 | COMPLETE | Redemption and usage tracking |
 | 29.6 | COMPLETE | Promotions admin UI |
-| 30.1 | NEXT | Tax foundation |
-| 30.2 | PLANNED | Tax rules and rates |
+| 30.1 | COMPLETE | Tax foundation |
+| 30.2 | NEXT | Tax rules and rates |
 | 30.3 | PLANNED | Fiscal policy administration |
 | 30.4 | PLANNED | Tax calculation engine |
-| 30.5 | PLANNED | Tax reporting foundation |
-| 30.6 | PLANNED | Tax admin UI |
-| 31 | PLANNED | Business-day opening, shifts, cash drawer, and closing |
-| 32 | PLANNED | Device registration, trusted sessions, and terminal management |
-| 33 | PLANNED | Offline SQLite operation and synchronization protocol |
-| 34 | PLANNED | Transactional outbox, background jobs, and scheduler |
-| 35 | PLANNED | File/document storage abstraction and retention |
-| 36 | PLANNED | Webhooks, API integrations, and integration credentials |
+| 30.5 | PLANNED | Tax reporting foundation | ooks, API integrations, and integration credentials |
 
 ## Restaurant and Customer Expansion
 

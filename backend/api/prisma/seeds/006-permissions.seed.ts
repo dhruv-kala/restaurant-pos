@@ -89,6 +89,7 @@ const moduleActions: Record<string, readonly string[]> = {
     'redemption_view',
     'redemption_create',
   ],
+  tax: ['read', 'profile_manage', 'policy_manage', 'report_view'],
   subscriptions: [
     'create',
     'read',

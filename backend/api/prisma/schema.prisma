@@ -226,6 +226,32 @@ enum PromotionRedemptionSource {
   @@map("promotion_redemption_source")
 }
 
+enum TaxProfileStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("tax_profile_status")
+}
+
+enum TaxType {
+  GST
+  VAT
+  SERVICE_TAX
+  ZERO_RATED
+  EXEMPT
+
+  @@map("tax_type")
+}
+
+enum TaxMode {
+  INCLUSIVE
+  EXCLUSIVE
+  EXEMPT
+  ZERO_RATED
+
+  @@map("tax_mode")
+}
+
 enum PaymentMethod {
   CASH
   UPI
@@ -826,6 +852,7 @@ model Tenant {
   promotionCampaignOutlets      PromotionCampaignOutlet[]
   promotionRules                PromotionRule[]
   promotionRedemptions          PromotionRedemption[]
+  taxProfiles                   TaxProfile[]
   payments                      Payment[]
   paymentTransactions           PaymentTransaction[]
   paymentRefunds                PaymentRefund[]
@@ -988,6 +1015,8 @@ model UserAccount {
   updatedCoupons                       Coupon[]                       @relation("CouponUpdatedBy")
   createdPromotionCampaigns            PromotionCampaign[]            @relation("PromotionCampaignCreatedBy")
   updatedPromotionCampaigns            PromotionCampaign[]            @relation("PromotionCampaignUpdatedBy")
+  createdTaxProfiles                   TaxProfile[]                   @relation("TaxProfileCreatedBy")
+  updatedTaxProfiles                   TaxProfile[]                   @relation("TaxProfileUpdatedBy")
   createdPayments                      Payment[]                      @relation("PaymentCreatedBy")
   paidPayments                         Payment[]                      @relation("PaymentPaidBy")
   paymentRefunds                       PaymentRefund[]                @relation("PaymentRefundedBy")
@@ -1719,6 +1748,35 @@ model BillTax {
   @@unique([tenantId, id])
   @@index([tenantId, billId])
   @@map("bill_taxes")
+}
+
+model TaxProfile {
+  id              String           @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String           @map("tenant_id") @db.Uuid
+  code            String           @db.VarChar(80)
+  name            String           @db.VarChar(160)
+  description     String?          @db.VarChar(1000)
+  taxType         TaxType          @map("tax_type")
+  taxMode         TaxMode          @map("tax_mode")
+  countryCode     String           @default("IN") @map("country_code") @db.Char(2)
+  currencyCode    String           @default("INR") @map("currency_code") @db.Char(3)
+  isDefault       Boolean          @default(false) @map("is_default")
+  status          TaxProfileStatus @default(ACTIVE)
+  createdByUserId String           @map("created_by_user_id") @db.Uuid
+  updatedByUserId String           @map("updated_by_user_id") @db.Uuid
+  version         Int              @default(1)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  createdBy UserAccount @relation("TaxProfileCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy UserAccount @relation("TaxProfileUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "tax_profiles_tenant_id_id_key")
+  @@unique([tenantId, code], map: "tax_profiles_tenant_code_key")
+  @@index([tenantId, status, isDefault], map: "tax_profiles_status_default_idx")
+  @@index([tenantId, taxType, taxMode], map: "tax_profiles_type_mode_idx")
+  @@map("tax_profiles")
 }
 
 model DiscountPolicy {

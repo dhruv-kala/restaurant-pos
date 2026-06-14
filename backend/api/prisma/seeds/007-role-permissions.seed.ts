@@ -24,6 +24,7 @@ const roleModules: Record<string, readonly string[]> = {
     'attendance',
     'loyalty',
     'promotions',
+    'tax',
     'settings',
     'audit',
     'notifications',
@@ -48,6 +49,7 @@ const roleModules: Record<string, readonly string[]> = {
     'notifications',
     'communication',
     'promotions',
+    'tax',
   ],
   CASHIER: [
     'billing',
@@ -122,6 +124,12 @@ const promotionActions: Record<string, readonly string[]> = {
   ],
 };
 
+const taxActions: Record<string, readonly string[]> = {
+  SUPER_ADMIN: ['*'],
+  TENANT_ADMIN: ['*'],
+  MANAGER: ['read'],
+};
+
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {
   const permissions = await prisma.permission.findMany();
   const templates = await prisma.systemRoleTemplate.findMany();
@@ -138,6 +146,7 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
     const allowedNotificationActions = notificationActions[roleKey] ?? [];
     const allowedCommunicationActions = communicationActions[roleKey] ?? [];
     const allowedPromotionActions = promotionActions[roleKey] ?? [];
+    const allowedTaxActions = taxActions[roleKey] ?? [];
     const allowed = permissions.filter(
       (permission) =>
         (modules.includes('*') || modules.includes(permission.module)) &&
@@ -149,7 +158,10 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
           allowedCommunicationActions.includes(permission.action)) &&
         (permission.module !== 'promotions' ||
           allowedPromotionActions.includes('*') ||
-          allowedPromotionActions.includes(permission.action)),
+          allowedPromotionActions.includes(permission.action)) &&
+        (permission.module !== 'tax' ||
+          allowedTaxActions.includes('*') ||
+          allowedTaxActions.includes(permission.action)),
     );
     for (const permission of allowed) {
       await prisma.systemRolePermission.upsert({

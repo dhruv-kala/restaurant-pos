@@ -2,12 +2,12 @@
 
 ## Status
 
-Planned.
+Partially implemented.
 
 Task 30 is split into:
 
-- Task 30.1 Tax Foundation
-- Task 30.2 Tax Rules and Rates
+- Task 30.1 Tax Foundation - Complete
+- Task 30.2 Tax Rules and Rates - Next
 - Task 30.3 Fiscal Policy Administration
 - Task 30.4 Tax Calculation Engine
 - Task 30.5 Tax Reporting Foundation
@@ -45,7 +45,7 @@ Tax module owns tax policy and tax calculation.
 
 Potential entities:
 
-- TaxProfile
+- TaxProfile - implemented in Task 30.1
 - TaxRate
 - TaxGroup
 - TaxRule
@@ -92,22 +92,28 @@ Initial support:
 
 Suggested permissions:
 
-- `TAX_VIEW`
-- `TAX_CREATE`
-- `TAX_UPDATE`
-- `TAX_DELETE`
-- `TAX_POLICY_MANAGE`
-- `FISCAL_POLICY_VIEW`
-- `FISCAL_POLICY_MANAGE`
-- `TAX_REPORT_VIEW`
+- `tax.read`
+- `tax.profile_manage`
+- `tax.policy_manage`
+- `tax.report_view`
+- `fiscal_policy.read`
+- `fiscal_policy.manage`
+
+The lowercase dot-key convention matches the repository's RBAC seed pattern.
 
 ## API
 
 Tax Foundation:
 
 - `GET /tax/profiles`
+- `GET /tax/profiles/default`
+- `GET /tax/profiles/:id`
 - `POST /tax/profiles`
 - `PATCH /tax/profiles/:id`
+
+Task 30.1 implements tenant-scoped tax profiles with `TaxType`, `TaxMode`, and
+`TaxProfileStatus`. A tenant may have only one active default tax profile.
+Profile mutations use optimistic `version` checks and write audit events.
 
 Tax Rates:
 
@@ -165,6 +171,7 @@ Shared:
 Audit:
 
 - tax profile creation
+- tax profile changes
 - tax rate changes
 - fiscal policy changes
 - invoice sequence changes

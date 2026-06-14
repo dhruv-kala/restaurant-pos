@@ -2679,3 +2679,80 @@ Known limitations:
 Next task:
 
 - Task 30 - Tax Configuration and Fiscal Policy Administration
+
+## Task 30.1 Completion
+
+Date: 2026-06-14
+
+Task: Task 30.1 - Tax Foundation
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616020000_add_tax_foundation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/app.module.ts`
+- `backend/api/src/modules/tax/controllers/tax-profiles.controller.ts`
+- `backend/api/src/modules/tax/dto/tax-profile.dto.ts`
+- `backend/api/src/modules/tax/services/tax-access.util.ts`
+- `backend/api/src/modules/tax/services/tax-access.util.spec.ts`
+- `backend/api/src/modules/tax/services/tax-profiles.service.ts`
+- `backend/api/src/modules/tax/services/tax-profiles.service.spec.ts`
+- `backend/api/src/modules/tax/tax-schema.spec.ts`
+- `backend/api/src/modules/tax/tax.module.ts`
+- `docs/specifications/tax-module.md`
+- `docs/tasks/030-tax/30.1-tax-foundation.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 30.1 implemented only the tax foundation scope.
+- Added tenant-scoped `TaxProfile` records with `TaxType`, `TaxMode`, and
+  `TaxProfileStatus`.
+- Added forced RLS and tenant-aware unique constraints for `tax_profiles`.
+- Added a partial unique index so each tenant can have at most one active
+  default tax profile.
+- Tax profile mutations use optimistic `version` checks.
+- Default profile changes clear any previous tenant default in the same locked
+  transaction.
+- Added protected APIs:
+  `POST /tax/profiles`,
+  `GET /tax/profiles`,
+  `GET /tax/profiles/default`,
+  `GET /tax/profiles/:id`, and
+  `PATCH /tax/profiles/:id`.
+- Added lowercase RBAC permissions:
+  `tax.read`, `tax.profile_manage`, `tax.policy_manage`, and
+  `tax.report_view`.
+- Added audit events for tax profile creation and update.
+- Tax rates, tax groups, tax rules, fiscal policy, invoice sequencing,
+  calculation, reporting, shared Dart clients, and UI remain deferred.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/tax/tax-schema.spec.ts src/modules/tax/services/tax-access.util.spec.ts src/modules/tax/services/tax-profiles.service.spec.ts`: passed, 3 suites and 9 tests
+- `npm run lint`: passed
+- `npm run build`: passed
+- `npm test -- --runInBand`: passed, 91 suites and 317 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 30.1 migration was not deployed to a live PostgreSQL database.
+- Live RLS and partial unique index behavior require valid local database
+  credentials and migration deployment.
+- Tax rates, rules, fiscal invoice policy, tax calculation snapshots, reports,
+  and UI are not implemented in this task.
+
+Next task:
+
+- Task 30.2 - Tax Rules and Rates
