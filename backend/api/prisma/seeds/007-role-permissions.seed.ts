@@ -23,6 +23,7 @@ const roleModules: Record<string, readonly string[]> = {
     'shifts',
     'attendance',
     'loyalty',
+    'promotions',
     'settings',
     'audit',
     'notifications',
@@ -46,9 +47,19 @@ const roleModules: Record<string, readonly string[]> = {
     'attendance',
     'notifications',
     'communication',
+    'promotions',
   ],
-  CASHIER: ['billing', 'payments', 'receipts', 'customers', 'orders', 'tables', 'notifications'],
-  WAITER: ['orders', 'tables', 'menu', 'customers', 'notifications'],
+  CASHIER: [
+    'billing',
+    'payments',
+    'receipts',
+    'customers',
+    'orders',
+    'tables',
+    'notifications',
+    'promotions',
+  ],
+  WAITER: ['orders', 'tables', 'menu', 'customers', 'notifications', 'promotions'],
   KITCHEN_STAFF: ['kitchen', 'orders', 'menu', 'inventory', 'notifications'],
   INVENTORY_MANAGER: ['inventory', 'purchasing', 'recipes', 'reports', 'notifications'],
   HR_MANAGER: ['employees', 'shifts', 'attendance', 'reports', 'users', 'notifications'],
@@ -73,6 +84,14 @@ const communicationActions: Record<string, readonly string[]> = {
   MANAGER: ['history_view'],
 };
 
+const promotionActions: Record<string, readonly string[]> = {
+  SUPER_ADMIN: ['*'],
+  TENANT_ADMIN: ['*'],
+  MANAGER: ['read', 'policy_manage', 'apply_discount', 'override_discount'],
+  CASHIER: ['read', 'apply_discount'],
+  WAITER: ['read'],
+};
+
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {
   const permissions = await prisma.permission.findMany();
   const templates = await prisma.systemRoleTemplate.findMany();
@@ -88,6 +107,7 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
     const modules = roleModules[roleKey] ?? [];
     const allowedNotificationActions = notificationActions[roleKey] ?? [];
     const allowedCommunicationActions = communicationActions[roleKey] ?? [];
+    const allowedPromotionActions = promotionActions[roleKey] ?? [];
     const allowed = permissions.filter(
       (permission) =>
         (modules.includes('*') || modules.includes(permission.module)) &&
@@ -96,7 +116,10 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
           allowedNotificationActions.includes(permission.action)) &&
         (permission.module !== 'communication' ||
           allowedCommunicationActions.includes('*') ||
-          allowedCommunicationActions.includes(permission.action)),
+          allowedCommunicationActions.includes(permission.action)) &&
+        (permission.module !== 'promotions' ||
+          allowedPromotionActions.includes('*') ||
+          allowedPromotionActions.includes(permission.action)),
     );
     for (const permission of allowed) {
       await prisma.systemRolePermission.upsert({

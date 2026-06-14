@@ -11,7 +11,9 @@ Last updated: 2026-06-14
 - Execute only the task explicitly requested.
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
-  2026-06-14; Task 29 remains the next provisional task.
+  2026-06-14.
+- Task 29.1 discount policy foundation is complete; Task 29.2 coupon
+  management is the next provisional promotions subtask.
 
 ## Foundation and Core SaaS
 
@@ -36,7 +38,12 @@ Last updated: 2026-06-14
 | 28.4 | COMPLETE | Central usage limits, counters, and over-limit policies |
 | 28.5 | COMPLETE | Trial lifecycle, expiry handling, and paid conversion |
 | 28.6 | COMPLETE | Subscription administration UI |
-| 29 | NEXT | Promotions, coupons, and discount policy engine |
+| 29.1 | COMPLETE | Discount policy foundation, deterministic calculation, immutable application snapshots, RLS, permissions, and audit |
+| 29.2 | NEXT | Coupon management |
+| 29.3 | PLANNED | Promotion campaigns |
+| 29.4 | PLANNED | Discount eligibility engine |
+| 29.5 | PLANNED | Redemption and usage tracking |
+| 29.6 | PLANNED | Promotions admin UI |
 | 30 | PLANNED | Tax configuration and fiscal policy administration |
 | 31 | PLANNED | Business-day opening, shifts, cash drawer, and closing |
 | 32 | PLANNED | Device registration, trusted sessions, and terminal management |

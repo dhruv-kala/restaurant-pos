@@ -23,6 +23,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { OutletsModule } from './modules/outlets/outlets.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { PromotionsModule } from './modules/promotions/promotions.module';
 import { ReceiptsModule } from './modules/receipts/receipts.module';
 import { RecipesModule } from './modules/recipes/recipes.module';
 import { RbacModule } from './modules/rbac/rbac.module';
@@ -55,6 +56,7 @@ import { PrismaModule } from './prisma/prisma.module';
     NotificationsModule,
     OrdersModule,
     PaymentsModule,
+    PromotionsModule,
     ReceiptsModule,
     RecipesModule,
     RbacModule,

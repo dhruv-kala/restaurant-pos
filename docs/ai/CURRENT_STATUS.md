@@ -4,9 +4,9 @@ Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 28.6**
-- Current module: **Subscription Administration UI**
-- Next provisional task: **Task 29 - Promotions, Coupons, and Discount Policy Engine**
+- Completed through: **Task 29.1**
+- Current module: **Promotions, Coupons, and Discount Policy Engine**
+- Next provisional task: **Task 29.2 - Coupon Management**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -40,6 +40,7 @@ Last updated: 2026-06-14
 | 28.4 | Tenant usage counters, immutable operations, atomic enforcement, configurable over-limit policies, RLS, and audit events |
 | 28.5 | Trial subscriptions, immutable trial history, extension, expiry, paid conversion, RLS, and audit events |
 | 28.6 | Shared subscription contracts, typed clients, Riverpod providers, and admin plan/subscription/entitlement/usage/trial screens |
+| 29.1 | Tenant discount policies, deterministic percentage/fixed calculations, immutable application snapshots, RBAC foundation, RLS, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -104,6 +105,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   Riverpod providers, platform plan management, tenant subscription lifecycle
   actions, entitlement visibility/overrides, usage counter reconciliation, and
   trial management screens
+- Promotions discount policy foundation with tenant/outlet-scoped policy CRUD,
+  deterministic bill/item/category discount calculation, immutable
+  `DiscountApplication` snapshots, forced RLS, append-only protections,
+  permission seed entries, and audit events
 
 ## Known Environment Limitation
 
@@ -114,7 +119,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 29 - Promotions, Coupons, and Discount Policy Engine
+### Task 29.2 - Coupon Management
 
 Read:
 
@@ -123,9 +128,10 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Define promotion ownership, discount stacking rules, coupon redemption
-contracts, tenant/outlet scope, audit requirements, and backend-first APIs
-before Flutter screens. Do not implement Task 29 unless explicitly requested.
+Implement coupon definitions only after reading
+`docs/specifications/promotions-module.md` and the Task 29.2 task file when it
+exists. Do not implement campaigns, eligibility UI, redemption tracking, or
+admin UI unless explicitly requested.
 
 ## Status Maintenance
 

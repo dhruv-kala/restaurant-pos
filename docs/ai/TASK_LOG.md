@@ -2264,3 +2264,68 @@ Validation:
 Known limitations:
 Next task:
 ```
+
+## Task 29.1 Completion
+
+Date: 2026-06-14
+
+Task: Task 29.1 - Discount Policy Foundation
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260615180000_add_promotions_discount_policy_foundation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/app.module.ts`
+- `backend/api/src/modules/promotions/controllers/promotions.controller.ts`
+- `backend/api/src/modules/promotions/dto/discount-calculation.dto.ts`
+- `backend/api/src/modules/promotions/dto/discount-policy.dto.ts`
+- `backend/api/src/modules/promotions/promotions.module.ts`
+- `backend/api/src/modules/promotions/promotions-schema.spec.ts`
+- `backend/api/src/modules/promotions/services/discount-policies.service.ts`
+- `backend/api/src/modules/promotions/services/discount-policies.service.spec.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.spec.ts`
+- `docs/specifications/promotions-module.md`
+- `docs/tasks/029-promotions/29.1-discount-policy-foundation.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 29.1 implemented only discount policy foundation scope.
+- Coupons, campaigns, eligibility UI, redemption tracking, and promotions admin
+  UI remain deferred.
+- Discount policy records are tenant-scoped and optionally outlet-scoped.
+- Discount application records are immutable snapshots and do not mutate bill or
+  order totals in this task.
+- Discount calculation supports deterministic percentage basis points and fixed
+  minor-unit amounts.
+- Manual arbitrary discounts require override permission; cashiers can apply
+  approved policies but cannot create ad hoc overrides.
+- RBAC seed entries use existing lowercase dot-key convention:
+  `promotions.read`, `promotions.policy_manage`,
+  `promotions.apply_discount`, and `promotions.override_discount`.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run test -- --runInBand`: passed, 84 suites and 287 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+
+Known limitations:
+
+- Migrations were not deployed to a live PostgreSQL database in this task.
+- Live RLS and trigger behavior still require valid local database credentials
+  and migration deployment.
+
+Next task:
+
+- Task 29.2 - Coupon Management
