@@ -2,6 +2,8 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 import {
+  requireCampaignManage,
+  requireCampaignRead,
   requireCouponManage,
   requireCouponValidate,
   requireDiscountOverride,
@@ -54,5 +56,19 @@ describe('promotions access', () => {
 
   it('allows cashiers to validate coupons', () => {
     expect(() => requireCouponValidate(actor({ roles: ['CASHIER'] }))).not.toThrow();
+  });
+
+  it('does not allow cashiers to manage campaigns', () => {
+    expect(() =>
+      requireCampaignManage(
+        actor({ roles: ['CASHIER'], permissions: ['promotions.campaign_view'] }),
+      ),
+    ).toThrow(ForbiddenException);
+  });
+
+  it('allows waiters to read campaigns when granted campaign view', () => {
+    expect(() =>
+      requireCampaignRead(actor({ permissions: ['promotions.campaign_view'] })),
+    ).not.toThrow();
   });
 });

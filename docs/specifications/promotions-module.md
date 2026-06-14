@@ -8,8 +8,8 @@ Task 29 is split into:
 
 - Task 29.1 Discount Policy Foundation - Complete
 - Task 29.2 Coupon Management - Complete
-- Task 29.3 Promotion Campaigns - Next
-- Task 29.4 Discount Eligibility Engine
+- Task 29.3 Promotion Campaigns - Complete
+- Task 29.4 Discount Eligibility Engine - Next
 - Task 29.5 Redemption and Usage Tracking
 - Task 29.6 Promotions Admin UI
 
@@ -102,6 +102,8 @@ Suggested permissions:
 - `promotions.coupon_view`
 - `promotions.coupon_manage`
 - `promotions.coupon_validate`
+- `promotions.campaign_view`
+- `promotions.campaign_manage`
 
 The lowercase `promotions.*` permission keys match the repository's existing
 RBAC convention. Redemption-specific permissions remain planned for Task 29.5.
@@ -129,6 +131,9 @@ Promotion Campaigns:
 - `GET /promotions/campaigns/:id`
 - `POST /promotions/campaigns`
 - `PATCH /promotions/campaigns/:id`
+- `POST /promotions/campaigns/:id/activate`
+- `POST /promotions/campaigns/:id/deactivate`
+- `POST /promotions/campaigns/evaluate`
 
 Discount Calculation:
 

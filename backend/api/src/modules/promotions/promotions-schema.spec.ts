@@ -15,6 +15,10 @@ describe('promotions discount policy foundation schema', () => {
     join(root, 'prisma/migrations/20260615200000_add_coupon_management/migration.sql'),
     'utf8',
   );
+  const campaignMigration = readFileSync(
+    join(root, 'prisma/migrations/20260615220000_add_promotion_campaigns/migration.sql'),
+    'utf8',
+  );
 
   it('defines discount policies and immutable application snapshots', () => {
     expect(schema).toContain('model DiscountPolicy {');
@@ -41,5 +45,18 @@ describe('promotions discount policy foundation schema', () => {
     expect(couponMigration).toContain('CREATE TABLE "coupons"');
     expect(couponMigration).toContain('ALTER TABLE "coupons" FORCE ROW LEVEL SECURITY');
     expect(couponMigration).toContain('CREATE POLICY "coupons_tenant_isolation"');
+  });
+
+  it('defines promotion campaigns, outlet targets, and rules with forced RLS', () => {
+    expect(schema).toContain('model PromotionCampaign {');
+    expect(schema).toContain('model PromotionCampaignOutlet {');
+    expect(schema).toContain('model PromotionRule {');
+    expect(campaignMigration).toContain('CREATE TABLE "promotion_campaigns"');
+    expect(campaignMigration).toContain('CREATE TABLE "promotion_campaign_outlets"');
+    expect(campaignMigration).toContain('CREATE TABLE "promotion_rules"');
+    expect(campaignMigration).toContain(
+      'ALTER TABLE "promotion_campaigns" FORCE ROW LEVEL SECURITY',
+    );
+    expect(campaignMigration).toContain('ALTER TABLE "promotion_rules" FORCE ROW LEVEL SECURITY');
   });
 });

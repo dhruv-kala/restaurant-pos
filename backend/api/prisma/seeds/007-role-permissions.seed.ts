@@ -95,9 +95,11 @@ const promotionActions: Record<string, readonly string[]> = {
     'coupon_view',
     'coupon_manage',
     'coupon_validate',
+    'campaign_view',
+    'campaign_manage',
   ],
-  CASHIER: ['read', 'apply_discount', 'coupon_view', 'coupon_validate'],
-  WAITER: ['read', 'coupon_view', 'coupon_validate'],
+  CASHIER: ['read', 'apply_discount', 'coupon_view', 'coupon_validate', 'campaign_view'],
+  WAITER: ['read', 'coupon_view', 'coupon_validate', 'campaign_view'],
 };
 
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {

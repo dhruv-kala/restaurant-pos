@@ -29,8 +29,16 @@ import {
   DiscountPolicyQueryDto,
   UpdateDiscountPolicyDto,
 } from '../dto/discount-policy.dto';
+import {
+  ChangePromotionCampaignStatusDto,
+  CreatePromotionCampaignDto,
+  EvaluatePromotionCampaignsDto,
+  PromotionCampaignQueryDto,
+  UpdatePromotionCampaignDto,
+} from '../dto/promotion-campaign.dto';
 import { DiscountPoliciesService } from '../services/discount-policies.service';
 import { CouponsService } from '../services/coupons.service';
+import { PromotionCampaignsService } from '../services/promotion-campaigns.service';
 
 @ApiTags('Promotions')
 @ApiBearerAuth()
@@ -40,6 +48,7 @@ export class PromotionsController {
   constructor(
     private readonly discountPolicies: DiscountPoliciesService,
     private readonly coupons: CouponsService,
+    private readonly campaigns: PromotionCampaignsService,
   ) {}
 
   @Post('discount-policies')
@@ -112,6 +121,16 @@ export class PromotionsController {
     return this.coupons.list(query, actor);
   }
 
+  @Post('coupons/validate')
+  @ApiOperation({ summary: 'Validate a coupon without creating redemption records' })
+  validateCoupon(
+    @Body() dto: ValidateCouponDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.coupons.validate(dto, actor, auditRequestMetadata(request));
+  }
+
   @Get('coupons/:id')
   @ApiOperation({ summary: 'Get a coupon definition' })
   detailCoupon(
@@ -134,13 +153,77 @@ export class PromotionsController {
     return this.coupons.update(id, dto, query, actor, auditRequestMetadata(request));
   }
 
-  @Post('coupons/validate')
-  @ApiOperation({ summary: 'Validate a coupon without creating redemption records' })
-  validateCoupon(
-    @Body() dto: ValidateCouponDto,
+  @Post('campaigns')
+  @ApiOperation({ summary: 'Create a tenant-scoped promotion campaign' })
+  createCampaign(
+    @Body() dto: CreatePromotionCampaignDto,
     @CurrentUser() actor: AuthenticatedUser,
     @Req() request: Request,
   ) {
-    return this.coupons.validate(dto, actor, auditRequestMetadata(request));
+    return this.campaigns.create(dto, actor, auditRequestMetadata(request));
+  }
+
+  @Get('campaigns')
+  @ApiOperation({ summary: 'List promotion campaigns' })
+  listCampaigns(
+    @Query() query: PromotionCampaignQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.campaigns.list(query, actor);
+  }
+
+  @Post('campaigns/evaluate')
+  @ApiOperation({ summary: 'Evaluate active promotion campaign rules without redemption' })
+  evaluateCampaigns(
+    @Body() dto: EvaluatePromotionCampaignsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.campaigns.evaluate(dto, actor);
+  }
+
+  @Get('campaigns/:id')
+  @ApiOperation({ summary: 'Get a promotion campaign' })
+  detailCampaign(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: PromotionCampaignQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.campaigns.detail(id, query, actor);
+  }
+
+  @Patch('campaigns/:id')
+  @ApiOperation({ summary: 'Update a promotion campaign with optimistic concurrency' })
+  updateCampaign(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdatePromotionCampaignDto,
+    @Query() query: PromotionCampaignQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.campaigns.update(id, dto, query, actor, auditRequestMetadata(request));
+  }
+
+  @Post('campaigns/:id/activate')
+  @ApiOperation({ summary: 'Activate a promotion campaign' })
+  activateCampaign(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ChangePromotionCampaignStatusDto,
+    @Query() query: PromotionCampaignQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.campaigns.activate(id, dto, query, actor, auditRequestMetadata(request));
+  }
+
+  @Post('campaigns/:id/deactivate')
+  @ApiOperation({ summary: 'Deactivate a promotion campaign' })
+  deactivateCampaign(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ChangePromotionCampaignStatusDto,
+    @Query() query: PromotionCampaignQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.campaigns.deactivate(id, dto, query, actor, auditRequestMetadata(request));
   }
 }

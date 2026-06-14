@@ -2394,3 +2394,71 @@ Known limitations:
 Next task:
 
 - Task 29.3 - Promotion Campaigns
+
+## Task 29.3 Completion
+
+Date: 2026-06-14
+
+Task: Task 29.3 - Promotion Campaigns
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260615220000_add_promotion_campaigns/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/promotions/controllers/promotions.controller.ts`
+- `backend/api/src/modules/promotions/dto/promotion-campaign.dto.ts`
+- `backend/api/src/modules/promotions/promotions.module.ts`
+- `backend/api/src/modules/promotions/promotions-schema.spec.ts`
+- `backend/api/src/modules/promotions/services/promotion-campaigns.service.ts`
+- `backend/api/src/modules/promotions/services/promotion-campaigns.service.spec.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.spec.ts`
+- `docs/specifications/promotions-module.md`
+- `docs/tasks/029-promotions/29.3-promotion-campaigns.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 29.3 implemented only campaign configuration, outlet targeting,
+  activation/deactivation, rules, and read-only evaluation.
+- Marketing automation, segmentation, communication sending, AI promotion
+  generation, redemption tracking, eligibility UI, and admin UI remain deferred.
+- Campaigns are tenant-scoped with stable per-tenant codes.
+- Campaigns support all-outlet scope or selected-outlet scope through a
+  tenant-aware join table.
+- Managers can manage only selected-outlet campaigns for their authenticated
+  outlet.
+- Campaign rules support percentage, fixed amount, free item, category, and item
+  promotion types.
+- Evaluation returns active in-window campaigns and rule snapshots but does not
+  create redemptions or mutate usage.
+- RBAC seed entries use existing lowercase dot-key convention:
+  `promotions.campaign_view` and `promotions.campaign_manage`.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run test -- --runInBand`: passed, 86 suites and 297 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+
+Known limitations:
+
+- Migrations were not deployed to a live PostgreSQL database in this task.
+- Live RLS and constraint behavior still require valid local database
+  credentials and migration deployment.
+- Campaign evaluation is read-only and does not apply discounts to bills or
+  orders until future eligibility/application work is implemented.
+
+Next task:
+
+- Task 29.4 - Discount Eligibility Engine

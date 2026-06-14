@@ -83,6 +83,8 @@ const moduleActions: Record<string, readonly string[]> = {
     'coupon_view',
     'coupon_manage',
     'coupon_validate',
+    'campaign_view',
+    'campaign_manage',
   ],
   subscriptions: [
     'create',

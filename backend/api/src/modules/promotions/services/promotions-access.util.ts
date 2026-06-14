@@ -148,6 +148,30 @@ export function requireCouponValidate(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Coupon validation permission is required');
 }
 
+export function requireCampaignRead(actor: AuthenticatedUser): void {
+  if (
+    DISCOUNT_POLICY_READ_ROLES.some((role) => hasRole(actor, role)) ||
+    hasPermission(actor, 'promotions.read') ||
+    hasPermission(actor, 'promotions.campaign_view') ||
+    hasPermission(actor, 'promotions.campaign_manage')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Promotion campaign read permission is required');
+}
+
+export function requireCampaignManage(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'promotions.campaign_manage')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Promotion campaign management permission is required');
+}
+
 function hasPermission(actor: AuthenticatedUser, permission: string): boolean {
   return actor.permissions?.includes(permission) ?? false;
 }
