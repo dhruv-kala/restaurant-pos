@@ -1,7 +1,13 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
-import { requireTaxProfileManage, requireTaxProfileRead, resolveTaxScope } from './tax-access.util';
+import {
+  requireFiscalPolicyManage,
+  requireFiscalPolicyRead,
+  requireTaxProfileManage,
+  requireTaxProfileRead,
+  resolveTaxScope,
+} from './tax-access.util';
 
 const tenantId = '01975c30-0000-7000-8000-000000000100';
 
@@ -40,5 +46,13 @@ describe('tax access utilities', () => {
     const manager = { ...tenantAdmin, roles: ['MANAGER'] };
     expect(() => requireTaxProfileRead(manager)).not.toThrow();
     expect(() => requireTaxProfileManage(manager)).toThrow(ForbiddenException);
+  });
+
+  it('allows tenant admins to manage fiscal policy and managers to read only', () => {
+    const manager = { ...tenantAdmin, roles: ['MANAGER'] };
+    expect(() => requireFiscalPolicyRead(tenantAdmin)).not.toThrow();
+    expect(() => requireFiscalPolicyManage(tenantAdmin)).not.toThrow();
+    expect(() => requireFiscalPolicyRead(manager)).not.toThrow();
+    expect(() => requireFiscalPolicyManage(manager)).toThrow(ForbiddenException);
   });
 });

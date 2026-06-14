@@ -9,7 +9,7 @@ Task 30 is split into:
 - Task 30.1 Tax Foundation - Complete
 - Task 30.2 Tax Rules and Rates - Complete
 - Task 30.2.5 Tax Architecture Review and Correction - Complete
-- Task 30.3 Fiscal Policy Administration
+- Task 30.3 Fiscal Policy Administration - Complete
 - Task 30.4 Tax Calculation Engine
 - Task 30.5 Tax Reporting Foundation
 - Task 30.6 Tax Admin UI
@@ -51,8 +51,8 @@ Potential entities:
 - TaxGroup - implemented in Task 30.2
 - TaxRule - implemented in Task 30.2
 - TaxCategoryMapping - implemented in Task 30.2 and corrected in Task 30.2.5
-- OutletFiscalPolicy
-- FiscalInvoiceSequence
+- OutletFiscalPolicy - implemented in Task 30.3
+- FiscalInvoiceSequence - implemented in Task 30.3
 - TaxCalculationSnapshot
 
 All tenant-owned records carry tenant scope and use forced PostgreSQL row-level security.
@@ -164,8 +164,25 @@ The review report is recorded in `docs/architecture/tax-architecture-review.md`.
 Fiscal Policy:
 
 - `GET /tax/fiscal-policies`
+- `GET /tax/fiscal-policies/:id`
 - `POST /tax/fiscal-policies`
 - `PATCH /tax/fiscal-policies/:id`
+
+Fiscal Invoice Sequences:
+
+- `GET /tax/fiscal-sequences`
+- `GET /tax/fiscal-sequences/:id`
+- `POST /tax/fiscal-sequences`
+- `PATCH /tax/fiscal-sequences/:id`
+- `POST /tax/fiscal-sequences/:id/generate`
+
+Task 30.3 implements outlet-scoped fiscal policies and fiscal invoice
+sequences. Policies own outlet fiscal-year settings, invoice prefix and
+padding, optional tax profile reference, timezone, status, and effective dates.
+Sequences are outlet/fiscal-year/prefix scoped, enforce uniqueness, and generate
+monotonic invoice numbers atomically. Sequence generation is audited but is not
+yet wired into receipt generation; existing receipt numbering remains unchanged
+until a later integration task.
 
 Calculation:
 

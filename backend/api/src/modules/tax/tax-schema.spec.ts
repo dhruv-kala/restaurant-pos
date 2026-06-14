@@ -12,6 +12,10 @@ describe('tax foundation schema', () => {
     join(root, 'prisma/migrations/20260616040000_add_tax_rules_and_rates/migration.sql'),
     'utf8',
   );
+  const fiscalMigration = readFileSync(
+    join(root, 'prisma/migrations/20260616060000_add_fiscal_policy_administration/migration.sql'),
+    'utf8',
+  );
 
   it('defines tenant-scoped tax profiles and base enums', () => {
     expect(schema).toContain('model TaxProfile {');
@@ -62,5 +66,25 @@ describe('tax foundation schema', () => {
     expect(rulesMigration).toContain('tax_category_mappings_target_validity_idx');
     expect(rulesMigration).toContain('tax_rates_rate_bps_check');
     expect(rulesMigration).toContain('tax_group_rates_group_id_fkey');
+  });
+
+  it('defines outlet fiscal policies and fiscal invoice sequences', () => {
+    expect(schema).toContain('model OutletFiscalPolicy {');
+    expect(schema).toContain('model FiscalInvoiceSequence {');
+    expect(schema).toContain('enum FiscalPolicyStatus {');
+    expect(schema).toContain('enum FiscalInvoiceSequenceStatus {');
+    expect(schema).toContain('outletFiscalPolicies          OutletFiscalPolicy[]');
+    expect(schema).toContain('fiscalInvoiceSequences        FiscalInvoiceSequence[]');
+  });
+
+  it('creates fiscal policy tables with outlet scope, constraints, and forced RLS', () => {
+    for (const table of ['outlet_fiscal_policies', 'fiscal_invoice_sequences']) {
+      expect(fiscalMigration).toContain(`CREATE TABLE "${table}"`);
+      expect(fiscalMigration).toContain(`ALTER TABLE "${table}" FORCE ROW LEVEL SECURITY`);
+      expect(fiscalMigration).toContain(`CREATE POLICY "${table}_tenant_isolation"`);
+    }
+    expect(fiscalMigration).toContain('outlet_fiscal_policies_outlet_id_fkey');
+    expect(fiscalMigration).toContain('fiscal_invoice_sequences_outlet_year_prefix_key');
+    expect(fiscalMigration).toContain('fiscal_invoice_sequences_last_number_check');
   });
 });

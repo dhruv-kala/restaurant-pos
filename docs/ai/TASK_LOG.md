@@ -2909,3 +2909,89 @@ Known limitations:
 Next task:
 
 - Task 30.3 - Fiscal Policy Administration
+
+## Task 30.3 Completion
+
+Date: 2026-06-14
+
+Task: Task 30.3 - Fiscal Policy Administration
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616060000_add_fiscal_policy_administration/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/tax/controllers/fiscal-policy.controller.ts`
+- `backend/api/src/modules/tax/dto/fiscal-policy.dto.ts`
+- `backend/api/src/modules/tax/services/fiscal-policy.service.ts`
+- `backend/api/src/modules/tax/services/fiscal-policy.service.spec.ts`
+- `backend/api/src/modules/tax/services/tax-access.util.ts`
+- `backend/api/src/modules/tax/services/tax-access.util.spec.ts`
+- `backend/api/src/modules/tax/tax-schema.spec.ts`
+- `backend/api/src/modules/tax/tax.module.ts`
+- `docs/specifications/tax-module.md`
+- `docs/tasks/030-tax/30.3-fiscal-policy-administration.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 30.3 implemented only fiscal policy administration scope.
+- Added outlet-scoped `OutletFiscalPolicy` records for invoice prefix,
+  invoice padding, fiscal year start rules, timezone, optional active tax
+  profile reference, status, and effective dates.
+- Added outlet-scoped `FiscalInvoiceSequence` records for fiscal-year/prefix
+  invoice numbering.
+- Enforced tenant-aware outlet and tax profile references.
+- Enforced sequence uniqueness per tenant, outlet, fiscal year label, and
+  prefix.
+- Active outlet fiscal policy effective date overlaps are rejected in service
+  logic under an outlet advisory lock.
+- Fiscal invoice number generation increments the sequence atomically and
+  returns a formatted number of `PREFIX-FISCAL_YEAR-LPAD(number)`.
+- Added protected APIs:
+  `POST /tax/fiscal-policies`,
+  `GET /tax/fiscal-policies`,
+  `GET /tax/fiscal-policies/:id`,
+  `PATCH /tax/fiscal-policies/:id`,
+  `POST /tax/fiscal-sequences`,
+  `GET /tax/fiscal-sequences`,
+  `GET /tax/fiscal-sequences/:id`,
+  `PATCH /tax/fiscal-sequences/:id`, and
+  `POST /tax/fiscal-sequences/:id/generate`.
+- Added `fiscal_policy.read` and `fiscal_policy.manage` permission seeds and
+  role-template mappings.
+- Added audit events for fiscal policy changes, sequence changes, and generated
+  invoice numbers.
+- Existing receipt invoice generation remains unchanged; wiring fiscal
+  sequences into receipts is deferred.
+- Government e-invoice integration, fiscal devices, accounting export, tax
+  calculation engine, shared Dart clients, and UI remain deferred.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/tax`: passed, 5 suites and 20 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 93 suites and 328 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 30.3 migration was not deployed to a live PostgreSQL database.
+- Existing receipt and bill invoice number generation still use their legacy
+  counters until a future integration task changes that behavior.
+- Tax calculation snapshots and historical bill tax stability remain Task 30.4
+  scope.
+
+Next task:
+
+- Task 30.4 - Tax Calculation Engine

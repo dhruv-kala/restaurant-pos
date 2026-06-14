@@ -54,6 +54,33 @@ export function requireTaxProfileManage(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Tax profile management permission is required');
 }
 
+export function requireFiscalPolicyRead(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'fiscal_policy.read') ||
+    hasPermission(actor, 'fiscal_policy.manage') ||
+    hasPermission(actor, 'tax.read') ||
+    hasPermission(actor, 'tax.policy_manage')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Fiscal policy read permission is required');
+}
+
+export function requireFiscalPolicyManage(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasPermission(actor, 'fiscal_policy.manage') ||
+    hasPermission(actor, 'tax.policy_manage')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Fiscal policy management permission is required');
+}
+
 function hasPermission(actor: AuthenticatedUser, permission: string): boolean {
   return actor.permissions?.includes('*') || actor.permissions?.includes(permission) || false;
 }

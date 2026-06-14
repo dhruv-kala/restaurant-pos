@@ -293,6 +293,20 @@ enum TaxMappingTarget {
   @@map("tax_mapping_target")
 }
 
+enum FiscalPolicyStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("fiscal_policy_status")
+}
+
+enum FiscalInvoiceSequenceStatus {
+  ACTIVE
+  CLOSED
+
+  @@map("fiscal_invoice_sequence_status")
+}
+
 enum PaymentMethod {
   CASH
   UPI
@@ -898,6 +912,8 @@ model Tenant {
   taxGroups                     TaxGroup[]
   taxRules                      TaxRule[]
   taxCategoryMappings           TaxCategoryMapping[]
+  outletFiscalPolicies          OutletFiscalPolicy[]
+  fiscalInvoiceSequences        FiscalInvoiceSequence[]
   payments                      Payment[]
   paymentTransactions           PaymentTransaction[]
   paymentRefunds                PaymentRefund[]
@@ -1027,6 +1043,8 @@ model Outlet {
   notifications            Notification[]
   communicationMessages    CommunicationMessage[]
   communicationPushDevices CommunicationPushDevice[]
+  fiscalPolicies           OutletFiscalPolicy[]
+  fiscalInvoiceSequences   FiscalInvoiceSequence[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1070,6 +1088,10 @@ model UserAccount {
   updatedTaxRules                      TaxRule[]                      @relation("TaxRuleUpdatedBy")
   createdTaxCategoryMappings           TaxCategoryMapping[]           @relation("TaxCategoryMappingCreatedBy")
   updatedTaxCategoryMappings           TaxCategoryMapping[]           @relation("TaxCategoryMappingUpdatedBy")
+  createdOutletFiscalPolicies          OutletFiscalPolicy[]           @relation("OutletFiscalPolicyCreatedBy")
+  updatedOutletFiscalPolicies          OutletFiscalPolicy[]           @relation("OutletFiscalPolicyUpdatedBy")
+  createdFiscalInvoiceSequences        FiscalInvoiceSequence[]        @relation("FiscalInvoiceSequenceCreatedBy")
+  updatedFiscalInvoiceSequences        FiscalInvoiceSequence[]        @relation("FiscalInvoiceSequenceUpdatedBy")
   createdPayments                      Payment[]                      @relation("PaymentCreatedBy")
   paidPayments                         Payment[]                      @relation("PaymentPaidBy")
   paymentRefunds                       PaymentRefund[]                @relation("PaymentRefundedBy")
@@ -1823,12 +1845,13 @@ model TaxProfile {
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  createdBy UserAccount @relation("TaxProfileCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  updatedBy UserAccount @relation("TaxProfileUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
-  rates     TaxRate[]
-  groups    TaxGroup[]
-  rules     TaxRule[]
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  createdBy      UserAccount          @relation("TaxProfileCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy      UserAccount          @relation("TaxProfileUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  rates          TaxRate[]
+  groups         TaxGroup[]
+  rules          TaxRule[]
+  fiscalPolicies OutletFiscalPolicy[]
 
   @@unique([tenantId, id], map: "tax_profiles_tenant_id_id_key")
   @@unique([tenantId, code], map: "tax_profiles_tenant_code_key")
@@ -1977,6 +2000,69 @@ model TaxCategoryMapping {
   @@index([tenantId, target, menuItemId, effectiveFrom, effectiveTo], map: "tax_category_mappings_item_validity_idx")
   @@index([tenantId, taxRuleId, isActive], map: "tax_category_mappings_rule_active_idx")
   @@map("tax_category_mappings")
+}
+
+model OutletFiscalPolicy {
+  id                   String             @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId             String             @map("tenant_id") @db.Uuid
+  outletId             String             @map("outlet_id") @db.Uuid
+  taxProfileId         String?            @map("tax_profile_id") @db.Uuid
+  invoicePrefix        String             @map("invoice_prefix") @db.VarChar(24)
+  invoicePadding       Int                @default(5) @map("invoice_padding")
+  fiscalYearStartMonth Int                @default(4) @map("fiscal_year_start_month")
+  fiscalYearStartDay   Int                @default(1) @map("fiscal_year_start_day")
+  timezone             String             @db.VarChar(64)
+  status               FiscalPolicyStatus @default(ACTIVE)
+  effectiveFrom        DateTime           @map("effective_from") @db.Timestamptz(3)
+  effectiveTo          DateTime?          @map("effective_to") @db.Timestamptz(3)
+  createdByUserId      String             @map("created_by_user_id") @db.Uuid
+  updatedByUserId      String             @map("updated_by_user_id") @db.Uuid
+  version              Int                @default(1)
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant     Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet     Outlet                  @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  taxProfile TaxProfile?             @relation(fields: [tenantId, taxProfileId], references: [tenantId, id], onDelete: Restrict)
+  createdBy  UserAccount             @relation("OutletFiscalPolicyCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy  UserAccount             @relation("OutletFiscalPolicyUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  sequences  FiscalInvoiceSequence[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, outletId, status, effectiveFrom, effectiveTo], map: "outlet_fiscal_policies_outlet_validity_idx")
+  @@index([tenantId, taxProfileId], map: "outlet_fiscal_policies_tax_profile_idx")
+  @@map("outlet_fiscal_policies")
+}
+
+model FiscalInvoiceSequence {
+  id              String                      @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String                      @map("tenant_id") @db.Uuid
+  outletId        String                      @map("outlet_id") @db.Uuid
+  fiscalPolicyId  String                      @map("fiscal_policy_id") @db.Uuid
+  fiscalYearLabel String                      @map("fiscal_year_label") @db.VarChar(16)
+  prefix          String                      @db.VarChar(24)
+  padding         Int                         @default(5)
+  lastNumber      Int                         @default(0) @map("last_number")
+  status          FiscalInvoiceSequenceStatus @default(ACTIVE)
+  startsAt        DateTime                    @map("starts_at") @db.Date
+  endsAt          DateTime                    @map("ends_at") @db.Date
+  createdByUserId String                      @map("created_by_user_id") @db.Uuid
+  updatedByUserId String                      @map("updated_by_user_id") @db.Uuid
+  version         Int                         @default(1)
+  createdAt       DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet             @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  fiscalPolicy OutletFiscalPolicy @relation(fields: [tenantId, fiscalPolicyId], references: [tenantId, id], onDelete: Restrict)
+  createdBy    UserAccount        @relation("FiscalInvoiceSequenceCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy    UserAccount        @relation("FiscalInvoiceSequenceUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, outletId, fiscalYearLabel, prefix], map: "fiscal_invoice_sequences_outlet_year_prefix_key")
+  @@index([tenantId, outletId, status, startsAt, endsAt], map: "fiscal_invoice_sequences_outlet_validity_idx")
+  @@index([tenantId, fiscalPolicyId, status], map: "fiscal_invoice_sequences_policy_status_idx")
+  @@map("fiscal_invoice_sequences")
 }
 
 model DiscountPolicy {
