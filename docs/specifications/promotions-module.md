@@ -9,8 +9,8 @@ Task 29 is split into:
 - Task 29.1 Discount Policy Foundation - Complete
 - Task 29.2 Coupon Management - Complete
 - Task 29.3 Promotion Campaigns - Complete
-- Task 29.4 Discount Eligibility Engine - Next
-- Task 29.5 Redemption and Usage Tracking
+- Task 29.4 Discount Eligibility Engine - Complete
+- Task 29.5 Redemption and Usage Tracking - Next
 - Task 29.6 Promotions Admin UI
 
 ## Objective
@@ -104,6 +104,7 @@ Suggested permissions:
 - `promotions.coupon_validate`
 - `promotions.campaign_view`
 - `promotions.campaign_manage`
+- `promotions.eligibility_evaluate`
 
 The lowercase `promotions.*` permission keys match the repository's existing
 RBAC convention. Redemption-specific permissions remain planned for Task 29.5.
@@ -139,6 +140,16 @@ Discount Calculation:
 
 - `POST /promotions/discounts/calculate`
 - `POST /promotions/discounts/apply-manual`
+
+Eligibility:
+
+- `POST /promotions/eligibility/evaluate`
+
+The eligibility endpoint evaluates active discount policies, requested coupon
+codes, and active promotion campaign rules. It returns all candidates, explicit
+denial reasons, selected discounts, stacking rejections, and `createsRedemption:
+false`. The current stacking foundation is conservative:
+`BEST_SINGLE_DISCOUNT`.
 
 Redemptions:
 

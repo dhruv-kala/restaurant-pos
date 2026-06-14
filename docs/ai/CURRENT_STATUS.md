@@ -4,9 +4,9 @@ Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 29.3**
+- Completed through: **Task 29.4**
 - Current module: **Promotions, Coupons, and Discount Policy Engine**
-- Next provisional task: **Task 29.4 - Discount Eligibility Engine**
+- Next provisional task: **Task 29.5 - Redemption and Usage Tracking**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -43,6 +43,7 @@ Last updated: 2026-06-14
 | 29.1 | Tenant discount policies, deterministic percentage/fixed calculations, immutable application snapshots, RBAC foundation, RLS, and audit events |
 | 29.2 | Tenant coupon definitions, normalized codes, validity/status management, read-only validation, usage-limit foundation, RLS, RBAC, and audit events |
 | 29.3 | Tenant promotion campaigns, selected-outlet targeting, campaign rules, activation/deactivation, read-only evaluation, RLS, RBAC, and audit events |
+| 29.4 | Central discount eligibility service, context validation, explicit denial reasons, deterministic candidate evaluation, and conservative stacking enforcement |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -118,6 +119,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Promotion campaign foundation with tenant-scoped campaigns, selected-outlet
   targeting, campaign rules, activation/deactivation, read-only rule
   evaluation, forced RLS, permission seed entries, and audit events
+- Discount eligibility engine with a central tenant-aware evaluator for discount
+  policies, requested coupons, and active campaign rules, explicit rejection
+  reasons, missing-code reporting, item/category context evaluation, and
+  `BEST_SINGLE_DISCOUNT` stacking enforcement
 
 ## Known Environment Limitation
 
@@ -128,7 +133,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 29.4 - Discount Eligibility Engine
+### Task 29.5 - Redemption and Usage Tracking
 
 Read:
 
@@ -137,9 +142,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement discount eligibility only after reading
-`docs/specifications/promotions-module.md` and the Task 29.4 task file. Do not
-implement redemption tracking or admin UI unless explicitly requested.
+Implement redemption and usage tracking only after reading
+`docs/specifications/promotions-module.md` and the Task 29.5 task file. Do not
+implement promotions admin UI unless explicitly requested.
 
 ## Status Maintenance
 

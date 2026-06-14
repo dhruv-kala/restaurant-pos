@@ -2462,3 +2462,74 @@ Known limitations:
 Next task:
 
 - Task 29.4 - Discount Eligibility Engine
+
+## Task 29.4 Completion
+
+Date: 2026-06-14
+
+Task: Task 29.4 - Discount Eligibility Engine
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/promotions/controllers/promotions.controller.ts`
+- `backend/api/src/modules/promotions/dto/discount-eligibility.dto.ts`
+- `backend/api/src/modules/promotions/promotions.module.ts`
+- `backend/api/src/modules/promotions/services/discount-eligibility.service.ts`
+- `backend/api/src/modules/promotions/services/discount-eligibility.service.spec.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.spec.ts`
+- `docs/specifications/promotions-module.md`
+- `docs/tasks/029-promotions/29.4-discount-eligibility-engine.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 29.4 implemented a central read-only eligibility engine only.
+- The engine evaluates tenant/outlet-scoped discount policies, requested coupon
+  codes, and active in-window campaign rules.
+- Eligibility context accepts tenant, outlet, customer, order, bill, item,
+  category, evaluated time, payment method, and customer type inputs.
+- Customer, order, bill, and outlet references are checked under the tenant
+  database request context.
+- Denied discounts return explicit reasons such as `NOT_FOUND`, `INACTIVE`,
+  `EXPIRED`, `CURRENCY_MISMATCH`, `MINIMUM_SUBTOTAL_NOT_MET`,
+  `ITEM_NOT_PRESENT`, and `CATEGORY_NOT_PRESENT`.
+- Missing requested coupon codes are returned as rejected coupon candidates
+  rather than disappearing from the response.
+- Stacking is intentionally conservative for the foundation:
+  `BEST_SINGLE_DISCOUNT` selects the highest-value eligible candidate and marks
+  the remaining eligible candidates with `STACKING_CONFLICT`.
+- The endpoint does not create redemption records, mutate usage counters, add
+  UI, perform segmentation, or start marketing automation.
+- Added `promotions.eligibility_evaluate` to the permission seed catalog and
+  operational role mappings.
+
+Validation:
+
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run build`: passed
+- `npm test -- --runInBand src/modules/promotions/services/discount-eligibility.service.spec.ts src/modules/promotions/services/promotions-access.util.spec.ts`: passed, 2 suites and 13 tests
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 87 suites and 302 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- Per-customer coupon usage limits still require Task 29.5 redemption tracking
+  before they can be consumed or counted.
+- The stacking model is deliberately conservative and can be expanded after
+  redemption/application data exists.
+- No live PostgreSQL migration deployment was performed; this task did not add
+  new database tables or migrations.
+
+Next task:
+
+- Task 29.5 - Redemption and Usage Tracking

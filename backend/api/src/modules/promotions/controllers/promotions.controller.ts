@@ -24,6 +24,7 @@ import {
   ValidateCouponDto,
 } from '../dto/coupon.dto';
 import { ApplyManualDiscountDto, CalculateDiscountDto } from '../dto/discount-calculation.dto';
+import { EvaluateDiscountEligibilityDto } from '../dto/discount-eligibility.dto';
 import {
   CreateDiscountPolicyDto,
   DiscountPolicyQueryDto,
@@ -38,6 +39,7 @@ import {
 } from '../dto/promotion-campaign.dto';
 import { DiscountPoliciesService } from '../services/discount-policies.service';
 import { CouponsService } from '../services/coupons.service';
+import { DiscountEligibilityService } from '../services/discount-eligibility.service';
 import { PromotionCampaignsService } from '../services/promotion-campaigns.service';
 
 @ApiTags('Promotions')
@@ -49,6 +51,7 @@ export class PromotionsController {
     private readonly discountPolicies: DiscountPoliciesService,
     private readonly coupons: CouponsService,
     private readonly campaigns: PromotionCampaignsService,
+    private readonly eligibility: DiscountEligibilityService,
   ) {}
 
   @Post('discount-policies')
@@ -103,6 +106,15 @@ export class PromotionsController {
     @Req() request: Request,
   ) {
     return this.discountPolicies.applyManual(dto, actor, auditRequestMetadata(request));
+  }
+
+  @Post('eligibility/evaluate')
+  @ApiOperation({ summary: 'Evaluate discount eligibility and stacking without redemption' })
+  evaluateDiscountEligibility(
+    @Body() dto: EvaluateDiscountEligibilityDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.eligibility.evaluate(dto, actor);
   }
 
   @Post('coupons')

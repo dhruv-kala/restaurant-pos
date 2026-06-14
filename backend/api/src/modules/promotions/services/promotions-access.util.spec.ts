@@ -7,6 +7,7 @@ import {
   requireCouponManage,
   requireCouponValidate,
   requireDiscountOverride,
+  requireEligibilityEvaluate,
   resolvePromotionsScope,
 } from './promotions-access.util';
 
@@ -70,5 +71,19 @@ describe('promotions access', () => {
     expect(() =>
       requireCampaignRead(actor({ permissions: ['promotions.campaign_view'] })),
     ).not.toThrow();
+  });
+
+  it('allows explicit eligibility evaluation permission', () => {
+    expect(() =>
+      requireEligibilityEvaluate(
+        actor({ roles: [], permissions: ['promotions.eligibility_evaluate'] }),
+      ),
+    ).not.toThrow();
+  });
+
+  it('rejects eligibility evaluation without promotion permissions', () => {
+    expect(() => requireEligibilityEvaluate(actor({ roles: [], permissions: [] }))).toThrow(
+      ForbiddenException,
+    );
   });
 });

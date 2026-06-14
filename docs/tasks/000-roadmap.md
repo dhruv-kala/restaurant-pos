@@ -12,7 +12,7 @@ Last updated: 2026-06-14
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.3 are complete; Task 29.4 discount eligibility engine is the
+- Tasks 29.1-29.4 are complete; Task 29.5 redemption and usage tracking is the
   next provisional promotions subtask.
 
 ## Foundation and Core SaaS
@@ -41,8 +41,8 @@ Last updated: 2026-06-14
 | 29.1 | COMPLETE | Discount policy foundation, deterministic calculation, immutable application snapshots, RLS, permissions, and audit |
 | 29.2 | COMPLETE | Coupon management |
 | 29.3 | COMPLETE | Promotion campaigns |
-| 29.4 | NEXT | Discount eligibility engine |
-| 29.5 | PLANNED | Redemption and usage tracking |
+| 29.4 | COMPLETE | Discount eligibility engine |
+| 29.5 | NEXT | Redemption and usage tracking |
 | 29.6 | PLANNED | Promotions admin UI |
 | 30 | PLANNED | Tax configuration and fiscal policy administration |
 | 31 | PLANNED | Business-day opening, shifts, cash drawer, and closing |

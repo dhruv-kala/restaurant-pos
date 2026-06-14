@@ -85,6 +85,7 @@ const moduleActions: Record<string, readonly string[]> = {
     'coupon_validate',
     'campaign_view',
     'campaign_manage',
+    'eligibility_evaluate',
   ],
   subscriptions: [
     'create',

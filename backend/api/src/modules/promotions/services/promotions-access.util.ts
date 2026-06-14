@@ -172,6 +172,19 @@ export function requireCampaignManage(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Promotion campaign management permission is required');
 }
 
+export function requireEligibilityEvaluate(actor: AuthenticatedUser): void {
+  if (
+    DISCOUNT_POLICY_READ_ROLES.some((role) => hasRole(actor, role)) ||
+    hasPermission(actor, 'promotions.eligibility_evaluate') ||
+    hasPermission(actor, 'promotions.apply_discount') ||
+    hasPermission(actor, 'promotions.coupon_validate') ||
+    hasPermission(actor, 'promotions.campaign_view')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Promotion eligibility evaluation permission is required');
+}
+
 function hasPermission(actor: AuthenticatedUser, permission: string): boolean {
-  return actor.permissions?.includes(permission) ?? false;
+  return actor.permissions?.includes('*') || actor.permissions?.includes(permission) || false;
 }
