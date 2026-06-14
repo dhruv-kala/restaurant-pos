@@ -717,6 +717,9 @@ export class TaxRulesService {
     target: TaxMappingTarget,
     ids: { menuCategoryId: string | null; menuItemId: string | null },
   ): Promise<void> {
+    if (target === TaxMappingTarget.TENANT_DEFAULT) {
+      return;
+    }
     if (target === TaxMappingTarget.CATEGORY) {
       const category = await tx.menuCategory.findFirst({
         where: { tenantId, id: ids.menuCategoryId!, deletedAt: null },
@@ -746,9 +749,7 @@ export class TaxRulesService {
       target,
       isActive: true,
       ...(excludeId ? { id: { not: excludeId } } : {}),
-      ...(target === TaxMappingTarget.CATEGORY
-        ? { menuCategoryId: ids.menuCategoryId }
-        : { menuItemId: ids.menuItemId }),
+      ...this.mappingOverlapTargetWhere(target, ids),
       effectiveFrom: effectiveTo ? { lt: effectiveTo } : undefined,
       OR: [{ effectiveTo: null }, { effectiveTo: { gt: effectiveFrom } }],
     };
@@ -763,6 +764,12 @@ export class TaxRulesService {
     menuCategoryId?: string | null,
     menuItemId?: string | null,
   ) {
+    if (target === TaxMappingTarget.TENANT_DEFAULT) {
+      if (menuCategoryId || menuItemId) {
+        throw new BadRequestException('TENANT_DEFAULT tax mappings cannot include menu targets');
+      }
+      return { menuCategoryId: null, menuItemId: null };
+    }
     if (target === TaxMappingTarget.CATEGORY) {
       if (!menuCategoryId || menuItemId) {
         throw new BadRequestException('CATEGORY tax mappings require menuCategoryId only');
@@ -773,6 +780,19 @@ export class TaxRulesService {
       throw new BadRequestException('ITEM tax mappings require menuItemId only');
     }
     return { menuCategoryId: null, menuItemId };
+  }
+
+  private mappingOverlapTargetWhere(
+    target: TaxMappingTarget,
+    ids: { menuCategoryId: string | null; menuItemId: string | null },
+  ): Prisma.TaxCategoryMappingWhereInput {
+    if (target === TaxMappingTarget.TENANT_DEFAULT) {
+      return { menuCategoryId: null, menuItemId: null };
+    }
+    if (target === TaxMappingTarget.CATEGORY) {
+      return { menuCategoryId: ids.menuCategoryId };
+    }
+    return { menuItemId: ids.menuItemId };
   }
 
   private async lockTenant(tx: Prisma.TransactionClient, tenantId: string): Promise<void> {

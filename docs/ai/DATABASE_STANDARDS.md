@@ -8,6 +8,47 @@
 - Tenant context comes from authenticated server context, not request fields.
 - Use composite tenant-aware foreign keys where practical.
 
+## Configuration Scope
+
+Before creating configuration entities, determine whether configuration belongs to:
+
+- Platform Scope
+- Tenant Scope
+- Outlet Scope
+- User Scope
+
+Preferred hierarchy:
+
+Platform
+→ Tenant Default
+→ Outlet Override
+→ User Preference
+
+Use Tenant scope for:
+
+- tax profiles
+- loyalty policies
+- promotion definitions
+- communication templates
+- inventory policies
+
+Use Outlet scope for:
+
+- fiscal policies
+- invoice sequences
+- kitchen configuration
+- receipt configuration
+- device assignments
+- outlet-specific promotions
+
+Use User scope for:
+
+- notification preferences
+- dashboard preferences
+- language preferences
+
+New modules must explicitly evaluate configuration scope before schema design.
+
 ## Identifiers and Time
 
 - Use UUIDv7/time-sortable UUIDs for primary identifiers.

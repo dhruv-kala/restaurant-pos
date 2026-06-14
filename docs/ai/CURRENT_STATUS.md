@@ -4,7 +4,7 @@ Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 30.2**
+- Completed through: **Task 30.2.5**
 - Current module: **Tax Configuration and Fiscal Policy**
 - Next provisional task: **Task 30.3 - Fiscal Policy Administration**
 - Later roadmap entries: **Provisional until explicitly approved**
@@ -48,6 +48,7 @@ Last updated: 2026-06-14
 | 29.6 | Shared promotions contracts, typed API client, Riverpod providers, and admin dashboard/policy/coupon/campaign/preview/redemption screens |
 | 30.1 | Tenant-scoped tax profiles, tax type/mode enums, active default enforcement, protected APIs, RLS, RBAC, and audit events |
 | 30.2 | Tenant-scoped tax rates, groups, rules, category/item mappings, effective dating, overlap prevention, RLS, and audit events |
+| 30.2.5 | Formal tax architecture review, tenant-default mapping correction, precedence documentation, and approval to proceed to fiscal policy |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -143,6 +144,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   category/item `TaxCategoryMapping` records, effective dating, active mapping
   overlap prevention, protected `/tax/rates`, `/tax/groups`, `/tax/rules`, and
   `/tax/category-mappings` APIs, and audit events
+- Tax architecture review and correction with first-class
+  `TaxMappingTarget.TENANT_DEFAULT`, explicit future calculation precedence of
+  item rule, category rule, then tenant default rule, and an approval report in
+  `docs/architecture/tax-architecture-review.md`
 
 ## Known Environment Limitation
 
@@ -163,9 +168,9 @@ Read:
 - `docs/ai/API_STANDARDS.md`
 
 Do not implement Task 30.3 unless explicitly requested. It should build on the
-Task 30.1 and 30.2 tax configuration foundations and define outlet fiscal
-policy ownership, fiscal period rules, invoice policy boundaries, tenant/outlet
-scope, and audit requirements before adding UI.
+Task 30.1, 30.2, and 30.2.5 tax configuration foundations and define outlet
+fiscal policy ownership, fiscal period rules, invoice policy boundaries,
+tenant/outlet scope, and audit requirements before adding UI.
 
 ## Status Maintenance
 

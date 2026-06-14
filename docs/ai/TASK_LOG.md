@@ -2823,7 +2823,11 @@ Validation:
 - `npm run prisma:validate`: passed
 - `npm run prisma:generate`: passed
 - `npm test -- --runInBand src/modules/tax`: passed, 4 suites and 13 tests
+- `npm run lint`: passed
 - `npm run build`: passed
+- `npm test -- --runInBand`: passed, 92 suites and 321 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed
 
 Known limitations:
 
@@ -2831,6 +2835,76 @@ Known limitations:
 - Live RLS, foreign key, and check constraint behavior require valid local
   database credentials and migration deployment.
 - Tax calculation does not consume these rules yet; that belongs to Task 30.4.
+
+Next task:
+
+- Task 30.3 - Fiscal Policy Administration
+
+## Task 30.2.5 Completion
+
+Date: 2026-06-14
+
+Task: Task 30.2.5 - Tax Architecture Review and Correction
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616040000_add_tax_rules_and_rates/migration.sql`
+- `backend/api/src/modules/tax/controllers/tax-rules.controller.ts`
+- `backend/api/src/modules/tax/services/tax-rules.service.ts`
+- `backend/api/src/modules/tax/services/tax-rules.service.spec.ts`
+- `backend/api/src/modules/tax/tax-schema.spec.ts`
+- `docs/architecture/tax-architecture-review.md`
+- `docs/specifications/tax-module.md`
+- `docs/tasks/030-tax/30.2.5-tax-architecture-review.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_EXECUTION_RULES.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Performed the formal architecture review for Task 30.1 and Task 30.2 before
+  fiscal policy and tax calculation work.
+- Verified tenant isolation, forced RLS, tenant-aware foreign keys, effective
+  date strategy, GST component hierarchy, outlet compatibility, indexes,
+  constraints, and audit readiness.
+- Identified one high-impact gap: the documented future calculation precedence
+  required a tenant default fallback, but Task 30.2 only modeled category and
+  item mappings.
+- Corrected the mapping model by adding
+  `TaxMappingTarget.TENANT_DEFAULT`.
+- Updated the migration target check so tenant default mappings require no
+  menu category or menu item.
+- Added a target validity index for default/category/item mapping lookup.
+- Updated service validation, overlap checks, Swagger descriptions, and tests
+  for tenant default mappings.
+- Produced `docs/architecture/tax-architecture-review.md` and approved Task
+  30.3 to proceed.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/tax`: passed, 4 suites and 14 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 92 suites and 322 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only after removing a
+  whitespace-only line in `docs/ai/TASK_EXECUTION_RULES.md`
+
+Known limitations:
+
+- The Task 30.2 migration has still not been deployed to a live PostgreSQL
+  database.
+- Historical tax stability still depends on Task 30.4 implementing immutable
+  `TaxCalculationSnapshot` records and bill/receipt tax snapshots.
+- No fiscal policy, calculation engine, reports, shared Dart clients, or UI
+  were implemented in this review task.
 
 Next task:
 

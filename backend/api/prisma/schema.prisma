@@ -286,6 +286,7 @@ enum TaxComponent {
 }
 
 enum TaxMappingTarget {
+  TENANT_DEFAULT
   CATEGORY
   ITEM
 
@@ -1971,6 +1972,7 @@ model TaxCategoryMapping {
   updatedBy    UserAccount   @relation("TaxCategoryMappingUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
 
   @@unique([tenantId, id])
+  @@index([tenantId, target, isActive, effectiveFrom, effectiveTo], map: "tax_category_mappings_target_validity_idx")
   @@index([tenantId, target, menuCategoryId, effectiveFrom, effectiveTo], map: "tax_category_mappings_category_validity_idx")
   @@index([tenantId, target, menuItemId, effectiveFrom, effectiveTo], map: "tax_category_mappings_item_validity_idx")
   @@index([tenantId, taxRuleId, isActive], map: "tax_category_mappings_rule_active_idx")

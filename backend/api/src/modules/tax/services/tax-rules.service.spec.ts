@@ -175,4 +175,99 @@ describe('TaxRulesService', () => {
     ).rejects.toThrow(ConflictException);
     expect(tx.taxCategoryMapping.create).not.toHaveBeenCalled();
   });
+
+  it('creates a tenant default mapping without menu target lookup', async () => {
+    const now = new Date('2026-06-14T00:00:00.000Z');
+    const taxGroup = {
+      id: '01975c30-0000-7000-8000-000000000402',
+      tenantId,
+      profileId,
+      code: 'gst_5_group',
+      name: 'GST 5%',
+      description: null,
+      status: TaxGroupStatus.ACTIVE,
+      effectiveFrom: now,
+      effectiveTo: null,
+      createdByUserId: userId,
+      updatedByUserId: userId,
+      version: 1,
+      createdAt: now,
+      updatedAt: now,
+      rates: [],
+    };
+    const taxRule = {
+      id: ruleId,
+      tenantId,
+      profileId,
+      taxGroupId: taxGroup.id,
+      code: 'tenant_default',
+      name: 'Tenant Default',
+      description: null,
+      priority: 1000,
+      status: TaxRuleStatus.ACTIVE,
+      effectiveFrom: now,
+      effectiveTo: null,
+      createdByUserId: userId,
+      updatedByUserId: userId,
+      version: 1,
+      createdAt: now,
+      updatedAt: now,
+      taxGroup,
+    };
+    const created = {
+      id: '01975c30-0000-7000-8000-000000000602',
+      tenantId,
+      taxRuleId: ruleId,
+      target: TaxMappingTarget.TENANT_DEFAULT,
+      menuCategoryId: null,
+      menuItemId: null,
+      effectiveFrom: now,
+      effectiveTo: null,
+      isActive: true,
+      createdByUserId: userId,
+      updatedByUserId: userId,
+      version: 1,
+      createdAt: now,
+      updatedAt: now,
+      taxRule,
+    };
+    const createMappingMock = jest
+      .fn<Promise<typeof created>, [{ data: Record<string, unknown>; include: object }]>()
+      .mockResolvedValue(created);
+    const tx = {
+      $queryRaw: jest.fn(),
+      taxRule: { findFirst: jest.fn().mockResolvedValue(taxRule) },
+      menuCategory: { findFirst: jest.fn() },
+      menuItem: { findFirst: jest.fn() },
+      taxCategoryMapping: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: createMappingMock,
+      },
+    };
+    const service = new TaxRulesService(
+      transactionalPrisma(tx),
+      { append: jest.fn() } as unknown as AuditService,
+    );
+
+    const result = await service.createMapping(
+      {
+        taxRuleId: ruleId,
+        target: TaxMappingTarget.TENANT_DEFAULT,
+        effectiveFrom: now.toISOString(),
+      },
+      tenantAdmin,
+      {},
+    );
+
+    expect(tx.menuCategory.findFirst).not.toHaveBeenCalled();
+    expect(tx.menuItem.findFirst).not.toHaveBeenCalled();
+    expect(createMappingMock.mock.calls[0][0].data).toMatchObject({
+      tenantId,
+      taxRuleId: ruleId,
+      target: TaxMappingTarget.TENANT_DEFAULT,
+      menuCategoryId: null,
+      menuItemId: null,
+    });
+    expect(result).toEqual(expect.objectContaining({ target: TaxMappingTarget.TENANT_DEFAULT }));
+  });
 });

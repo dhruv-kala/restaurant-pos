@@ -2,7 +2,7 @@ CREATE TYPE "tax_rate_status" AS ENUM ('ACTIVE', 'INACTIVE');
 CREATE TYPE "tax_group_status" AS ENUM ('ACTIVE', 'INACTIVE');
 CREATE TYPE "tax_rule_status" AS ENUM ('ACTIVE', 'INACTIVE');
 CREATE TYPE "tax_component" AS ENUM ('GST', 'CGST', 'SGST', 'IGST', 'VAT', 'SERVICE_TAX', 'CESS');
-CREATE TYPE "tax_mapping_target" AS ENUM ('CATEGORY', 'ITEM');
+CREATE TYPE "tax_mapping_target" AS ENUM ('TENANT_DEFAULT', 'CATEGORY', 'ITEM');
 
 CREATE TABLE "tax_rates" (
   "id" UUID NOT NULL DEFAULT app_uuid_v7(),
@@ -108,7 +108,8 @@ CREATE TABLE "tax_category_mappings" (
 
   CONSTRAINT "tax_category_mappings_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "tax_category_mappings_target_check" CHECK (
-    ("target" = 'CATEGORY' AND "menu_category_id" IS NOT NULL AND "menu_item_id" IS NULL)
+    ("target" = 'TENANT_DEFAULT' AND "menu_category_id" IS NULL AND "menu_item_id" IS NULL)
+    OR ("target" = 'CATEGORY' AND "menu_category_id" IS NOT NULL AND "menu_item_id" IS NULL)
     OR ("target" = 'ITEM' AND "menu_item_id" IS NOT NULL AND "menu_category_id" IS NULL)
   ),
   CONSTRAINT "tax_category_mappings_validity_check" CHECK ("effective_to" IS NULL OR "effective_to" > "effective_from"),
@@ -135,6 +136,7 @@ CREATE INDEX "tax_rules_group_idx" ON "tax_rules"("tenant_id", "tax_group_id");
 CREATE INDEX "tax_rules_validity_idx" ON "tax_rules"("tenant_id", "effective_from", "effective_to");
 
 CREATE UNIQUE INDEX "tax_category_mappings_tenant_id_id_key" ON "tax_category_mappings"("tenant_id", "id");
+CREATE INDEX "tax_category_mappings_target_validity_idx" ON "tax_category_mappings"("tenant_id", "target", "is_active", "effective_from", "effective_to");
 CREATE INDEX "tax_category_mappings_category_validity_idx" ON "tax_category_mappings"("tenant_id", "target", "menu_category_id", "effective_from", "effective_to");
 CREATE INDEX "tax_category_mappings_item_validity_idx" ON "tax_category_mappings"("tenant_id", "target", "menu_item_id", "effective_from", "effective_to");
 CREATE INDEX "tax_category_mappings_rule_active_idx" ON "tax_category_mappings"("tenant_id", "tax_rule_id", "is_active");

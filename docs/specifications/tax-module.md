@@ -8,6 +8,7 @@ Task 30 is split into:
 
 - Task 30.1 Tax Foundation - Complete
 - Task 30.2 Tax Rules and Rates - Complete
+- Task 30.2.5 Tax Architecture Review and Correction - Complete
 - Task 30.3 Fiscal Policy Administration
 - Task 30.4 Tax Calculation Engine
 - Task 30.5 Tax Reporting Foundation
@@ -49,7 +50,7 @@ Potential entities:
 - TaxRate - implemented in Task 30.2
 - TaxGroup - implemented in Task 30.2
 - TaxRule - implemented in Task 30.2
-- TaxCategoryMapping - implemented in Task 30.2
+- TaxCategoryMapping - implemented in Task 30.2 and corrected in Task 30.2.5
 - OutletFiscalPolicy
 - FiscalInvoiceSequence
 - TaxCalculationSnapshot
@@ -149,6 +150,16 @@ classification fields after creation. Groups are composed from active rates in
 the same profile. Active mapping date ranges cannot overlap for the same menu
 category or item. All mutations use optimistic `version` checks and write audit
 events.
+
+Task 30.2.5 reviewed the tax architecture before fiscal policy and calculation
+work. The review added first-class tenant default mappings through
+`TaxMappingTarget.TENANT_DEFAULT` so the future calculation precedence is:
+
+1. Item rule
+2. Category rule
+3. Tenant default rule
+
+The review report is recorded in `docs/architecture/tax-architecture-review.md`.
 
 Fiscal Policy:
 

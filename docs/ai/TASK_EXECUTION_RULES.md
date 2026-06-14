@@ -52,6 +52,19 @@ Do not load the complete `TASK_LOG.md` unless historical detail is needed. Use
 - Do not add infrastructure not approved by the task.
 - Never revert unrelated user changes.
 
+## Architecture Validation
+
+Before implementing a new module:
+
+- Evaluate platform scope
+- Evaluate tenant scope
+- Evaluate outlet scope
+- Evaluate user scope
+
+Apply configuration hierarchy rules defined in DATABASE_STANDARDS.md.
+
+Do not create separate architecture-review tasks unless explicitly requested.
+
 ## Prompt Efficiency
 
 Future prompts must reference repository documents instead of repeating:
@@ -71,10 +84,20 @@ Prompts should provide only:
 - task-specific acceptance criteria
 - explicit deviations from repository rules
 
+## Architecture Validation
+
+Before implementing a new module:
+
+- Evaluate Platform Scope
+- Evaluate Tenant Scope
+- Evaluate Outlet Scope
+- Evaluate User Scope
+
+Apply configuration hierarchy rules from MULTI_TENANCY_RULES.md.
+
 ## Validation
 
 Run checks relevant to changed areas. Do not claim checks that were not run.
 Database deployment requires a known target and valid credentials. Documentation
 tasks require link/path checks, status consistency checks, and `git diff
 --check`.
-

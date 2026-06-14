@@ -41,6 +41,7 @@ describe('tax foundation schema', () => {
     expect(schema).toContain('model TaxRule {');
     expect(schema).toContain('model TaxCategoryMapping {');
     expect(schema).toContain('enum TaxComponent {');
+    expect(schema).toContain('TENANT_DEFAULT');
     expect(schema).toContain('taxCategoryMappings           TaxCategoryMapping[]');
   });
 
@@ -57,6 +58,8 @@ describe('tax foundation schema', () => {
       expect(rulesMigration).toContain(`CREATE POLICY "${table}_tenant_isolation"`);
     }
     expect(rulesMigration).toContain('tax_category_mappings_target_check');
+    expect(rulesMigration).toContain('"target" = \'TENANT_DEFAULT\'');
+    expect(rulesMigration).toContain('tax_category_mappings_target_validity_idx');
     expect(rulesMigration).toContain('tax_rates_rate_bps_check');
     expect(rulesMigration).toContain('tax_group_rates_group_id_fkey');
   });

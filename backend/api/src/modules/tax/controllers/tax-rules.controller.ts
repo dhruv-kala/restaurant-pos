@@ -170,7 +170,7 @@ export class TaxRulesController {
   }
 
   @Post('category-mappings')
-  @ApiOperation({ summary: 'Map a menu category or item to a tax rule' })
+  @ApiOperation({ summary: 'Map tenant default, menu category, or menu item to a tax rule' })
   @ApiCreatedResponse()
   createMapping(
     @Body() dto: CreateTaxCategoryMappingDto,
@@ -181,14 +181,14 @@ export class TaxRulesController {
   }
 
   @Get('category-mappings')
-  @ApiOperation({ summary: 'List tax category and item mappings' })
+  @ApiOperation({ summary: 'List tax default, category, and item mappings' })
   @ApiOkResponse()
   listMappings(@Query() query: TaxConfigurationQueryDto, @CurrentUser() actor: AuthenticatedUser) {
     return this.taxRules.listMappings(query, actor);
   }
 
   @Get('category-mappings/:id')
-  @ApiOperation({ summary: 'Get a tax category or item mapping' })
+  @ApiOperation({ summary: 'Get a tax default, category, or item mapping' })
   @ApiOkResponse()
   detailMapping(
     @Param('id', ParseUUIDPipe) id: string,

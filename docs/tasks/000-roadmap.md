@@ -12,7 +12,7 @@ Last updated: 2026-06-14
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6 and 30.1-30.2 are complete; Task 30.3 fiscal policy
+- Tasks 29.1-29.6 and 30.1-30.2.5 are complete; Task 30.3 fiscal policy
   administration is the next provisional task.
 
 ## Foundation and Core SaaS
@@ -46,6 +46,7 @@ Last updated: 2026-06-14
 | 29.6 | COMPLETE | Promotions admin UI |
 | 30.1 | COMPLETE | Tax foundation |
 | 30.2 | COMPLETE | Tax rules and rates |
+| 30.2.5 | COMPLETE | Tax architecture review and correction |
 | 30.3 | NEXT | Fiscal policy administration |
 | 30.4 | PLANNED | Tax calculation engine |
 | 30.5 | PLANNED | Tax reporting foundation |
