@@ -44,7 +44,12 @@ Last updated: 2026-06-14
 | 29.4 | COMPLETE | Discount eligibility engine |
 | 29.5 | COMPLETE | Redemption and usage tracking |
 | 29.6 | COMPLETE | Promotions admin UI |
-| 30 | NEXT | Tax configuration and fiscal policy administration |
+| 30.1 | NEXT | Tax foundation |
+| 30.2 | PLANNED | Tax rules and rates |
+| 30.3 | PLANNED | Fiscal policy administration |
+| 30.4 | PLANNED | Tax calculation engine |
+| 30.5 | PLANNED | Tax reporting foundation |
+| 30.6 | PLANNED | Tax admin UI |
 | 31 | PLANNED | Business-day opening, shifts, cash drawer, and closing |
 | 32 | PLANNED | Device registration, trusted sessions, and terminal management |
 | 33 | PLANNED | Offline SQLite operation and synchronization protocol |
