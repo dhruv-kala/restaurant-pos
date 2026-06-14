@@ -7,7 +7,7 @@ Partially implemented.
 Task 30 is split into:
 
 - Task 30.1 Tax Foundation - Complete
-- Task 30.2 Tax Rules and Rates - Next
+- Task 30.2 Tax Rules and Rates - Complete
 - Task 30.3 Fiscal Policy Administration
 - Task 30.4 Tax Calculation Engine
 - Task 30.5 Tax Reporting Foundation
@@ -46,10 +46,10 @@ Tax module owns tax policy and tax calculation.
 Potential entities:
 
 - TaxProfile - implemented in Task 30.1
-- TaxRate
-- TaxGroup
-- TaxRule
-- TaxCategoryMapping
+- TaxRate - implemented in Task 30.2
+- TaxGroup - implemented in Task 30.2
+- TaxRule - implemented in Task 30.2
+- TaxCategoryMapping - implemented in Task 30.2
 - OutletFiscalPolicy
 - FiscalInvoiceSequence
 - TaxCalculationSnapshot
@@ -119,13 +119,36 @@ Tax Rates:
 
 - `GET /tax/rates`
 - `POST /tax/rates`
+- `GET /tax/rates/:id`
 - `PATCH /tax/rates/:id`
 
 Tax Groups:
 
 - `GET /tax/groups`
 - `POST /tax/groups`
+- `GET /tax/groups/:id`
 - `PATCH /tax/groups/:id`
+
+Tax Rules:
+
+- `GET /tax/rules`
+- `POST /tax/rules`
+- `GET /tax/rules/:id`
+- `PATCH /tax/rules/:id`
+
+Tax Category and Item Mappings:
+
+- `GET /tax/category-mappings`
+- `POST /tax/category-mappings`
+- `GET /tax/category-mappings/:id`
+- `PATCH /tax/category-mappings/:id`
+
+Task 30.2 implements tenant-scoped tax rates, rate groups, rules, and menu
+category/item mappings. Tax rates store exact basis-point values and immutable
+classification fields after creation. Groups are composed from active rates in
+the same profile. Active mapping date ranges cannot overlap for the same menu
+category or item. All mutations use optimistic `version` checks and write audit
+events.
 
 Fiscal Policy:
 

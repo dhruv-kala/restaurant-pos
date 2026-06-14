@@ -252,6 +252,46 @@ enum TaxMode {
   @@map("tax_mode")
 }
 
+enum TaxRateStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("tax_rate_status")
+}
+
+enum TaxGroupStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("tax_group_status")
+}
+
+enum TaxRuleStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("tax_rule_status")
+}
+
+enum TaxComponent {
+  GST
+  CGST
+  SGST
+  IGST
+  VAT
+  SERVICE_TAX
+  CESS
+
+  @@map("tax_component")
+}
+
+enum TaxMappingTarget {
+  CATEGORY
+  ITEM
+
+  @@map("tax_mapping_target")
+}
+
 enum PaymentMethod {
   CASH
   UPI
@@ -853,6 +893,10 @@ model Tenant {
   promotionRules                PromotionRule[]
   promotionRedemptions          PromotionRedemption[]
   taxProfiles                   TaxProfile[]
+  taxRates                      TaxRate[]
+  taxGroups                     TaxGroup[]
+  taxRules                      TaxRule[]
+  taxCategoryMappings           TaxCategoryMapping[]
   payments                      Payment[]
   paymentTransactions           PaymentTransaction[]
   paymentRefunds                PaymentRefund[]
@@ -1017,6 +1061,14 @@ model UserAccount {
   updatedPromotionCampaigns            PromotionCampaign[]            @relation("PromotionCampaignUpdatedBy")
   createdTaxProfiles                   TaxProfile[]                   @relation("TaxProfileCreatedBy")
   updatedTaxProfiles                   TaxProfile[]                   @relation("TaxProfileUpdatedBy")
+  createdTaxRates                      TaxRate[]                      @relation("TaxRateCreatedBy")
+  updatedTaxRates                      TaxRate[]                      @relation("TaxRateUpdatedBy")
+  createdTaxGroups                     TaxGroup[]                     @relation("TaxGroupCreatedBy")
+  updatedTaxGroups                     TaxGroup[]                     @relation("TaxGroupUpdatedBy")
+  createdTaxRules                      TaxRule[]                      @relation("TaxRuleCreatedBy")
+  updatedTaxRules                      TaxRule[]                      @relation("TaxRuleUpdatedBy")
+  createdTaxCategoryMappings           TaxCategoryMapping[]           @relation("TaxCategoryMappingCreatedBy")
+  updatedTaxCategoryMappings           TaxCategoryMapping[]           @relation("TaxCategoryMappingUpdatedBy")
   createdPayments                      Payment[]                      @relation("PaymentCreatedBy")
   paidPayments                         Payment[]                      @relation("PaymentPaidBy")
   paymentRefunds                       PaymentRefund[]                @relation("PaymentRefundedBy")
@@ -1212,12 +1264,13 @@ model MenuCategory {
   updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(3)
 
-  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  parent         MenuCategory?   @relation("MenuCategoryHierarchy", fields: [tenantId, parentId], references: [tenantId, id], onDelete: Restrict)
-  children       MenuCategory[]  @relation("MenuCategoryHierarchy")
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  parent         MenuCategory?        @relation("MenuCategoryHierarchy", fields: [tenantId, parentId], references: [tenantId, id], onDelete: Restrict)
+  children       MenuCategory[]       @relation("MenuCategoryHierarchy")
   items          MenuItem[]
-  coupons        Coupon[]        @relation("CouponTargetCategory")
-  promotionRules PromotionRule[] @relation("PromotionRuleTargetCategory")
+  coupons        Coupon[]             @relation("CouponTargetCategory")
+  promotionRules PromotionRule[]      @relation("PromotionRuleTargetCategory")
+  taxMappings    TaxCategoryMapping[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, name])
@@ -1261,6 +1314,7 @@ model MenuItem {
   freeItemCoupons        Coupon[]                   @relation("CouponFreeItem")
   targetPromotionRules   PromotionRule[]            @relation("PromotionRuleTargetItem")
   freeItemPromotionRules PromotionRule[]            @relation("PromotionRuleFreeItem")
+  taxMappings            TaxCategoryMapping[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, sku])
@@ -1771,12 +1825,156 @@ model TaxProfile {
   tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   createdBy UserAccount @relation("TaxProfileCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
   updatedBy UserAccount @relation("TaxProfileUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  rates     TaxRate[]
+  groups    TaxGroup[]
+  rules     TaxRule[]
 
   @@unique([tenantId, id], map: "tax_profiles_tenant_id_id_key")
   @@unique([tenantId, code], map: "tax_profiles_tenant_code_key")
   @@index([tenantId, status, isDefault], map: "tax_profiles_status_default_idx")
   @@index([tenantId, taxType, taxMode], map: "tax_profiles_type_mode_idx")
   @@map("tax_profiles")
+}
+
+model TaxRate {
+  id              String         @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String         @map("tenant_id") @db.Uuid
+  profileId       String         @map("profile_id") @db.Uuid
+  code            String         @db.VarChar(80)
+  name            String         @db.VarChar(160)
+  description     String?        @db.VarChar(1000)
+  component       TaxComponent
+  taxType         TaxType        @map("tax_type")
+  rateBps         Int            @map("rate_bps")
+  status          TaxGroupStatus @default(ACTIVE)
+  effectiveFrom   DateTime       @map("effective_from") @db.Timestamptz(3)
+  effectiveTo     DateTime?      @map("effective_to") @db.Timestamptz(3)
+  createdByUserId String         @map("created_by_user_id") @db.Uuid
+  updatedByUserId String         @map("updated_by_user_id") @db.Uuid
+  version         Int            @default(1)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant     Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  profile    TaxProfile     @relation(fields: [tenantId, profileId], references: [tenantId, id], onDelete: Restrict)
+  createdBy  UserAccount    @relation("TaxRateCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy  UserAccount    @relation("TaxRateUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  groupRates TaxGroupRate[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, profileId, code])
+  @@index([tenantId, profileId, status], map: "tax_rates_profile_status_idx")
+  @@index([tenantId, component, status], map: "tax_rates_component_status_idx")
+  @@index([tenantId, effectiveFrom, effectiveTo], map: "tax_rates_validity_idx")
+  @@map("tax_rates")
+}
+
+model TaxGroup {
+  id              String        @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String        @map("tenant_id") @db.Uuid
+  profileId       String        @map("profile_id") @db.Uuid
+  code            String        @db.VarChar(80)
+  name            String        @db.VarChar(160)
+  description     String?       @db.VarChar(1000)
+  status          TaxRateStatus @default(ACTIVE)
+  effectiveFrom   DateTime      @map("effective_from") @db.Timestamptz(3)
+  effectiveTo     DateTime?     @map("effective_to") @db.Timestamptz(3)
+  createdByUserId String        @map("created_by_user_id") @db.Uuid
+  updatedByUserId String        @map("updated_by_user_id") @db.Uuid
+  version         Int           @default(1)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  profile   TaxProfile     @relation(fields: [tenantId, profileId], references: [tenantId, id], onDelete: Restrict)
+  createdBy UserAccount    @relation("TaxGroupCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy UserAccount    @relation("TaxGroupUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  rates     TaxGroupRate[]
+  rules     TaxRule[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, profileId, code])
+  @@index([tenantId, profileId, status], map: "tax_groups_profile_status_idx")
+  @@index([tenantId, effectiveFrom, effectiveTo], map: "tax_groups_validity_idx")
+  @@map("tax_groups")
+}
+
+model TaxGroupRate {
+  tenantId  String   @map("tenant_id") @db.Uuid
+  groupId   String   @map("group_id") @db.Uuid
+  rateId    String   @map("rate_id") @db.Uuid
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  group TaxGroup @relation(fields: [tenantId, groupId], references: [tenantId, id], onDelete: Cascade)
+  rate  TaxRate  @relation(fields: [tenantId, rateId], references: [tenantId, id], onDelete: Restrict)
+
+  @@id([tenantId, groupId, rateId])
+  @@index([tenantId, rateId], map: "tax_group_rates_rate_idx")
+  @@map("tax_group_rates")
+}
+
+model TaxRule {
+  id              String        @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String        @map("tenant_id") @db.Uuid
+  profileId       String        @map("profile_id") @db.Uuid
+  taxGroupId      String        @map("tax_group_id") @db.Uuid
+  code            String        @db.VarChar(80)
+  name            String        @db.VarChar(160)
+  description     String?       @db.VarChar(1000)
+  priority        Int           @default(100)
+  status          TaxRuleStatus @default(ACTIVE)
+  effectiveFrom   DateTime      @map("effective_from") @db.Timestamptz(3)
+  effectiveTo     DateTime?     @map("effective_to") @db.Timestamptz(3)
+  createdByUserId String        @map("created_by_user_id") @db.Uuid
+  updatedByUserId String        @map("updated_by_user_id") @db.Uuid
+  version         Int           @default(1)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  profile   TaxProfile           @relation(fields: [tenantId, profileId], references: [tenantId, id], onDelete: Restrict)
+  taxGroup  TaxGroup             @relation(fields: [tenantId, taxGroupId], references: [tenantId, id], onDelete: Restrict)
+  createdBy UserAccount          @relation("TaxRuleCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy UserAccount          @relation("TaxRuleUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  mappings  TaxCategoryMapping[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, profileId, code])
+  @@index([tenantId, profileId, status, priority], map: "tax_rules_profile_status_priority_idx")
+  @@index([tenantId, taxGroupId], map: "tax_rules_group_idx")
+  @@index([tenantId, effectiveFrom, effectiveTo], map: "tax_rules_validity_idx")
+  @@map("tax_rules")
+}
+
+model TaxCategoryMapping {
+  id              String           @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String           @map("tenant_id") @db.Uuid
+  taxRuleId       String           @map("tax_rule_id") @db.Uuid
+  target          TaxMappingTarget
+  menuCategoryId  String?          @map("menu_category_id") @db.Uuid
+  menuItemId      String?          @map("menu_item_id") @db.Uuid
+  effectiveFrom   DateTime         @map("effective_from") @db.Timestamptz(3)
+  effectiveTo     DateTime?        @map("effective_to") @db.Timestamptz(3)
+  isActive        Boolean          @default(true) @map("is_active")
+  createdByUserId String           @map("created_by_user_id") @db.Uuid
+  updatedByUserId String           @map("updated_by_user_id") @db.Uuid
+  version         Int              @default(1)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  taxRule      TaxRule       @relation(fields: [tenantId, taxRuleId], references: [tenantId, id], onDelete: Restrict)
+  menuCategory MenuCategory? @relation(fields: [tenantId, menuCategoryId], references: [tenantId, id], onDelete: Restrict)
+  menuItem     MenuItem?     @relation(fields: [tenantId, menuItemId], references: [tenantId, id], onDelete: Restrict)
+  createdBy    UserAccount   @relation("TaxCategoryMappingCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy    UserAccount   @relation("TaxCategoryMappingUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, target, menuCategoryId, effectiveFrom, effectiveTo], map: "tax_category_mappings_category_validity_idx")
+  @@index([tenantId, target, menuItemId, effectiveFrom, effectiveTo], map: "tax_category_mappings_item_validity_idx")
+  @@index([tenantId, taxRuleId, isActive], map: "tax_category_mappings_rule_active_idx")
+  @@map("tax_category_mappings")
 }
 
 model DiscountPolicy {

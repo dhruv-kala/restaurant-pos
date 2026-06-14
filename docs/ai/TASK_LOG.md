@@ -2756,3 +2756,82 @@ Known limitations:
 Next task:
 
 - Task 30.2 - Tax Rules and Rates
+
+## Task 30.2 Completion
+
+Date: 2026-06-14
+
+Task: Task 30.2 - Tax Rules and Rates
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616040000_add_tax_rules_and_rates/migration.sql`
+- `backend/api/src/modules/tax/controllers/tax-rules.controller.ts`
+- `backend/api/src/modules/tax/dto/tax-rules.dto.ts`
+- `backend/api/src/modules/tax/services/tax-rules.service.ts`
+- `backend/api/src/modules/tax/services/tax-rules.service.spec.ts`
+- `backend/api/src/modules/tax/tax-schema.spec.ts`
+- `backend/api/src/modules/tax/tax.module.ts`
+- `docs/specifications/tax-module.md`
+- `docs/tasks/030-tax/30.2-tax-rules-and-rates.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 30.2 implemented only tax rules and rates scope.
+- Added tenant-scoped `TaxRate`, `TaxGroup`, `TaxGroupRate`, `TaxRule`, and
+  `TaxCategoryMapping` models.
+- Added `TaxComponent`, `TaxRateStatus`, `TaxGroupStatus`, `TaxRuleStatus`,
+  and `TaxMappingTarget` enums.
+- Tax rates store exact basis-point values and immutable tax classification
+  fields after creation.
+- Tax groups are composed from active rates in the same tax profile.
+- Tax rules reference active tax groups in the same tax profile.
+- Category and item mappings validate menu target ownership and reject
+  overlapping active effective-date ranges for the same target.
+- Added forced RLS and tenant-aware constraints for all new tax configuration
+  tables.
+- Added protected APIs:
+  `POST /tax/rates`,
+  `GET /tax/rates`,
+  `GET /tax/rates/:id`,
+  `PATCH /tax/rates/:id`,
+  `POST /tax/groups`,
+  `GET /tax/groups`,
+  `GET /tax/groups/:id`,
+  `PATCH /tax/groups/:id`,
+  `POST /tax/rules`,
+  `GET /tax/rules`,
+  `GET /tax/rules/:id`,
+  `PATCH /tax/rules/:id`,
+  `POST /tax/category-mappings`,
+  `GET /tax/category-mappings`,
+  `GET /tax/category-mappings/:id`, and
+  `PATCH /tax/category-mappings/:id`.
+- Added audit events for rate, group, rule, and category mapping mutations.
+- Fiscal invoice sequencing, fiscal policy, calculation engine, reporting,
+  shared Dart clients, and UI remain deferred.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/tax`: passed, 4 suites and 13 tests
+- `npm run build`: passed
+
+Known limitations:
+
+- The Task 30.2 migration was not deployed to a live PostgreSQL database.
+- Live RLS, foreign key, and check constraint behavior require valid local
+  database credentials and migration deployment.
+- Tax calculation does not consume these rules yet; that belongs to Task 30.4.
+
+Next task:
+
+- Task 30.3 - Fiscal Policy Administration

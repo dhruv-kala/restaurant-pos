@@ -8,6 +8,10 @@ describe('tax foundation schema', () => {
     join(root, 'prisma/migrations/20260616020000_add_tax_foundation/migration.sql'),
     'utf8',
   );
+  const rulesMigration = readFileSync(
+    join(root, 'prisma/migrations/20260616040000_add_tax_rules_and_rates/migration.sql'),
+    'utf8',
+  );
 
   it('defines tenant-scoped tax profiles and base enums', () => {
     expect(schema).toContain('model TaxProfile {');
@@ -28,5 +32,32 @@ describe('tax foundation schema', () => {
     expect(migration).toContain('tax_profiles_one_active_default_per_tenant_key');
     expect(migration).toContain('WHERE "is_default" = true AND "status" = \'ACTIVE\'');
     expect(migration).toContain('"is_default" = false OR "status" = \'ACTIVE\'');
+  });
+
+  it('defines tenant-scoped tax rates, groups, rules, and category mappings', () => {
+    expect(schema).toContain('model TaxRate {');
+    expect(schema).toContain('model TaxGroup {');
+    expect(schema).toContain('model TaxGroupRate {');
+    expect(schema).toContain('model TaxRule {');
+    expect(schema).toContain('model TaxCategoryMapping {');
+    expect(schema).toContain('enum TaxComponent {');
+    expect(schema).toContain('taxCategoryMappings           TaxCategoryMapping[]');
+  });
+
+  it('creates tax rule tables with forced RLS and mapping target constraints', () => {
+    for (const table of [
+      'tax_rates',
+      'tax_groups',
+      'tax_group_rates',
+      'tax_rules',
+      'tax_category_mappings',
+    ]) {
+      expect(rulesMigration).toContain(`CREATE TABLE "${table}"`);
+      expect(rulesMigration).toContain(`ALTER TABLE "${table}" FORCE ROW LEVEL SECURITY`);
+      expect(rulesMigration).toContain(`CREATE POLICY "${table}_tenant_isolation"`);
+    }
+    expect(rulesMigration).toContain('tax_category_mappings_target_check');
+    expect(rulesMigration).toContain('tax_rates_rate_bps_check');
+    expect(rulesMigration).toContain('tax_group_rates_group_id_fkey');
   });
 });

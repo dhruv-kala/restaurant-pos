@@ -12,8 +12,8 @@ Last updated: 2026-06-14
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6 and 30.1 are complete; Task 30.2 tax rules and rates is the
-  next provisional task.
+- Tasks 29.1-29.6 and 30.1-30.2 are complete; Task 30.3 fiscal policy
+  administration is the next provisional task.
 
 ## Foundation and Core SaaS
 
@@ -45,10 +45,11 @@ Last updated: 2026-06-14
 | 29.5 | COMPLETE | Redemption and usage tracking |
 | 29.6 | COMPLETE | Promotions admin UI |
 | 30.1 | COMPLETE | Tax foundation |
-| 30.2 | NEXT | Tax rules and rates |
-| 30.3 | PLANNED | Fiscal policy administration |
+| 30.2 | COMPLETE | Tax rules and rates |
+| 30.3 | NEXT | Fiscal policy administration |
 | 30.4 | PLANNED | Tax calculation engine |
-| 30.5 | PLANNED | Tax reporting foundation | ooks, API integrations, and integration credentials |
+| 30.5 | PLANNED | Tax reporting foundation |
+| 30.6 | PLANNED | Tax admin UI |
 
 ## Restaurant and Customer Expansion
 
