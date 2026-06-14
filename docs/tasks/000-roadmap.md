@@ -12,8 +12,9 @@ Last updated: 2026-06-14
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Task 29.1 discount policy foundation is complete; Task 29.2 coupon
-  management is the next provisional promotions subtask.
+- Task 29.1 discount policy foundation and Task 29.2 coupon management are
+  complete; Task 29.3 promotion campaigns is the next provisional promotions
+  subtask.
 
 ## Foundation and Core SaaS
 
@@ -39,8 +40,8 @@ Last updated: 2026-06-14
 | 28.5 | COMPLETE | Trial lifecycle, expiry handling, and paid conversion |
 | 28.6 | COMPLETE | Subscription administration UI |
 | 29.1 | COMPLETE | Discount policy foundation, deterministic calculation, immutable application snapshots, RLS, permissions, and audit |
-| 29.2 | NEXT | Coupon management |
-| 29.3 | PLANNED | Promotion campaigns |
+| 29.2 | COMPLETE | Coupon management |
+| 29.3 | NEXT | Promotion campaigns |
 | 29.4 | PLANNED | Discount eligibility engine |
 | 29.5 | PLANNED | Redemption and usage tracking |
 | 29.6 | PLANNED | Promotions admin UI |

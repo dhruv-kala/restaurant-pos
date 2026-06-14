@@ -1,7 +1,12 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
-import { requireDiscountOverride, resolvePromotionsScope } from './promotions-access.util';
+import {
+  requireCouponManage,
+  requireCouponValidate,
+  requireDiscountOverride,
+  resolvePromotionsScope,
+} from './promotions-access.util';
 
 function actor(overrides: Partial<AuthenticatedUser> = {}): AuthenticatedUser {
   return {
@@ -39,5 +44,15 @@ describe('promotions access', () => {
 
   it('allows managers to override discounts', () => {
     expect(() => requireDiscountOverride(actor({ roles: ['MANAGER'] }))).not.toThrow();
+  });
+
+  it('does not allow cashiers to manage coupons', () => {
+    expect(() =>
+      requireCouponManage(actor({ roles: ['CASHIER'], permissions: ['promotions.coupon_view'] })),
+    ).toThrow(ForbiddenException);
+  });
+
+  it('allows cashiers to validate coupons', () => {
+    expect(() => requireCouponValidate(actor({ roles: ['CASHIER'] }))).not.toThrow();
   });
 });

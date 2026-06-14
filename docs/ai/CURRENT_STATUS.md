@@ -4,9 +4,9 @@ Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 29.1**
+- Completed through: **Task 29.2**
 - Current module: **Promotions, Coupons, and Discount Policy Engine**
-- Next provisional task: **Task 29.2 - Coupon Management**
+- Next provisional task: **Task 29.3 - Promotion Campaigns**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -41,6 +41,7 @@ Last updated: 2026-06-14
 | 28.5 | Trial subscriptions, immutable trial history, extension, expiry, paid conversion, RLS, and audit events |
 | 28.6 | Shared subscription contracts, typed clients, Riverpod providers, and admin plan/subscription/entitlement/usage/trial screens |
 | 29.1 | Tenant discount policies, deterministic percentage/fixed calculations, immutable application snapshots, RBAC foundation, RLS, and audit events |
+| 29.2 | Tenant coupon definitions, normalized codes, validity/status management, read-only validation, usage-limit foundation, RLS, RBAC, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -109,6 +110,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   deterministic bill/item/category discount calculation, immutable
   `DiscountApplication` snapshots, forced RLS, append-only protections,
   permission seed entries, and audit events
+- Coupon management foundation with tenant/outlet-scoped coupon CRUD,
+  uppercase per-tenant code uniqueness, percentage/fixed/free-item/category/item
+  coupon types, validity windows, usage-limit fields, read-only validation,
+  forced RLS, permission seed entries, and audit events
 
 ## Known Environment Limitation
 
@@ -119,7 +124,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 29.2 - Coupon Management
+### Task 29.3 - Promotion Campaigns
 
 Read:
 
@@ -128,10 +133,10 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Implement coupon definitions only after reading
-`docs/specifications/promotions-module.md` and the Task 29.2 task file when it
-exists. Do not implement campaigns, eligibility UI, redemption tracking, or
-admin UI unless explicitly requested.
+Implement promotion campaigns only after reading
+`docs/specifications/promotions-module.md` and the Task 29.3 task file. Do not
+implement eligibility UI, redemption tracking, or admin UI unless explicitly
+requested.
 
 ## Status Maintenance
 

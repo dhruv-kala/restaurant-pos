@@ -108,6 +108,46 @@ export function requireDiscountOverride(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Discount override permission is required');
 }
 
+export function requireCouponRead(actor: AuthenticatedUser): void {
+  if (
+    DISCOUNT_POLICY_READ_ROLES.some((role) => hasRole(actor, role)) ||
+    hasPermission(actor, 'promotions.read') ||
+    hasPermission(actor, 'promotions.coupon_view') ||
+    hasPermission(actor, 'promotions.coupon_manage') ||
+    hasPermission(actor, 'promotions.coupon_validate')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Coupon read permission is required');
+}
+
+export function requireCouponManage(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'promotions.coupon_manage')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Coupon management permission is required');
+}
+
+export function requireCouponValidate(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasRole(actor, 'CASHIER') ||
+    hasRole(actor, 'WAITER') ||
+    hasPermission(actor, 'promotions.coupon_validate') ||
+    hasPermission(actor, 'promotions.apply_discount')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Coupon validation permission is required');
+}
+
 function hasPermission(actor: AuthenticatedUser, permission: string): boolean {
   return actor.permissions?.includes(permission) ?? false;
 }

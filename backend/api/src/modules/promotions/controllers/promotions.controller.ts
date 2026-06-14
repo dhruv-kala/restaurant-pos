@@ -17,6 +17,12 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
 import { auditRequestMetadata } from '../../audit/services/audit-request.util';
+import {
+  CouponQueryDto,
+  CreateCouponDto,
+  UpdateCouponDto,
+  ValidateCouponDto,
+} from '../dto/coupon.dto';
 import { ApplyManualDiscountDto, CalculateDiscountDto } from '../dto/discount-calculation.dto';
 import {
   CreateDiscountPolicyDto,
@@ -24,13 +30,17 @@ import {
   UpdateDiscountPolicyDto,
 } from '../dto/discount-policy.dto';
 import { DiscountPoliciesService } from '../services/discount-policies.service';
+import { CouponsService } from '../services/coupons.service';
 
 @ApiTags('Promotions')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('promotions')
 export class PromotionsController {
-  constructor(private readonly discountPolicies: DiscountPoliciesService) {}
+  constructor(
+    private readonly discountPolicies: DiscountPoliciesService,
+    private readonly coupons: CouponsService,
+  ) {}
 
   @Post('discount-policies')
   @ApiOperation({ summary: 'Create a tenant-scoped discount policy' })
@@ -84,5 +94,53 @@ export class PromotionsController {
     @Req() request: Request,
   ) {
     return this.discountPolicies.applyManual(dto, actor, auditRequestMetadata(request));
+  }
+
+  @Post('coupons')
+  @ApiOperation({ summary: 'Create a tenant-scoped coupon definition' })
+  createCoupon(
+    @Body() dto: CreateCouponDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.coupons.create(dto, actor, auditRequestMetadata(request));
+  }
+
+  @Get('coupons')
+  @ApiOperation({ summary: 'List coupon definitions' })
+  listCoupons(@Query() query: CouponQueryDto, @CurrentUser() actor: AuthenticatedUser) {
+    return this.coupons.list(query, actor);
+  }
+
+  @Get('coupons/:id')
+  @ApiOperation({ summary: 'Get a coupon definition' })
+  detailCoupon(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: CouponQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.coupons.detail(id, query, actor);
+  }
+
+  @Patch('coupons/:id')
+  @ApiOperation({ summary: 'Update a coupon definition with optimistic concurrency' })
+  updateCoupon(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCouponDto,
+    @Query() query: CouponQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.coupons.update(id, dto, query, actor, auditRequestMetadata(request));
+  }
+
+  @Post('coupons/validate')
+  @ApiOperation({ summary: 'Validate a coupon without creating redemption records' })
+  validateCoupon(
+    @Body() dto: ValidateCouponDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.coupons.validate(dto, actor, auditRequestMetadata(request));
   }
 }

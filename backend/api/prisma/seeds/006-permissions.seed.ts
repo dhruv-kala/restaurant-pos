@@ -75,7 +75,15 @@ const moduleActions: Record<string, readonly string[]> = {
     'audit',
   ],
   loyalty: ['create', 'read', 'update', 'earn', 'redeem', 'adjust', 'expire', 'configure'],
-  promotions: ['read', 'policy_manage', 'apply_discount', 'override_discount'],
+  promotions: [
+    'read',
+    'policy_manage',
+    'apply_discount',
+    'override_discount',
+    'coupon_view',
+    'coupon_manage',
+    'coupon_validate',
+  ],
   subscriptions: [
     'create',
     'read',

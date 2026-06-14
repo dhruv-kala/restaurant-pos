@@ -11,6 +11,10 @@ describe('promotions discount policy foundation schema', () => {
     ),
     'utf8',
   );
+  const couponMigration = readFileSync(
+    join(root, 'prisma/migrations/20260615200000_add_coupon_management/migration.sql'),
+    'utf8',
+  );
 
   it('defines discount policies and immutable application snapshots', () => {
     expect(schema).toContain('model DiscountPolicy {');
@@ -28,5 +32,14 @@ describe('promotions discount policy foundation schema', () => {
   it('protects discount application history from mutation and deletion', () => {
     expect(migration).toContain('CREATE TRIGGER "discount_applications_no_update"');
     expect(migration).toContain('CREATE TRIGGER "discount_applications_no_delete"');
+  });
+
+  it('defines tenant-scoped coupons with forced row-level security', () => {
+    expect(schema).toContain('model Coupon {');
+    expect(schema).toContain('enum CouponStatus {');
+    expect(schema).toContain('enum CouponType {');
+    expect(couponMigration).toContain('CREATE TABLE "coupons"');
+    expect(couponMigration).toContain('ALTER TABLE "coupons" FORCE ROW LEVEL SECURITY');
+    expect(couponMigration).toContain('CREATE POLICY "coupons_tenant_isolation"');
   });
 });

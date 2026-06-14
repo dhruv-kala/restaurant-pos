@@ -87,9 +87,17 @@ const communicationActions: Record<string, readonly string[]> = {
 const promotionActions: Record<string, readonly string[]> = {
   SUPER_ADMIN: ['*'],
   TENANT_ADMIN: ['*'],
-  MANAGER: ['read', 'policy_manage', 'apply_discount', 'override_discount'],
-  CASHIER: ['read', 'apply_discount'],
-  WAITER: ['read'],
+  MANAGER: [
+    'read',
+    'policy_manage',
+    'apply_discount',
+    'override_discount',
+    'coupon_view',
+    'coupon_manage',
+    'coupon_validate',
+  ],
+  CASHIER: ['read', 'apply_discount', 'coupon_view', 'coupon_validate'],
+  WAITER: ['read', 'coupon_view', 'coupon_validate'],
 };
 
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {

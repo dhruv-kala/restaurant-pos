@@ -2329,3 +2329,68 @@ Known limitations:
 Next task:
 
 - Task 29.2 - Coupon Management
+
+## Task 29.2 Completion
+
+Date: 2026-06-14
+
+Task: Task 29.2 - Coupon Management
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260615200000_add_coupon_management/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/promotions/controllers/promotions.controller.ts`
+- `backend/api/src/modules/promotions/dto/coupon.dto.ts`
+- `backend/api/src/modules/promotions/promotions.module.ts`
+- `backend/api/src/modules/promotions/promotions-schema.spec.ts`
+- `backend/api/src/modules/promotions/services/coupons.service.ts`
+- `backend/api/src/modules/promotions/services/coupons.service.spec.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.ts`
+- `backend/api/src/modules/promotions/services/promotions-access.util.spec.ts`
+- `docs/specifications/promotions-module.md`
+- `docs/tasks/029-promotions/29.2-coupon-management.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 29.2 implemented only coupon definition CRUD, read-only validation,
+  status management, and usage-limit foundation.
+- Coupon validation does not create redemption records and does not increment
+  usage counters; redemption remains Task 29.5.
+- Coupon codes are normalized to uppercase and unique per tenant.
+- Coupons are tenant-scoped with optional outlet scope.
+- Coupon types include percentage, fixed amount, free item, category, and item.
+- Optional menu category/item/free-item references were added for future
+  eligibility evaluation, without implementing the eligibility engine.
+- RBAC seed entries use existing lowercase dot-key convention:
+  `promotions.coupon_view`, `promotions.coupon_manage`, and
+  `promotions.coupon_validate`.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run test -- --runInBand`: passed, 85 suites and 292 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+
+Known limitations:
+
+- Migrations were not deployed to a live PostgreSQL database in this task.
+- Live RLS and constraint behavior still require valid local database
+  credentials and migration deployment.
+- Per-customer usage limits are stored as coupon constraints but cannot be
+  consumed until redemption tracking is implemented.
+
+Next task:
+
+- Task 29.3 - Promotion Campaigns

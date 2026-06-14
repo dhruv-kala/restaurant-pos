@@ -176,6 +176,23 @@ enum DiscountApplicationSource {
   @@map("discount_application_source")
 }
 
+enum CouponStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("coupon_status")
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_ITEM
+  CATEGORY
+  ITEM
+
+  @@map("coupon_type")
+}
+
 enum PaymentMethod {
   CASH
   UPI
@@ -771,6 +788,7 @@ model Tenant {
   billCounters                  BillNumberCounter[]
   discountPolicies              DiscountPolicy[]
   discountApplications          DiscountApplication[]
+  coupons                       Coupon[]
   payments                      Payment[]
   paymentTransactions           PaymentTransaction[]
   paymentRefunds                PaymentRefund[]
@@ -870,6 +888,7 @@ model Outlet {
   billCounters             BillNumberCounter[]
   discountPolicies         DiscountPolicy[]
   discountApplications     DiscountApplication[]
+  coupons                  Coupon[]
   payments                 Payment[]
   paymentCounters          PaymentNumberCounter[]
   receipts                 Receipt[]
@@ -926,6 +945,8 @@ model UserAccount {
   createdDiscountPolicies              DiscountPolicy[]               @relation("DiscountPolicyCreatedBy")
   updatedDiscountPolicies              DiscountPolicy[]               @relation("DiscountPolicyUpdatedBy")
   appliedDiscounts                     DiscountApplication[]          @relation("DiscountAppliedBy")
+  createdCoupons                       Coupon[]                       @relation("CouponCreatedBy")
+  updatedCoupons                       Coupon[]                       @relation("CouponUpdatedBy")
   createdPayments                      Payment[]                      @relation("PaymentCreatedBy")
   paidPayments                         Payment[]                      @relation("PaymentPaidBy")
   paymentRefunds                       PaymentRefund[]                @relation("PaymentRefundedBy")
@@ -1124,6 +1145,7 @@ model MenuCategory {
   parent   MenuCategory?  @relation("MenuCategoryHierarchy", fields: [tenantId, parentId], references: [tenantId, id], onDelete: Restrict)
   children MenuCategory[] @relation("MenuCategoryHierarchy")
   items    MenuItem[]
+  coupons  Coupon[]       @relation("CouponTargetCategory")
 
   @@unique([tenantId, id])
   @@unique([tenantId, name])
@@ -1163,6 +1185,8 @@ model MenuItem {
   kitchenCategoryId  String?                    @map("kitchen_category_id") @db.Uuid
   stationAssignments KitchenStationAssignment[]
   recipes            Recipe[]
+  targetCoupons      Coupon[]                   @relation("CouponTargetItem")
+  freeItemCoupons    Coupon[]                   @relation("CouponFreeItem")
 
   @@unique([tenantId, id])
   @@unique([tenantId, sku])
@@ -1678,6 +1702,7 @@ model DiscountPolicy {
   createdBy    UserAccount           @relation("DiscountPolicyCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
   updatedBy    UserAccount           @relation("DiscountPolicyUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
   applications DiscountApplication[]
+  coupons      Coupon[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1725,6 +1750,53 @@ model DiscountApplication {
   @@index([tenantId, orderId], map: "discount_applications_order_idx")
   @@index([tenantId, policyId, createdAt], map: "discount_applications_policy_created_idx")
   @@map("discount_applications")
+}
+
+model Coupon {
+  id                    String             @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId              String             @map("tenant_id") @db.Uuid
+  outletId              String?            @map("outlet_id") @db.Uuid
+  code                  String             @db.VarChar(64)
+  name                  String             @db.VarChar(160)
+  description           String?            @db.VarChar(1000)
+  couponType            CouponType         @map("coupon_type")
+  status                CouponStatus       @default(ACTIVE)
+  discountPolicyId      String?            @map("discount_policy_id") @db.Uuid
+  valueType             DiscountValueType? @map("value_type")
+  percentageBps         Int?               @map("percentage_bps")
+  amountMinor           Int?               @map("amount_minor")
+  currencyCode          String?            @map("currency_code") @db.Char(3)
+  maxDiscountMinor      Int?               @map("max_discount_minor")
+  targetMenuCategoryId  String?            @map("target_menu_category_id") @db.Uuid
+  targetMenuItemId      String?            @map("target_menu_item_id") @db.Uuid
+  freeItemMenuItemId    String?            @map("free_item_menu_item_id") @db.Uuid
+  startsAt              DateTime?          @map("starts_at") @db.Timestamptz(3)
+  endsAt                DateTime?          @map("ends_at") @db.Timestamptz(3)
+  totalUsageLimit       Int?               @map("total_usage_limit")
+  perCustomerUsageLimit Int?               @map("per_customer_usage_limit")
+  currentUsageCount     Int                @default(0) @map("current_usage_count")
+  metadata              Json?              @db.JsonB
+  createdByUserId       String             @map("created_by_user_id") @db.Uuid
+  updatedByUserId       String             @map("updated_by_user_id") @db.Uuid
+  version               Int                @default(1)
+  createdAt             DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet             Outlet?         @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  discountPolicy     DiscountPolicy? @relation(fields: [tenantId, discountPolicyId], references: [tenantId, id], onDelete: Restrict)
+  targetMenuCategory MenuCategory?   @relation("CouponTargetCategory", fields: [tenantId, targetMenuCategoryId], references: [tenantId, id], onDelete: Restrict)
+  targetMenuItem     MenuItem?       @relation("CouponTargetItem", fields: [tenantId, targetMenuItemId], references: [tenantId, id], onDelete: Restrict)
+  freeItemMenuItem   MenuItem?       @relation("CouponFreeItem", fields: [tenantId, freeItemMenuItemId], references: [tenantId, id], onDelete: Restrict)
+  createdBy          UserAccount     @relation("CouponCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy          UserAccount     @relation("CouponUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, code])
+  @@index([tenantId, outletId, status], map: "coupons_outlet_status_idx")
+  @@index([tenantId, status, startsAt, endsAt], map: "coupons_validity_idx")
+  @@index([tenantId, couponType, status], map: "coupons_type_status_idx")
+  @@map("coupons")
 }
 
 model PaymentNumberCounter {
