@@ -333,8 +333,13 @@ items, batches, conflicts, checkpoints, push/pull requests, and architecture/API
 documentation. SQLite tables, sync execution, conflict resolution, and offline
 POS workflows remain deferred.
 
-Task 33.2 is next provisionally: implement SQLite local storage. Do not
-implement it unless the active user request explicitly asks for it.
+Task 33.2 implemented the restaurant-app SQLite local storage foundation with
+durable local tables for `DeviceSyncState`, orders, bills, customers, and
+inventory projections, tenant/outlet/device scoping, local entity mappers,
+repository APIs, and persistence tests across database reopen.
+
+Task 33.3 is next provisionally: implement sync queue and change tracking. Do
+not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

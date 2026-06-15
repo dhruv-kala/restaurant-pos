@@ -2,12 +2,12 @@
 
 ## Status
 
-Implemented through Task 33.1.
+Implemented through Task 33.2.
 
 Task 33 is split into:
 
 * Task 33.1 Offline Architecture Foundation - Complete
-* Task 33.2 SQLite Local Storage
+* Task 33.2 SQLite Local Storage - Complete
 * Task 33.3 Sync Queue and Change Tracking
 * Task 33.4 Conflict Resolution Engine
 * Task 33.5 Background Sync Service
@@ -54,17 +54,23 @@ The Offline Module owns data persistence and synchronization.
 
 Potential entities:
 
-* DeviceSyncState - contract defined in Task 33.1
+* DeviceSyncState - contract defined in Task 33.1 and persisted locally in
+  Task 33.2
 * SyncQueue - contract defined in Task 33.1
 * SyncBatch - contract defined in Task 33.1
 * SyncConflict - contract defined in Task 33.1
 * SyncCheckpoint - contract defined in Task 33.1
 * LocalChangeLog - deferred to Task 33.3
+* LocalOrderProjection - Task 33.2 SQLite projection
+* LocalBillProjection - Task 33.2 SQLite projection
+* LocalCustomerProjection - Task 33.2 SQLite projection
+* LocalInventoryProjection - Task 33.2 SQLite projection
 
 SQLite mirrors approved online entities.
 
-Task 33.1 defines storage-neutral shared contracts only. SQLite schema creation
-is deferred to Task 33.2.
+Task 33.2 adds the first restaurant-app SQLite schema and repository layer for
+durable local projections. Sync queue mutation and local change logs remain
+deferred to Task 33.3.
 
 ## Offline Device Coverage
 

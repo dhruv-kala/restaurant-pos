@@ -2,11 +2,11 @@
 
 ## Status
 
-Task 33.1 foundation complete.
+Implemented through Task 33.2.
 
-This document defines the offline architecture boundary. It does not implement
-SQLite tables, sync workers, background scheduling, conflict resolution, or
-offline POS flows.
+This document defines the offline architecture boundary. SQLite projection
+storage exists for Task 33.2. Sync workers, background scheduling, conflict
+resolution, and offline POS flows remain deferred.
 
 ## Goals
 
@@ -64,17 +64,29 @@ operation reuses the same key.
 
 ## Local Persistence Boundary
 
-Task 33.2 will define SQLite tables. The approved table groups are:
+Task 33.2 defines the first local SQLite tables in
+`apps/restaurant-app/lib/core/offline`:
 
-* local read projections for approved online entities
-* `DeviceSyncState`
+* `device_sync_state`
+* `local_orders`
+* `local_bills`
+* `local_customers`
+* `local_inventory_items`
+
+The tables preserve tenant, outlet, and device scope, store globally stable
+local IDs, and keep source payload JSON so future sync tasks can avoid lossy
+projection changes.
+
+Future approved table groups are:
+
 * `SyncQueue`
 * `SyncBatch`
 * `SyncConflict`
 * `SyncCheckpoint`
 * `LocalChangeLog`
 
-Task 33.1 defines the contracts only. No local schema is created in this task.
+Task 33.2 intentionally does not implement sync queue mutation, local change
+tracking, background workers, or conflict handling.
 
 ## Command Flow
 
@@ -173,15 +185,13 @@ Task 33.1 adds framework-independent Dart contracts in
 * `SyncPushRequest`
 * `SyncPullRequest`
 
-These contracts are intentionally storage-neutral. Task 33.2 maps them to
-SQLite.
+These contracts are intentionally storage-neutral. Task 33.2 maps
+`DeviceSyncState` and local read projections to SQLite.
 
 ## Non-Goals
 
-Task 33.1 does not implement:
+Task 33.2 does not implement:
 
-* SQLite migrations
-* local repositories
 * sync queue mutation logic
 * background workers
 * conflict resolution

@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 33.1**
+- Completed through: **Task 33.2**
 - Current module: **Offline SQLite Operation and Synchronization**
-- Next provisional task: **Task 33.2 - SQLite Local Storage**
+- Next provisional task: **Task 33.3 - Sync Queue and Change Tracking**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -66,6 +66,7 @@ Last updated: 2026-06-15
 | 32.5   | Tenant/outlet device security policies, session timeout caps, device-type restrictions, forced logout, effective policy evaluation, forced RLS, permissions, and audit events |
 | 32.6   | Shared device contracts, typed API client, Riverpod providers, and admin device/enrollment/session/terminal/security-policy/audit screens |
 | 33.1   | Offline sync architecture, storage-neutral shared sync contracts, offline identifier contract, and future sync API contract documentation |
+| 33.2   | Restaurant-app SQLite local storage, scoped local projections for orders/bills/customers/inventory, entity mappers, repository APIs, and reopen persistence tests |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -244,6 +245,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   conflicts, checkpoints, push/pull requests, queue states, operation types,
   conflict strategies, and offline payment verification modes, plus
   architecture and future API contract documentation
+- SQLite local storage foundation in restaurant-app with local
+  `DeviceSyncState`, order, bill, customer, and inventory projection tables,
+  tenant/outlet/device scoped repository APIs, JSON payload preservation, and
+  file-backed reopen persistence coverage
 
 ## Known Environment Limitation
 
@@ -254,7 +259,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 33.2 - SQLite Local Storage
+### Task 33.3 - Sync Queue and Change Tracking
 
 Read:
 
@@ -263,8 +268,10 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 33.2 unless explicitly requested. It should map the
-Task 33.1 offline contracts to durable SQLite local storage only.
+Do not implement Task 33.3 unless explicitly requested. It should add durable
+sync queue and local change tracking on top of the Task 33.2 SQLite foundation
+without implementing background sync workers, conflict resolution, offline POS
+flows, or admin sync monitoring UI.
 
 ## Status Maintenance
 

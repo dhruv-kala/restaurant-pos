@@ -4132,3 +4132,63 @@ Known limitations:
 Next task:
 
 - Task 33.2 - SQLite Local Storage
+
+## 2026-06-15 - Task 33.2 SQLite Local Storage
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/restaurant-app/pubspec.yaml`
+- `apps/restaurant-app/lib/core/offline/local_database.dart`
+- `apps/restaurant-app/lib/core/offline/local_database_schema.dart`
+- `apps/restaurant-app/lib/core/offline/offline_entity_mapper.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_models.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_repository.dart`
+- `apps/restaurant-app/test/core/offline/offline_local_repository_test.dart`
+- `pubspec.lock`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.2-sqlite-local-storage.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.2 only; sync queue mutation, local change tracking,
+  background sync, conflict resolution, offline POS workflows, and admin sync
+  monitoring remain deferred.
+- Added restaurant-app SQLite schema version 1 for `device_sync_state`,
+  `local_orders`, `local_bills`, `local_customers`, and
+  `local_inventory_items`.
+- Preserved tenant, outlet, and device scope on every local table.
+- Added local projection classes and mappers for orders, bills, customers, and
+  inventory, keeping source payload JSON for future sync and recovery work.
+- Added repository methods for scoped upsert, get, and list behavior.
+- Used `sqflite_common` plus `sqflite_common_ffi` so the foundation is
+  testable without native plugin symlink setup; the database factory remains
+  injectable for future platform-specific bootstrap.
+
+Validation:
+
+- `flutter pub get` from `apps/restaurant-app`: dependency resolution completed
+  but the standalone command returned non-zero in this Windows environment
+  because Flutter plugin symlink support requires Developer Mode.
+- `dart format apps/restaurant-app/lib/core/offline apps/restaurant-app/test/core/offline`:
+  passed
+- `flutter analyze` from `apps/restaurant-app`: passed
+- `flutter test test/core/offline/offline_local_repository_test.dart` from
+  `apps/restaurant-app`: passed
+- `flutter test` from `apps/restaurant-app`: passed
+
+Known limitations:
+
+- Task 33.2 does not wire offline repositories into live POS feature flows.
+- Native mobile SQLite factory selection remains a future bootstrap concern;
+  the repository API already accepts an injected `DatabaseFactory`.
+
+Next task:
+
+- Task 33.3 - Sync Queue and Change Tracking
