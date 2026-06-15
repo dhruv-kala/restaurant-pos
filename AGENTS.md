@@ -371,8 +371,13 @@ counts, failed/retrying/stale in-progress visibility, open conflict visibility,
 recent batch and checkpoint visibility, failed-item retry recovery, stale
 in-progress recovery, and tests.
 
-Task 33.9 is next provisionally: implement offline administration UI. Do
-not implement it unless the active user request explicitly asks for it.
+Task 33.9 implemented restaurant-app offline administration UI with sync
+dashboard metrics, queue trouble-item visibility, conflict detail visibility,
+local recovery actions, route access, and operational dashboard entry points.
+
+Task 34 is next provisionally: implement transactional outbox, background jobs,
+and scheduler. Do not implement it unless the active user request explicitly
+asks for it.
 
 ## Working Practices
 

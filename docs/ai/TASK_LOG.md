@@ -4525,3 +4525,61 @@ Known limitations:
 Next task:
 
 - Task 33.9 - Offline Administration UI
+
+## 2026-06-15 - Task 33.9 Offline Administration UI
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/restaurant-app/lib/app/router/app_router.dart`
+- `apps/restaurant-app/lib/features/dashboard/presentation/screens/role_dashboard_scaffold.dart`
+- `apps/restaurant-app/lib/features/offline_admin/presentation/providers/offline_admin_providers.dart`
+- `apps/restaurant-app/lib/features/offline_admin/presentation/screens/offline_admin_screen.dart`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.9-offline-admin-ui.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.9 only; concrete backend sync endpoints, pulled server
+  projection application, and cross-device platform sync administration remain
+  deferred.
+- Added an offline administration provider layer over the existing
+  `OfflineLocalDatabase`, `OfflineLocalRepository`, and
+  `OfflineSyncMonitoringService`.
+- Added an `OfflineAdminScreen` with dashboard, queue, conflicts, and recovery
+  tabs.
+- Dashboard shows queue health metrics, device sync state, recent sync batches,
+  and pull checkpoints.
+- Queue viewer shows failed, retrying, and stale in-progress queue items.
+- Conflict viewer shows open conflicts and local/server payload details.
+- Recovery screen exposes retry for failed/retrying items and stale
+  in-progress recovery actions.
+- Added `/offline-admin` route access for tenant operational roles and a
+  dashboard entry point for tenant admin, manager, cashier, and waiter users.
+- Preserved the Task 33.8 local-only boundary; the UI does not introduce
+  backend sync routes or new persistence tables.
+
+Validation:
+
+- `dart format apps/restaurant-app/lib/features/offline_admin apps/restaurant-app/lib/app/router/app_router.dart apps/restaurant-app/lib/features/dashboard/presentation/screens/role_dashboard_scaffold.dart`:
+  passed
+- `flutter analyze` from `apps/restaurant-app`: passed
+- `flutter test` from `apps/restaurant-app`: passed
+
+Known limitations:
+
+- The UI operates on the local device SQLite scope and defaults the device ID
+  field to `local-device` until trusted device bootstrap provides a concrete
+  runtime device identifier.
+- Concrete backend sync endpoints and pulled server projection application
+  remain future work.
+
+Next task:
+
+- Task 34 - Transactional Outbox, Background Jobs, and Scheduler

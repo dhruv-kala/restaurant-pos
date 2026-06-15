@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented through Task 33.8.
+Implemented through Task 33.9.
 
 Task 33 is split into:
 
@@ -14,7 +14,7 @@ Task 33 is split into:
 * Task 33.6 Offline POS Operations - Complete
 * Task 33.7 Offline Inventory and Customers - Complete
 * Task 33.8 Sync Monitoring and Recovery - Complete
-* Task 33.9 Offline Administration UI
+* Task 33.9 Offline Administration UI - Complete
 
 ## Objective
 
@@ -87,6 +87,8 @@ lookup/adjustment workflows on top of the same atomic projection plus queued
 command pattern. Task 33.8 adds local sync health snapshots, queue/batch/
 checkpoint visibility, failed/retrying/stale in-progress item visibility, and
 recovery tools for failed and stale sync queue items.
+Task 33.9 adds the restaurant-app offline administration UI for sync dashboard
+metrics, queue visibility, conflict visibility, and local recovery actions.
 
 ## Offline Device Coverage
 

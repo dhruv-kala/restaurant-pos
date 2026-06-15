@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 33.8**
+- Completed through: **Task 33.9**
 - Current module: **Offline SQLite Operation and Synchronization**
-- Next provisional task: **Task 33.9 - Offline Administration UI**
+- Next provisional task: **Task 34 - Transactional Outbox, Background Jobs, and Scheduler**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -73,6 +73,7 @@ Last updated: 2026-06-15
 | 33.6   | Offline POS operation foundation for orders, bills, payments, and receipts with atomic local writes, queued commands, and workflow tests |
 | 33.7   | Offline customer lookup/create/update and inventory lookup/adjustment workflows with atomic local writes, queued commands, and workflow tests |
 | 33.8   | Sync health snapshots, queue/batch/checkpoint visibility, failed/retrying/stale item visibility, recovery tools, and tests |
+| 33.9   | Offline administration UI with sync dashboard, queue viewer, conflict viewer, recovery actions, route access, and operational dashboard entry point |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -282,6 +283,9 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   counts, failed/retrying/stale in-progress visibility, open conflict
   visibility, recent batch and checkpoint visibility, failed-item retry
   recovery, stale in-progress recovery, and tests
+- Offline administration UI in restaurant-app with local sync dashboard
+  metrics, queue trouble-item visibility, conflict detail visibility, recovery
+  actions, GoRouter route, and operational dashboard entry point
 
 ## Known Environment Limitation
 
@@ -292,7 +296,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 33.9 - Offline Administration UI
+### Task 34 - Transactional Outbox, Background Jobs, and Scheduler
 
 Read:
 
@@ -301,9 +305,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 33.9 unless explicitly requested. It should add the
-offline administration UI on top of the Task 33.8 monitoring and recovery
-foundation without expanding unrelated backend or sync endpoint work.
+Do not implement Task 34 unless explicitly requested. It should introduce the
+transactional outbox, background jobs, and scheduler foundation without
+changing offline sync UI behavior unless explicitly required.
 
 ## Status Maintenance
 

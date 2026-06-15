@@ -27,6 +27,7 @@ import '../../features/kitchen/presentation/screens/station_screen.dart';
 import '../../features/orders/presentation/screens/order_details_screen.dart';
 import '../../features/orders/presentation/screens/order_list_screen.dart';
 import '../../features/notifications/presentation/screens/notification_center_screen.dart';
+import '../../features/offline_admin/presentation/screens/offline_admin_screen.dart';
 import '../../features/payments/presentation/screens/payment_details_screen.dart';
 import '../../features/payments/presentation/screens/payment_history_screen.dart';
 import '../../features/payments/presentation/screens/payment_screen.dart';
@@ -59,6 +60,7 @@ abstract final class AppRoutes {
   static const payments = '/payments';
   static const receipts = '/receipts';
   static const notifications = '/notifications';
+  static const offlineAdmin = '/offline-admin';
 
   static String forRole(UserRole role) {
     return switch (role) {
@@ -137,6 +139,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           (role == UserRole.customer || role == UserRole.kitchenStaff)) {
         return roleRoute;
       }
+      if (location.startsWith(AppRoutes.offlineAdmin) &&
+          (role == UserRole.customer ||
+              role == UserRole.kitchenStaff ||
+              role == UserRole.superAdmin)) {
+        return roleRoute;
+      }
       if (location == AppRoutes.login ||
           location == AppRoutes.splash ||
           location == AppRoutes.dashboard ||
@@ -192,6 +200,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.notifications,
         builder: (context, state) => const NotificationCenterScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.offlineAdmin,
+        builder: (context, state) => const OfflineAdminScreen(),
       ),
       GoRoute(
         path: AppRoutes.orders,

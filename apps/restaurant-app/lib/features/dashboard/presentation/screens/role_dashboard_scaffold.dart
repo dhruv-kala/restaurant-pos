@@ -112,6 +112,18 @@ class RoleDashboardScaffold extends ConsumerWidget {
                       label: const Text('Payment History'),
                     ),
                   ),
+                if (roleName == 'Tenant Admin' ||
+                    roleName == 'Manager' ||
+                    roleName == 'Cashier' ||
+                    roleName == 'Waiter')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push(AppRoutes.offlineAdmin),
+                      icon: const Icon(Icons.sync_problem),
+                      label: const Text('Offline Sync'),
+                    ),
+                  ),
               ],
             ),
           ),

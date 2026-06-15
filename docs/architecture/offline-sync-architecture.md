@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented through Task 33.8.
+Implemented through Task 33.9.
 
 This document defines the offline architecture boundary. SQLite projection,
 sync queue, local change-log storage, and local conflict resolution persistence
@@ -10,7 +10,8 @@ exist through Task 33.4. Task 33.5 adds a bounded background sync service
 foundation, batch history, and checkpoint tracking. Task 33.6 adds offline POS
 operation foundations for orders, bills, payments, and receipts. Task 33.7 adds
 offline customer and inventory operation foundations. Task 33.8 adds sync
-health monitoring and recovery tools.
+health monitoring and recovery tools. Task 33.9 adds the restaurant-app
+offline administration UI over those local monitoring and recovery services.
 
 ## Goals
 
@@ -121,12 +122,18 @@ over `DeviceSyncState`, `sync_queue`, `sync_batches`, `sync_checkpoints`, and
 and move stale `IN_PROGRESS` items back to `RETRYING` without deleting local
 records.
 
+Task 33.9 adds `OfflineAdminScreen`, route access, Riverpod providers, and
+dashboard entry points for operational roles. The UI shows sync health metrics,
+queue trouble items, open conflict details, recent batches, checkpoints, and
+local recovery actions.
+
 Future approved table groups are:
 
 * pulled server-change staging tables when projection application is added
 
-Task 33.8 intentionally does not implement live screen wiring, concrete backend
-sync endpoint integration, or admin sync monitoring UI.
+Task 33.9 intentionally does not implement concrete backend sync endpoint
+integration, pulled projection application, or cross-device platform sync
+administration.
 
 ## Command Flow
 
@@ -230,8 +237,8 @@ These contracts are intentionally storage-neutral. Task 33.2 maps
 
 ## Non-Goals
 
-Task 33.8 does not implement:
+Task 33.9 does not implement:
 
-* live screen wiring
 * concrete backend sync endpoint integration
-* admin sync monitoring UI
+* pulled server projection application
+* cross-device platform sync administration
