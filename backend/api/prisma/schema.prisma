@@ -783,6 +783,28 @@ enum AttendanceStatus {
   @@map("attendance_status")
 }
 
+enum DeviceType {
+  POS_TERMINAL
+  CASHIER_DEVICE
+  WAITER_DEVICE
+  KITCHEN_DISPLAY
+  CUSTOMER_KIOSK
+  TABLET
+  MOBILE_DEVICE
+  ADMIN_WORKSTATION
+
+  @@map("device_type")
+}
+
+enum DeviceStatus {
+  PENDING
+  ACTIVE
+  DISABLED
+  REVOKED
+
+  @@map("device_status")
+}
+
 model Country {
   id        String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   code      String   @unique @db.Citext
@@ -1007,6 +1029,7 @@ model Tenant {
   usageCounterEvents            UsageCounterEvent[]
   trialSubscriptions            TrialSubscription[]
   trialSubscriptionEvents       TrialSubscriptionEvent[]
+  devices                       Device[]
 
   @@index([status])
   @@index([deletedAt])
@@ -1090,6 +1113,7 @@ model Outlet {
   cashDrawers              CashDrawer[]
   cashDrawerTransactions   CashDrawerTransaction[]
   shiftReconciliations     ShiftReconciliation[]
+  devices                  Device[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1199,6 +1223,8 @@ model UserAccount {
   updatedTrialSubscriptions            TrialSubscription[]            @relation("TrialSubscriptionUpdatedBy")
   trialSubscriptionEvents              TrialSubscriptionEvent[]       @relation("TrialSubscriptionEventActor")
   promotionRedemptions                 PromotionRedemption[]          @relation("PromotionRedemptionRedeemedBy")
+  registeredDevices                    Device[]                       @relation("DeviceRegisteredBy")
+  updatedDevices                       Device[]                       @relation("DeviceUpdatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -1220,6 +1246,43 @@ model RefreshToken {
   @@index([userId, revokedAt])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+model Device {
+  id                 String       @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId           String       @map("tenant_id") @db.Uuid
+  outletId           String?      @map("outlet_id") @db.Uuid
+  deviceIdentifier   String       @map("device_identifier") @db.Citext
+  name               String       @db.VarChar(160)
+  deviceType         DeviceType   @map("device_type")
+  status             DeviceStatus @default(PENDING)
+  platform           String?      @db.VarChar(80)
+  manufacturer       String?      @db.VarChar(120)
+  model              String?      @db.VarChar(120)
+  osVersion          String?      @map("os_version") @db.VarChar(80)
+  appVersion         String?      @map("app_version") @db.VarChar(80)
+  serialNumber       String?      @map("serial_number") @db.VarChar(160)
+  metadata           Json?        @db.JsonB
+  registeredByUserId String       @map("registered_by_user_id") @db.Uuid
+  updatedByUserId    String       @map("updated_by_user_id") @db.Uuid
+  registeredAt       DateTime     @default(now()) @map("registered_at") @db.Timestamptz(3)
+  lastSeenAt         DateTime?    @map("last_seen_at") @db.Timestamptz(3)
+  statusChangedAt    DateTime?    @map("status_changed_at") @db.Timestamptz(3)
+  version            Int          @default(1)
+  createdAt          DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant       Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet?     @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  registeredBy UserAccount @relation("DeviceRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: Restrict)
+  updatedBy    UserAccount @relation("DeviceUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "devices_tenant_id_id_key")
+  @@unique([tenantId, deviceIdentifier], map: "devices_tenant_identifier_key")
+  @@index([tenantId, outletId, status], map: "devices_outlet_status_idx")
+  @@index([tenantId, deviceType, status], map: "devices_type_status_idx")
+  @@index([tenantId, status, updatedAt], map: "devices_status_updated_idx")
+  @@map("devices")
 }
 
 model TenantMembership {

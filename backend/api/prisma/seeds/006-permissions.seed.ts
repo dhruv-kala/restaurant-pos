@@ -94,6 +94,7 @@ const moduleActions: Record<string, readonly string[]> = {
   business_day: ['read', 'open', 'close'],
   cash_drawer: ['read', 'open', 'adjust', 'close'],
   shift_reconciliation: ['read', 'create'],
+  devices: ['read', 'register', 'update_status'],
   subscriptions: [
     'create',
     'read',

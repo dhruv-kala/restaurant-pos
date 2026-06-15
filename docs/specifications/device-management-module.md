@@ -2,11 +2,11 @@
 
 ## Status
 
-Planned.
+Implemented through Task 32.1.
 
 Task 32 is split into:
 
-* Task 32.1 Device Registry Foundation
+* Task 32.1 Device Registry Foundation - Complete
 * Task 32.2 Device Enrollment and Activation
 * Task 32.3 Trusted Sessions
 * Task 32.4 Terminal Management
@@ -46,7 +46,7 @@ This module owns device identity.
 
 Potential entities:
 
-* Device
+* Device - implemented in Task 32.1
 * DeviceEnrollment
 * TrustedSession
 * Terminal
@@ -89,13 +89,32 @@ Examples:
 
 Suggested permissions:
 
-* DEVICE_VIEW
-* DEVICE_REGISTER
-* DEVICE_ACTIVATE
-* DEVICE_DEACTIVATE
-* DEVICE_ASSIGN
-* DEVICE_SECURITY_MANAGE
-* TERMINAL_MANAGE
+* `devices.read`
+* `devices.register`
+* `devices.update_status`
+* `devices.activate`
+* `devices.deactivate`
+* `devices.assign`
+* `devices.security_manage`
+* `terminals.manage`
+
+Task 32.1 implements only `devices.read`, `devices.register`, and
+`devices.update_status`. Later subtasks may add the remaining permissions.
+
+## API
+
+Device Registry Foundation:
+
+* `POST /devices`
+* `GET /devices`
+* `GET /devices/:id`
+* `PATCH /devices/:id/status`
+
+Task 32.1 implements tenant-scoped device registry records with optional outlet
+scope for non-admin operational devices. Device identifiers are unique per
+tenant. Registration creates `PENDING` devices. Status updates support
+`ACTIVE`, `DISABLED`, and `REVOKED` through optimistic `version` checks.
+Registration and status updates write audit events.
 
 ## Audit Requirements
 

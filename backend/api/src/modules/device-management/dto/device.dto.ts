@@ -1,0 +1,117 @@
+import { DeviceStatus, DeviceType } from '@prisma/client';
+import { Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
+
+export class RegisterDeviceDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  outletId?: string | null;
+
+  @IsString()
+  @MaxLength(160)
+  deviceIdentifier!: string;
+
+  @IsString()
+  @MaxLength(160)
+  name!: string;
+
+  @IsEnum(DeviceType)
+  deviceType!: DeviceType;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  platform?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  manufacturer?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  model?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  osVersion?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  appVersion?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  serialNumber?: string | null;
+
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, unknown> | null;
+}
+
+export class DeviceQueryDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  outletId?: string;
+
+  @IsOptional()
+  @IsEnum(DeviceStatus)
+  status?: DeviceStatus;
+
+  @IsOptional()
+  @IsEnum(DeviceType)
+  deviceType?: DeviceType;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  search?: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 20;
+}
+
+export class TenantDeviceQueryDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+}
+
+export class UpdateDeviceStatusDto {
+  @IsEnum(DeviceStatus)
+  status!: DeviceStatus;
+
+  @IsInt()
+  @Min(1)
+  version!: number;
+}

@@ -29,6 +29,7 @@ const roleModules: Record<string, readonly string[]> = {
     'business_day',
     'cash_drawer',
     'shift_reconciliation',
+    'devices',
     'settings',
     'audit',
     'notifications',
@@ -58,6 +59,7 @@ const roleModules: Record<string, readonly string[]> = {
     'business_day',
     'cash_drawer',
     'shift_reconciliation',
+    'devices',
   ],
   CASHIER: [
     'billing',
@@ -168,6 +170,12 @@ const shiftReconciliationActions: Record<string, readonly string[]> = {
   CASHIER: ['read', 'create'],
 };
 
+const deviceActions: Record<string, readonly string[]> = {
+  SUPER_ADMIN: ['*'],
+  TENANT_ADMIN: ['*'],
+  MANAGER: ['read', 'register', 'update_status'],
+};
+
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {
   const permissions = await prisma.permission.findMany();
   const templates = await prisma.systemRoleTemplate.findMany();
@@ -189,6 +197,7 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
     const allowedShiftActions = shiftActions[roleKey] ?? [];
     const allowedCashDrawerActions = cashDrawerActions[roleKey] ?? [];
     const allowedShiftReconciliationActions = shiftReconciliationActions[roleKey] ?? [];
+    const allowedDeviceActions = deviceActions[roleKey] ?? [];
     const allowed = permissions.filter(
       (permission) =>
         (modules.includes('*') || modules.includes(permission.module)) &&
@@ -215,7 +224,10 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
           allowedCashDrawerActions.includes(permission.action)) &&
         (permission.module !== 'shift_reconciliation' ||
           allowedShiftReconciliationActions.includes('*') ||
-          allowedShiftReconciliationActions.includes(permission.action)),
+          allowedShiftReconciliationActions.includes(permission.action)) &&
+        (permission.module !== 'devices' ||
+          allowedDeviceActions.includes('*') ||
+          allowedDeviceActions.includes(permission.action)),
     );
     for (const permission of allowed) {
       await prisma.systemRolePermission.upsert({

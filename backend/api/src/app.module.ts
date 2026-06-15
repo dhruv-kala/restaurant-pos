@@ -14,6 +14,7 @@ import { BillingModule } from './modules/billing/billing.module';
 import { BusinessDayModule } from './modules/business-day/business-day.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { CommunicationModule } from './modules/communication/communication.module';
+import { DeviceManagementModule } from './modules/device-management/device-management.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { HealthModule } from './modules/health/health.module';
 import { KdsModule } from './modules/kds/kds.module';
@@ -49,6 +50,7 @@ import { PrismaModule } from './prisma/prisma.module';
     BillingModule,
     BusinessDayModule,
     CommunicationModule,
+    DeviceManagementModule,
     CustomersModule,
     EmployeesModule,
     HealthModule,

@@ -3648,3 +3648,73 @@ Known limitations:
 Next task:
 
 - Task 32 - Device Registration, Trusted Sessions, and Terminal Management
+
+## 2026-06-15 - Task 32.1 Device Registry Foundation
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616120000_add_device_registry_foundation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/app.module.ts`
+- `backend/api/src/modules/device-management/device-management.module.ts`
+- `backend/api/src/modules/device-management/device-management-schema.spec.ts`
+- `backend/api/src/modules/device-management/controllers/devices.controller.ts`
+- `backend/api/src/modules/device-management/dto/device.dto.ts`
+- `backend/api/src/modules/device-management/services/device-access.util.ts`
+- `backend/api/src/modules/device-management/services/devices.service.ts`
+- `backend/api/src/modules/device-management/services/devices.service.spec.ts`
+- `docs/api/device-management-module.md`
+- `docs/specifications/device-management-module.md`
+- `docs/tasks/032-device-management/32.1-device-registry-foundation.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 32.1 only; enrollment, activation flows, trusted sessions,
+  terminal assignment, security policies, shared Dart clients, and UI remain
+  deferred.
+- Added tenant-scoped `Device` records with `DeviceType` and `DeviceStatus`
+  enums.
+- Enforced per-tenant unique device identifiers.
+- Required outlet scope for operational device types while allowing
+  tenant-scoped `ADMIN_WORKSTATION` records.
+- Added tenant-aware outlet foreign keys, forced RLS, lookup indexes, and a
+  no-delete trigger for device records.
+- Added protected APIs:
+  `POST /devices`,
+  `GET /devices`,
+  `GET /devices/:id`, and
+  `PATCH /devices/:id/status`.
+- Added `devices.read`, `devices.register`, and `devices.update_status`
+  permission seeds and role-template mappings for tenant admins and managers.
+- Added audit events `device.registered` and `device.status_changed`.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/device-management`: passed, 2 suites
+  and 7 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 103 suites and 388 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 32.1 migration was not deployed to a live PostgreSQL database.
+- No frontend or shared Dart client work was added in this backend foundation
+  task.
+
+Next task:
+
+- Task 32.2 - Device Enrollment and Activation

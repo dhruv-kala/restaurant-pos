@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 31.6 are complete at the foundation level.
+Tasks 1 through 32.1 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -294,9 +294,13 @@ client, Riverpod providers, authorized admin navigation, and Operations
 administration tabs for business days, shifts, cash drawers, reconciliations,
 day closings, and audit history.
 
-Task 32 is next provisionally: implement device registration, trusted sessions,
-and terminal management. Do not implement it unless the active user request
-explicitly asks for it.
+Task 32.1 implemented tenant-scoped device registry records, device type/status
+enums, unique device identifiers, optional outlet scope for admin workstations,
+required outlet scope for operational devices, protected `/devices` APIs,
+forced RLS, permission seeds, role mappings, and device audit events.
+
+Task 32.2 is next provisionally: implement device enrollment and activation. Do
+not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

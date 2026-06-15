@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 31.6**
-- Current module: **Business Day, Shifts, Cash Drawer, Closing, and Operations UI**
-- Next provisional task: **Task 32 - Device Registration, Trusted Sessions, and Terminal Management**
+- Completed through: **Task 32.1**
+- Current module: **Device Registration, Trusted Sessions, and Terminal Management**
+- Next provisional task: **Task 32.2 - Device Enrollment and Activation**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -59,6 +59,7 @@ Last updated: 2026-06-15
 | 31.4   | Immutable shift reconciliations, expected/counted cash variance tracking, approval notes, close-before-reconcile protection, forced RLS, permissions, and audit events |
 | 31.5   | Immutable business day closings, active shift/drawer/reconciliation validation, cash summary snapshots, forced RLS, close audit events, and closing summary read API   |
 | 31.6   | Shared operations contracts, typed API client, Riverpod providers, and admin operations screens for business days, shifts, drawers, reconciliation, closing, and audit |
+| 32.1   | Tenant-scoped device registry, device type/status enums, unique identifiers, protected APIs, RLS, permissions, and audit events                                  |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -203,6 +204,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   operations client, Riverpod providers, authorized admin navigation, business
   day, shift, cash drawer, reconciliation, day closing, and operation audit
   history screens
+- Device registry foundation with tenant-scoped `Device` records, device type
+  and status enums, optional outlet scoping for admin workstations, required
+  outlet scoping for operational devices, per-tenant unique identifiers,
+  protected `/devices` APIs, optimistic status changes, forced RLS, permission
+  seeds, role mappings, and audit events
 
 ## Known Environment Limitation
 
@@ -213,7 +219,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 32 - Device Registration, Trusted Sessions, and Terminal Management
+### Task 32.2 - Device Enrollment and Activation
 
 Read:
 
@@ -222,9 +228,8 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 32 unless explicitly requested. It should define device
-registration, trusted terminal sessions, outlet/device scoping, and device
-administration boundaries before any UI work.
+Do not implement Task 32.2 unless explicitly requested. It should build on the
+Task 32.1 device registry and add enrollment/activation flows only.
 
 ## Status Maintenance
 
