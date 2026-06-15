@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented through Task 33.7.
+Implemented through Task 33.8.
 
 Task 33 is split into:
 
@@ -13,7 +13,7 @@ Task 33 is split into:
 * Task 33.5 Background Sync Service - Complete
 * Task 33.6 Offline POS Operations - Complete
 * Task 33.7 Offline Inventory and Customers - Complete
-* Task 33.8 Sync Monitoring and Recovery
+* Task 33.8 Sync Monitoring and Recovery - Complete
 * Task 33.9 Offline Administration UI
 
 ## Objective
@@ -84,7 +84,9 @@ abstraction. Task 33.6 adds offline POS operation foundations for orders,
 bills, payments, and receipts, storing local projections and queued commands
 atomically. Task 33.7 adds offline customer lookup/create/update and inventory
 lookup/adjustment workflows on top of the same atomic projection plus queued
-command pattern.
+command pattern. Task 33.8 adds local sync health snapshots, queue/batch/
+checkpoint visibility, failed/retrying/stale in-progress item visibility, and
+recovery tools for failed and stale sync queue items.
 
 ## Offline Device Coverage
 

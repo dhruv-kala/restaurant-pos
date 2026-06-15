@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 33.7**
+- Completed through: **Task 33.8**
 - Current module: **Offline SQLite Operation and Synchronization**
-- Next provisional task: **Task 33.8 - Sync Monitoring and Recovery**
+- Next provisional task: **Task 33.9 - Offline Administration UI**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -72,6 +72,7 @@ Last updated: 2026-06-15
 | 33.5   | Background sync service foundation, retryable queue claiming, bounded retry policy, batch history, checkpoint tracking, and worker tests |
 | 33.6   | Offline POS operation foundation for orders, bills, payments, and receipts with atomic local writes, queued commands, and workflow tests |
 | 33.7   | Offline customer lookup/create/update and inventory lookup/adjustment workflows with atomic local writes, queued commands, and workflow tests |
+| 33.8   | Sync health snapshots, queue/batch/checkpoint visibility, failed/retrying/stale item visibility, recovery tools, and tests |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -277,6 +278,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   scoped local lookup helpers, customer create/update commands, inventory
   adjustment commands, atomic projection plus queued-command writes, and
   workflow tests
+- Sync monitoring and recovery foundation in restaurant-app with queue state
+  counts, failed/retrying/stale in-progress visibility, open conflict
+  visibility, recent batch and checkpoint visibility, failed-item retry
+  recovery, stale in-progress recovery, and tests
 
 ## Known Environment Limitation
 
@@ -287,7 +292,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 33.8 - Sync Monitoring and Recovery
+### Task 33.9 - Offline Administration UI
 
 Read:
 
@@ -296,9 +301,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 33.8 unless explicitly requested. It should add sync
-monitoring and recovery capabilities on top of the Task 33.7 offline operation
-foundation without expanding unrelated POS or admin workflows.
+Do not implement Task 33.9 unless explicitly requested. It should add the
+offline administration UI on top of the Task 33.8 monitoring and recovery
+foundation without expanding unrelated backend or sync endpoint work.
 
 ## Status Maintenance
 

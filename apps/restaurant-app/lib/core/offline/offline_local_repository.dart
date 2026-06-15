@@ -485,6 +485,59 @@ class OfflineLocalRepository {
         .toList(growable: false);
   }
 
+  Future<List<SyncQueueItem>> listSyncQueueItemsByStates({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    required Set<SyncQueueState> states,
+    int limit = 100,
+  }) async {
+    if (states.isEmpty) return const [];
+    final database = await _database.open();
+    final placeholders = List.filled(states.length, '?').join(', ');
+    final rows = await database.query(
+      'sync_queue',
+      where:
+          'tenant_id = ? AND outlet_id = ? AND device_id = ? AND state IN ($placeholders)',
+      whereArgs: [
+        tenantId,
+        outletId,
+        deviceId,
+        ...states.map((state) => state.wireName),
+      ],
+      orderBy: 'updated_at ASC',
+      limit: limit,
+    );
+    return rows
+        .map(OfflineEntityMapper.syncQueueItemFromRow)
+        .toList(growable: false);
+  }
+
+  Future<Map<SyncQueueState, int>> countSyncQueueItemsByState({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+  }) async {
+    final database = await _database.open();
+    final rows = await database.rawQuery(
+      'SELECT state, COUNT(*) AS count FROM sync_queue '
+      'WHERE tenant_id = ? AND outlet_id = ? AND device_id = ? '
+      'GROUP BY state',
+      [tenantId, outletId, deviceId],
+    );
+    final counts = {for (final state in SyncQueueState.values) state: 0};
+    for (final row in rows) {
+      final state = SyncQueueState.fromJson(row['state']);
+      final value = row['count'];
+      counts[state] = value is int
+          ? value
+          : value is num
+          ? value.toInt()
+          : 0;
+    }
+    return counts;
+  }
+
   Future<List<SyncQueueItem>> claimRetryableSyncQueueItems({
     required String tenantId,
     required String outletId,
@@ -686,6 +739,23 @@ AND (
         .toList(growable: false);
   }
 
+  Future<List<SyncCheckpoint>> listSyncCheckpoints({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+  }) async {
+    final database = await _database.open();
+    final rows = await database.query(
+      'sync_checkpoints',
+      where: 'tenant_id = ? AND outlet_id = ? AND device_id = ?',
+      whereArgs: [tenantId, outletId, deviceId],
+      orderBy: 'module ASC',
+    );
+    return rows
+        .map(OfflineEntityMapper.syncCheckpointFromRow)
+        .toList(growable: false);
+  }
+
   Future<void> upsertSyncCheckpoint(SyncCheckpoint checkpoint) async {
     final database = await _database.open();
     await database.insert(
@@ -802,6 +872,74 @@ AND (
     return rows
         .map(OfflineEntityMapper.localChangeLogEntryFromRow)
         .toList(growable: false);
+  }
+
+  Future<int> retrySyncQueueItems({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    required Iterable<String> localIds,
+    required DateTime retriedAt,
+    bool resetAttemptCount = true,
+  }) async {
+    final ids = localIds.toSet();
+    if (ids.isEmpty) return 0;
+    final database = await _database.open();
+    final placeholders = List.filled(ids.length, '?').join(', ');
+    return database.update(
+      'sync_queue',
+      {
+        'state': SyncQueueState.pending.wireName,
+        if (resetAttemptCount) 'attempt_count': 0,
+        'last_attempt_at': null,
+        'next_retry_at': null,
+        'error_code': null,
+        'error_message': null,
+        'updated_at': retriedAt.toUtc().toIso8601String(),
+      },
+      where:
+          'tenant_id = ? AND outlet_id = ? AND device_id = ? '
+          'AND local_id IN ($placeholders) '
+          'AND state IN (?, ?)',
+      whereArgs: [
+        tenantId,
+        outletId,
+        deviceId,
+        ...ids,
+        SyncQueueState.failed.wireName,
+        SyncQueueState.retrying.wireName,
+      ],
+    );
+  }
+
+  Future<int> recoverStaleInProgressQueueItems({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    required DateTime staleBefore,
+    required DateTime recoveredAt,
+  }) async {
+    final database = await _database.open();
+    return database.update(
+      'sync_queue',
+      {
+        'state': SyncQueueState.retrying.wireName,
+        'next_retry_at': recoveredAt.toUtc().toIso8601String(),
+        'error_code': 'SYNC_RECOVERED_STALE_IN_PROGRESS',
+        'error_message': 'Recovered stale in-progress sync item.',
+        'updated_at': recoveredAt.toUtc().toIso8601String(),
+      },
+      where:
+          'tenant_id = ? AND outlet_id = ? AND device_id = ? '
+          'AND state = ? AND updated_at <= ?',
+      whereArgs: [
+        tenantId,
+        outletId,
+        deviceId,
+        SyncQueueState.inProgress.wireName,
+        staleBefore.toUtc().toIso8601String(),
+      ],
+    );
   }
 
   Future<void> recordSyncConflict(SyncConflict conflict) async {

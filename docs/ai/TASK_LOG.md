@@ -4457,7 +4457,9 @@ Validation:
 
 - `dart format apps/restaurant-app/lib/core/offline apps/restaurant-app/test/core/offline`:
   passed
+- `flutter analyze` from `apps/restaurant-app`: passed
 - `flutter test test/core/offline` from `apps/restaurant-app`: passed
+- `flutter test` from `apps/restaurant-app`: passed
 
 Known limitations:
 
@@ -4469,3 +4471,57 @@ Known limitations:
 Next task:
 
 - Task 33.8 - Sync Monitoring and Recovery
+
+## 2026-06-15 - Task 33.8 Sync Monitoring and Recovery
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/restaurant-app/lib/core/offline/offline_local_repository.dart`
+- `apps/restaurant-app/lib/core/offline/offline_sync_monitoring_service.dart`
+- `apps/restaurant-app/test/core/offline/offline_sync_monitoring_service_test.dart`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.8-sync-monitoring-and-recovery.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.8 only; admin UI, concrete backend sync endpoints, and
+  pulled projection application remain deferred.
+- Reused existing `sync_batches` and `sync_checkpoints` tables from Task 33.5;
+  no schema version bump was required.
+- Added sync health snapshots over device sync state, queue counts, failed
+  items, retrying items, stale in-progress items, open conflicts, recent
+  batches, and checkpoints.
+- Added repository queries for queue state counts, multi-state queue listings,
+  and checkpoint listings.
+- Added a recovery operation that moves selected `FAILED` and `RETRYING` queue
+  items back to `PENDING`, clears errors, and resets attempts for manual retry.
+- Added a recovery operation that moves stale `IN_PROGRESS` queue items back to
+  `RETRYING` with an explicit recovery error code.
+- Preserved tenant, outlet, and device scoping for all monitoring and recovery
+  operations.
+
+Validation:
+
+- `dart format apps/restaurant-app/lib/core/offline apps/restaurant-app/test/core/offline`:
+  passed
+- `flutter analyze` from `apps/restaurant-app`: passed
+- `flutter test test/core/offline` from `apps/restaurant-app`: passed
+- `flutter test` from `apps/restaurant-app`: passed
+
+Known limitations:
+
+- Monitoring and recovery are exposed as a local service foundation only; no
+  admin UI is wired yet.
+- Concrete HTTP sync endpoints and pulled server projection application remain
+  future work.
+
+Next task:
+
+- Task 33.9 - Offline Administration UI

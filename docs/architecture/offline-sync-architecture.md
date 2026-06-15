@@ -2,14 +2,15 @@
 
 ## Status
 
-Implemented through Task 33.7.
+Implemented through Task 33.8.
 
 This document defines the offline architecture boundary. SQLite projection,
 sync queue, local change-log storage, and local conflict resolution persistence
 exist through Task 33.4. Task 33.5 adds a bounded background sync service
 foundation, batch history, and checkpoint tracking. Task 33.6 adds offline POS
 operation foundations for orders, bills, payments, and receipts. Task 33.7 adds
-offline customer and inventory operation foundations.
+offline customer and inventory operation foundations. Task 33.8 adds sync
+health monitoring and recovery tools.
 
 ## Goals
 
@@ -114,11 +115,17 @@ inventory adjustments use the same atomic projection plus queue/change-log
 write pattern. Inventory adjustments are queued as append operations so stock
 history can remain auditable after reconnect synchronization.
 
+Task 33.8 adds `OfflineSyncMonitoringService` for local sync health snapshots
+over `DeviceSyncState`, `sync_queue`, `sync_batches`, `sync_checkpoints`, and
+`sync_conflicts`. It also adds recovery tools to requeue failed/retrying items
+and move stale `IN_PROGRESS` items back to `RETRYING` without deleting local
+records.
+
 Future approved table groups are:
 
 * pulled server-change staging tables when projection application is added
 
-Task 33.7 intentionally does not implement live screen wiring, concrete backend
+Task 33.8 intentionally does not implement live screen wiring, concrete backend
 sync endpoint integration, or admin sync monitoring UI.
 
 ## Command Flow
@@ -223,7 +230,7 @@ These contracts are intentionally storage-neutral. Task 33.2 maps
 
 ## Non-Goals
 
-Task 33.7 does not implement:
+Task 33.8 does not implement:
 
 * live screen wiring
 * concrete backend sync endpoint integration

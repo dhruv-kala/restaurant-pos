@@ -366,7 +366,12 @@ scoped local lookup helpers, customer create/update commands, inventory
 adjustment commands, atomic projection plus queued-command writes, and workflow
 tests.
 
-Task 33.8 is next provisionally: implement sync monitoring and recovery. Do
+Task 33.8 implemented sync monitoring and recovery foundations with queue state
+counts, failed/retrying/stale in-progress visibility, open conflict visibility,
+recent batch and checkpoint visibility, failed-item retry recovery, stale
+in-progress recovery, and tests.
+
+Task 33.9 is next provisionally: implement offline administration UI. Do
 not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
