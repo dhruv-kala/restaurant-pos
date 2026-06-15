@@ -84,6 +84,30 @@ export function requireDeviceStatusUpdate(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Device status update permission is required');
 }
 
+export function requireDeviceEnroll(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'devices.enroll')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Device enrollment permission is required');
+}
+
+export function requireDeviceActivate(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'devices.activate')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Device activation permission is required');
+}
+
 export function assertOutletAccess(actor: AuthenticatedUser, outletId: string | null): void {
   if (hasRole(actor, PLATFORM_ADMIN_ROLE) || hasRole(actor, TENANT_ADMIN_ROLE)) {
     return;

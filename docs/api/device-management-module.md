@@ -1,6 +1,7 @@
 # Device Management API
 
-Task 32.1 introduces the device registry foundation.
+Task 32.1 introduces the device registry foundation. Task 32.2 adds device
+enrollment and activation.
 
 ## Device Registry
 
@@ -75,7 +76,77 @@ Optional query:
 
 Writes `device.status_changed` audit events when status changes.
 
+## Device Enrollment and Activation
+
+### Request Device Enrollment
+
+`POST /devices/:id/enrollments`
+
+Body:
+
+* `tenantId` - optional; platform administrator only
+* `expiresInMinutes` - optional, 5 to 1440, defaults to 15
+
+Creates a `REQUESTED` enrollment for a pending or disabled device. The response
+includes the one-time plaintext `activationCode`; only a SHA-256 hash and masked
+code are stored.
+
+### List Device Enrollment History
+
+`GET /devices/:id/enrollments`
+
+Query:
+
+* `tenantId`
+* `page`
+* `limit`
+
+Returns paginated enrollment history for the device.
+
+### Device Enrollment Detail
+
+`GET /device-enrollments/:id`
+
+Optional query:
+
+* `tenantId`
+
+Returns one enrollment record when the actor has tenant and outlet access.
+
+### Approve Device Enrollment
+
+`PATCH /device-enrollments/:id/approve`
+
+Body:
+
+* `version`: optimistic concurrency version
+
+Optional query:
+
+* `tenantId`
+
+Moves a `REQUESTED` enrollment to `APPROVED`. Expired requests are transitioned
+to `EXPIRED` instead of being approved.
+
+### Activate Device Enrollment
+
+`POST /device-enrollments/activate`
+
+Body:
+
+* `tenantId` - optional; platform administrator only
+* `deviceIdentifier`
+* `activationCode`
+
+Activates the linked device when the code matches an approved, unexpired
+enrollment.
+
 ## Audit Events
 
 * `device.registered`
 * `device.status_changed`
+* `device.enrollment_requested`
+* `device.enrollment_approved`
+* `device.enrollment_expired`
+* `device.enrollment_activated`
+* `device.activated`

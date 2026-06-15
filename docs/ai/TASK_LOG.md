@@ -3718,3 +3718,70 @@ Known limitations:
 Next task:
 
 - Task 32.2 - Device Enrollment and Activation
+
+## 2026-06-15 - Task 32.2 Device Enrollment and Activation
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616130000_add_device_enrollment_activation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/device-management/device-management.module.ts`
+- `backend/api/src/modules/device-management/device-management-schema.spec.ts`
+- `backend/api/src/modules/device-management/controllers/device-enrollments.controller.ts`
+- `backend/api/src/modules/device-management/dto/device.dto.ts`
+- `backend/api/src/modules/device-management/services/device-access.util.ts`
+- `backend/api/src/modules/device-management/services/device-enrollments.service.ts`
+- `backend/api/src/modules/device-management/services/device-enrollments.service.spec.ts`
+- `docs/api/device-management-module.md`
+- `docs/specifications/device-management-module.md`
+- `docs/tasks/032-device-management/32.2-device-enrollment-and-activation.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 32.2 only; trusted sessions, terminal assignment, device
+  security policies, Flutter clients, and UI remain deferred.
+- Added tenant-scoped `DeviceEnrollment` records with `REQUESTED`, `APPROVED`,
+  `ACTIVATED`, `EXPIRED`, and `CANCELLED` states.
+- Stored activation codes as SHA-256 hashes with masked display values; the
+  plaintext code is returned only at request time.
+- Enforced one active `REQUESTED` or `APPROVED` enrollment per device.
+- Added activation expiry handling and approval-time expiry transition.
+- Added protected APIs:
+  `POST /devices/:id/enrollments`,
+  `GET /devices/:id/enrollments`,
+  `GET /device-enrollments/:id`,
+  `PATCH /device-enrollments/:id/approve`, and
+  `POST /device-enrollments/activate`.
+- Added `devices.enroll` and `devices.activate` permission seeds and manager
+  role mappings.
+- Added audit events `device.enrollment_requested`,
+  `device.enrollment_approved`, `device.enrollment_expired`,
+  `device.enrollment_activated`, and `device.activated`.
+
+Validation:
+
+- `npx prisma format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runTestsByPath src/modules/device-management/device-management-schema.spec.ts src/modules/device-management/services/device-enrollments.service.spec.ts src/modules/device-management/services/devices.service.spec.ts`: passed,
+  3 suites and 15 tests
+- `npm run lint`: passed
+- `npm run build`: passed
+
+Known limitations:
+
+- The Task 32.2 migration was not deployed to a live PostgreSQL database.
+- No frontend or shared Dart client work was added in this backend foundation
+  task.
+
+Next task:
+
+- Task 32.3 - Trusted Sessions

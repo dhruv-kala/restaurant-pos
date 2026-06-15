@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 32.1 are complete at the foundation level.
+Tasks 1 through 32.2 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -299,7 +299,12 @@ enums, unique device identifiers, optional outlet scope for admin workstations,
 required outlet scope for operational devices, protected `/devices` APIs,
 forced RLS, permission seeds, role mappings, and device audit events.
 
-Task 32.2 is next provisionally: implement device enrollment and activation. Do
+Task 32.2 implemented tenant-scoped device enrollment records, expiring hashed
+activation codes, one active enrollment per device, approval workflow,
+activation of approved devices, protected enrollment APIs, forced RLS,
+permission seeds, role mappings, and enrollment/activation audit events.
+
+Task 32.3 is next provisionally: implement trusted sessions. Do
 not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

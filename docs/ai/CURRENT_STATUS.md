@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 32.1**
+- Completed through: **Task 32.2**
 - Current module: **Device Registration, Trusted Sessions, and Terminal Management**
-- Next provisional task: **Task 32.2 - Device Enrollment and Activation**
+- Next provisional task: **Task 32.3 - Trusted Sessions**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -59,7 +59,8 @@ Last updated: 2026-06-15
 | 31.4   | Immutable shift reconciliations, expected/counted cash variance tracking, approval notes, close-before-reconcile protection, forced RLS, permissions, and audit events |
 | 31.5   | Immutable business day closings, active shift/drawer/reconciliation validation, cash summary snapshots, forced RLS, close audit events, and closing summary read API   |
 | 31.6   | Shared operations contracts, typed API client, Riverpod providers, and admin operations screens for business days, shifts, drawers, reconciliation, closing, and audit |
-| 32.1   | Tenant-scoped device registry, device type/status enums, unique identifiers, protected APIs, RLS, permissions, and audit events                                  |
+| 32.1   | Tenant-scoped device registry, device type/status enums, unique identifiers, protected APIs, RLS, permissions, and audit events                                        |
+| 32.2   | Tenant-scoped device enrollments, expiring activation codes, approval workflow, activation API, forced RLS, permissions, and audit events                             |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -209,6 +210,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   outlet scoping for operational devices, per-tenant unique identifiers,
   protected `/devices` APIs, optimistic status changes, forced RLS, permission
   seeds, role mappings, and audit events
+- Device enrollment and activation with tenant-scoped `DeviceEnrollment`
+  records, expiring hashed activation codes, approval workflow, one active
+  enrollment per device, activation of approved devices, protected enrollment
+  APIs, forced RLS, permission seeds, role mappings, and audit events
 
 ## Known Environment Limitation
 
@@ -219,7 +224,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 32.2 - Device Enrollment and Activation
+### Task 32.3 - Trusted Sessions
 
 Read:
 
@@ -228,8 +233,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 32.2 unless explicitly requested. It should build on the
-Task 32.1 device registry and add enrollment/activation flows only.
+Do not implement Task 32.3 unless explicitly requested. It should build on the
+Task 32.1 device registry and Task 32.2 activation workflow, and add trusted
+session records and revocation only.
 
 ## Status Maintenance
 

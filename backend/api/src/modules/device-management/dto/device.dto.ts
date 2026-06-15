@@ -115,3 +115,53 @@ export class UpdateDeviceStatusDto {
   @Min(1)
   version!: number;
 }
+
+export class RequestDeviceEnrollmentDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(5)
+  @Max(1440)
+  expiresInMinutes = 15;
+}
+
+export class DeviceEnrollmentQueryDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 20;
+}
+
+export class ApproveDeviceEnrollmentDto {
+  @IsInt()
+  @Min(1)
+  version!: number;
+}
+
+export class ActivateDeviceEnrollmentDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsString()
+  @MaxLength(160)
+  deviceIdentifier!: string;
+
+  @IsString()
+  @MaxLength(64)
+  activationCode!: string;
+}

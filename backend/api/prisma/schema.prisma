@@ -805,6 +805,16 @@ enum DeviceStatus {
   @@map("device_status")
 }
 
+enum DeviceEnrollmentStatus {
+  REQUESTED
+  APPROVED
+  ACTIVATED
+  EXPIRED
+  CANCELLED
+
+  @@map("device_enrollment_status")
+}
+
 model Country {
   id        String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   code      String   @unique @db.Citext
@@ -1030,6 +1040,7 @@ model Tenant {
   trialSubscriptions            TrialSubscription[]
   trialSubscriptionEvents       TrialSubscriptionEvent[]
   devices                       Device[]
+  deviceEnrollments             DeviceEnrollment[]
 
   @@index([status])
   @@index([deletedAt])
@@ -1114,6 +1125,7 @@ model Outlet {
   cashDrawerTransactions   CashDrawerTransaction[]
   shiftReconciliations     ShiftReconciliation[]
   devices                  Device[]
+  deviceEnrollments        DeviceEnrollment[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1225,6 +1237,9 @@ model UserAccount {
   promotionRedemptions                 PromotionRedemption[]          @relation("PromotionRedemptionRedeemedBy")
   registeredDevices                    Device[]                       @relation("DeviceRegisteredBy")
   updatedDevices                       Device[]                       @relation("DeviceUpdatedBy")
+  requestedDeviceEnrollments           DeviceEnrollment[]             @relation("DeviceEnrollmentRequestedBy")
+  approvedDeviceEnrollments            DeviceEnrollment[]             @relation("DeviceEnrollmentApprovedBy")
+  activatedDeviceEnrollments           DeviceEnrollment[]             @relation("DeviceEnrollmentActivatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -1272,10 +1287,11 @@ model Device {
   createdAt          DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant       Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet       Outlet?     @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  registeredBy UserAccount @relation("DeviceRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: Restrict)
-  updatedBy    UserAccount @relation("DeviceUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet?            @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  registeredBy UserAccount        @relation("DeviceRegisteredBy", fields: [registeredByUserId], references: [id], onDelete: Restrict)
+  updatedBy    UserAccount        @relation("DeviceUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  enrollments  DeviceEnrollment[]
 
   @@unique([tenantId, id], map: "devices_tenant_id_id_key")
   @@unique([tenantId, deviceIdentifier], map: "devices_tenant_identifier_key")
@@ -1283,6 +1299,40 @@ model Device {
   @@index([tenantId, deviceType, status], map: "devices_type_status_idx")
   @@index([tenantId, status, updatedAt], map: "devices_status_updated_idx")
   @@map("devices")
+}
+
+model DeviceEnrollment {
+  id                   String                 @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId             String                 @map("tenant_id") @db.Uuid
+  outletId             String?                @map("outlet_id") @db.Uuid
+  deviceId             String                 @map("device_id") @db.Uuid
+  status               DeviceEnrollmentStatus @default(REQUESTED)
+  activationCodeHash   String                 @map("activation_code_hash") @db.Char(64)
+  activationCodeMasked String                 @map("activation_code_masked") @db.VarChar(32)
+  requestedByUserId    String                 @map("requested_by_user_id") @db.Uuid
+  approvedByUserId     String?                @map("approved_by_user_id") @db.Uuid
+  activatedByUserId    String?                @map("activated_by_user_id") @db.Uuid
+  requestedAt          DateTime               @default(now()) @map("requested_at") @db.Timestamptz(3)
+  approvedAt           DateTime?              @map("approved_at") @db.Timestamptz(3)
+  activatedAt          DateTime?              @map("activated_at") @db.Timestamptz(3)
+  expiresAt            DateTime               @map("expires_at") @db.Timestamptz(3)
+  cancelledAt          DateTime?              @map("cancelled_at") @db.Timestamptz(3)
+  cancellationReason   String?                @map("cancellation_reason") @db.VarChar(500)
+  version              Int                    @default(1)
+  createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet      Outlet?      @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  device      Device       @relation(fields: [tenantId, deviceId], references: [tenantId, id], onDelete: Restrict)
+  requestedBy UserAccount  @relation("DeviceEnrollmentRequestedBy", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  approvedBy  UserAccount? @relation("DeviceEnrollmentApprovedBy", fields: [approvedByUserId], references: [id], onDelete: Restrict)
+  activatedBy UserAccount? @relation("DeviceEnrollmentActivatedBy", fields: [activatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "device_enrollments_tenant_id_id_key")
+  @@index([tenantId, deviceId, status], map: "device_enrollments_device_status_idx")
+  @@index([tenantId, status, expiresAt], map: "device_enrollments_status_expiry_idx")
+  @@map("device_enrollments")
 }
 
 model TenantMembership {

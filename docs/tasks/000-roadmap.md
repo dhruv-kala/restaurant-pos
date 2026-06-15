@@ -12,8 +12,8 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, and 32.1 are complete; Task 32.2
-  device enrollment and activation is the next listed provisional task.
+- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, and 32.1-32.2 are complete;
+  Task 32.3 trusted sessions is the next listed provisional task.
 
 ## Foundation and Core SaaS
 
@@ -58,12 +58,20 @@ Last updated: 2026-06-15
 | 31.5 | COMPLETE | Business day closing |
 | 31.6 | COMPLETE | Operations administration UI |
 | 32.1 | COMPLETE | Device registry foundation |
-| 32.2 | NEXT | Device enrollment and activation |
-| 32.3 | PLANNED | Trusted sessions |
+| 32.2 | COMPLETE | Device enrollment and activation |
+| 32.3 | NEXT | Trusted sessions |
 | 32.4 | PLANNED | Terminal management |
 | 32.5 | PLANNED | Device security policies |
 | 32.6 | PLANNED | Device administration UI |
-| 33 | PLANNED | Offline SQLite operation and synchronization protocol |
+| 33.1 | PLANNED | Offline architecture foundation |
+| 33.2 | PLANNED | SQLite local storage |
+| 33.3 | PLANNED | Sync queue and change tracking |
+| 33.4 | PLANNED | Conflict resolution engine |
+| 33.5 | PLANNED | Background sync service |
+| 33.6 | PLANNED | Offline POS operations |
+| 33.7 | PLANNED | Offline inventory and customers |
+| 33.8 | PLANNED | Sync monitoring and recovery |
+| 33.9 | PLANNED | Offline administration UI |
 | 34 | PLANNED | Transactional outbox, background jobs, and scheduler |
 | 35 | PLANNED | File/document storage abstraction and retention |
 | 36 | PLANNED | Webhooks, API integrations, and integration credentials |

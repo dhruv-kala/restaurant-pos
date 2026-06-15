@@ -2,12 +2,12 @@
 
 ## Status
 
-Implemented through Task 32.1.
+Implemented through Task 32.2.
 
 Task 32 is split into:
 
 * Task 32.1 Device Registry Foundation - Complete
-* Task 32.2 Device Enrollment and Activation
+* Task 32.2 Device Enrollment and Activation - Complete
 * Task 32.3 Trusted Sessions
 * Task 32.4 Terminal Management
 * Task 32.5 Device Security Policies
@@ -47,7 +47,7 @@ This module owns device identity.
 Potential entities:
 
 * Device - implemented in Task 32.1
-* DeviceEnrollment
+* DeviceEnrollment - implemented in Task 32.2
 * TrustedSession
 * Terminal
 * DeviceSecurityPolicy
@@ -99,7 +99,8 @@ Suggested permissions:
 * `terminals.manage`
 
 Task 32.1 implements only `devices.read`, `devices.register`, and
-`devices.update_status`. Later subtasks may add the remaining permissions.
+`devices.update_status`. Task 32.2 adds `devices.enroll` and
+`devices.activate`. Later subtasks may add the remaining permissions.
 
 ## API
 
@@ -116,11 +117,29 @@ tenant. Registration creates `PENDING` devices. Status updates support
 `ACTIVE`, `DISABLED`, and `REVOKED` through optimistic `version` checks.
 Registration and status updates write audit events.
 
+Device Enrollment and Activation:
+
+* `POST /devices/:id/enrollments`
+* `GET /devices/:id/enrollments`
+* `GET /device-enrollments/:id`
+* `PATCH /device-enrollments/:id/approve`
+* `POST /device-enrollments/activate`
+
+Task 32.2 implements controlled enrollment for registered tenant devices.
+Enrollment requests create expiring activation-code records in `REQUESTED`
+state. Managers or tenant administrators approve requests with optimistic
+`version` checks, moving them to `APPROVED`. Activation requires the matching
+device identifier and activation code, marks the enrollment `ACTIVATED`, and
+activates the linked device. Enrollment records are tenant scoped, append-only,
+RLS protected, and retain masked activation-code metadata only.
+
 ## Audit Requirements
 
 Audit:
 
 * device registration
+* device enrollment request
+* device enrollment approval
 * device activation
 * device deactivation
 * terminal assignment
