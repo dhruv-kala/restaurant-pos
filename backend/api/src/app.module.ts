@@ -11,6 +11,7 @@ import { validateEnvironment } from './config/environment.validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { BusinessDayModule } from './modules/business-day/business-day.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { CommunicationModule } from './modules/communication/communication.module';
 import { EmployeesModule } from './modules/employees/employees.module';
@@ -46,6 +47,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuditModule,
     AuthModule,
     BillingModule,
+    BusinessDayModule,
     CommunicationModule,
     CustomersModule,
     EmployeesModule,

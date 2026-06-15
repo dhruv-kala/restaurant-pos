@@ -1,0 +1,71 @@
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
+
+import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
+import {
+  assertOutletAccess,
+  requireBusinessDayClose,
+  requireBusinessDayOpen,
+  requireBusinessDayRead,
+  resolveBusinessDayScope,
+} from './business-day-access.util';
+
+const tenantId = '01975c30-0000-7000-8000-000000000100';
+const outletId = '01975c30-0000-7000-8000-000000000200';
+
+const tenantAdmin: AuthenticatedUser = {
+  id: '01975c30-0000-7000-8000-000000000001',
+  email: 'admin@example.test',
+  name: 'Admin',
+  tenantId,
+  outletId: null,
+  roles: ['TENANT_ADMIN'],
+  permissions: [],
+};
+
+describe('business day access utilities', () => {
+  it('requires explicit tenant scope for platform access', () => {
+    expect(() =>
+      resolveBusinessDayScope({ ...tenantAdmin, tenantId: null, roles: ['SUPER_ADMIN'] }),
+    ).toThrow(BadRequestException);
+    expect(
+      resolveBusinessDayScope({ ...tenantAdmin, tenantId: null, roles: ['SUPER_ADMIN'] }, tenantId),
+    ).toEqual({ tenantId });
+  });
+
+  it('blocks cross-tenant access for tenant users', () => {
+    expect(() =>
+      resolveBusinessDayScope(tenantAdmin, '01975c30-0000-7000-8000-000000000999'),
+    ).toThrow(ForbiddenException);
+  });
+
+  it('allows tenant admins and managers to operate business days', () => {
+    const manager = { ...tenantAdmin, roles: ['MANAGER'], outletId };
+    expect(() => requireBusinessDayRead(tenantAdmin)).not.toThrow();
+    expect(() => requireBusinessDayOpen(tenantAdmin)).not.toThrow();
+    expect(() => requireBusinessDayClose(tenantAdmin)).not.toThrow();
+    expect(() => requireBusinessDayRead(manager)).not.toThrow();
+    expect(() => requireBusinessDayOpen(manager)).not.toThrow();
+    expect(() => requireBusinessDayClose(manager)).not.toThrow();
+  });
+
+  it('supports granular permissions without privileged roles', () => {
+    const user = { ...tenantAdmin, roles: ['CASHIER'], permissions: ['business_day.read'] };
+    expect(() => requireBusinessDayRead(user)).not.toThrow();
+    expect(() => requireBusinessDayOpen(user)).toThrow(ForbiddenException);
+    expect(() =>
+      requireBusinessDayOpen({ ...user, permissions: ['business_day.open'] }),
+    ).not.toThrow();
+    expect(() =>
+      requireBusinessDayClose({ ...user, permissions: ['business_day.close'] }),
+    ).not.toThrow();
+  });
+
+  it('enforces outlet access for outlet-bound users', () => {
+    const manager = { ...tenantAdmin, roles: ['MANAGER'], outletId };
+    expect(() => assertOutletAccess(manager, outletId)).not.toThrow();
+    expect(() => assertOutletAccess(manager, '01975c30-0000-7000-8000-000000000201')).toThrow(
+      ForbiddenException,
+    );
+    expect(() => assertOutletAccess(tenantAdmin, outletId)).not.toThrow();
+  });
+});

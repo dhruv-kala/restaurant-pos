@@ -26,6 +26,7 @@ const roleModules: Record<string, readonly string[]> = {
     'promotions',
     'tax',
     'fiscal_policy',
+    'business_day',
     'settings',
     'audit',
     'notifications',
@@ -52,6 +53,7 @@ const roleModules: Record<string, readonly string[]> = {
     'promotions',
     'tax',
     'fiscal_policy',
+    'business_day',
   ],
   CASHIER: [
     'billing',

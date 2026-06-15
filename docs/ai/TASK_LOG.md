@@ -3204,3 +3204,83 @@ Known limitations:
 Next task:
 
 - Task 37 - Customer ordering application foundation
+
+## Task 31.1 Completion
+
+Date: 2026-06-15
+
+Task: Task 31.1 - Business Day Foundation
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616100000_add_business_day_foundation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/app.module.ts`
+- `backend/api/src/modules/business-day/business-day.module.ts`
+- `backend/api/src/modules/business-day/business-day-schema.spec.ts`
+- `backend/api/src/modules/business-day/controllers/business-day.controller.ts`
+- `backend/api/src/modules/business-day/dto/business-day.dto.ts`
+- `backend/api/src/modules/business-day/services/business-day-access.util.ts`
+- `backend/api/src/modules/business-day/services/business-day-access.util.spec.ts`
+- `backend/api/src/modules/business-day/services/business-day.service.ts`
+- `backend/api/src/modules/business-day/services/business-day.service.spec.ts`
+- `docs/api/business-day-module.md`
+- `docs/specifications/business-day-module.md`
+- `docs/tasks/031-business-day/31.1-business-day-foundation.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 31.1 implemented only business day foundation scope.
+- Added tenant/outlet-scoped `BusinessDay` records with
+  `BusinessDayStatus.OPEN` and `BusinessDayStatus.CLOSED`.
+- Enforced one open business day per outlet through a partial unique index.
+- Enforced one business day per outlet/date through a tenant-aware unique
+  constraint.
+- Stored `businessDate` as a database `DATE`, separate from open/close
+  timestamps.
+- Added forced RLS and tenant-aware outlet foreign keys.
+- Added closed-day immutability and no-delete triggers.
+- Added protected APIs:
+  `POST /business-days/open`,
+  `GET /business-days`,
+  `GET /business-days/current`, and
+  `PATCH /business-days/:id/close`.
+- Added `business_day.read`, `business_day.open`, and `business_day.close`
+  permission seeds and mapped them to tenant admin and manager role templates.
+- Business day close uses optimistic `version` checks.
+- Business day open and close write audit events.
+- Shift sessions, cash drawers, reconciliation, business day closing
+  validations, shared Dart clients, and UI remain deferred.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/business-day`: passed, 3 suites and
+  13 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 98 suites and 349 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 31.1 migration was not deployed to a live PostgreSQL database.
+- Existing order, billing, payment, receipt, and report flows still use their
+  current business-date derivation until later integration tasks explicitly
+  wire them to open business days.
+- Business day close currently records lifecycle state only; unresolved shift,
+  cash drawer, and reconciliation checks belong to later Task 31 subtasks.
+
+Next task:
+
+- Task 31.2 - Shift Management

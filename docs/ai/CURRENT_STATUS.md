@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 30.6**
-- Current module: **Tax Configuration and Fiscal Policy**
-- Next provisional task: **Task 37 - Customer ordering application foundation**
+- Completed through: **Task 31.1**
+- Current module: **Business Day, Shifts, Cash Drawer, and Closing**
+- Next provisional task: **Task 31.2 - Shift Management**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -53,6 +53,7 @@ Last updated: 2026-06-15
 | 30.4 | Deterministic tax calculation engine, inclusive/exclusive support, rule precedence, immutable bill snapshots, RLS, and bill integration |
 | 30.5 | Tax summary and detailed reporting from bill/tax snapshots, invoice counts, taxable sales, outlet filtering, and audit events |
 | 30.6 | Shared tax Dart contracts, typed API client, Riverpod providers, and admin tax profile/rate/group/mapping/fiscal policy/report screens |
+| 31.1 | Outlet-scoped business days, one-open-day enforcement, current-day lookup, optimistic close, forced RLS, permissions, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -169,6 +170,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   Riverpod providers, authorized admin navigation, tax profile/rate/group
   administration, tax mapping creation, outlet fiscal policy creation, fiscal
   sequence visibility, and tax report visibility
+- Business day foundation with tenant/outlet-scoped `BusinessDay` records,
+  one open day per outlet, separate `businessDate`, protected
+  `/business-days` lifecycle APIs, forced RLS, closed-day immutability,
+  business-day permissions, and open/close audit events
 
 ## Known Environment Limitation
 
@@ -179,7 +184,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 37 - Customer ordering application foundation
+### Task 31.2 - Shift Management
 
 Read:
 
@@ -188,8 +193,10 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 37 unless explicitly requested. It is the next listed
-provisional roadmap task after the completed Task 30 tax module sequence.
+Do not implement Task 31.2 unless explicitly requested. It should build on
+Task 31.1 business days and add shift lifecycle management only; cash drawers,
+shift reconciliation, business day closing, and operations UI remain later
+Task 31 subtasks.
 
 ## Status Maintenance
 

@@ -91,6 +91,7 @@ const moduleActions: Record<string, readonly string[]> = {
   ],
   tax: ['read', 'profile_manage', 'policy_manage', 'report_view'],
   fiscal_policy: ['read', 'manage'],
+  business_day: ['read', 'open', 'close'],
   subscriptions: [
     'create',
     'read',

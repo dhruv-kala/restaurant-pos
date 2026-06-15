@@ -51,7 +51,17 @@ Last updated: 2026-06-15
 | 30.4 | COMPLETE | Tax calculation engine |
 | 30.5 | COMPLETE | Tax reporting foundation |
 | 30.6 | COMPLETE | Tax admin UI |
-
+| 31.1 | COMPLETE | Business day foundation |
+| 31.2 | NEXT | Shift management |
+| 31.3 | PLANNED | Cash drawer management |
+| 31.4 | PLANNED | Shift closing and reconciliation |
+| 31.5 | PLANNED | Business day closing |
+| 31.6 | PLANNED | Operations administration UI |
+| 32 | PLANNED | Device registration, trusted sessions, and terminal management |
+| 33 | PLANNED | Offline SQLite operation and synchronization protocol |
+| 34 | PLANNED | Transactional outbox, background jobs, and scheduler |
+| 35 | PLANNED | File/document storage abstraction and retention |
+| 36 | PLANNED | Webhooks, API integrations, and integration credentials |
 ## Restaurant and Customer Expansion
 
 | Task | Status | Provisional scope |
