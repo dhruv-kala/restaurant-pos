@@ -135,6 +135,8 @@ const moduleActions: Record<string, readonly string[]> = {
     'history_view',
     'send',
   ],
+  jobs: ['view', 'manage', 'retry', 'dead_letter_manage'],
+  scheduler: ['view', 'manage'],
 };
 
 export const PERMISSIONS = Object.entries(moduleActions).flatMap(([module, actions]) =>

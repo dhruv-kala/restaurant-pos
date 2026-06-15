@@ -854,6 +854,23 @@ enum DeviceSecurityPolicyStatus {
   @@map("device_security_policy_status")
 }
 
+enum OutboxEventScope {
+  PLATFORM
+  TENANT
+
+  @@map("outbox_event_scope")
+}
+
+enum OutboxEventStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+  CANCELLED
+
+  @@map("outbox_event_status")
+}
+
 model Country {
   id        String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   code      String   @unique @db.Citext
@@ -1084,6 +1101,7 @@ model Tenant {
   terminals                     Terminal[]
   deviceAssignments             DeviceAssignment[]
   deviceSecurityPolicies        DeviceSecurityPolicy[]
+  outboxEvents                  OutboxEvent[]
 
   @@index([status])
   @@index([deletedAt])
@@ -1173,6 +1191,7 @@ model Outlet {
   terminals                Terminal[]
   deviceAssignments        DeviceAssignment[]
   deviceSecurityPolicies   DeviceSecurityPolicy[]
+  outboxEvents             OutboxEvent[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1295,6 +1314,7 @@ model UserAccount {
   endedDeviceAssignments               DeviceAssignment[]             @relation("DeviceAssignmentEndedBy")
   createdDeviceSecurityPolicies        DeviceSecurityPolicy[]         @relation("DeviceSecurityPolicyCreatedBy")
   updatedDeviceSecurityPolicies        DeviceSecurityPolicy[]         @relation("DeviceSecurityPolicyUpdatedBy")
+  createdOutboxEvents                  OutboxEvent[]                  @relation("OutboxEventCreatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -1511,6 +1531,39 @@ model DeviceSecurityPolicy {
   @@index([tenantId, outletId, status], map: "device_security_policies_scope_status_idx")
   @@index([tenantId, status, updatedAt], map: "device_security_policies_status_updated_idx")
   @@map("device_security_policies")
+}
+
+model OutboxEvent {
+  id                 String            @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  scope              OutboxEventScope
+  scopeKey           String            @map("scope_key") @db.VarChar(80)
+  tenantId           String?           @map("tenant_id") @db.Uuid
+  outletId           String?           @map("outlet_id") @db.Uuid
+  eventType          String            @map("event_type") @db.VarChar(160)
+  aggregateType      String?           @map("aggregate_type") @db.VarChar(100)
+  aggregateId        String?           @map("aggregate_id") @db.VarChar(160)
+  idempotencyKey     String            @map("idempotency_key") @db.VarChar(180)
+  requestFingerprint String            @map("request_fingerprint") @db.Char(64)
+  payload            Json              @db.JsonB
+  redactedPayload    Json?             @map("redacted_payload") @db.JsonB
+  status             OutboxEventStatus @default(PENDING)
+  availableAt        DateTime          @default(now()) @map("available_at") @db.Timestamptz(3)
+  processedAt        DateTime?         @map("processed_at") @db.Timestamptz(3)
+  createdByUserId    String?           @map("created_by_user_id") @db.Uuid
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet    Outlet?      @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  createdBy UserAccount? @relation("OutboxEventCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([scopeKey, eventType, idempotencyKey], map: "outbox_events_scope_event_idempotency_key")
+  @@unique([tenantId, id], map: "outbox_events_tenant_id_id_key")
+  @@index([tenantId, status, availableAt], map: "outbox_events_tenant_queue_idx")
+  @@index([scope, status, availableAt], map: "outbox_events_scope_queue_idx")
+  @@index([tenantId, outletId, createdAt], map: "outbox_events_outlet_created_idx")
+  @@index([scopeKey, aggregateType, aggregateId, createdAt], map: "outbox_events_aggregate_idx")
+  @@map("outbox_events")
 }
 
 model TenantMembership {

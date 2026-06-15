@@ -375,9 +375,15 @@ Task 33.9 implemented restaurant-app offline administration UI with sync
 dashboard metrics, queue trouble-item visibility, conflict detail visibility,
 local recovery actions, route access, and operational dashboard entry points.
 
-Task 34 is next provisionally: implement transactional outbox, background jobs,
-and scheduler. Do not implement it unless the active user request explicitly
-asks for it.
+Task 34.1 implemented tenant/platform scoped transactional outbox events,
+optional outlet scope, idempotent transactional enqueueing, request
+fingerprints, redacted payload snapshots, forced RLS, immutable
+identity/payload protections, protected `/outbox/events` read APIs, permission
+seeds, and focused tests.
+
+Task 34.2 is next provisionally: implement background job registry and worker
+foundation. Do not implement it unless the active user request explicitly asks
+for it.
 
 ## Working Practices
 

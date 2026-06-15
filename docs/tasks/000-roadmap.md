@@ -12,10 +12,10 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, 32.1-32.6, and 33.1-33.9 are
-  complete; Task 34 transactional outbox, background jobs, and scheduler is
-  the next listed
-  provisional task.
+- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, 32.1-32.6, 33.1-33.9, and 34.1 are
+  complete; Task 34.2 background job registry and worker foundation is the next listed
+  provisional implementation task.
+- Specification and subtask planning files exist for Tasks 34 through 39 only.
 
 ## Foundation and Core SaaS
 
@@ -74,17 +74,41 @@ Last updated: 2026-06-15
 | 33.7 | COMPLETE | Offline inventory and customers |
 | 33.8 | COMPLETE | Sync monitoring and recovery |
 | 33.9 | COMPLETE | Offline administration UI |
-| 34 | NEXT | Transactional outbox, background jobs, and scheduler |
-| 35 | PLANNED | File/document storage abstraction and retention |
-| 36 | PLANNED | Webhooks, API integrations, and integration credentials |
+| 34.1 | COMPLETE | Transactional outbox foundation |
+| 34.2 | NEXT | Background job registry and worker foundation |
+| 34.3 | PLANNED | Scheduler foundation |
+| 34.4 | PLANNED | Retry, dead letter, and recovery controls |
+| 34.5 | PLANNED | Operations administration UI for jobs and scheduler |
+| 35.1 | PLANNED | Storage abstraction foundation |
+| 35.2 | PLANNED | File metadata, ownership, and access control |
+| 35.3 | PLANNED | Upload, download, and signed access |
+| 35.4 | PLANNED | Document retention and deletion policies |
+| 35.5 | PLANNED | File administration UI |
+| 36.1 | PLANNED | Integration registry and credential references |
+| 36.2 | PLANNED | Outbound webhook subscriptions |
+| 36.3 | PLANNED | Inbound webhook verification foundation |
+| 36.4 | PLANNED | API key and integration access controls |
+| 36.5 | PLANNED | Integration administration UI |
 
 ## Restaurant and Customer Expansion
 
 | Task | Status | Provisional scope |
 |---|---|---|
-| 37 | PLANNED | Customer ordering application foundation |
-| 38 | PLANNED | QR ordering and table self-service |
-| 39 | PLANNED | Delivery, pickup, fulfillment, and address zones |
+| 37.1 | PLANNED | Customer ordering domain foundation |
+| 37.2 | PLANNED | Public menu and availability APIs |
+| 37.3 | PLANNED | Customer cart and draft order APIs |
+| 37.4 | PLANNED | Customer authentication and guest session foundation |
+| 37.5 | PLANNED | Customer app foundation UI |
+| 38.1 | PLANNED | QR table session foundation |
+| 38.2 | PLANNED | Table self-service ordering APIs |
+| 38.3 | PLANNED | Staff review and order injection |
+| 38.4 | PLANNED | QR ordering customer UI |
+| 38.5 | PLANNED | QR ordering administration UI |
+| 39.1 | PLANNED | Fulfillment method and policy foundation |
+| 39.2 | PLANNED | Customer address and zone management |
+| 39.3 | PLANNED | Delivery and pickup order lifecycle |
+| 39.4 | PLANNED | Fulfillment capacity and time slots |
+| 39.5 | PLANNED | Fulfillment customer and admin UI |
 | 40 | PLANNED | Advanced reservations, waitlist, and guest seating |
 | 41 | PLANNED | Purchase requisitions, approvals, and procurement policies |
 | 42 | PLANNED | Vendor invoices, payable reconciliation, and purchase costing |

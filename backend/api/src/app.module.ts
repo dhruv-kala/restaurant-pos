@@ -22,6 +22,7 @@ import { KitchenModule } from './modules/kitchen/kitchen.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { OutboxModule } from './modules/outbox/outbox.module';
 import { OutletsModule } from './modules/outlets/outlets.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
@@ -59,6 +60,7 @@ import { PrismaModule } from './prisma/prisma.module';
     InventoryModule,
     MenuModule,
     NotificationsModule,
+    OutboxModule,
     OrdersModule,
     PaymentsModule,
     PromotionsModule,

@@ -4582,4 +4582,76 @@ Known limitations:
 
 Next task:
 
-- Task 34 - Transactional Outbox, Background Jobs, and Scheduler
+- Task 34.1 - Transactional Outbox Foundation
+
+## 2026-06-15 - Task 34.1 Transactional Outbox Foundation
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616180000_add_transactional_outbox_foundation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/app.module.ts`
+- `backend/api/src/modules/outbox/controllers/outbox-events.controller.ts`
+- `backend/api/src/modules/outbox/dto/outbox-event-query.dto.ts`
+- `backend/api/src/modules/outbox/models/outbox-event.model.ts`
+- `backend/api/src/modules/outbox/outbox.module.ts`
+- `backend/api/src/modules/outbox/outbox-schema.spec.ts`
+- `backend/api/src/modules/outbox/services/outbox-access.util.ts`
+- `backend/api/src/modules/outbox/services/outbox-events.service.spec.ts`
+- `backend/api/src/modules/outbox/services/outbox-events.service.ts`
+- `backend/api/src/modules/outbox/services/outbox-payload.util.ts`
+- `backend/api/src/modules/outbox/services/outbox.service.spec.ts`
+- `backend/api/src/modules/outbox/services/outbox.service.ts`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/specifications/transactional-outbox-jobs-scheduler-module.md`
+- `docs/tasks/000-roadmap.md`
+- `docs/tasks/034-outbox-jobs-scheduler/34.1-transactional-outbox-foundation.md`
+
+Decisions:
+
+- Implemented Task 34.1 only; background job records, worker execution,
+  scheduler definitions, retry/dead-letter controls, admin UI, and external
+  integrations remain deferred.
+- Added `OutboxEventScope` and `OutboxEventStatus` enums.
+- Added `OutboxEvent` with platform or tenant scope, optional outlet scope,
+  event type, aggregate reference, idempotency key, request fingerprint,
+  payload, redacted payload, status, availability timestamp, and actor
+  attribution.
+- Used `scopeKey` plus event type and idempotency key for one idempotency
+  namespace that works for both platform and tenant events.
+- Added forced RLS for `outbox_events`; tenant users see only tenant rows and
+  platform rows require platform context.
+- Added database triggers that prevent deleting outbox events or mutating
+  event identity/payload fields.
+- Added `OutboxService.enqueue(transaction, input)` so business modules can
+  create outbox events inside an existing Prisma transaction.
+- Added recursive redaction for sensitive payload keys before exposing
+  operational history.
+- Added protected `GET /outbox/events` and `GET /outbox/events/:id` read APIs.
+- Added `jobs.*` and `scheduler.*` permission seeds with tenant admin and
+  manager read visibility.
+
+Validation:
+
+- `npm run prisma:format` from `backend/api`: passed
+- `npx prettier --write src/modules/outbox/**/*.ts src/app.module.ts prisma/seeds/006-permissions.seed.ts prisma/seeds/007-role-permissions.seed.ts`
+  from `backend/api`: passed
+- `npm run prisma:generate` from `backend/api`: passed
+- `npm test -- outbox` from `backend/api`: passed
+
+Known limitations:
+
+- The read API exposes redacted payload snapshots only; raw payload inspection
+  is intentionally not exposed.
+- No worker claims, job materialization, scheduler, retry, dead-letter, or UI
+  behavior is implemented in Task 34.1.
+
+Next task:
+
+- Task 34.2 - Background Job Registry and Worker Foundation

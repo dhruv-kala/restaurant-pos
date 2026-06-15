@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 33.9**
-- Current module: **Offline SQLite Operation and Synchronization**
-- Next provisional task: **Task 34 - Transactional Outbox, Background Jobs, and Scheduler**
+- Completed through: **Task 34.1**
+- Current module: **Transactional Outbox, Background Jobs, and Scheduler**
+- Next provisional task: **Task 34.2 - Background Job Registry and Worker Foundation**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -74,6 +74,7 @@ Last updated: 2026-06-15
 | 33.7   | Offline customer lookup/create/update and inventory lookup/adjustment workflows with atomic local writes, queued commands, and workflow tests |
 | 33.8   | Sync health snapshots, queue/batch/checkpoint visibility, failed/retrying/stale item visibility, recovery tools, and tests |
 | 33.9   | Offline administration UI with sync dashboard, queue viewer, conflict viewer, recovery actions, route access, and operational dashboard entry point |
+| 34.1   | Transactional outbox events, platform/tenant scope, idempotent writer, redacted payload snapshots, forced RLS, protected read APIs, and tests |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -286,6 +287,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 - Offline administration UI in restaurant-app with local sync dashboard
   metrics, queue trouble-item visibility, conflict detail visibility, recovery
   actions, GoRouter route, and operational dashboard entry point
+- Transactional outbox foundation with tenant/platform scoped `OutboxEvent`
+  records, optional outlet scope, idempotency fingerprints, redacted payload
+  snapshots, immutable identity/payload protections, forced RLS, protected
+  `/outbox/events` read APIs, and an injectable writer service for existing
+  Prisma transactions
 
 ## Known Environment Limitation
 
@@ -296,7 +302,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 34 - Transactional Outbox, Background Jobs, and Scheduler
+### Task 34.2 - Background Job Registry and Worker Foundation
 
 Read:
 
@@ -304,10 +310,13 @@ Read:
 - `docs/ai/MODULE_DEPENDENCIES.md`
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
+- `docs/specifications/transactional-outbox-jobs-scheduler-module.md`
+- `docs/tasks/034-outbox-jobs-scheduler/34.2-background-job-registry-and-worker-foundation.md`
 
-Do not implement Task 34 unless explicitly requested. It should introduce the
-transactional outbox, background jobs, and scheduler foundation without
-changing offline sync UI behavior unless explicitly required.
+Do not implement Task 34.2 unless explicitly requested. It should create
+background job records, handler registry contracts, and worker claim behavior
+from the existing outbox foundation without implementing scheduler,
+dead-letter administration, or UI.
 
 ## Status Maintenance
 

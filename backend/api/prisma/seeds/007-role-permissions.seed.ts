@@ -35,6 +35,8 @@ const roleModules: Record<string, readonly string[]> = {
     'audit',
     'notifications',
     'communication',
+    'jobs',
+    'scheduler',
   ],
   MANAGER: [
     'menu',
@@ -62,6 +64,8 @@ const roleModules: Record<string, readonly string[]> = {
     'shift_reconciliation',
     'devices',
     'terminals',
+    'jobs',
+    'scheduler',
   ],
   CASHIER: [
     'billing',
@@ -192,6 +196,18 @@ const terminalActions: Record<string, readonly string[]> = {
   MANAGER: ['manage'],
 };
 
+const jobActions: Record<string, readonly string[]> = {
+  SUPER_ADMIN: ['*'],
+  TENANT_ADMIN: ['view'],
+  MANAGER: ['view'],
+};
+
+const schedulerActions: Record<string, readonly string[]> = {
+  SUPER_ADMIN: ['*'],
+  TENANT_ADMIN: ['view'],
+  MANAGER: ['view'],
+};
+
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {
   const permissions = await prisma.permission.findMany();
   const templates = await prisma.systemRoleTemplate.findMany();
@@ -215,6 +231,8 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
     const allowedShiftReconciliationActions = shiftReconciliationActions[roleKey] ?? [];
     const allowedDeviceActions = deviceActions[roleKey] ?? [];
     const allowedTerminalActions = terminalActions[roleKey] ?? [];
+    const allowedJobActions = jobActions[roleKey] ?? [];
+    const allowedSchedulerActions = schedulerActions[roleKey] ?? [];
     const allowed = permissions.filter(
       (permission) =>
         (modules.includes('*') || modules.includes(permission.module)) &&
@@ -247,7 +265,13 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
           allowedDeviceActions.includes(permission.action)) &&
         (permission.module !== 'terminals' ||
           allowedTerminalActions.includes('*') ||
-          allowedTerminalActions.includes(permission.action)),
+          allowedTerminalActions.includes(permission.action)) &&
+        (permission.module !== 'jobs' ||
+          allowedJobActions.includes('*') ||
+          allowedJobActions.includes(permission.action)) &&
+        (permission.module !== 'scheduler' ||
+          allowedSchedulerActions.includes('*') ||
+          allowedSchedulerActions.includes(permission.action)),
     );
     for (const permission of allowed) {
       await prisma.systemRolePermission.upsert({
