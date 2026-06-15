@@ -12,8 +12,8 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, and 32.1-32.6 are complete;
-  Task 33.1 offline architecture foundation is the next listed provisional task.
+- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, 32.1-32.6, and 33.1 are complete;
+  Task 33.2 SQLite local storage is the next listed provisional task.
 
 ## Foundation and Core SaaS
 
@@ -63,8 +63,8 @@ Last updated: 2026-06-15
 | 32.4 | COMPLETE | Terminal management |
 | 32.5 | COMPLETE | Device security policies |
 | 32.6 | COMPLETE | Device administration UI |
-| 33.1 | NEXT | Offline architecture foundation |
-| 33.2 | PLANNED | SQLite local storage |
+| 33.1 | COMPLETE | Offline architecture foundation |
+| 33.2 | NEXT | SQLite local storage |
 | 33.3 | PLANNED | Sync queue and change tracking |
 | 33.4 | PLANNED | Conflict resolution engine |
 | 33.5 | PLANNED | Background sync service |

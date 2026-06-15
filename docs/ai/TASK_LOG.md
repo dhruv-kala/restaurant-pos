@@ -4078,3 +4078,57 @@ Known limitations:
 Next task:
 
 - Task 33.1 - Offline Architecture Foundation
+
+## 2026-06-15 - Task 33.1 Offline Architecture Foundation
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `packages/shared_models/lib/restaurant_pos_shared_models.dart`
+- `packages/shared_models/lib/src/offline/offline_sync_models.dart`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/architecture/system-overview.md`
+- `docs/api/offline-sync-module.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.1-offline-architecture-foundation.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.1 only; SQLite tables, local repositories, sync queue
+  mutation logic, background synchronization, conflict resolution, offline POS
+  workflows, and sync monitoring UI remain deferred.
+- Added storage-neutral shared Dart contracts for `DeviceSyncState`,
+  `OfflineIdentifier`, `SyncQueueItem`, `SyncBatch`, `SyncConflict`,
+  `SyncCheckpoint`, `SyncPushRequest`, and `SyncPullRequest`.
+- Added sync state enums for queue states, operation types, conflict statuses,
+  conflict resolution strategies, offline payment verification modes, and
+  offline payment verification statuses.
+- Documented the platform sync flow: UI to feature repository to offline
+  repository facade to SQLite projection/sync queue to sync coordinator to
+  NestJS domain APIs.
+- Documented offline scope invariants: tenant, outlet, device, actor, stable
+  offline ID, stable idempotency key, business date, and durable local command
+  recovery.
+- Documented future sync API shape without exposing new backend routes.
+
+Validation:
+
+- `dart format lib` from `packages/shared_models`: passed
+- `dart format --output=none --set-exit-if-changed lib` from
+  `packages/shared_models`: passed
+- `dart analyze` from `packages/shared_models`: passed
+
+Known limitations:
+
+- Task 33.1 is architecture and contract foundation only.
+- No backend validation was run because no backend code changed.
+- No Flutter app validation was run because no app code changed.
+
+Next task:
+
+- Task 33.2 - SQLite Local Storage

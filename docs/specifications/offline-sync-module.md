@@ -2,11 +2,11 @@
 
 ## Status
 
-Planned.
+Implemented through Task 33.1.
 
 Task 33 is split into:
 
-* Task 33.1 Offline Architecture Foundation
+* Task 33.1 Offline Architecture Foundation - Complete
 * Task 33.2 SQLite Local Storage
 * Task 33.3 Sync Queue and Change Tracking
 * Task 33.4 Conflict Resolution Engine
@@ -54,14 +54,17 @@ The Offline Module owns data persistence and synchronization.
 
 Potential entities:
 
-* DeviceSyncState
-* SyncQueue
-* SyncBatch
-* SyncConflict
-* SyncCheckpoint
-* LocalChangeLog
+* DeviceSyncState - contract defined in Task 33.1
+* SyncQueue - contract defined in Task 33.1
+* SyncBatch - contract defined in Task 33.1
+* SyncConflict - contract defined in Task 33.1
+* SyncCheckpoint - contract defined in Task 33.1
+* LocalChangeLog - deferred to Task 33.3
 
 SQLite mirrors approved online entities.
+
+Task 33.1 defines storage-neutral shared contracts only. SQLite schema creation
+is deferred to Task 33.2.
 
 ## Offline Device Coverage
 
@@ -257,6 +260,10 @@ Business modules never synchronize directly.
 
 All synchronization passes through the Offline Module.
 
+Task 33.1 documents the architecture in
+`docs/architecture/offline-sync-architecture.md` and future endpoint contract
+shape in `docs/api/offline-sync-module.md`. No sync endpoints are exposed yet.
+
 ## Offline Identifiers
 
 Every offline-created record must use:
@@ -266,6 +273,9 @@ Every offline-created record must use:
 * outlet scope
 
 Identifiers must remain valid after synchronization.
+
+Task 33.1 adds `OfflineIdentifier` as the stable client-side identifier
+contract. Future tasks must not replace offline IDs after server acceptance.
 
 ## Invariants
 

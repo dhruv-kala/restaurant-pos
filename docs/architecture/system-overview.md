@@ -230,6 +230,9 @@ Financial, inventory, loyalty, and audit changes use append-only ledger events.
 The server remains authoritative for external payments, wallet balances, and
 fiscal document numbering.
 
+See `docs/architecture/offline-sync-architecture.md` for the Task 33.1
+offline architecture foundation and sync contract boundaries.
+
 ## Data and Integration Flow
 
 ```mermaid

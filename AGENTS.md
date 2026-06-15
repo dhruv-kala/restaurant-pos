@@ -327,8 +327,14 @@ device screens for registered devices, enrollments, trusted sessions, terminals,
 assignments, security policies, effective policy evaluation, and audit
 visibility.
 
-Task 33.1 is next provisionally: implement offline architecture foundation. Do
-not implement it unless the active user request explicitly asks for it.
+Task 33.1 implemented the offline architecture foundation, storage-neutral
+shared Dart contracts for `DeviceSyncState`, offline identifiers, sync queue
+items, batches, conflicts, checkpoints, push/pull requests, and architecture/API
+documentation. SQLite tables, sync execution, conflict resolution, and offline
+POS workflows remain deferred.
+
+Task 33.2 is next provisionally: implement SQLite local storage. Do not
+implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 
