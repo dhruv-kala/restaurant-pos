@@ -4417,3 +4417,55 @@ Known limitations:
 Next task:
 
 - Task 33.7 - Offline Inventory and Customers
+
+## 2026-06-15 - Task 33.7 Offline Inventory and Customers
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/restaurant-app/lib/core/offline/offline_inventory_customer_operations_service.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_repository.dart`
+- `apps/restaurant-app/test/core/offline/offline_inventory_customer_operations_service_test.dart`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.7-offline-inventory-and-customers.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.7 only; live screen wiring, concrete backend sync
+  endpoints, and sync monitoring/recovery UI remain deferred.
+- Reused existing Task 33.2 customer and inventory SQLite projection tables;
+  no schema version bump was required.
+- Added scoped customer search by name, phone, and email.
+- Added offline customer create and update commands.
+- Added scoped inventory search by item name and SKU.
+- Added offline inventory adjustment commands.
+- Queued inventory adjustments as `APPEND` operations with
+  `InventoryAdjustment` entity type so stock history remains auditable after
+  reconnect synchronization.
+- Ensured customer and inventory mutations write the local projection and
+  queue/change-log entry in one transaction.
+- Preserved tenant, outlet, device, actor, business-date, local ID, and
+  idempotency metadata on queued commands.
+
+Validation:
+
+- `dart format apps/restaurant-app/lib/core/offline apps/restaurant-app/test/core/offline`:
+  passed
+- `flutter test test/core/offline` from `apps/restaurant-app`: passed
+
+Known limitations:
+
+- The service foundation is not yet wired into live restaurant-app screens.
+- Pulled server projection application and concrete HTTP sync endpoints remain
+  future work.
+- Sync monitoring and recovery remain Task 33.8.
+
+Next task:
+
+- Task 33.8 - Sync Monitoring and Recovery

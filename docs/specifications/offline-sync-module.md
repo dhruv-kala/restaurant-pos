@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented through Task 33.6.
+Implemented through Task 33.7.
 
 Task 33 is split into:
 
@@ -12,7 +12,7 @@ Task 33 is split into:
 * Task 33.4 Conflict Resolution Engine - Complete
 * Task 33.5 Background Sync Service - Complete
 * Task 33.6 Offline POS Operations - Complete
-* Task 33.7 Offline Inventory and Customers
+* Task 33.7 Offline Inventory and Customers - Complete
 * Task 33.8 Sync Monitoring and Recovery
 * Task 33.9 Offline Administration UI
 
@@ -82,7 +82,9 @@ decisions. Task 33.5 adds background sync orchestration, bounded retry policy,
 batch history, and checkpoint tracking through an injected transport
 abstraction. Task 33.6 adds offline POS operation foundations for orders,
 bills, payments, and receipts, storing local projections and queued commands
-atomically.
+atomically. Task 33.7 adds offline customer lookup/create/update and inventory
+lookup/adjustment workflows on top of the same atomic projection plus queued
+command pattern.
 
 ## Offline Device Coverage
 

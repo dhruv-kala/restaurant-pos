@@ -361,7 +361,12 @@ upgrade handling, atomic local projection plus queued-command writes, offline
 order creation/status updates, bill generation, manual payment recording,
 receipt generation, bill paid-state updates, and offline POS workflow tests.
 
-Task 33.7 is next provisionally: implement offline inventory and customers. Do
+Task 33.7 implemented offline customer and inventory operation foundations with
+scoped local lookup helpers, customer create/update commands, inventory
+adjustment commands, atomic projection plus queued-command writes, and workflow
+tests.
+
+Task 33.8 is next provisionally: implement sync monitoring and recovery. Do
 not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

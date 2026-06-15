@@ -230,6 +230,30 @@ class OfflineLocalRepository {
         .toList(growable: false);
   }
 
+  Future<List<LocalCustomerProjection>> searchCustomers({
+    required String tenantId,
+    required String outletId,
+    required String query,
+  }) async {
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) {
+      return listCustomers(tenantId: tenantId, outletId: outletId);
+    }
+    final likeQuery = '%$normalizedQuery%';
+    final rows = await _listProjections(
+      'local_customers',
+      tenantId: tenantId,
+      outletId: outletId,
+      extraWhere:
+          '(display_name LIKE ? COLLATE NOCASE OR phone LIKE ? OR email LIKE ? COLLATE NOCASE)',
+      extraArgs: [likeQuery, likeQuery, likeQuery],
+      orderBy: 'display_name COLLATE NOCASE ASC',
+    );
+    return rows
+        .map(OfflineEntityMapper.customerFromRow)
+        .toList(growable: false);
+  }
+
   Future<void> upsertInventory(LocalInventoryProjection inventory) async {
     await _upsert(
       'local_inventory_items',
@@ -259,6 +283,29 @@ class OfflineLocalRepository {
       'local_inventory_items',
       tenantId: tenantId,
       outletId: outletId,
+      orderBy: 'name COLLATE NOCASE ASC',
+    );
+    return rows
+        .map(OfflineEntityMapper.inventoryFromRow)
+        .toList(growable: false);
+  }
+
+  Future<List<LocalInventoryProjection>> searchInventoryItems({
+    required String tenantId,
+    required String outletId,
+    required String query,
+  }) async {
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) {
+      return listInventoryItems(tenantId: tenantId, outletId: outletId);
+    }
+    final likeQuery = '%$normalizedQuery%';
+    final rows = await _listProjections(
+      'local_inventory_items',
+      tenantId: tenantId,
+      outletId: outletId,
+      extraWhere: '(name LIKE ? COLLATE NOCASE OR sku LIKE ? COLLATE NOCASE)',
+      extraArgs: [likeQuery, likeQuery],
       orderBy: 'name COLLATE NOCASE ASC',
     );
     return rows
@@ -344,6 +391,34 @@ class OfflineLocalRepository {
     await _upsertRowsAndAppendChange(
       projectionTable: 'local_receipts',
       projectionRow: OfflineEntityMapper.receiptToRow(receipt),
+      queueItem: queueItem,
+      changeLogEntry: changeLogEntry,
+    );
+  }
+
+  Future<void> upsertCustomerAndAppendChange({
+    required LocalCustomerProjection customer,
+    required SyncQueueItem queueItem,
+    required LocalChangeLogEntry changeLogEntry,
+  }) async {
+    _validateQueueAndChangeLog(queueItem, changeLogEntry);
+    await _upsertRowsAndAppendChange(
+      projectionTable: 'local_customers',
+      projectionRow: OfflineEntityMapper.customerToRow(customer),
+      queueItem: queueItem,
+      changeLogEntry: changeLogEntry,
+    );
+  }
+
+  Future<void> upsertInventoryAndAppendChange({
+    required LocalInventoryProjection inventory,
+    required SyncQueueItem queueItem,
+    required LocalChangeLogEntry changeLogEntry,
+  }) async {
+    _validateQueueAndChangeLog(queueItem, changeLogEntry);
+    await _upsertRowsAndAppendChange(
+      projectionTable: 'local_inventory_items',
+      projectionRow: OfflineEntityMapper.inventoryToRow(inventory),
       queueItem: queueItem,
       changeLogEntry: changeLogEntry,
     );
