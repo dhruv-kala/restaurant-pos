@@ -11,6 +11,7 @@ export 'src/enums/outlet_status.dart';
 export 'src/enums/tenant_status.dart';
 export 'src/enums/user_role.dart';
 export 'src/inventory/inventory_models.dart';
+export 'src/jobs/job_models.dart';
 export 'src/kds/kds_models.dart';
 export 'src/menu/menu_item.dart';
 export 'src/models/auth_response.dart';

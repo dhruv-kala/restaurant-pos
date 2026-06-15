@@ -2,9 +2,11 @@ import { ConflictException } from '@nestjs/common';
 import {
   BackgroundJobAttemptStatus,
   BackgroundJobStatus,
+  JobDeadLetterStatus,
   OutboxEventScope,
   OutboxEventStatus,
   type BackgroundJob,
+  type JobDeadLetter,
   type OutboxEvent,
   type Prisma,
 } from '@prisma/client';
@@ -111,6 +113,7 @@ interface UpdateJobArg {
   where: { id: string };
   data: {
     status: BackgroundJobStatus;
+    availableAt?: Date;
     lastErrorCode?: string | null;
   };
 }
@@ -122,6 +125,14 @@ interface UpdateAttemptArg {
     errorCode?: string | null;
     errorClassification?: string | null;
     errorMessage?: string | null;
+  };
+}
+
+interface CreateDeadLetterArg {
+  data: {
+    jobId: string;
+    reasonCode: string;
+    reasonMessage?: string | null;
   };
 }
 
@@ -237,25 +248,43 @@ describe('BackgroundJobsService', () => {
     const service = new BackgroundJobsService();
     const updateJob = jest.fn<Promise<unknown>, [UpdateJobArg]>().mockResolvedValue({});
     const updateAttempt = jest.fn<Promise<unknown>, [UpdateAttemptArg]>().mockResolvedValue({});
+    const createDeadLetter = jest
+      .fn<Promise<JobDeadLetter>, [CreateDeadLetterArg]>()
+      .mockResolvedValue(deadLetter());
     const tx = {
       backgroundJob: {
+        findUniqueOrThrow: jest.fn().mockResolvedValue(
+          job({
+            status: BackgroundJobStatus.PROCESSING,
+            attemptCount: 1,
+            maxAttempts: 5,
+          }),
+        ),
         update: updateJob,
+      },
+      backgroundJobRetryPolicy: {
+        findUnique: jest.fn().mockResolvedValue(null),
       },
       backgroundJobAttempt: {
         update: updateAttempt,
       },
+      jobDeadLetter: {
+        create: createDeadLetter,
+      },
     };
 
+    const nextAvailableAt = new Date('2026-06-15T12:10:00.000Z');
     await service.markFailed(tx as unknown as Prisma.TransactionClient, jobId, 1, {
       retryable: true,
       errorCode: 'SMTP_TIMEOUT',
       errorClassification: 'NETWORK',
       errorMessage: 'Timed out while contacting provider with token=secret',
-      nextAvailableAt: new Date('2026-06-15T12:10:00.000Z'),
+      nextAvailableAt,
     });
 
     expect(updateJob.mock.calls[0][0].where).toEqual({ id: jobId });
     expect(updateJob.mock.calls[0][0].data.status).toBe(BackgroundJobStatus.RETRYING);
+    expect(updateJob.mock.calls[0][0].data.availableAt).toBe(nextAvailableAt);
     expect(updateJob.mock.calls[0][0].data.lastErrorCode).toBe('SMTP_TIMEOUT');
     expect(updateAttempt.mock.calls[0][0].where).toEqual({
       jobId_attemptNumber: { jobId, attemptNumber: 1 },
@@ -268,5 +297,82 @@ describe('BackgroundJobsService', () => {
     expect(updateAttempt.mock.calls[0][0].data.errorMessage).toBe(
       'Timed out while contacting provider with token=[REDACTED]',
     );
+    expect(createDeadLetter).not.toHaveBeenCalled();
+  });
+
+  it('dead-letters exhausted retryable failures', async () => {
+    const service = new BackgroundJobsService();
+    const updateJob = jest.fn<Promise<unknown>, [UpdateJobArg]>().mockResolvedValue({});
+    const updateAttempt = jest.fn<Promise<unknown>, [UpdateAttemptArg]>().mockResolvedValue({});
+    const createDeadLetter = jest
+      .fn<Promise<JobDeadLetter>, [CreateDeadLetterArg]>()
+      .mockResolvedValue(deadLetter());
+    const tx = {
+      backgroundJob: {
+        findUniqueOrThrow: jest.fn().mockResolvedValue(
+          job({
+            status: BackgroundJobStatus.PROCESSING,
+            attemptCount: 3,
+            maxAttempts: 3,
+          }),
+        ),
+        update: updateJob,
+      },
+      backgroundJobRetryPolicy: {
+        findUnique: jest.fn().mockResolvedValue({
+          maxAttempts: 3,
+          initialDelaySeconds: 30,
+          maxDelaySeconds: 300,
+          backoffMultiplier: 2,
+        }),
+      },
+      backgroundJobAttempt: {
+        update: updateAttempt,
+      },
+      jobDeadLetter: {
+        create: createDeadLetter,
+      },
+    };
+
+    await service.markFailed(tx as unknown as Prisma.TransactionClient, jobId, 3, {
+      retryable: true,
+      errorCode: 'SMTP_TIMEOUT',
+      errorClassification: 'NETWORK',
+      errorMessage: 'Timed out while contacting provider with password=secret',
+      now,
+    });
+
+    expect(updateJob.mock.calls[0][0].data.status).toBe(BackgroundJobStatus.DEAD_LETTERED);
+    expect(updateAttempt.mock.calls[0][0].data.status).toBe(
+      BackgroundJobAttemptStatus.TERMINAL_FAILED,
+    );
+    expect(createDeadLetter.mock.calls[0][0].data).toEqual(
+      expect.objectContaining({
+        jobId,
+        reasonCode: 'SMTP_TIMEOUT',
+        reasonMessage: 'Timed out while contacting provider with password=[REDACTED]',
+      }),
+    );
   });
 });
+
+function deadLetter(overrides: Partial<JobDeadLetter> = {}): JobDeadLetter {
+  return {
+    id: '01975c30-0000-7000-8000-000000000700',
+    scope: OutboxEventScope.TENANT,
+    scopeKey: tenantId,
+    tenantId,
+    outletId,
+    jobId,
+    status: JobDeadLetterStatus.OPEN,
+    reasonCode: 'SMTP_TIMEOUT',
+    reasonMessage: 'Timed out',
+    failedAt: now,
+    resolvedAt: null,
+    resolvedByUserId: null,
+    resolutionNote: null,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}

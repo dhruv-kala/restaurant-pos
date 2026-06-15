@@ -877,6 +877,7 @@ enum BackgroundJobStatus {
   RETRYING
   SUCCEEDED
   FAILED
+  DEAD_LETTERED
   CANCELLED
 
   @@map("background_job_status")
@@ -889,6 +890,36 @@ enum BackgroundJobAttemptStatus {
   TERMINAL_FAILED
 
   @@map("background_job_attempt_status")
+}
+
+enum JobDeadLetterStatus {
+  OPEN
+  RESOLVED
+
+  @@map("job_dead_letter_status")
+}
+
+enum ScheduledJobStatus {
+  ACTIVE
+  PAUSED
+  DISABLED
+
+  @@map("scheduled_job_status")
+}
+
+enum ScheduledJobScheduleType {
+  INTERVAL
+  CRON
+
+  @@map("scheduled_job_schedule_type")
+}
+
+enum ScheduledJobRunStatus {
+  CREATED
+  SKIPPED
+  FAILED
+
+  @@map("scheduled_job_run_status")
 }
 
 model Country {
@@ -1124,6 +1155,10 @@ model Tenant {
   outboxEvents                  OutboxEvent[]
   backgroundJobs                BackgroundJob[]
   backgroundJobAttempts         BackgroundJobAttempt[]
+  backgroundJobRetryPolicies    BackgroundJobRetryPolicy[]
+  jobDeadLetters                JobDeadLetter[]
+  scheduledJobs                 ScheduledJob[]
+  scheduledJobRuns              ScheduledJobRun[]
 
   @@index([status])
   @@index([deletedAt])
@@ -1215,6 +1250,9 @@ model Outlet {
   deviceSecurityPolicies   DeviceSecurityPolicy[]
   outboxEvents             OutboxEvent[]
   backgroundJobs           BackgroundJob[]
+  jobDeadLetters           JobDeadLetter[]
+  scheduledJobs            ScheduledJob[]
+  scheduledJobRuns         ScheduledJobRun[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1339,6 +1377,11 @@ model UserAccount {
   updatedDeviceSecurityPolicies        DeviceSecurityPolicy[]         @relation("DeviceSecurityPolicyUpdatedBy")
   createdOutboxEvents                  OutboxEvent[]                  @relation("OutboxEventCreatedBy")
   createdBackgroundJobs                BackgroundJob[]                @relation("BackgroundJobCreatedBy")
+  createdBackgroundJobRetryPolicies    BackgroundJobRetryPolicy[]     @relation("BackgroundJobRetryPolicyCreatedBy")
+  updatedBackgroundJobRetryPolicies    BackgroundJobRetryPolicy[]     @relation("BackgroundJobRetryPolicyUpdatedBy")
+  resolvedJobDeadLetters               JobDeadLetter[]                @relation("JobDeadLetterResolvedBy")
+  createdScheduledJobs                 ScheduledJob[]                 @relation("ScheduledJobCreatedBy")
+  updatedScheduledJobs                 ScheduledJob[]                 @relation("ScheduledJobUpdatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -1618,11 +1661,13 @@ model BackgroundJob {
   createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant    Tenant?                @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet    Outlet?                @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  outbox    OutboxEvent?           @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
-  createdBy UserAccount?           @relation("BackgroundJobCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  attempts  BackgroundJobAttempt[]
+  tenant        Tenant?                @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet        Outlet?                @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  outbox        OutboxEvent?           @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+  createdBy     UserAccount?           @relation("BackgroundJobCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  attempts      BackgroundJobAttempt[]
+  scheduledRuns ScheduledJobRun[]
+  deadLetter    JobDeadLetter?
 
   @@unique([scopeKey, jobType, idempotencyKey], map: "background_jobs_scope_type_idempotency_key")
   @@unique([tenantId, id], map: "background_jobs_tenant_id_id_key")
@@ -1659,6 +1704,128 @@ model BackgroundJobAttempt {
   @@index([tenantId, jobId, startedAt], map: "background_job_attempts_job_history_idx")
   @@index([scope, status, startedAt], map: "background_job_attempts_status_idx")
   @@map("background_job_attempts")
+}
+
+model BackgroundJobRetryPolicy {
+  id                  String           @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  scope               OutboxEventScope
+  scopeKey            String           @map("scope_key") @db.VarChar(80)
+  tenantId            String?          @map("tenant_id") @db.Uuid
+  jobType             String           @map("job_type") @db.VarChar(160)
+  maxAttempts         Int              @default(5) @map("max_attempts")
+  initialDelaySeconds Int              @default(30) @map("initial_delay_seconds")
+  maxDelaySeconds     Int              @default(3600) @map("max_delay_seconds")
+  backoffMultiplier   Int              @default(2) @map("backoff_multiplier")
+  createdByUserId     String?          @map("created_by_user_id") @db.Uuid
+  updatedByUserId     String?          @map("updated_by_user_id") @db.Uuid
+  version             Int              @default(1)
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  createdBy UserAccount? @relation("BackgroundJobRetryPolicyCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy UserAccount? @relation("BackgroundJobRetryPolicyUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([scopeKey, jobType], map: "background_job_retry_policies_scope_type_key")
+  @@unique([tenantId, id], map: "background_job_retry_policies_tenant_id_id_key")
+  @@index([tenantId, jobType], map: "background_job_retry_policies_tenant_type_idx")
+  @@map("background_job_retry_policies")
+}
+
+model JobDeadLetter {
+  id               String              @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  scope            OutboxEventScope
+  scopeKey         String              @map("scope_key") @db.VarChar(80)
+  tenantId         String?             @map("tenant_id") @db.Uuid
+  outletId         String?             @map("outlet_id") @db.Uuid
+  jobId            String              @unique(map: "job_dead_letters_job_id_key") @map("job_id") @db.Uuid
+  status           JobDeadLetterStatus @default(OPEN)
+  reasonCode       String              @map("reason_code") @db.VarChar(120)
+  reasonMessage    String?             @map("reason_message") @db.VarChar(500)
+  failedAt         DateTime            @default(now()) @map("failed_at") @db.Timestamptz(3)
+  resolvedAt       DateTime?           @map("resolved_at") @db.Timestamptz(3)
+  resolvedByUserId String?             @map("resolved_by_user_id") @db.Uuid
+  resolutionNote   String?             @map("resolution_note") @db.VarChar(500)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant     Tenant?       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet     Outlet?       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  job        BackgroundJob @relation(fields: [jobId], references: [id], onDelete: Restrict)
+  resolvedBy UserAccount?  @relation("JobDeadLetterResolvedBy", fields: [resolvedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "job_dead_letters_tenant_id_id_key")
+  @@index([tenantId, outletId, status, failedAt], map: "job_dead_letters_scope_status_idx")
+  @@index([scope, status, failedAt], map: "job_dead_letters_status_idx")
+  @@map("job_dead_letters")
+}
+
+model ScheduledJob {
+  id              String                   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  scope           OutboxEventScope
+  scopeKey        String                   @map("scope_key") @db.VarChar(80)
+  tenantId        String?                  @map("tenant_id") @db.Uuid
+  outletId        String?                  @map("outlet_id") @db.Uuid
+  scheduleKey     String                   @map("schedule_key") @db.VarChar(120)
+  displayName     String                   @map("display_name") @db.VarChar(160)
+  description     String?                  @db.VarChar(500)
+  jobType         String                   @map("job_type") @db.VarChar(160)
+  payload         Json                     @db.JsonB
+  redactedPayload Json?                    @map("redacted_payload") @db.JsonB
+  status          ScheduledJobStatus       @default(ACTIVE)
+  scheduleType    ScheduledJobScheduleType @map("schedule_type")
+  cronExpression  String?                  @map("cron_expression") @db.VarChar(120)
+  intervalSeconds Int?                     @map("interval_seconds")
+  timezone        String                   @default("UTC") @db.VarChar(64)
+  nextRunAt       DateTime                 @map("next_run_at") @db.Timestamptz(3)
+  lastRunAt       DateTime?                @map("last_run_at") @db.Timestamptz(3)
+  createdByUserId String?                  @map("created_by_user_id") @db.Uuid
+  updatedByUserId String?                  @map("updated_by_user_id") @db.Uuid
+  version         Int                      @default(1)
+  createdAt       DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant?           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet    Outlet?           @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  createdBy UserAccount?      @relation("ScheduledJobCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy UserAccount?      @relation("ScheduledJobUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  runs      ScheduledJobRun[]
+
+  @@unique([scopeKey, scheduleKey], map: "scheduled_jobs_scope_schedule_key")
+  @@unique([tenantId, id], map: "scheduled_jobs_tenant_id_id_key")
+  @@index([scope, status, nextRunAt], map: "scheduled_jobs_due_idx")
+  @@index([tenantId, outletId, status], map: "scheduled_jobs_scope_status_idx")
+  @@map("scheduled_jobs")
+}
+
+model ScheduledJobRun {
+  id              String                @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  scope           OutboxEventScope
+  scopeKey        String                @map("scope_key") @db.VarChar(80)
+  tenantId        String?               @map("tenant_id") @db.Uuid
+  outletId        String?               @map("outlet_id") @db.Uuid
+  scheduledJobId  String                @map("scheduled_job_id") @db.Uuid
+  backgroundJobId String?               @map("background_job_id") @db.Uuid
+  dueAt           DateTime              @map("due_at") @db.Timestamptz(3)
+  triggeredAt     DateTime              @default(now()) @map("triggered_at") @db.Timestamptz(3)
+  status          ScheduledJobRunStatus @default(CREATED)
+  idempotencyKey  String                @map("idempotency_key") @db.VarChar(180)
+  failureCode     String?               @map("failure_code") @db.VarChar(120)
+  failureMessage  String?               @map("failure_message") @db.VarChar(500)
+  createdAt       DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant        Tenant?        @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet        Outlet?        @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  scheduledJob  ScheduledJob   @relation(fields: [scheduledJobId], references: [id], onDelete: Restrict)
+  backgroundJob BackgroundJob? @relation(fields: [backgroundJobId], references: [id], onDelete: Restrict)
+
+  @@unique([scheduledJobId, dueAt], map: "scheduled_job_runs_job_due_key")
+  @@unique([scopeKey, idempotencyKey], map: "scheduled_job_runs_scope_idempotency_key")
+  @@unique([tenantId, id], map: "scheduled_job_runs_tenant_id_id_key")
+  @@index([tenantId, scheduledJobId, dueAt], map: "scheduled_job_runs_history_idx")
+  @@index([tenantId, outletId, dueAt], map: "scheduled_job_runs_outlet_due_idx")
+  @@index([scope, status, dueAt], map: "scheduled_job_runs_status_idx")
+  @@map("scheduled_job_runs")
 }
 
 model TenantMembership {

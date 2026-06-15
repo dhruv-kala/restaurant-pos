@@ -13,6 +13,7 @@ export 'src/services/customers_api_service.dart';
 export 'src/services/device_management_api_service.dart';
 export 'src/services/employees_api_service.dart';
 export 'src/services/inventory_api_service.dart';
+export 'src/services/jobs_api_service.dart';
 export 'src/services/kds_api_service.dart';
 export 'src/services/kitchen_api_service.dart';
 export 'src/services/menu_api_service.dart';

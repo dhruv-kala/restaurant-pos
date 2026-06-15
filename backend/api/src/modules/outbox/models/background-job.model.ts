@@ -34,4 +34,12 @@ export interface BackgroundJobFailureInput {
   errorClassification?: string | null;
   errorMessage?: string | null;
   nextAvailableAt?: Date | null;
+  now?: Date;
+}
+
+export interface BackgroundJobRetryPolicyConfig {
+  maxAttempts: number;
+  initialDelaySeconds: number;
+  maxDelaySeconds: number;
+  backoffMultiplier: number;
 }

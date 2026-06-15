@@ -29,6 +29,35 @@ export function requireOutboxView(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Job/outbox view permission is required');
 }
 
+export function requireJobRetry(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasPermission(actor, 'jobs.retry') ||
+    hasPermission(actor, 'jobs.manage')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Job retry permission is required');
+}
+
+export function requireJobManage(actor: AuthenticatedUser): void {
+  if (hasRole(actor, PLATFORM_ADMIN_ROLE) || hasPermission(actor, 'jobs.manage')) {
+    return;
+  }
+  throw new ForbiddenException('Job management permission is required');
+}
+
+export function requireDeadLetterManage(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasPermission(actor, 'jobs.dead_letter_manage') ||
+    hasPermission(actor, 'jobs.manage')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Dead-letter management permission is required');
+}
+
 export function resolveOutboxReadScope(
   actor: AuthenticatedUser,
   requestedTenantId?: string,

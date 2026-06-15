@@ -4726,3 +4726,234 @@ Known limitations:
 Next task:
 
 - Task 34.3 - Scheduler Foundation
+
+## 2026-06-16 - Task 34.3 Scheduler Foundation
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616200000_add_scheduler_foundation/migration.sql`
+- `backend/api/src/modules/outbox/controllers/scheduler.controller.ts`
+- `backend/api/src/modules/outbox/dto/scheduler.dto.ts`
+- `backend/api/src/modules/outbox/models/scheduler.model.ts`
+- `backend/api/src/modules/outbox/outbox-schema.spec.ts`
+- `backend/api/src/modules/outbox/outbox.module.ts`
+- `backend/api/src/modules/outbox/services/scheduler-access.util.ts`
+- `backend/api/src/modules/outbox/services/scheduler-expression.util.ts`
+- `backend/api/src/modules/outbox/services/scheduler.service.spec.ts`
+- `backend/api/src/modules/outbox/services/scheduler.service.ts`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/specifications/transactional-outbox-jobs-scheduler-module.md`
+- `docs/tasks/000-roadmap.md`
+- `docs/tasks/034-outbox-jobs-scheduler/34.3-scheduler-foundation.md`
+
+Decisions:
+
+- Implemented Task 34.3 only; retry/dead-letter controls, operations UI,
+  advanced calendars, external schedulers, visual schedule builders, and public
+  job administration remain deferred.
+- Added `ScheduledJobStatus`, `ScheduledJobScheduleType`, and
+  `ScheduledJobRunStatus` enums.
+- Added `ScheduledJob` with platform or tenant scope, optional outlet override,
+  schedule key, display name, job type, payload, redacted payload,
+  interval/cron shape, timezone, next/last run timestamps, actor attribution,
+  and optimistic version.
+- Added immutable `ScheduledJobRun` records with due timestamp, triggered
+  timestamp, background job link, idempotency key, status, and safe failure
+  fields.
+- Added forced RLS for scheduled jobs and scheduled job runs.
+- Added database constraints for platform scope, tenant scope, outlet override
+  shape, schedule text, interval/cron shape, version, and one run per due
+  window.
+- Added database triggers that prevent deleting scheduled jobs and scheduled
+  job runs, prevent mutation of schedule identity/payload fields, and keep run
+  records immutable.
+- Added protected scheduler APIs:
+  - `POST /scheduler/jobs`
+  - `GET /scheduler/jobs`
+  - `GET /scheduler/jobs/:id`
+  - `POST /scheduler/jobs/:id/pause`
+  - `POST /scheduler/jobs/:id/resume`
+- Added scheduler access helpers for platform, tenant default, and outlet
+  override read/write scope resolution.
+- Added interval validation and foundation cron validation for minute/hour cron
+  expressions; advanced day/month/weekday calendars remain deferred.
+- Added `SchedulerService.scanDueSchedules` with bounded batch size, database
+  `FOR UPDATE SKIP LOCKED` due-row locking, idempotent run creation, and
+  materialization into existing `BackgroundJob` records.
+- Added crash-recovery behavior where an already materialized due window
+  advances the schedule without creating a duplicate run.
+- Added audit events for schedule creation, pause, and resume.
+
+Validation:
+
+- `npm run prisma:format` from `backend/api`: passed
+- `npm run prisma:generate` from `backend/api`: passed
+- `npm test -- --runTestsByPath src/modules/outbox/services/scheduler.service.spec.ts src/modules/outbox/outbox-schema.spec.ts`
+  from `backend/api`: passed
+
+Known limitations:
+
+- Cron validation intentionally supports only foundation minute/hour schedules;
+  advanced calendars, holidays, and complex cron semantics are deferred.
+- The due scanner is an injectable service foundation. A bootstrapped polling
+  process, PM2 topology, and operational UI are deferred.
+- Retry/dead-letter controls are deferred to Task 34.4.
+
+Next task:
+
+- Task 34.4 - Retry, Dead Letter, and Recovery Controls
+
+## 2026-06-16 - Task 34.4 Retry, Dead Letter, and Recovery Controls
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616210000_add_job_recovery_controls/migration.sql`
+- `backend/api/src/modules/outbox/controllers/jobs.controller.ts`
+- `backend/api/src/modules/outbox/dto/jobs.dto.ts`
+- `backend/api/src/modules/outbox/models/background-job.model.ts`
+- `backend/api/src/modules/outbox/outbox-schema.spec.ts`
+- `backend/api/src/modules/outbox/outbox.module.ts`
+- `backend/api/src/modules/outbox/services/background-jobs.service.spec.ts`
+- `backend/api/src/modules/outbox/services/background-jobs.service.ts`
+- `backend/api/src/modules/outbox/services/job-recovery.service.spec.ts`
+- `backend/api/src/modules/outbox/services/job-recovery.service.ts`
+- `backend/api/src/modules/outbox/services/outbox-access.util.ts`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/specifications/transactional-outbox-jobs-scheduler-module.md`
+- `docs/tasks/000-roadmap.md`
+- `docs/tasks/034-outbox-jobs-scheduler/34.4-retry-dead-letter-and-recovery-controls.md`
+
+Decisions:
+
+- Implemented Task 34.4 only; operations administration UI, alerting
+  integrations, and incident-management workflows remain deferred.
+- Added `DEAD_LETTERED` to `BackgroundJobStatus`.
+- Added `JobDeadLetterStatus`.
+- Added `BackgroundJobRetryPolicy` for job-type retry policy configuration by
+  platform or tenant scope.
+- Added `JobDeadLetter` for retained terminal failure records with resolution
+  state.
+- Added forced RLS for retry policies and dead letters.
+- Added database constraints for platform/tenant scope, retry bounds, one
+  retry policy per scope/job type, one dead-letter record per job, and valid
+  resolution shape.
+- Added no-delete triggers for retry policies and dead letters, plus immutable
+  identity triggers.
+- Updated `BackgroundJobsService.markFailed` so retryable failures use bounded
+  backoff and exhausted or terminal failures become dead-lettered.
+- Preserved append-only attempt history; manual retry increases `maxAttempts`
+  when needed instead of resetting `attemptCount`.
+- Added protected recovery APIs:
+  - `GET /jobs`
+  - `GET /jobs/:id`
+  - `GET /jobs/:id/attempts`
+  - `POST /jobs/:id/retry`
+  - `POST /jobs/:id/cancel`
+  - `GET /jobs/dead-letters`
+  - `POST /jobs/dead-letters/:id/resolve`
+  - `GET /jobs/retry-policies`
+  - `PUT /jobs/retry-policies`
+- Added audit events for manual retry, cancellation, dead-letter resolution,
+  and retry-policy upsert.
+
+Validation:
+
+- `npm run prisma:format` from `backend/api`: passed
+- `npx prettier --write src/modules/outbox/**/*.ts` from `backend/api`: passed
+- `npm run prisma:generate` from `backend/api`: passed
+- `npm run prisma:validate` from `backend/api`: passed
+- `npm test -- outbox` from `backend/api`: passed, 7 suites and 28 tests; Jest
+  emitted a worker-exit warning after tests completed.
+- `npm run build` from `backend/api`: passed
+- `npm run lint` from `backend/api`: passed
+
+Known limitations:
+
+- Recovery controls are backend APIs only; the operations administration UI is
+  deferred to Task 34.5.
+- Alerting and incident-management integrations are deferred.
+
+Next task:
+
+- Task 34.5 - Operations Administration UI for Jobs and Scheduler
+
+## 2026-06-16 - Task 34.5 Operations Administration UI for Jobs and Scheduler
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/admin/lib/app.dart`
+- `apps/admin/lib/features/jobs/data/jobs_repository.dart`
+- `apps/admin/lib/features/jobs/domain/jobs_query.dart`
+- `apps/admin/lib/features/jobs/presentation/providers/jobs_providers.dart`
+- `apps/admin/lib/features/jobs/presentation/screens/jobs_admin_screen.dart`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/specifications/transactional-outbox-jobs-scheduler-module.md`
+- `docs/tasks/000-roadmap.md`
+- `docs/tasks/034-outbox-jobs-scheduler/34.5-operations-administration-ui.md`
+- `packages/api_client/lib/restaurant_pos_api_client.dart`
+- `packages/api_client/lib/src/api_endpoints.dart`
+- `packages/api_client/lib/src/services/jobs_api_service.dart`
+- `packages/shared_models/lib/restaurant_pos_shared_models.dart`
+- `packages/shared_models/lib/src/jobs/job_models.dart`
+
+Decisions:
+
+- Implemented Task 34.5 only; no backend queue semantics, workflow designer,
+  custom script execution, alerting integration, provider integrations, or
+  restaurant-app/mobile UI were added.
+- Added shared Dart contracts for outbox events, background jobs, job attempts,
+  job details, dead letters, retry policies, scheduled jobs, and schedule runs.
+- Added typed API client support for:
+  - `GET /outbox/events`
+  - `GET /jobs`
+  - `GET /jobs/:id`
+  - `GET /jobs/:id/attempts`
+  - `POST /jobs/:id/retry`
+  - `POST /jobs/:id/cancel`
+  - `GET /jobs/dead-letters`
+  - `POST /jobs/dead-letters/:id/resolve`
+  - `GET /jobs/retry-policies`
+  - `PUT /jobs/retry-policies`
+  - `GET /scheduler/jobs`
+  - `POST /scheduler/jobs/:id/pause`
+  - `POST /scheduler/jobs/:id/resume`
+- Added admin repository and Riverpod providers for job, dead-letter,
+  scheduler, retry-policy, and outbox queries.
+- Added an authorized admin navigation entry for users with job or scheduler
+  view/manage permissions.
+- Added the jobs and scheduler operations console with health cards, job list,
+  job detail and attempt visibility, manual retry, cancellation,
+  dead-letter retry/resolution, scheduler pause/resume, retry policy upsert,
+  and outbox event visibility.
+- Tenant users remain tenant-scoped; platform scope is only selectable by
+  super-admin users.
+
+Validation:
+
+- `flutter pub get` from `apps/admin`: passed
+- `flutter analyze` from `apps/admin`: passed
+
+Known limitations:
+
+- The UI depends on the backend APIs introduced in Tasks 34.1 through 34.4.
+- It does not create or edit scheduler definitions beyond pause/resume.
+- It does not implement alerts, incident-management workflows, or worker
+  process controls.
+
+Next task:
+
+- Task 35.1 - Storage Abstraction Foundation

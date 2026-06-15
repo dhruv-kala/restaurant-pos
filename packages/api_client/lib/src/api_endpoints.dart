@@ -33,6 +33,11 @@ abstract final class ApiEndpoints {
   static const String rbacGroupedPermissions = '$rbacPermissions/grouped';
   static const String auditEvents = '/audit-events';
   static const String auditExport = '$auditEvents/export';
+  static const String outboxEvents = '/outbox/events';
+  static const String jobs = '/jobs';
+  static const String jobRetryPolicies = '$jobs/retry-policies';
+  static const String jobDeadLetters = '$jobs/dead-letters';
+  static const String schedulerJobs = '/scheduler/jobs';
   static const String notifications = '/notifications';
   static const String notificationAdmin = '$notifications/admin';
   static const String notificationUnreadCount = '$notifications/unread-count';
@@ -205,6 +210,16 @@ abstract final class ApiEndpoints {
   static String rbacRole(String id) => '$rbacRoles/$id';
   static String rbacRolePermissions(String id) => '${rbacRole(id)}/permissions';
   static String auditEvent(String id) => '$auditEvents/$id';
+  static String outboxEvent(String id) => '$outboxEvents/$id';
+  static String job(String id) => '$jobs/$id';
+  static String jobAttempts(String id) => '${job(id)}/attempts';
+  static String jobRetry(String id) => '${job(id)}/retry';
+  static String jobCancel(String id) => '${job(id)}/cancel';
+  static String jobDeadLetterResolve(String id) =>
+      '$jobDeadLetters/$id/resolve';
+  static String schedulerJob(String id) => '$schedulerJobs/$id';
+  static String schedulerJobPause(String id) => '${schedulerJob(id)}/pause';
+  static String schedulerJobResume(String id) => '${schedulerJob(id)}/resume';
   static String notification(String id) => '$notifications/$id';
   static String notificationRead(String id) => '${notification(id)}/read';
   static String notificationAdminDetail(String id) => '$notificationAdmin/$id';

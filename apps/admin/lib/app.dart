@@ -11,6 +11,7 @@ import 'features/operations/presentation/screens/operations_admin_screen.dart';
 import 'features/promotions/presentation/screens/promotions_admin_screen.dart';
 import 'features/audit/presentation/screens/audit_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
+import 'features/jobs/presentation/screens/jobs_admin_screen.dart';
 import 'features/customers/presentation/screens/customer_dashboard.dart';
 import 'features/devices/presentation/screens/device_admin_screen.dart';
 import 'features/employees/presentation/screens/employee_dashboard.dart';
@@ -126,6 +127,15 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasPermission('devices.manage_sessions') == true ||
         user?.hasPermission('devices.security_manage') == true ||
         user?.hasPermission('terminals.manage') == true;
+    final canViewJobs =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('jobs.view') == true ||
+        user?.hasPermission('jobs.manage') == true ||
+        user?.hasPermission('jobs.retry') == true ||
+        user?.hasPermission('jobs.dead_letter_manage') == true ||
+        user?.hasPermission('scheduler.view') == true ||
+        user?.hasPermission('scheduler.manage') == true;
     final screens = <Widget>[
       const MenuDashboard(),
       const TableLayoutScreen(),
@@ -136,6 +146,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       const EmployeeDashboard(),
       if (canViewOperations) const OperationsAdminScreen(),
       if (canViewDevices) const DeviceAdminScreen(),
+      if (canViewJobs) const JobsAdminScreen(),
       const NotificationCenterScreen(),
       if (canViewPromotions) const PromotionsAdminScreen(),
       if (canViewTax) const TaxAdminScreen(),
@@ -176,6 +187,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         const NavigationDestination(
           icon: Icon(Icons.devices_other),
           label: 'Devices',
+        ),
+      if (canViewJobs)
+        const NavigationDestination(
+          icon: Icon(Icons.work_history),
+          label: 'Jobs',
         ),
       const NavigationDestination(
         icon: Icon(Icons.notifications),

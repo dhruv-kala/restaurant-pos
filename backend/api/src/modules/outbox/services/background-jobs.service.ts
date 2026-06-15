@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 
 import type {
   BackgroundJobFailureInput,
+  BackgroundJobRetryPolicyConfig,
   ClaimBackgroundJobsInput,
   CreateBackgroundJobInput,
 } from '../models/background-job.model';
@@ -231,12 +232,18 @@ export class BackgroundJobsService {
     const errorCode = this.requiredText(failure.errorCode, 'errorCode', 120);
     const errorClassification = this.optionalText(failure.errorClassification, 80);
     const errorMessage = this.sanitizeErrorMessage(this.optionalText(failure.errorMessage, 500));
-    const retryable = failure.retryable;
+    const now = failure.now ?? new Date();
+    const job = await transaction.backgroundJob.findUniqueOrThrow({ where: { id: jobId } });
+    const retryPolicy = await this.resolveRetryPolicy(transaction, job);
+    const retryable = failure.retryable && attemptNumber < retryPolicy.maxAttempts;
+    const nextAvailableAt = retryable
+      ? (failure.nextAvailableAt ?? this.calculateNextAttemptAt(now, attemptNumber, retryPolicy))
+      : undefined;
     await transaction.backgroundJob.update({
       where: { id: jobId },
       data: {
-        status: retryable ? BackgroundJobStatus.RETRYING : BackgroundJobStatus.FAILED,
-        availableAt: retryable ? (failure.nextAvailableAt ?? new Date()) : undefined,
+        status: retryable ? BackgroundJobStatus.RETRYING : BackgroundJobStatus.DEAD_LETTERED,
+        availableAt: nextAvailableAt,
         lockedBy: null,
         lockedUntil: null,
         lastErrorCode: errorCode,
@@ -260,6 +267,9 @@ export class BackgroundJobsService {
         completedAt: new Date(),
       },
     });
+    if (!retryable) {
+      await this.createDeadLetter(transaction, job, errorCode, errorMessage, now);
+    }
   }
 
   private normalizeCreate(input: CreateBackgroundJobInput): NormalizedBackgroundJob {
@@ -390,6 +400,62 @@ export class BackgroundJobsService {
       /(authorization|credential|password|secret|token|api.?key|signature|cookie|session)=\S+/gi,
       '$1=[REDACTED]',
     );
+  }
+
+  private async resolveRetryPolicy(
+    transaction: Prisma.TransactionClient,
+    job: BackgroundJob,
+  ): Promise<BackgroundJobRetryPolicyConfig> {
+    const policy = await transaction.backgroundJobRetryPolicy.findUnique({
+      where: {
+        scopeKey_jobType: {
+          scopeKey: job.scopeKey,
+          jobType: job.jobType,
+        },
+      },
+    });
+    return {
+      maxAttempts: policy?.maxAttempts ?? job.maxAttempts,
+      initialDelaySeconds: policy?.initialDelaySeconds ?? 30,
+      maxDelaySeconds: policy?.maxDelaySeconds ?? 3600,
+      backoffMultiplier: policy?.backoffMultiplier ?? 2,
+    };
+  }
+
+  private calculateNextAttemptAt(
+    now: Date,
+    attemptNumber: number,
+    policy: BackgroundJobRetryPolicyConfig,
+  ): Date {
+    const exponent = Math.max(0, attemptNumber - 1);
+    const rawDelay = policy.initialDelaySeconds * Math.pow(policy.backoffMultiplier, exponent);
+    const boundedDelay = Math.min(rawDelay, policy.maxDelaySeconds);
+    return new Date(now.getTime() + boundedDelay * 1000);
+  }
+
+  private async createDeadLetter(
+    transaction: Prisma.TransactionClient,
+    job: BackgroundJob,
+    reasonCode: string,
+    reasonMessage: string | null,
+    failedAt: Date,
+  ): Promise<void> {
+    try {
+      await transaction.jobDeadLetter.create({
+        data: {
+          scope: job.scope,
+          scopeKey: job.scopeKey,
+          tenantId: job.tenantId,
+          outletId: job.outletId,
+          jobId: job.id,
+          reasonCode,
+          reasonMessage,
+          failedAt,
+        },
+      });
+    } catch (error) {
+      if (!this.isUniqueConflict(error)) throw error;
+    }
   }
 }
 

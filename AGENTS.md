@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 32.6 are complete at the foundation level.
+Tasks 1 through 34.5 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -387,8 +387,23 @@ registry contracts, atomic worker batch claiming with leases, internal worker
 execution, success/failure transitions, retryable failure metadata, forced RLS,
 immutable identity protections, and focused tests.
 
-Task 34.3 is next provisionally: implement scheduler foundation. Do not
-implement it unless the active user request explicitly asks for it.
+Task 34.3 implemented platform/tenant/outlet scoped scheduled jobs, immutable
+scheduled run history, interval and foundation cron validation, pause/resume
+APIs, due-schedule scanning with row locks, idempotent background job
+materialization, forced RLS, and focused tests.
+
+Task 34.4 implemented job-type retry policy configuration, bounded backoff,
+`DEAD_LETTERED` job state, tenant/platform scoped dead-letter records, manual
+retry, cancellation, dead-letter resolution APIs, audit events, forced RLS, and
+focused tests.
+
+Task 34.5 implemented shared Dart job/outbox/scheduler contracts, typed API
+clients, Riverpod providers, and the admin operations console for job health,
+job details and attempts, dead-letter recovery, scheduler pause/resume, retry
+policies, and outbox visibility.
+
+Task 35.1 is next provisionally: implement storage abstraction foundation. Do
+not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 
