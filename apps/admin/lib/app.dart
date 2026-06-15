@@ -17,6 +17,7 @@ import 'features/rbac/presentation/screens/user_management_dashboard.dart';
 import 'features/reports/presentation/screens/reports_dashboard.dart';
 import 'features/subscriptions/presentation/screens/subscription_admin_screen.dart';
 import 'features/tables/presentation/screens/table_layout_screen.dart';
+import 'features/tax/presentation/screens/tax_admin_screen.dart';
 
 class AdminApp extends StatelessWidget {
   const AdminApp({super.key});
@@ -88,6 +89,15 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasPermission('promotions.campaign_manage') == true ||
         user?.hasPermission('promotions.eligibility_evaluate') == true ||
         user?.hasPermission('promotions.redemption_view') == true;
+    final canViewTax =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('tax.read') == true ||
+        user?.hasPermission('tax.profile_manage') == true ||
+        user?.hasPermission('tax.policy_manage') == true ||
+        user?.hasPermission('tax.report_view') == true ||
+        user?.hasPermission('fiscal_policy.read') == true ||
+        user?.hasPermission('fiscal_policy.manage') == true;
     final screens = <Widget>[
       const MenuDashboard(),
       const TableLayoutScreen(),
@@ -98,6 +108,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       const EmployeeDashboard(),
       const NotificationCenterScreen(),
       if (canViewPromotions) const PromotionsAdminScreen(),
+      if (canViewTax) const TaxAdminScreen(),
       if (canViewCommunication) const CommunicationCenterScreen(),
       if (canViewSubscriptions) const SubscriptionAdminScreen(),
       if (canManageRbac) const UserManagementDashboard(),
@@ -134,6 +145,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         const NavigationDestination(
           icon: Icon(Icons.local_offer),
           label: 'Promotions',
+        ),
+      if (canViewTax)
+        const NavigationDestination(
+          icon: Icon(Icons.request_quote),
+          label: 'Tax',
         ),
       if (canViewCommunication)
         const NavigationDestination(

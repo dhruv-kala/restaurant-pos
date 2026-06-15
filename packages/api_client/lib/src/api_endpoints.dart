@@ -57,6 +57,17 @@ abstract final class ApiEndpoints {
       '$promotionCampaigns/evaluate';
   static const String promotionEligibility = '$promotions/eligibility/evaluate';
   static const String promotionRedemptions = '$promotions/redemptions';
+  static const String tax = '/tax';
+  static const String taxProfiles = '$tax/profiles';
+  static const String taxRates = '$tax/rates';
+  static const String taxGroups = '$tax/groups';
+  static const String taxRules = '$tax/rules';
+  static const String taxCategoryMappings = '$tax/category-mappings';
+  static const String taxFiscalPolicies = '$tax/fiscal-policies';
+  static const String taxFiscalSequences = '$tax/fiscal-sequences';
+  static const String taxCalculate = '$tax/calculate';
+  static const String taxReportSummary = '$tax/reports/summary';
+  static const String taxReportDetailed = '$tax/reports/detailed';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -266,6 +277,15 @@ abstract final class ApiEndpoints {
   static String promotionCampaignDeactivate(String id) =>
       '${promotionCampaign(id)}/deactivate';
   static String promotionRedemption(String id) => '$promotionRedemptions/$id';
+  static String taxProfile(String id) => '$taxProfiles/$id';
+  static String taxRate(String id) => '$taxRates/$id';
+  static String taxGroup(String id) => '$taxGroups/$id';
+  static String taxRule(String id) => '$taxRules/$id';
+  static String taxCategoryMapping(String id) => '$taxCategoryMappings/$id';
+  static String taxFiscalPolicy(String id) => '$taxFiscalPolicies/$id';
+  static String taxFiscalSequence(String id) => '$taxFiscalSequences/$id';
+  static String taxFiscalSequenceGenerate(String id) =>
+      '${taxFiscalSequence(id)}/generate';
   static String employeePerformance(String id) => '${employee(id)}/performance';
   static const String employeeDashboard = '$employees/dashboard';
   static String shift(String id) => '$shifts/$id';

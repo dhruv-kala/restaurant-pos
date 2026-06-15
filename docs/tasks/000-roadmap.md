@@ -1,6 +1,6 @@
 # Restaurant POS Task Roadmap
 
-Last updated: 2026-06-14
+Last updated: 2026-06-15
 
 ## Roadmap Rules
 
@@ -12,8 +12,8 @@ Last updated: 2026-06-14
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6 and 30.1-30.5 are complete; Task 30.6 tax admin UI is the
-  next provisional task.
+- Tasks 29.1-29.6 and 30.1-30.6 are complete; Task 37 customer ordering
+  application foundation is the next listed provisional task.
 
 ## Foundation and Core SaaS
 
@@ -50,13 +50,13 @@ Last updated: 2026-06-14
 | 30.3 | COMPLETE | Fiscal policy administration |
 | 30.4 | COMPLETE | Tax calculation engine |
 | 30.5 | COMPLETE | Tax reporting foundation |
-| 30.6 | NEXT | Tax admin UI |
+| 30.6 | COMPLETE | Tax admin UI |
 
 ## Restaurant and Customer Expansion
 
 | Task | Status | Provisional scope |
 |---|---|---|
-| 37 | PLANNED | Customer ordering application foundation |
+| 37 | NEXT | Customer ordering application foundation |
 | 38 | PLANNED | QR ordering and table self-service |
 | 39 | PLANNED | Delivery, pickup, fulfillment, and address zones |
 | 40 | PLANNED | Advanced reservations, waitlist, and guest seating |

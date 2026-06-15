@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially implemented.
+Implemented through Task 30.6.
 
 Task 30 is split into:
 
@@ -12,7 +12,7 @@ Task 30 is split into:
 - Task 30.3 Fiscal Policy Administration - Complete
 - Task 30.4 Tax Calculation Engine - Complete
 - Task 30.5 Tax Reporting Foundation - Complete
-- Task 30.6 Tax Admin UI
+- Task 30.6 Tax Admin UI - Complete
 
 ## Objective
 
@@ -217,12 +217,14 @@ Endpoint availability depends on which Task 30.x implementation has been complet
 
 Admin Tax Center:
 
-- tax profile management
-- tax rate management
-- tax group management
-- outlet fiscal policy management
-- tax calculation preview
-- tax reports foundation
+- tax profile management - implemented in Task 30.6
+- tax rate management - implemented in Task 30.6
+- tax group management - implemented in Task 30.6
+- tax category/item/default mapping visibility and creation - implemented in
+  Task 30.6
+- outlet fiscal policy management - implemented in Task 30.6
+- fiscal sequence visibility - implemented in Task 30.6
+- tax reports foundation - implemented in Task 30.6
 
 Restaurant App:
 
@@ -231,9 +233,9 @@ Restaurant App:
 
 Shared:
 
-- tax models
-- typed Dio API client
-- Riverpod providers
+- tax models - implemented in Task 30.6
+- typed Dio API client - implemented in Task 30.6
+- Riverpod providers - implemented in Task 30.6
 
 ## Audit Requirements
 

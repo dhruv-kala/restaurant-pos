@@ -1,12 +1,12 @@
 # Current Status
 
-Last updated: 2026-06-14
+Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 30.5**
+- Completed through: **Task 30.6**
 - Current module: **Tax Configuration and Fiscal Policy**
-- Next provisional task: **Task 30.6 - Tax Admin UI**
+- Next provisional task: **Task 37 - Customer ordering application foundation**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -52,6 +52,7 @@ Last updated: 2026-06-14
 | 30.3 | Outlet-scoped fiscal policies, fiscal invoice sequences, monotonic number generation, RLS, permissions, and audit events |
 | 30.4 | Deterministic tax calculation engine, inclusive/exclusive support, rule precedence, immutable bill snapshots, RLS, and bill integration |
 | 30.5 | Tax summary and detailed reporting from bill/tax snapshots, invoice counts, taxable sales, outlet filtering, and audit events |
+| 30.6 | Shared tax Dart contracts, typed API client, Riverpod providers, and admin tax profile/rate/group/mapping/fiscal policy/report screens |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -164,6 +165,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   `/tax/reports/detailed` APIs, business-date filtering, outlet filtering,
   invoice counts, taxable sales, tax collected totals, component breakdowns,
   report generation audits, and no historical recalculation from live tax rules
+- Tax administration UI with shared Dart tax contracts, typed Dio tax client,
+  Riverpod providers, authorized admin navigation, tax profile/rate/group
+  administration, tax mapping creation, outlet fiscal policy creation, fiscal
+  sequence visibility, and tax report visibility
 
 ## Known Environment Limitation
 
@@ -174,7 +179,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 30.6 - Tax Admin UI
+### Task 37 - Customer ordering application foundation
 
 Read:
 
@@ -183,11 +188,8 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 30.6 unless explicitly requested. It should build on the
-Task 30.1-30.5 tax configuration, calculation, and reporting foundations and add
-the admin tax UI plus any required shared Dart contracts/client updates. Do not
-implement government filing or accounting export unless the task file explicitly
-requires it.
+Do not implement Task 37 unless explicitly requested. It is the next listed
+provisional roadmap task after the completed Task 30 tax module sequence.
 
 ## Status Maintenance
 

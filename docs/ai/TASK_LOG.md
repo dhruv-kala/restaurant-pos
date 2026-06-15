@@ -3138,3 +3138,69 @@ Known limitations:
 Next task:
 
 - Task 30.6 - Tax Admin UI
+
+## Task 30.6 Completion
+
+Date: 2026-06-15
+
+Task: Task 30.6 - Tax Admin UI
+
+Status: Complete
+
+Files changed:
+
+- `apps/admin/lib/app.dart`
+- `apps/admin/lib/features/tax/data/tax_repository.dart`
+- `apps/admin/lib/features/tax/domain/tax_query.dart`
+- `apps/admin/lib/features/tax/presentation/providers/tax_providers.dart`
+- `apps/admin/lib/features/tax/presentation/screens/tax_admin_screen.dart`
+- `packages/api_client/lib/restaurant_pos_api_client.dart`
+- `packages/api_client/lib/src/api_endpoints.dart`
+- `packages/api_client/lib/src/services/tax_api_service.dart`
+- `packages/shared_models/lib/restaurant_pos_shared_models.dart`
+- `packages/shared_models/lib/src/tax/tax_models.dart`
+- `docs/specifications/tax-module.md`
+- `docs/tasks/030-tax/30.6-tax-admin-ui.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 30.6 implemented only the admin tax UI and shared Flutter-facing
+  contracts/client scope.
+- Added shared Dart models for tax profiles, rates, groups, rules, mappings,
+  outlet fiscal policies, invoice sequences, and summary/detailed tax reports.
+- Added typed API endpoints and `TaxApiService` methods for the existing Task
+  30.1-30.5 backend tax APIs.
+- Added admin tax repository and Riverpod providers for tax configuration,
+  fiscal policy, fiscal sequences, and reports.
+- Added the admin Tax Center with tabs for profiles, rates, groups, mappings,
+  fiscal policy, and reports.
+- Wired the Tax Center into the admin navigation behind tenant admin, super
+  admin, and existing tax/fiscal permissions.
+- Did not implement government filing UI, accounting export UI, fiscal device
+  UI, or restaurant-app tax presentation changes.
+
+Validation:
+
+- `dart format apps/admin/lib/app.dart apps/admin/lib/features/tax/data/tax_repository.dart apps/admin/lib/features/tax/domain/tax_query.dart apps/admin/lib/features/tax/presentation/providers/tax_providers.dart apps/admin/lib/features/tax/presentation/screens/tax_admin_screen.dart packages/api_client/lib/restaurant_pos_api_client.dart packages/api_client/lib/src/api_endpoints.dart packages/api_client/lib/src/services/tax_api_service.dart packages/shared_models/lib/restaurant_pos_shared_models.dart packages/shared_models/lib/src/tax/tax_models.dart`: passed
+- `dart analyze` from `packages/shared_models`: passed
+- `dart analyze` from `packages/api_client`: passed
+- `flutter pub get` from `apps/admin`: passed
+- `flutter analyze` from `apps/admin`: passed
+- `flutter test` from `apps/admin`: passed, 2 tests
+
+Known limitations:
+
+- No backend or Prisma files changed, so backend build/test and Prisma
+  validation/generation were not rerun for this task.
+- Live tax UI behavior still depends on valid backend connectivity and deployed
+  Task 30 migrations.
+- Fiscal policy creation uses the current minimal admin input set and defaults
+  currency, timezone, fiscal year, sequence padding, and starting sequence
+  values through the shared client layer.
+
+Next task:
+
+- Task 37 - Customer ordering application foundation
