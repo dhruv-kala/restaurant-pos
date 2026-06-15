@@ -11,7 +11,7 @@ Task 30 is split into:
 - Task 30.2.5 Tax Architecture Review and Correction - Complete
 - Task 30.3 Fiscal Policy Administration - Complete
 - Task 30.4 Tax Calculation Engine - Complete
-- Task 30.5 Tax Reporting Foundation
+- Task 30.5 Tax Reporting Foundation - Complete
 - Task 30.6 Tax Admin UI
 
 ## Objective
@@ -201,6 +201,15 @@ Reporting:
 
 - `GET /tax/reports/summary`
 - `GET /tax/reports/detailed`
+
+Task 30.5 implements tenant/outlet-scoped tax reporting from immutable bill tax
+snapshots and tax calculation snapshots. Reports use `businessDate`, exclude
+void bills, do not recalculate historical tax from current tax rules, and audit
+generation through `ReportGenerationAudit` plus audit events. Summary returns
+invoice counts, tax-invoice counts, taxable sales, tax collected, component
+breakdowns, outlet totals, and currency totals. Detailed returns paginated
+invoice-level tax rows with receipt/invoice references and component
+breakdowns.
 
 Endpoint availability depends on which Task 30.x implementation has been completed.
 

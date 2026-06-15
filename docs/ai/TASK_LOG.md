@@ -3071,3 +3071,70 @@ Known limitations:
 Next task:
 
 - Task 30.5 - Tax Reporting Foundation
+
+## Task 30.5 Completion
+
+Date: 2026-06-14
+
+Task: Task 30.5 - Tax Reporting Foundation
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/src/modules/tax/controllers/tax-reports.controller.ts`
+- `backend/api/src/modules/tax/dto/tax-report.dto.ts`
+- `backend/api/src/modules/tax/services/tax-access.util.ts`
+- `backend/api/src/modules/tax/services/tax-access.util.spec.ts`
+- `backend/api/src/modules/tax/services/tax-reports.service.ts`
+- `backend/api/src/modules/tax/services/tax-reports.service.spec.ts`
+- `backend/api/src/modules/tax/tax.module.ts`
+- `docs/specifications/tax-module.md`
+- `docs/tasks/030-tax/30.5-tax-reporting-foundation.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 30.5 implemented only tax reporting foundation scope.
+- Added protected `GET /tax/reports/summary` and
+  `GET /tax/reports/detailed`.
+- Reports use bill, bill tax, receipt, and latest tax calculation snapshot data.
+- Reports filter by `businessDate`, not creation timestamp.
+- Void bills are excluded from report totals.
+- Summary returns invoice count, tax-invoice count, taxable amount, tax
+  collected amount, grand total amount, tax component totals, outlet totals, and
+  currency totals.
+- Detailed returns paginated invoice-level tax rows with bill number, invoice
+  number, receipt numbers, outlet, taxable amount, tax collected amount,
+  tax mode, tax profile, snapshot reference, and component breakdowns.
+- Platform tax reports require explicit `tenantId`; tenant users use trusted
+  tenant scope, and outlet-bound users cannot query other outlets.
+- Added `tax.report_view` authorization support in tax access utilities.
+- Report generation writes `ReportGenerationAudit` rows and
+  `tax.report.generated` audit events.
+- Tax return filing, government submission, accounting export, shared Dart
+  clients, and UI remain deferred.
+
+Validation:
+
+- `npm test -- --runInBand src/modules/tax`: passed, 7 suites and 28 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 95 suites and 336 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+
+Known limitations:
+
+- No Prisma schema change was required, so Prisma validation/generation was not
+  rerun for this task.
+- The Task 30.4 migration still needs deployment before live tax calculation
+  snapshots exist in PostgreSQL.
+- Existing receipts do not own separate tax rows; tax reporting uses the linked
+  bill and bill tax snapshots.
+- Tax admin UI and shared Dart clients remain Task 30.6 scope.
+
+Next task:
+
+- Task 30.6 - Tax Admin UI

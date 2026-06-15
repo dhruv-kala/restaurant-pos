@@ -12,8 +12,8 @@ Last updated: 2026-06-14
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6 and 30.1-30.4 are complete; Task 30.5 tax reporting
-  foundation is the next provisional task.
+- Tasks 29.1-29.6 and 30.1-30.5 are complete; Task 30.6 tax admin UI is the
+  next provisional task.
 
 ## Foundation and Core SaaS
 
@@ -49,8 +49,8 @@ Last updated: 2026-06-14
 | 30.2.5 | COMPLETE | Tax architecture review and correction |
 | 30.3 | COMPLETE | Fiscal policy administration |
 | 30.4 | COMPLETE | Tax calculation engine |
-| 30.5 | NEXT | Tax reporting foundation |
-| 30.6 | PLANNED | Tax admin UI |
+| 30.5 | COMPLETE | Tax reporting foundation |
+| 30.6 | NEXT | Tax admin UI |
 
 ## Restaurant and Customer Expansion
 

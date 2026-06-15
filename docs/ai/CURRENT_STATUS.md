@@ -4,9 +4,9 @@ Last updated: 2026-06-14
 
 ## Current Position
 
-- Completed through: **Task 30.4**
+- Completed through: **Task 30.5**
 - Current module: **Tax Configuration and Fiscal Policy**
-- Next provisional task: **Task 30.5 - Tax Reporting Foundation**
+- Next provisional task: **Task 30.6 - Tax Admin UI**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -51,6 +51,7 @@ Last updated: 2026-06-14
 | 30.2.5 | Formal tax architecture review, tenant-default mapping correction, precedence documentation, and approval to proceed to fiscal policy |
 | 30.3 | Outlet-scoped fiscal policies, fiscal invoice sequences, monotonic number generation, RLS, permissions, and audit events |
 | 30.4 | Deterministic tax calculation engine, inclusive/exclusive support, rule precedence, immutable bill snapshots, RLS, and bill integration |
+| 30.5 | Tax summary and detailed reporting from bill/tax snapshots, invoice counts, taxable sales, outlet filtering, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -159,6 +160,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   minor-unit calculation, inclusive/exclusive tax support, explainable
   component breakdowns, protected `/tax/calculate` API, immutable
   `TaxCalculationSnapshot` records, and new bill-generation integration
+- Tax reporting foundation with protected `/tax/reports/summary` and
+  `/tax/reports/detailed` APIs, business-date filtering, outlet filtering,
+  invoice counts, taxable sales, tax collected totals, component breakdowns,
+  report generation audits, and no historical recalculation from live tax rules
 
 ## Known Environment Limitation
 
@@ -169,7 +174,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 30.5 - Tax Reporting Foundation
+### Task 30.6 - Tax Admin UI
 
 Read:
 
@@ -178,11 +183,11 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 30.5 unless explicitly requested. It should build on the
-Task 30.1-30.4 tax configuration and calculation foundations and add
-tenant/outlet-scoped tax reporting projections from immutable bill and tax
-calculation data. Do not implement government filing, accounting export, or tax
-UI unless the task file explicitly requires it.
+Do not implement Task 30.6 unless explicitly requested. It should build on the
+Task 30.1-30.5 tax configuration, calculation, and reporting foundations and add
+the admin tax UI plus any required shared Dart contracts/client updates. Do not
+implement government filing or accounting export unless the task file explicitly
+requires it.
 
 ## Status Maintenance
 

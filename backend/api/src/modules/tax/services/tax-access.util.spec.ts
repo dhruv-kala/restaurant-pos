@@ -6,6 +6,7 @@ import {
   requireFiscalPolicyRead,
   requireTaxProfileManage,
   requireTaxProfileRead,
+  requireTaxReportView,
   resolveTaxScope,
 } from './tax-access.util';
 
@@ -54,5 +55,20 @@ describe('tax access utilities', () => {
     expect(() => requireFiscalPolicyManage(tenantAdmin)).not.toThrow();
     expect(() => requireFiscalPolicyRead(manager)).not.toThrow();
     expect(() => requireFiscalPolicyManage(manager)).toThrow(ForbiddenException);
+  });
+
+  it('allows tax reports by role or permission', () => {
+    expect(() => requireTaxReportView(tenantAdmin)).not.toThrow();
+    expect(() => requireTaxReportView({ ...tenantAdmin, roles: ['MANAGER'] })).not.toThrow();
+    expect(() =>
+      requireTaxReportView({
+        ...tenantAdmin,
+        roles: ['CASHIER'],
+        permissions: ['tax.report_view'],
+      }),
+    ).not.toThrow();
+    expect(() => requireTaxReportView({ ...tenantAdmin, roles: ['CASHIER'] })).toThrow(
+      ForbiddenException,
+    );
   });
 });
