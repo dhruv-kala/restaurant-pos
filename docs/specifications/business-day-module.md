@@ -8,7 +8,7 @@ Task 31 is split into:
 
 * Task 31.1 Business Day Foundation - Complete
 * Task 31.2 Shift Management - Complete
-* Task 31.3 Cash Drawer Management
+* Task 31.3 Cash Drawer Management - Complete
 * Task 31.4 Shift Closing and Reconciliation
 * Task 31.5 Business Day Closing
 * Task 31.6 Operations Administration UI
@@ -49,8 +49,8 @@ Potential entities:
 
 * BusinessDay - implemented in Task 31.1
 * ShiftSession - implemented in Task 31.2
-* CashDrawer
-* CashDrawerTransaction
+* CashDrawer - implemented in Task 31.3
+* CashDrawerTransaction - implemented in Task 31.3
 * ShiftReconciliation
 * BusinessDayClosing
 
@@ -86,7 +86,9 @@ Suggested permissions:
 * `shifts.read`
 * `shifts.open`
 * `shifts.close`
+* `cash_drawer.read`
 * `cash_drawer.open`
+* `cash_drawer.adjust`
 * `cash_drawer.close`
 * `shift.reconciliation`
 
@@ -120,6 +122,23 @@ assigned to a user, belongs to the outlet's current open business day, and may
 reference an existing staff shift template from the employee module. Only one
 open shift session is allowed per user. Closing uses optimistic `version`
 checks. Open and close actions write audit events.
+
+Cash Drawer Management:
+
+* `POST /cash-drawers/open`
+* `GET /cash-drawers`
+* `GET /cash-drawers/current`
+* `GET /cash-drawers/:id/transactions`
+* `POST /cash-drawers/:id/transactions`
+* `PATCH /cash-drawers/:id/close`
+
+Task 31.3 implements tenant/outlet-scoped cash drawers attached to shift
+sessions and business days. One open drawer is allowed per shift session.
+Opening records an append-only opening balance transaction. Cash in, cash out,
+and adjustment transactions update expected cash while preserving transaction
+history. Closing records a counted closing balance transaction and uses
+optimistic `version` checks. Drawer lifecycle and adjustment actions write audit
+events.
 
 ## Audit Requirements
 

@@ -118,17 +118,72 @@ export function requireShiftSessionClose(actor: AuthenticatedUser): void {
 }
 
 export function assertShiftActorCanAssign(actor: AuthenticatedUser, assignedUserId: string): void {
-  if (
-    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
-    hasRole(actor, TENANT_ADMIN_ROLE) ||
-    hasRole(actor, MANAGER_ROLE)
-  ) {
+  if (canManageOperationalScope(actor)) {
     return;
   }
   if (actor.id === assignedUserId) {
     return;
   }
   throw new ForbiddenException('Users can only open or close their own shift sessions');
+}
+
+export function canManageOperationalScope(actor: AuthenticatedUser): boolean {
+  return (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE)
+  );
+}
+
+export function requireCashDrawerRead(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'cash_drawer.read') ||
+    hasPermission(actor, 'cash_drawer.open') ||
+    hasPermission(actor, 'cash_drawer.adjust') ||
+    hasPermission(actor, 'cash_drawer.close')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Cash drawer read permission is required');
+}
+
+export function requireCashDrawerOpen(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'cash_drawer.open')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Cash drawer open permission is required');
+}
+
+export function requireCashDrawerAdjust(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'cash_drawer.adjust')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Cash drawer adjustment permission is required');
+}
+
+export function requireCashDrawerClose(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'cash_drawer.close')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Cash drawer close permission is required');
 }
 
 function hasPermission(actor: AuthenticatedUser, permission: string): boolean {

@@ -27,6 +27,7 @@ const roleModules: Record<string, readonly string[]> = {
     'tax',
     'fiscal_policy',
     'business_day',
+    'cash_drawer',
     'settings',
     'audit',
     'notifications',
@@ -54,6 +55,7 @@ const roleModules: Record<string, readonly string[]> = {
     'tax',
     'fiscal_policy',
     'business_day',
+    'cash_drawer',
   ],
   CASHIER: [
     'billing',
@@ -63,6 +65,7 @@ const roleModules: Record<string, readonly string[]> = {
     'orders',
     'tables',
     'shifts',
+    'cash_drawer',
     'notifications',
     'promotions',
   ],
@@ -148,6 +151,13 @@ const shiftActions: Record<string, readonly string[]> = {
   CASHIER: ['read', 'open', 'close'],
 };
 
+const cashDrawerActions: Record<string, readonly string[]> = {
+  SUPER_ADMIN: ['*'],
+  TENANT_ADMIN: ['*'],
+  MANAGER: ['*'],
+  CASHIER: ['read', 'open', 'adjust', 'close'],
+};
+
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {
   const permissions = await prisma.permission.findMany();
   const templates = await prisma.systemRoleTemplate.findMany();
@@ -167,6 +177,7 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
     const allowedTaxActions = taxActions[roleKey] ?? [];
     const allowedFiscalPolicyActions = fiscalPolicyActions[roleKey] ?? [];
     const allowedShiftActions = shiftActions[roleKey] ?? [];
+    const allowedCashDrawerActions = cashDrawerActions[roleKey] ?? [];
     const allowed = permissions.filter(
       (permission) =>
         (modules.includes('*') || modules.includes(permission.module)) &&
@@ -187,7 +198,10 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
           allowedFiscalPolicyActions.includes(permission.action)) &&
         (permission.module !== 'shifts' ||
           allowedShiftActions.includes('*') ||
-          allowedShiftActions.includes(permission.action)),
+          allowedShiftActions.includes(permission.action)) &&
+        (permission.module !== 'cash_drawer' ||
+          allowedCashDrawerActions.includes('*') ||
+          allowedCashDrawerActions.includes(permission.action)),
     );
     for (const permission of allowed) {
       await prisma.systemRolePermission.upsert({

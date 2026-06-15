@@ -53,8 +53,8 @@ Last updated: 2026-06-15
 | 30.6 | COMPLETE | Tax admin UI |
 | 31.1 | COMPLETE | Business day foundation |
 | 31.2 | COMPLETE | Shift management |
-| 31.3 | NEXT | Cash drawer management |
-| 31.4 | PLANNED | Shift closing and reconciliation |
+| 31.3 | COMPLETE | Cash drawer management |
+| 31.4 | NEXT | Shift closing and reconciliation |
 | 31.5 | PLANNED | Business day closing |
 | 31.6 | PLANNED | Operations administration UI |
 | 32 | PLANNED | Device registration, trusted sessions, and terminal management |

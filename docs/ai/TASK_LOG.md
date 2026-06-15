@@ -3367,3 +3367,92 @@ Known limitations:
 Next task:
 
 - Task 31.3 - Cash Drawer Management
+
+## Task 31.3 Completion
+
+Date: 2026-06-15
+
+Task: Task 31.3 - Cash Drawer Management
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616100000_add_business_day_foundation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/business-day/business-day.module.ts`
+- `backend/api/src/modules/business-day/business-day-schema.spec.ts`
+- `backend/api/src/modules/business-day/controllers/cash-drawers.controller.ts`
+- `backend/api/src/modules/business-day/dto/cash-drawer.dto.ts`
+- `backend/api/src/modules/business-day/services/business-day-access.util.ts`
+- `backend/api/src/modules/business-day/services/business-day-access.util.spec.ts`
+- `backend/api/src/modules/business-day/services/cash-drawers.service.ts`
+- `backend/api/src/modules/business-day/services/cash-drawers.service.spec.ts`
+- `docs/api/business-day-module.md`
+- `docs/specifications/business-day-module.md`
+- `docs/tasks/031-business-day/31.3-cash-drawer-management.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 31.3 implemented only cash drawer management scope.
+- Added tenant/outlet/business-day/shift-scoped `CashDrawer` records with
+  `CashDrawerStatus.OPEN` and `CashDrawerStatus.CLOSED`.
+- Added append-only `CashDrawerTransaction` records with transaction types
+  `OPENING_BALANCE`, `CASH_IN`, `CASH_OUT`, `ADJUSTMENT`, and
+  `CLOSING_BALANCE`.
+- Enforced one open cash drawer per shift session through a partial unique
+  index.
+- Opening a drawer requires an open shift session and records an opening
+  balance transaction.
+- Cash in, cash out, and adjustment commands append transaction rows and update
+  expected drawer cash.
+- Cash out is rejected when it would make expected cash negative.
+- Closing a drawer uses optimistic `version` checks, stores the counted closing
+  balance, records a closing balance transaction, and audits the variance.
+- Added forced RLS and tenant-aware outlet, business-day, shift-session, and
+  drawer foreign keys.
+- Added closed-drawer immutability, no-delete triggers, and transaction
+  no-update/no-delete triggers.
+- Added protected APIs:
+  `POST /cash-drawers/open`,
+  `GET /cash-drawers`,
+  `GET /cash-drawers/current`,
+  `GET /cash-drawers/:id/transactions`,
+  `POST /cash-drawers/:id/transactions`, and
+  `PATCH /cash-drawers/:id/close`.
+- Added `cash_drawer.read`, `cash_drawer.open`, `cash_drawer.adjust`, and
+  `cash_drawer.close` permission seeds and cashier role-template mappings.
+- Managers, tenant admins, and platform admins can operate outlet drawers;
+  non-manager users can operate drawers only through their own shift sessions.
+- Payment-to-drawer posting, shift reconciliation, business day close
+  validations, shared Dart clients, and UI remain deferred.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/business-day`: passed, 5 suites and
+  32 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 100 suites and 368 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 31 migration was not deployed to a live PostgreSQL database.
+- Payment collection does not yet post cash tender movements into cash drawer
+  transactions; that belongs to later reconciliation/integration work.
+- Shift close currently does not require drawer closure or reconciliation;
+  that belongs to Task 31.4.
+
+Next task:
+
+- Task 31.4 - Shift Closing and Reconciliation

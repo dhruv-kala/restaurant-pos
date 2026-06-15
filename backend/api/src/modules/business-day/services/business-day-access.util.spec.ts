@@ -6,6 +6,10 @@ import {
   requireBusinessDayClose,
   requireBusinessDayOpen,
   requireBusinessDayRead,
+  requireCashDrawerAdjust,
+  requireCashDrawerClose,
+  requireCashDrawerOpen,
+  requireCashDrawerRead,
   requireShiftSessionClose,
   requireShiftSessionOpen,
   requireShiftSessionRead,
@@ -101,6 +105,27 @@ describe('business day access utilities', () => {
         { ...tenantAdmin, roles: ['MANAGER'] },
         '01975c30-0000-7000-8000-000000000002',
       ),
+    ).not.toThrow();
+  });
+
+  it('allows managers and granular permissions to operate cash drawers', () => {
+    const manager = { ...tenantAdmin, roles: ['MANAGER'], outletId };
+    expect(() => requireCashDrawerRead(manager)).not.toThrow();
+    expect(() => requireCashDrawerOpen(manager)).not.toThrow();
+    expect(() => requireCashDrawerAdjust(manager)).not.toThrow();
+    expect(() => requireCashDrawerClose(manager)).not.toThrow();
+
+    const cashier = { ...tenantAdmin, roles: ['CASHIER'], permissions: ['cash_drawer.read'] };
+    expect(() => requireCashDrawerRead(cashier)).not.toThrow();
+    expect(() => requireCashDrawerOpen(cashier)).toThrow(ForbiddenException);
+    expect(() =>
+      requireCashDrawerOpen({ ...cashier, permissions: ['cash_drawer.open'] }),
+    ).not.toThrow();
+    expect(() =>
+      requireCashDrawerAdjust({ ...cashier, permissions: ['cash_drawer.adjust'] }),
+    ).not.toThrow();
+    expect(() =>
+      requireCashDrawerClose({ ...cashier, permissions: ['cash_drawer.close'] }),
     ).not.toThrow();
   });
 });

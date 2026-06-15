@@ -321,6 +321,23 @@ enum ShiftSessionStatus {
   @@map("shift_session_status")
 }
 
+enum CashDrawerStatus {
+  OPEN
+  CLOSED
+
+  @@map("cash_drawer_status")
+}
+
+enum CashDrawerTransactionType {
+  OPENING_BALANCE
+  CASH_IN
+  CASH_OUT
+  ADJUSTMENT
+  CLOSING_BALANCE
+
+  @@map("cash_drawer_transaction_type")
+}
+
 enum PaymentMethod {
   CASH
   UPI
@@ -931,6 +948,8 @@ model Tenant {
   taxCalculationSnapshots       TaxCalculationSnapshot[]
   businessDays                  BusinessDay[]
   shiftSessions                 ShiftSession[]
+  cashDrawers                   CashDrawer[]
+  cashDrawerTransactions        CashDrawerTransaction[]
   payments                      Payment[]
   paymentTransactions           PaymentTransaction[]
   paymentRefunds                PaymentRefund[]
@@ -1065,6 +1084,8 @@ model Outlet {
   taxCalculationSnapshots  TaxCalculationSnapshot[]
   businessDays             BusinessDay[]
   shiftSessions            ShiftSession[]
+  cashDrawers              CashDrawer[]
+  cashDrawerTransactions   CashDrawerTransaction[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1151,6 +1172,9 @@ model UserAccount {
   assignedShiftSessions                ShiftSession[]                 @relation("ShiftSessionAssignedUser")
   openedShiftSessions                  ShiftSession[]                 @relation("ShiftSessionOpenedBy")
   closedShiftSessions                  ShiftSession[]                 @relation("ShiftSessionClosedBy")
+  openedCashDrawers                    CashDrawer[]                   @relation("CashDrawerOpenedBy")
+  closedCashDrawers                    CashDrawer[]                   @relation("CashDrawerClosedBy")
+  cashDrawerTransactions               CashDrawerTransaction[]        @relation("CashDrawerTransactionRecordedBy")
   createdNotifications                 Notification[]                 @relation("NotificationCreatedBy")
   notificationRecipients               NotificationRecipient[]
   notificationPreferences              NotificationPreference[]
@@ -2149,11 +2173,13 @@ model BusinessDay {
   createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet   Outlet         @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  openedBy UserAccount    @relation("BusinessDayOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
-  closedBy UserAccount?   @relation("BusinessDayClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
-  shifts   ShiftSession[]
+  tenant                 Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet                 Outlet                  @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  openedBy               UserAccount             @relation("BusinessDayOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
+  closedBy               UserAccount?            @relation("BusinessDayClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  shifts                 ShiftSession[]
+  drawers                CashDrawer[]
+  cashDrawerTransactions CashDrawerTransaction[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, businessDate], map: "business_days_outlet_date_key")
@@ -2187,12 +2213,73 @@ model ShiftSession {
   shift        Shift?       @relation(fields: [tenantId, shiftId], references: [tenantId, id], onDelete: Restrict)
   openedBy     UserAccount  @relation("ShiftSessionOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
   closedBy     UserAccount? @relation("ShiftSessionClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  cashDrawers  CashDrawer[]
 
   @@unique([tenantId, id])
   @@index([tenantId, outletId, businessDayId, status], map: "shift_sessions_business_day_idx")
   @@index([tenantId, assignedUserId, status], map: "shift_sessions_user_status_idx")
   @@index([tenantId, shiftId, status], map: "shift_sessions_shift_status_idx")
   @@map("shift_sessions")
+}
+
+model CashDrawer {
+  id                  String           @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId            String           @map("tenant_id") @db.Uuid
+  outletId            String           @map("outlet_id") @db.Uuid
+  businessDayId       String           @map("business_day_id") @db.Uuid
+  shiftSessionId      String           @map("shift_session_id") @db.Uuid
+  currencyCode        String           @map("currency_code") @db.Char(3)
+  status              CashDrawerStatus @default(OPEN)
+  openingBalanceMinor Int              @map("opening_balance_minor")
+  expectedCashMinor   Int              @default(0) @map("expected_cash_minor")
+  closingBalanceMinor Int?             @map("closing_balance_minor")
+  openedAt            DateTime         @default(now()) @map("opened_at") @db.Timestamptz(3)
+  closedAt            DateTime?        @map("closed_at") @db.Timestamptz(3)
+  openedByUserId      String           @map("opened_by_user_id") @db.Uuid
+  closedByUserId      String?          @map("closed_by_user_id") @db.Uuid
+  openingNotes        String?          @map("opening_notes") @db.VarChar(1000)
+  closingNotes        String?          @map("closing_notes") @db.VarChar(1000)
+  version             Int              @default(1)
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant       Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet                  @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  businessDay  BusinessDay             @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
+  shiftSession ShiftSession            @relation(fields: [tenantId, shiftSessionId], references: [tenantId, id], onDelete: Restrict)
+  openedBy     UserAccount             @relation("CashDrawerOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
+  closedBy     UserAccount?            @relation("CashDrawerClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  transactions CashDrawerTransaction[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, outletId, businessDayId, status], map: "cash_drawers_business_day_idx")
+  @@index([tenantId, shiftSessionId, status], map: "cash_drawers_shift_status_idx")
+  @@map("cash_drawers")
+}
+
+model CashDrawerTransaction {
+  id               String                    @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId         String                    @map("tenant_id") @db.Uuid
+  outletId         String                    @map("outlet_id") @db.Uuid
+  businessDayId    String                    @map("business_day_id") @db.Uuid
+  cashDrawerId     String                    @map("cash_drawer_id") @db.Uuid
+  transactionType  CashDrawerTransactionType @map("transaction_type")
+  amountMinor      Int                       @map("amount_minor")
+  balanceAfter     Int                       @map("balance_after_minor")
+  note             String?                   @db.VarChar(1000)
+  recordedByUserId String                    @map("recorded_by_user_id") @db.Uuid
+  recordedAt       DateTime                  @default(now()) @map("recorded_at") @db.Timestamptz(3)
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet      Outlet      @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  businessDay BusinessDay @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
+  drawer      CashDrawer  @relation(fields: [tenantId, cashDrawerId], references: [tenantId, id], onDelete: Restrict)
+  recordedBy  UserAccount @relation("CashDrawerTransactionRecordedBy", fields: [recordedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, cashDrawerId, recordedAt], map: "cash_drawer_transactions_drawer_idx")
+  @@index([tenantId, businessDayId, outletId, transactionType], map: "cash_drawer_transactions_reporting_idx")
+  @@map("cash_drawer_transactions")
 }
 
 model DiscountPolicy {

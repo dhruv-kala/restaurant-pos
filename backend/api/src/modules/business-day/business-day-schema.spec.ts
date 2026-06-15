@@ -27,6 +27,15 @@ describe('business day foundation schema', () => {
     expect(migration).toContain('CREATE TYPE "shift_session_status"');
   });
 
+  it('defines cash drawers and append-only cash drawer transactions', () => {
+    expect(schema).toContain('enum CashDrawerStatus {');
+    expect(schema).toContain('enum CashDrawerTransactionType {');
+    expect(schema).toContain('model CashDrawer {');
+    expect(schema).toContain('model CashDrawerTransaction {');
+    expect(migration).toContain('CREATE TABLE "cash_drawers"');
+    expect(migration).toContain('CREATE TABLE "cash_drawer_transactions"');
+  });
+
   it('creates business days with tenant constraints and forced RLS', () => {
     expect(migration).toContain('CREATE TABLE "business_days"');
     expect(migration).toContain('FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id")');
@@ -52,5 +61,14 @@ describe('business day foundation schema', () => {
     expect(migration).toContain('CREATE POLICY "shift_sessions_tenant_isolation"');
     expect(migration).toContain('reject_closed_shift_session_mutation');
     expect(migration).toContain('closed shift sessions are immutable');
+  });
+
+  it('enforces one open drawer per shift and append-only transaction history', () => {
+    expect(migration).toContain('cash_drawers_one_open_per_shift_key');
+    expect(migration).toContain('ALTER TABLE "cash_drawers" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('ALTER TABLE "cash_drawer_transactions" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('reject_closed_cash_drawer_mutation');
+    expect(migration).toContain('reject_cash_drawer_transaction_mutation');
+    expect(migration).toContain('cash drawer transactions are append-only');
   });
 });

@@ -2,6 +2,7 @@
 
 Task 31.1 adds outlet-scoped business day lifecycle endpoints.
 Task 31.2 adds operational shift session lifecycle endpoints.
+Task 31.3 adds cash drawer lifecycle and append-only drawer transactions.
 
 All endpoints require JWT authentication. Tenant scope is resolved from the
 authenticated user unless a platform administrator supplies `tenantId`.
@@ -17,6 +18,12 @@ Outlet-bound users can access only their assigned outlet.
 - `GET /shift-sessions`
 - `GET /shift-sessions/current`
 - `PATCH /shift-sessions/:id/close`
+- `POST /cash-drawers/open`
+- `GET /cash-drawers`
+- `GET /cash-drawers/current`
+- `GET /cash-drawers/:id/transactions`
+- `POST /cash-drawers/:id/transactions`
+- `PATCH /cash-drawers/:id/close`
 
 ## Permissions
 
@@ -26,6 +33,10 @@ Outlet-bound users can access only their assigned outlet.
 - `shifts.read`
 - `shifts.open`
 - `shifts.close`
+- `cash_drawer.read`
+- `cash_drawer.open`
+- `cash_drawer.adjust`
+- `cash_drawer.close`
 
 Tenant administrators and managers can operate business days.
 
@@ -33,9 +44,14 @@ Tenant administrators and managers can operate business days.
 
 - Only one `OPEN` business day can exist per tenant/outlet.
 - Only one `OPEN` shift session can exist per tenant/assigned user.
+- Only one `OPEN` cash drawer can exist per tenant/shift session.
 - `businessDate` is stored as a date separate from timestamps.
-- Closing business days and shift sessions requires the current `version`.
+- Closing business days, shift sessions, and cash drawers requires the current
+  `version`.
 - Closed business days are immutable.
 - Closed shift sessions are immutable.
+- Closed cash drawers are immutable.
+- Cash drawer transactions are append-only.
 - Business days cannot be deleted.
 - Shift sessions cannot be deleted.
+- Cash drawers cannot be deleted.
