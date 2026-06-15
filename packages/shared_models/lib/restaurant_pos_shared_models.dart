@@ -20,6 +20,7 @@ export 'src/models/tenant.dart';
 export 'src/models/token_pair.dart';
 export 'src/notifications/notification_models.dart';
 export 'src/orders/order_models.dart';
+export 'src/operations/operation_models.dart';
 export 'src/payments/payment_models.dart';
 export 'src/promotions/promotions_models.dart';
 export 'src/rbac/rbac_models.dart';

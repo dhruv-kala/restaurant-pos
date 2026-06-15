@@ -68,6 +68,10 @@ abstract final class ApiEndpoints {
   static const String taxCalculate = '$tax/calculate';
   static const String taxReportSummary = '$tax/reports/summary';
   static const String taxReportDetailed = '$tax/reports/detailed';
+  static const String businessDays = '/business-days';
+  static const String shiftSessions = '/shift-sessions';
+  static const String cashDrawers = '/cash-drawers';
+  static const String shiftReconciliations = '/shift-reconciliations';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -286,6 +290,19 @@ abstract final class ApiEndpoints {
   static String taxFiscalSequence(String id) => '$taxFiscalSequences/$id';
   static String taxFiscalSequenceGenerate(String id) =>
       '${taxFiscalSequence(id)}/generate';
+  static String businessDay(String id) => '$businessDays/$id';
+  static const String businessDayCurrent = '$businessDays/current';
+  static String businessDayClose(String id) => '${businessDay(id)}/close';
+  static String businessDayClosing(String id) => '${businessDay(id)}/closing';
+  static String shiftSession(String id) => '$shiftSessions/$id';
+  static const String shiftSessionCurrent = '$shiftSessions/current';
+  static String shiftSessionClose(String id) => '${shiftSession(id)}/close';
+  static String cashDrawer(String id) => '$cashDrawers/$id';
+  static const String cashDrawerCurrent = '$cashDrawers/current';
+  static String cashDrawerTransactions(String id) =>
+      '${cashDrawer(id)}/transactions';
+  static String cashDrawerClose(String id) => '${cashDrawer(id)}/close';
+  static String shiftReconciliation(String id) => '$shiftReconciliations/$id';
   static String employeePerformance(String id) => '${employee(id)}/performance';
   static const String employeeDashboard = '$employees/dashboard';
   static String shift(String id) => '$shifts/$id';

@@ -17,6 +17,7 @@ export 'src/services/kitchen_api_service.dart';
 export 'src/services/menu_api_service.dart';
 export 'src/services/notification_api_service.dart';
 export 'src/services/orders_api_service.dart';
+export 'src/services/operations_api_service.dart';
 export 'src/services/outlet_api_service.dart';
 export 'src/services/payments_api_service.dart';
 export 'src/services/promotions_api_service.dart';

@@ -7,6 +7,7 @@ import 'package:restaurant_pos_ui_kit/restaurant_pos_ui_kit.dart';
 import 'features/menu/presentation/screens/menu_dashboard.dart';
 import 'features/communication/presentation/screens/communication_center_screen.dart';
 import 'features/notifications/presentation/screens/notification_center_screen.dart';
+import 'features/operations/presentation/screens/operations_admin_screen.dart';
 import 'features/promotions/presentation/screens/promotions_admin_screen.dart';
 import 'features/audit/presentation/screens/audit_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
@@ -98,6 +99,21 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasPermission('tax.report_view') == true ||
         user?.hasPermission('fiscal_policy.read') == true ||
         user?.hasPermission('fiscal_policy.manage') == true;
+    final canViewOperations =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('business_day.read') == true ||
+        user?.hasPermission('business_day.open') == true ||
+        user?.hasPermission('business_day.close') == true ||
+        user?.hasPermission('shifts.read') == true ||
+        user?.hasPermission('shifts.open') == true ||
+        user?.hasPermission('shifts.close') == true ||
+        user?.hasPermission('cash_drawer.read') == true ||
+        user?.hasPermission('cash_drawer.open') == true ||
+        user?.hasPermission('cash_drawer.adjust') == true ||
+        user?.hasPermission('cash_drawer.close') == true ||
+        user?.hasPermission('shift_reconciliation.read') == true ||
+        user?.hasPermission('shift_reconciliation.create') == true;
     final screens = <Widget>[
       const MenuDashboard(),
       const TableLayoutScreen(),
@@ -106,6 +122,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       const CustomerDashboard(),
       const ReportsDashboard(),
       const EmployeeDashboard(),
+      if (canViewOperations) const OperationsAdminScreen(),
       const NotificationCenterScreen(),
       if (canViewPromotions) const PromotionsAdminScreen(),
       if (canViewTax) const TaxAdminScreen(),
@@ -137,6 +154,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         label: 'Reports',
       ),
       const NavigationDestination(icon: Icon(Icons.badge), label: 'Employees'),
+      if (canViewOperations)
+        const NavigationDestination(
+          icon: Icon(Icons.manage_accounts),
+          label: 'Operations',
+        ),
       const NavigationDestination(
         icon: Icon(Icons.notifications),
         label: 'Notifications',
