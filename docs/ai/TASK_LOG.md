@@ -4247,3 +4247,60 @@ Known limitations:
 Next task:
 
 - Task 33.4 - Conflict Resolution Engine
+
+## 2026-06-15 - Task 33.4 Conflict Resolution Engine
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/restaurant-app/lib/core/offline/local_database_schema.dart`
+- `apps/restaurant-app/lib/core/offline/offline_entity_mapper.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_models.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_repository.dart`
+- `apps/restaurant-app/test/core/offline/offline_local_repository_test.dart`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.4-conflict-resolution-engine.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.4 only; background sync workers, server pull
+  integration, conflict UI, offline POS workflows, and sync administration UI
+  remain deferred.
+- Bumped local offline SQLite schema to version 3 and added
+  `sync_conflicts`.
+- Added append-only `sync_conflict_decisions` to preserve resolution history.
+- Added conflict detection via `recordSyncConflict`, which persists the
+  conflict and marks the affected queue item as `CONFLICT`.
+- Added `applyConflictResolution` with server-authority, client-wins, and
+  manual-review behavior.
+- Mapped server wins to `SERVER_AUTHORITY` and queue `SUCCESS`.
+- Mapped client wins to `LAST_WRITE_WINS` and queue `PENDING`.
+- Mapped manual review to `MANUAL_REVIEW`, keeping the conflict open and queue
+  item in `CONFLICT`.
+- Enforced manual review for financial-sensitive entity types so bills,
+  payments, receipts, invoices, cash drawers, business-day closings,
+  reconciliations, and stock movement conflicts cannot be auto-resolved.
+
+Validation:
+
+- `dart format apps/restaurant-app/lib/core/offline apps/restaurant-app/test/core/offline`:
+  passed
+- `flutter analyze` from `apps/restaurant-app`: passed
+- `flutter test test/core/offline/offline_local_repository_test.dart` from
+  `apps/restaurant-app`: passed
+
+Known limitations:
+
+- Task 33.4 does not invoke conflict detection from a live sync worker.
+- Conflict records are local-only until future background sync and admin
+  monitoring tasks wire them into synchronization flows.
+
+Next task:
+
+- Task 33.5 - Background Sync Service

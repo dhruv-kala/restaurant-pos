@@ -1,6 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart' as sqlite;
 
-const offlineDatabaseVersion = 2;
+const offlineDatabaseVersion = 3;
 
 Future<void> createOfflineDatabaseSchema(sqlite.Database database) async {
   await database.execute('''
@@ -156,6 +156,72 @@ CREATE TABLE IF NOT EXISTS local_change_log (
   await database.execute(
     'CREATE INDEX IF NOT EXISTS idx_local_change_log_entity '
     'ON local_change_log (tenant_id, outlet_id, entity_type, entity_id)',
+  );
+
+  await database.execute('''
+CREATE TABLE IF NOT EXISTS sync_conflicts (
+  id TEXT NOT NULL PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  outlet_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  queue_item_id TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  resolution_strategy TEXT,
+  detected_at TEXT NOT NULL,
+  resolved_by_user_id TEXT,
+  resolved_at TEXT,
+  resolution_notes TEXT,
+  local_payload_json TEXT NOT NULL,
+  server_payload_json TEXT NOT NULL,
+  CHECK (length(id) > 0),
+  CHECK (length(tenant_id) > 0),
+  CHECK (length(outlet_id) > 0),
+  CHECK (length(device_id) > 0),
+  CHECK (length(queue_item_id) > 0),
+  CHECK (status IN ('OPEN', 'RESOLVED', 'IGNORED')),
+  CHECK (
+    resolution_strategy IS NULL OR
+    resolution_strategy IN ('BUSINESS_RULE', 'SERVER_AUTHORITY', 'MANUAL_REVIEW', 'LAST_WRITE_WINS')
+  )
+)
+''');
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_sync_conflicts_scope_status '
+    'ON sync_conflicts (tenant_id, outlet_id, device_id, status, detected_at)',
+  );
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_sync_conflicts_entity '
+    'ON sync_conflicts (tenant_id, outlet_id, entity_type, entity_id)',
+  );
+
+  await database.execute('''
+CREATE TABLE IF NOT EXISTS sync_conflict_decisions (
+  id TEXT NOT NULL PRIMARY KEY,
+  conflict_id TEXT NOT NULL,
+  tenant_id TEXT NOT NULL,
+  outlet_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  strategy TEXT NOT NULL,
+  status_after TEXT NOT NULL,
+  queue_state_after TEXT NOT NULL,
+  decided_by_user_id TEXT NOT NULL,
+  decided_at TEXT NOT NULL,
+  notes TEXT,
+  CHECK (length(id) > 0),
+  CHECK (length(conflict_id) > 0),
+  CHECK (length(tenant_id) > 0),
+  CHECK (length(outlet_id) > 0),
+  CHECK (length(device_id) > 0),
+  CHECK (strategy IN ('BUSINESS_RULE', 'SERVER_AUTHORITY', 'MANUAL_REVIEW', 'LAST_WRITE_WINS')),
+  CHECK (status_after IN ('OPEN', 'RESOLVED', 'IGNORED')),
+  CHECK (queue_state_after IN ('PENDING', 'IN_PROGRESS', 'SUCCESS', 'FAILED', 'CONFLICT', 'RETRYING'))
+)
+''');
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_sync_conflict_decisions_conflict '
+    'ON sync_conflict_decisions (tenant_id, outlet_id, device_id, conflict_id, decided_at)',
   );
 }
 

@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 33.3**
+- Completed through: **Task 33.4**
 - Current module: **Offline SQLite Operation and Synchronization**
-- Next provisional task: **Task 33.4 - Conflict Resolution Engine**
+- Next provisional task: **Task 33.5 - Background Sync Service**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -68,6 +68,7 @@ Last updated: 2026-06-15
 | 33.1   | Offline sync architecture, storage-neutral shared sync contracts, offline identifier contract, and future sync API contract documentation |
 | 33.2   | Restaurant-app SQLite local storage, scoped local projections for orders/bills/customers/inventory, entity mappers, repository APIs, and reopen persistence tests |
 | 33.3   | Append-only sync queue and local change log tables, transactional create/update/delete change tracking, scoped recovery reads, and reopen persistence tests |
+| 33.4   | Local sync conflict persistence, conflict detection, server/client/manual-review resolution decisions, financial manual-review guard, and decision history |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -254,6 +255,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   `sync_queue` and `local_change_log` tables, idempotency-key uniqueness,
   transactional queue/change-log appends for create, update, and delete
   operations, scoped recovery reads, and schema version 2 upgrade handling
+- Conflict resolution foundation in restaurant-app with local `sync_conflicts`
+  and append-only `sync_conflict_decisions` tables, queue conflict marking,
+  server-authority and client-wins resolution behavior, manual-review handling,
+  financial record auto-resolution protection, and schema version 3 upgrade
+  handling
 
 ## Known Environment Limitation
 
@@ -264,7 +270,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 33.4 - Conflict Resolution Engine
+### Task 33.5 - Background Sync Service
 
 Read:
 
@@ -273,10 +279,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 33.4 unless explicitly requested. It should add conflict
-resolution records and decision handling on top of the Task 33.3 queue/change
-tracking foundation without implementing background sync workers, offline POS
-flows, or admin sync monitoring UI.
+Do not implement Task 33.5 unless explicitly requested. It should add bounded
+background sync orchestration on top of the Task 33.4 conflict foundation
+without implementing offline POS feature workflows or admin sync monitoring UI.
 
 ## Status Maintenance
 

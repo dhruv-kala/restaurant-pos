@@ -34,6 +34,34 @@ class LocalChangeLogEntry {
   final DateTime createdAt;
 }
 
+class LocalConflictResolutionEntry {
+  const LocalConflictResolutionEntry({
+    required this.id,
+    required this.conflictId,
+    required this.tenantId,
+    required this.outletId,
+    required this.deviceId,
+    required this.strategy,
+    required this.statusAfter,
+    required this.queueStateAfter,
+    required this.decidedByUserId,
+    required this.decidedAt,
+    this.notes,
+  });
+
+  final String id;
+  final String conflictId;
+  final String tenantId;
+  final String outletId;
+  final String deviceId;
+  final SyncConflictResolutionStrategy strategy;
+  final SyncConflictStatus statusAfter;
+  final SyncQueueState queueStateAfter;
+  final String decidedByUserId;
+  final DateTime decidedAt;
+  final String? notes;
+}
+
 class LocalOrderProjection {
   const LocalOrderProjection({
     required this.id,

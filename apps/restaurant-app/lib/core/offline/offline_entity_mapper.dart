@@ -131,6 +131,79 @@ class OfflineEntityMapper {
     createdAt: _dateFromRow(row, 'created_at'),
   );
 
+  static Map<String, Object?> syncConflictToRow(SyncConflict conflict) => {
+    'id': conflict.id,
+    'tenant_id': conflict.tenantId,
+    'outlet_id': conflict.outletId,
+    'device_id': conflict.deviceId,
+    'queue_item_id': conflict.queueItemId,
+    'entity_type': conflict.entityType,
+    'entity_id': conflict.entityId,
+    'status': conflict.status.wireName,
+    'resolution_strategy': conflict.resolutionStrategy?.wireName,
+    'detected_at': _date(conflict.detectedAt),
+    'resolved_by_user_id': conflict.resolvedByUserId,
+    'resolved_at': _optionalDate(conflict.resolvedAt),
+    'resolution_notes': conflict.resolutionNotes,
+    'local_payload_json': jsonEncode(conflict.localPayload),
+    'server_payload_json': jsonEncode(conflict.serverPayload),
+  };
+
+  static SyncConflict syncConflictFromRow(Map<String, Object?> row) =>
+      SyncConflict(
+        id: _string(row, 'id'),
+        tenantId: _string(row, 'tenant_id'),
+        outletId: _string(row, 'outlet_id'),
+        deviceId: _string(row, 'device_id'),
+        queueItemId: _string(row, 'queue_item_id'),
+        entityType: _string(row, 'entity_type'),
+        entityId: _string(row, 'entity_id'),
+        status: SyncConflictStatus.fromJson(row['status']),
+        resolutionStrategy: row['resolution_strategy'] == null
+            ? null
+            : SyncConflictResolutionStrategy.fromJson(
+                row['resolution_strategy'],
+              ),
+        detectedAt: _dateFromRow(row, 'detected_at'),
+        resolvedByUserId: row['resolved_by_user_id']?.toString(),
+        resolvedAt: _optionalDateFromRow(row['resolved_at']),
+        resolutionNotes: row['resolution_notes']?.toString(),
+        localPayload: _jsonMap(row, 'local_payload_json'),
+        serverPayload: _jsonMap(row, 'server_payload_json'),
+      );
+
+  static Map<String, Object?> conflictResolutionEntryToRow(
+    LocalConflictResolutionEntry entry,
+  ) => {
+    'id': entry.id,
+    'conflict_id': entry.conflictId,
+    'tenant_id': entry.tenantId,
+    'outlet_id': entry.outletId,
+    'device_id': entry.deviceId,
+    'strategy': entry.strategy.wireName,
+    'status_after': entry.statusAfter.wireName,
+    'queue_state_after': entry.queueStateAfter.wireName,
+    'decided_by_user_id': entry.decidedByUserId,
+    'decided_at': _date(entry.decidedAt),
+    'notes': entry.notes,
+  };
+
+  static LocalConflictResolutionEntry conflictResolutionEntryFromRow(
+    Map<String, Object?> row,
+  ) => LocalConflictResolutionEntry(
+    id: _string(row, 'id'),
+    conflictId: _string(row, 'conflict_id'),
+    tenantId: _string(row, 'tenant_id'),
+    outletId: _string(row, 'outlet_id'),
+    deviceId: _string(row, 'device_id'),
+    strategy: SyncConflictResolutionStrategy.fromJson(row['strategy']),
+    statusAfter: SyncConflictStatus.fromJson(row['status_after']),
+    queueStateAfter: SyncQueueState.fromJson(row['queue_state_after']),
+    decidedByUserId: _string(row, 'decided_by_user_id'),
+    decidedAt: _dateFromRow(row, 'decided_at'),
+    notes: row['notes']?.toString(),
+  );
+
   static Map<String, Object?> orderToRow(LocalOrderProjection order) => {
     ..._baseProjectionToRow(order),
     'business_date': _date(order.businessDate),
@@ -338,7 +411,11 @@ class OfflineEntityMapper {
       value is String ? DateTime.parse(value) : null;
 
   static Map<String, dynamic> _payload(Map<String, Object?> row) {
-    final value = row['payload_json'];
+    return _jsonMap(row, 'payload_json');
+  }
+
+  static Map<String, dynamic> _jsonMap(Map<String, Object?> row, String key) {
+    final value = row[key];
     if (value is! String) {
       throw const FormatException('Expected JSON payload string.');
     }

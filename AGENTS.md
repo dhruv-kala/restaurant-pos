@@ -343,7 +343,13 @@ log storage for create, update, and delete operations, transactional queue and
 change-log appends, scoped recovery reads, idempotency-key uniqueness, schema
 upgrade handling, and persistence tests across database reopen.
 
-Task 33.4 is next provisionally: implement conflict resolution engine. Do not
+Task 33.4 implemented local sync conflict persistence, conflict detection that
+marks queue entries as `CONFLICT`, server-wins and client-wins resolution
+decisions, manual-review handling, append-only conflict decision history,
+financial-record manual-review enforcement, schema version 3 upgrade handling,
+and conflict resolution tests.
+
+Task 33.5 is next provisionally: implement background sync service. Do not
 implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
