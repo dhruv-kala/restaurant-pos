@@ -871,6 +871,26 @@ enum OutboxEventStatus {
   @@map("outbox_event_status")
 }
 
+enum BackgroundJobStatus {
+  PENDING
+  PROCESSING
+  RETRYING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+
+  @@map("background_job_status")
+}
+
+enum BackgroundJobAttemptStatus {
+  STARTED
+  SUCCEEDED
+  RETRYABLE_FAILED
+  TERMINAL_FAILED
+
+  @@map("background_job_attempt_status")
+}
+
 model Country {
   id        String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   code      String   @unique @db.Citext
@@ -1102,6 +1122,8 @@ model Tenant {
   deviceAssignments             DeviceAssignment[]
   deviceSecurityPolicies        DeviceSecurityPolicy[]
   outboxEvents                  OutboxEvent[]
+  backgroundJobs                BackgroundJob[]
+  backgroundJobAttempts         BackgroundJobAttempt[]
 
   @@index([status])
   @@index([deletedAt])
@@ -1192,6 +1214,7 @@ model Outlet {
   deviceAssignments        DeviceAssignment[]
   deviceSecurityPolicies   DeviceSecurityPolicy[]
   outboxEvents             OutboxEvent[]
+  backgroundJobs           BackgroundJob[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1315,6 +1338,7 @@ model UserAccount {
   createdDeviceSecurityPolicies        DeviceSecurityPolicy[]         @relation("DeviceSecurityPolicyCreatedBy")
   updatedDeviceSecurityPolicies        DeviceSecurityPolicy[]         @relation("DeviceSecurityPolicyUpdatedBy")
   createdOutboxEvents                  OutboxEvent[]                  @relation("OutboxEventCreatedBy")
+  createdBackgroundJobs                BackgroundJob[]                @relation("BackgroundJobCreatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -1553,9 +1577,10 @@ model OutboxEvent {
   createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant    Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet    Outlet?      @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  createdBy UserAccount? @relation("OutboxEventCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  tenant    Tenant?         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet    Outlet?         @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  createdBy UserAccount?    @relation("OutboxEventCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  jobs      BackgroundJob[]
 
   @@unique([scopeKey, eventType, idempotencyKey], map: "outbox_events_scope_event_idempotency_key")
   @@unique([tenantId, id], map: "outbox_events_tenant_id_id_key")
@@ -1564,6 +1589,76 @@ model OutboxEvent {
   @@index([tenantId, outletId, createdAt], map: "outbox_events_outlet_created_idx")
   @@index([scopeKey, aggregateType, aggregateId, createdAt], map: "outbox_events_aggregate_idx")
   @@map("outbox_events")
+}
+
+model BackgroundJob {
+  id                 String              @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  scope              OutboxEventScope
+  scopeKey           String              @map("scope_key") @db.VarChar(80)
+  tenantId           String?             @map("tenant_id") @db.Uuid
+  outletId           String?             @map("outlet_id") @db.Uuid
+  outboxEventId      String?             @map("outbox_event_id") @db.Uuid
+  jobType            String              @map("job_type") @db.VarChar(160)
+  aggregateType      String?             @map("aggregate_type") @db.VarChar(100)
+  aggregateId        String?             @map("aggregate_id") @db.VarChar(160)
+  idempotencyKey     String              @map("idempotency_key") @db.VarChar(180)
+  requestFingerprint String              @map("request_fingerprint") @db.Char(64)
+  payload            Json                @db.JsonB
+  redactedPayload    Json?               @map("redacted_payload") @db.JsonB
+  status             BackgroundJobStatus @default(PENDING)
+  priority           Int                 @default(100)
+  attemptCount       Int                 @default(0) @map("attempt_count")
+  maxAttempts        Int                 @default(5) @map("max_attempts")
+  availableAt        DateTime            @default(now()) @map("available_at") @db.Timestamptz(3)
+  lockedBy           String?             @map("locked_by") @db.VarChar(120)
+  lockedUntil        DateTime?           @map("locked_until") @db.Timestamptz(3)
+  lastErrorCode      String?             @map("last_error_code") @db.VarChar(120)
+  lastErrorMessage   String?             @map("last_error_message") @db.VarChar(500)
+  createdByUserId    String?             @map("created_by_user_id") @db.Uuid
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant?                @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet    Outlet?                @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  outbox    OutboxEvent?           @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+  createdBy UserAccount?           @relation("BackgroundJobCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  attempts  BackgroundJobAttempt[]
+
+  @@unique([scopeKey, jobType, idempotencyKey], map: "background_jobs_scope_type_idempotency_key")
+  @@unique([tenantId, id], map: "background_jobs_tenant_id_id_key")
+  @@index([tenantId, status, availableAt], map: "background_jobs_tenant_queue_idx")
+  @@index([scope, status, availableAt, priority], map: "background_jobs_scope_queue_idx")
+  @@index([tenantId, outletId, createdAt], map: "background_jobs_outlet_created_idx")
+  @@index([scopeKey, aggregateType, aggregateId, createdAt], map: "background_jobs_aggregate_idx")
+  @@index([outboxEventId], map: "background_jobs_outbox_event_idx")
+  @@map("background_jobs")
+}
+
+model BackgroundJobAttempt {
+  id                  String                     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  scope               OutboxEventScope
+  scopeKey            String                     @map("scope_key") @db.VarChar(80)
+  tenantId            String?                    @map("tenant_id") @db.Uuid
+  jobId               String                     @map("job_id") @db.Uuid
+  attemptNumber       Int                        @map("attempt_number")
+  workerId            String                     @map("worker_id") @db.VarChar(120)
+  status              BackgroundJobAttemptStatus @default(STARTED)
+  errorCode           String?                    @map("error_code") @db.VarChar(120)
+  errorClassification String?                    @map("error_classification") @db.VarChar(80)
+  errorMessage        String?                    @map("error_message") @db.VarChar(500)
+  startedAt           DateTime                   @default(now()) @map("started_at") @db.Timestamptz(3)
+  completedAt         DateTime?                  @map("completed_at") @db.Timestamptz(3)
+  createdAt           DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant?       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  job    BackgroundJob @relation(fields: [jobId], references: [id], onDelete: Restrict)
+
+  @@unique([jobId, attemptNumber], map: "background_job_attempts_job_attempt_key")
+  @@unique([tenantId, id], map: "background_job_attempts_tenant_id_id_key")
+  @@index([tenantId, jobId, startedAt], map: "background_job_attempts_job_history_idx")
+  @@index([scope, status, startedAt], map: "background_job_attempts_status_idx")
+  @@map("background_job_attempts")
 }
 
 model TenantMembership {

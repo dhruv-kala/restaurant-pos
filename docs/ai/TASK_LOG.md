@@ -4655,3 +4655,74 @@ Known limitations:
 Next task:
 
 - Task 34.2 - Background Job Registry and Worker Foundation
+
+## 2026-06-15 - Task 34.2 Background Job Registry and Worker Foundation
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616190000_add_background_job_foundation/migration.sql`
+- `backend/api/src/modules/outbox/models/background-job.model.ts`
+- `backend/api/src/modules/outbox/outbox-schema.spec.ts`
+- `backend/api/src/modules/outbox/outbox.module.ts`
+- `backend/api/src/modules/outbox/services/background-job-registry.service.spec.ts`
+- `backend/api/src/modules/outbox/services/background-job-registry.service.ts`
+- `backend/api/src/modules/outbox/services/background-jobs.service.spec.ts`
+- `backend/api/src/modules/outbox/services/background-jobs.service.ts`
+- `backend/api/src/modules/outbox/services/background-worker.service.ts`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/specifications/transactional-outbox-jobs-scheduler-module.md`
+- `docs/tasks/000-roadmap.md`
+- `docs/tasks/034-outbox-jobs-scheduler/34.2-background-job-registry-and-worker-foundation.md`
+
+Decisions:
+
+- Implemented Task 34.2 only; cron-like scheduler definitions, dead-letter
+  administration, admin UI, PM2 worker topology, and public job administration
+  APIs remain deferred.
+- Added `BackgroundJobStatus` and `BackgroundJobAttemptStatus` enums.
+- Added `BackgroundJob` with platform or tenant scope, optional outlet scope,
+  optional `outboxEventId`, job type, aggregate reference, idempotency key,
+  request fingerprint, payload, redacted payload, priority, attempt limits,
+  lease fields, and failure metadata.
+- Added append-only `BackgroundJobAttempt` records with attempt number, worker
+  ID, status, safe error fields, start and completion timestamps.
+- Added forced RLS for `background_jobs` and `background_job_attempts`.
+- Added immutable identity/payload triggers for jobs and append-only delete
+  protections for attempts.
+- Added `BackgroundJobsService.create` for idempotent direct job creation.
+- Added outbox materialization from `OutboxEvent` to `BackgroundJob`, preserving
+  tenant, outlet, aggregate, payload, actor, and availability scope.
+- Added atomic worker claiming using database `FOR UPDATE SKIP LOCKED`, bounded
+  batch size, and lease expiration.
+- Added attempt creation during claim and success/failure transition helpers.
+- Added retryable failure handling with error classification and simple secret
+  fragment redaction for error messages.
+- Added `BackgroundJobRegistry` as the handler registry contract.
+- Added `BackgroundWorkerService.runOnce` for internal batch execution through
+  registered handlers.
+
+Validation:
+
+- `npm run prisma:format` from `backend/api`: passed
+- `npx prettier --write src/modules/outbox/**/*.ts` from `backend/api`: passed
+- `npm run prisma:generate` from `backend/api`: passed
+- `npm test -- outbox` from `backend/api`: passed
+- `npm run prisma:validate` from `backend/api`: passed
+- `npm run build` from `backend/api`: passed
+- `npm run lint` from `backend/api`: passed
+
+Known limitations:
+
+- `BackgroundWorkerService` is an internal service foundation; no PM2 worker
+  process, bootstrapped polling loop, or operational UI is wired in Task 34.2.
+- Public job history/retry/cancel APIs are deferred to later Task 34 work.
+- Dead-letter terminal recovery is deferred to Task 34.4.
+
+Next task:
+
+- Task 34.3 - Scheduler Foundation

@@ -2,13 +2,13 @@
 
 ## Status
 
-Implemented through Task 34.1. Background job execution, scheduler definitions,
-retry/dead-letter controls, and operations UI remain planned.
+Implemented through Task 34.2. Scheduler definitions, retry/dead-letter
+administration, and operations UI remain planned.
 
 Task 34 is split into:
 
 * Task 34.1 Transactional Outbox Foundation - Complete
-* Task 34.2 Background Job Registry and Worker Foundation
+* Task 34.2 Background Job Registry and Worker Foundation - Complete
 * Task 34.3 Scheduler Foundation
 * Task 34.4 Retry, Dead Letter, and Recovery Controls
 * Task 34.5 Operations Administration UI
@@ -51,6 +51,11 @@ Task 34.1 implements `OutboxEvent` with platform or tenant scope, optional
 outlet scope for tenant events, idempotency keys, request fingerprints,
 redacted payload snapshots, forced RLS, immutable identity/payload triggers, a
 transactional writer service, and protected read APIs under `/outbox/events`.
+
+Task 34.2 implements `BackgroundJob` and append-only `BackgroundJobAttempt`
+records, idempotent materialization from outbox events, handler registry
+contracts, atomic worker claiming with database leases, worker batch execution,
+success/failure state transitions, and safe retryable failure metadata.
 
 ## Scope Rules
 
@@ -108,6 +113,9 @@ Planned APIs:
 
 Task 34.1 exposes only the outbox read APIs above. Job and scheduler APIs are
 deferred until their backing models exist.
+
+Task 34.2 keeps job registry and worker services internal. Public job
+administration APIs remain deferred.
 
 ## Flutter
 

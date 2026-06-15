@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 34.1**
+- Completed through: **Task 34.2**
 - Current module: **Transactional Outbox, Background Jobs, and Scheduler**
-- Next provisional task: **Task 34.2 - Background Job Registry and Worker Foundation**
+- Next provisional task: **Task 34.3 - Scheduler Foundation**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -75,6 +75,7 @@ Last updated: 2026-06-15
 | 33.8   | Sync health snapshots, queue/batch/checkpoint visibility, failed/retrying/stale item visibility, recovery tools, and tests |
 | 33.9   | Offline administration UI with sync dashboard, queue viewer, conflict viewer, recovery actions, route access, and operational dashboard entry point |
 | 34.1   | Transactional outbox events, platform/tenant scope, idempotent writer, redacted payload snapshots, forced RLS, protected read APIs, and tests |
+| 34.2   | Background job records, append-only attempts, handler registry, outbox materialization, atomic lease claims, worker execution, retryable failure metadata, and tests |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -292,6 +293,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   snapshots, immutable identity/payload protections, forced RLS, protected
   `/outbox/events` read APIs, and an injectable writer service for existing
   Prisma transactions
+- Background job foundation with tenant/platform scoped `BackgroundJob`
+  records, append-only `BackgroundJobAttempt` records, idempotent
+  materialization from outbox events, handler registry contracts, atomic
+  `FOR UPDATE SKIP LOCKED` worker claims with leases, success/failure
+  transitions, retryable failure metadata, and internal worker batch execution
 
 ## Known Environment Limitation
 
@@ -302,7 +308,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 34.2 - Background Job Registry and Worker Foundation
+### Task 34.3 - Scheduler Foundation
 
 Read:
 
@@ -311,12 +317,11 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 - `docs/specifications/transactional-outbox-jobs-scheduler-module.md`
-- `docs/tasks/034-outbox-jobs-scheduler/34.2-background-job-registry-and-worker-foundation.md`
+- `docs/tasks/034-outbox-jobs-scheduler/34.3-scheduler-foundation.md`
 
-Do not implement Task 34.2 unless explicitly requested. It should create
-background job records, handler registry contracts, and worker claim behavior
-from the existing outbox foundation without implementing scheduler,
-dead-letter administration, or UI.
+Do not implement Task 34.3 unless explicitly requested. It should add scheduled
+job definitions and due-schedule scanning on top of the existing background job
+foundation without implementing dead-letter administration or UI.
 
 ## Status Maintenance
 

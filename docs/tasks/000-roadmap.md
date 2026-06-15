@@ -12,8 +12,8 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, 32.1-32.6, 33.1-33.9, and 34.1 are
-  complete; Task 34.2 background job registry and worker foundation is the next listed
+- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, 32.1-32.6, 33.1-33.9, and 34.1-34.2 are
+  complete; Task 34.3 scheduler foundation is the next listed
   provisional implementation task.
 - Specification and subtask planning files exist for Tasks 34 through 39 only.
 
@@ -75,8 +75,8 @@ Last updated: 2026-06-15
 | 33.8 | COMPLETE | Sync monitoring and recovery |
 | 33.9 | COMPLETE | Offline administration UI |
 | 34.1 | COMPLETE | Transactional outbox foundation |
-| 34.2 | NEXT | Background job registry and worker foundation |
-| 34.3 | PLANNED | Scheduler foundation |
+| 34.2 | COMPLETE | Background job registry and worker foundation |
+| 34.3 | NEXT | Scheduler foundation |
 | 34.4 | PLANNED | Retry, dead letter, and recovery controls |
 | 34.5 | PLANNED | Operations administration UI for jobs and scheduler |
 | 35.1 | PLANNED | Storage abstraction foundation |

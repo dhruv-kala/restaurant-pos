@@ -381,9 +381,14 @@ fingerprints, redacted payload snapshots, forced RLS, immutable
 identity/payload protections, protected `/outbox/events` read APIs, permission
 seeds, and focused tests.
 
-Task 34.2 is next provisionally: implement background job registry and worker
-foundation. Do not implement it unless the active user request explicitly asks
-for it.
+Task 34.2 implemented tenant/platform scoped background job records,
+append-only attempts, idempotent materialization from outbox events, handler
+registry contracts, atomic worker batch claiming with leases, internal worker
+execution, success/failure transitions, retryable failure metadata, forced RLS,
+immutable identity protections, and focused tests.
+
+Task 34.3 is next provisionally: implement scheduler foundation. Do not
+implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 
