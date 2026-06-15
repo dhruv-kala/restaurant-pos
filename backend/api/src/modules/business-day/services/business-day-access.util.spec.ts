@@ -6,7 +6,11 @@ import {
   requireBusinessDayClose,
   requireBusinessDayOpen,
   requireBusinessDayRead,
+  requireShiftSessionClose,
+  requireShiftSessionOpen,
+  requireShiftSessionRead,
   resolveBusinessDayScope,
+  assertShiftActorCanAssign,
 } from './business-day-access.util';
 
 const tenantId = '01975c30-0000-7000-8000-000000000100';
@@ -67,5 +71,36 @@ describe('business day access utilities', () => {
       ForbiddenException,
     );
     expect(() => assertOutletAccess(tenantAdmin, outletId)).not.toThrow();
+  });
+
+  it('allows managers and granular permissions to operate shift sessions', () => {
+    const manager = { ...tenantAdmin, roles: ['MANAGER'], outletId };
+    expect(() => requireShiftSessionRead(manager)).not.toThrow();
+    expect(() => requireShiftSessionOpen(manager)).not.toThrow();
+    expect(() => requireShiftSessionClose(manager)).not.toThrow();
+
+    const cashier = { ...tenantAdmin, roles: ['CASHIER'], permissions: ['shifts.read'] };
+    expect(() => requireShiftSessionRead(cashier)).not.toThrow();
+    expect(() => requireShiftSessionOpen(cashier)).toThrow(ForbiddenException);
+    expect(() =>
+      requireShiftSessionOpen({ ...cashier, permissions: ['shifts.open'] }),
+    ).not.toThrow();
+    expect(() =>
+      requireShiftSessionClose({ ...cashier, permissions: ['shifts.close'] }),
+    ).not.toThrow();
+  });
+
+  it('limits non-manager shift operations to the actor user', () => {
+    const cashier = { ...tenantAdmin, roles: ['CASHIER'], permissions: ['shifts.open'] };
+    expect(() => assertShiftActorCanAssign(cashier, tenantAdmin.id)).not.toThrow();
+    expect(() =>
+      assertShiftActorCanAssign(cashier, '01975c30-0000-7000-8000-000000000002'),
+    ).toThrow(ForbiddenException);
+    expect(() =>
+      assertShiftActorCanAssign(
+        { ...tenantAdmin, roles: ['MANAGER'] },
+        '01975c30-0000-7000-8000-000000000002',
+      ),
+    ).not.toThrow();
   });
 });

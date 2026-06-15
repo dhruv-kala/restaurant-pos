@@ -18,6 +18,15 @@ describe('business day foundation schema', () => {
     expect(schema).toContain('closedBusinessDays');
   });
 
+  it('defines operational shift sessions linked to business days', () => {
+    expect(schema).toContain('enum ShiftSessionStatus {');
+    expect(schema).toContain('model ShiftSession {');
+    expect(schema).toContain('shiftSessions                 ShiftSession[]');
+    expect(schema).toContain('assignedShiftSessions');
+    expect(migration).toContain('CREATE TABLE "shift_sessions"');
+    expect(migration).toContain('CREATE TYPE "shift_session_status"');
+  });
+
   it('creates business days with tenant constraints and forced RLS', () => {
     expect(migration).toContain('CREATE TABLE "business_days"');
     expect(migration).toContain('FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id")');
@@ -34,5 +43,14 @@ describe('business day foundation schema', () => {
     expect(migration).toContain('reject_closed_business_day_mutation');
     expect(migration).toContain('closed business days are immutable');
     expect(migration).toContain('business days cannot be deleted');
+  });
+
+  it('enforces one open shift session per user and closed-session immutability', () => {
+    expect(migration).toContain('shift_sessions_one_open_per_user_key');
+    expect(migration).toContain('WHERE "status" = \'OPEN\'');
+    expect(migration).toContain('ALTER TABLE "shift_sessions" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "shift_sessions_tenant_isolation"');
+    expect(migration).toContain('reject_closed_shift_session_mutation');
+    expect(migration).toContain('closed shift sessions are immutable');
   });
 });

@@ -63,7 +63,7 @@ const moduleActions: Record<string, readonly string[]> = {
     'assign_role',
     'assign_outlet',
   ],
-  shifts: ['create', 'read', 'update', 'delete', 'assign', 'unassign', 'publish', 'close'],
+  shifts: ['create', 'read', 'update', 'delete', 'assign', 'unassign', 'publish', 'open', 'close'],
   attendance: [
     'read',
     'check_in',

@@ -79,6 +79,58 @@ export function requireBusinessDayClose(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Business day close permission is required');
 }
 
+export function requireShiftSessionRead(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'shifts.read') ||
+    hasPermission(actor, 'shifts.open') ||
+    hasPermission(actor, 'shifts.close')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Shift session read permission is required');
+}
+
+export function requireShiftSessionOpen(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'shifts.open')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Shift session open permission is required');
+}
+
+export function requireShiftSessionClose(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'shifts.close')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Shift session close permission is required');
+}
+
+export function assertShiftActorCanAssign(actor: AuthenticatedUser, assignedUserId: string): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE)
+  ) {
+    return;
+  }
+  if (actor.id === assignedUserId) {
+    return;
+  }
+  throw new ForbiddenException('Users can only open or close their own shift sessions');
+}
+
 function hasPermission(actor: AuthenticatedUser, permission: string): boolean {
   return actor.permissions?.includes('*') || actor.permissions?.includes(permission) || false;
 }

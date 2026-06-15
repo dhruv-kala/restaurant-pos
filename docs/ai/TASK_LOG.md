@@ -3284,3 +3284,86 @@ Known limitations:
 Next task:
 
 - Task 31.2 - Shift Management
+
+## Task 31.2 Completion
+
+Date: 2026-06-15
+
+Task: Task 31.2 - Shift Management
+
+Status: Complete
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616100000_add_business_day_foundation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/business-day/business-day.module.ts`
+- `backend/api/src/modules/business-day/business-day-schema.spec.ts`
+- `backend/api/src/modules/business-day/controllers/shift-sessions.controller.ts`
+- `backend/api/src/modules/business-day/dto/shift-session.dto.ts`
+- `backend/api/src/modules/business-day/services/business-day-access.util.ts`
+- `backend/api/src/modules/business-day/services/business-day-access.util.spec.ts`
+- `backend/api/src/modules/business-day/services/shift-sessions.service.ts`
+- `backend/api/src/modules/business-day/services/shift-sessions.service.spec.ts`
+- `docs/api/business-day-module.md`
+- `docs/specifications/business-day-module.md`
+- `docs/tasks/031-business-day/31.2-shift-management.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Task 31.2 implemented only operational shift-session lifecycle scope.
+- Added tenant/outlet-scoped `ShiftSession` records with
+  `ShiftSessionStatus.OPEN` and `ShiftSessionStatus.CLOSED`.
+- Kept the existing employee module `Shift` model as the staff shift template;
+  operational sessions reference it optionally instead of reusing it as a
+  lifecycle aggregate.
+- Shift sessions belong to the outlet's current open `BusinessDay`.
+- Enforced one open shift session per assigned user through a partial unique
+  index.
+- Added forced RLS and tenant-aware outlet, business-day, and optional shift
+  template foreign keys.
+- Added closed-session immutability and no-delete triggers.
+- Added protected APIs:
+  `POST /shift-sessions/open`,
+  `GET /shift-sessions`,
+  `GET /shift-sessions/current`, and
+  `PATCH /shift-sessions/:id/close`.
+- Added `shifts.open` permission and mapped cashiers to only
+  `shifts.read`, `shifts.open`, and `shifts.close` for operational sessions.
+- Managers, tenant admins, and platform admins can operate outlet sessions;
+  non-manager users can open and close only their own sessions.
+- Shift session close uses optimistic `version` checks.
+- Shift session open and close write audit events.
+- Cash drawers, reconciliation, business day close validations, shared Dart
+  clients, and UI remain deferred.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/business-day`: passed, 4 suites and
+  22 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 99 suites and 358 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 31 migration was not deployed to a live PostgreSQL database.
+- Existing order, billing, payment, receipt, and report flows still use their
+  current business-date derivation until later integration tasks explicitly
+  wire them to open business days and shift sessions.
+- Shift close currently records lifecycle state only; cash drawer and
+  reconciliation checks belong to later Task 31 subtasks.
+
+Next task:
+
+- Task 31.3 - Cash Drawer Management

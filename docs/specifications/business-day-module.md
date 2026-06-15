@@ -7,7 +7,7 @@ Partially implemented.
 Task 31 is split into:
 
 * Task 31.1 Business Day Foundation - Complete
-* Task 31.2 Shift Management
+* Task 31.2 Shift Management - Complete
 * Task 31.3 Cash Drawer Management
 * Task 31.4 Shift Closing and Reconciliation
 * Task 31.5 Business Day Closing
@@ -48,7 +48,7 @@ This module owns operational accountability.
 Potential entities:
 
 * BusinessDay - implemented in Task 31.1
-* ShiftSession
+* ShiftSession - implemented in Task 31.2
 * CashDrawer
 * CashDrawerTransaction
 * ShiftReconciliation
@@ -83,8 +83,9 @@ Suggested permissions:
 * `business_day.read`
 * `business_day.open`
 * `business_day.close`
-* `shift.open`
-* `shift.close`
+* `shifts.read`
+* `shifts.open`
+* `shifts.close`
 * `cash_drawer.open`
 * `cash_drawer.close`
 * `shift.reconciliation`
@@ -105,6 +106,20 @@ Task 31.1 implements tenant/outlet-scoped business days with
 validates outlet ownership and active outlet status, rejects duplicate outlet
 business dates, and enforces one open business day per outlet. Closing uses
 optimistic `version` checks. Open and close actions write audit events.
+
+Shift Management:
+
+* `POST /shift-sessions/open`
+* `GET /shift-sessions`
+* `GET /shift-sessions/current`
+* `PATCH /shift-sessions/:id/close`
+
+Task 31.2 implements tenant/outlet-scoped operational shift sessions with
+`ShiftSessionStatus.OPEN` and `ShiftSessionStatus.CLOSED`. A shift session is
+assigned to a user, belongs to the outlet's current open business day, and may
+reference an existing staff shift template from the employee module. Only one
+open shift session is allowed per user. Closing uses optimistic `version`
+checks. Open and close actions write audit events.
 
 ## Audit Requirements
 

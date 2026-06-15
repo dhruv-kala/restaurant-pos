@@ -52,8 +52,8 @@ Last updated: 2026-06-15
 | 30.5 | COMPLETE | Tax reporting foundation |
 | 30.6 | COMPLETE | Tax admin UI |
 | 31.1 | COMPLETE | Business day foundation |
-| 31.2 | NEXT | Shift management |
-| 31.3 | PLANNED | Cash drawer management |
+| 31.2 | COMPLETE | Shift management |
+| 31.3 | NEXT | Cash drawer management |
 | 31.4 | PLANNED | Shift closing and reconciliation |
 | 31.5 | PLANNED | Business day closing |
 | 31.6 | PLANNED | Operations administration UI |
@@ -66,7 +66,7 @@ Last updated: 2026-06-15
 
 | Task | Status | Provisional scope |
 |---|---|---|
-| 37 | NEXT | Customer ordering application foundation |
+| 37 | PLANNED | Customer ordering application foundation |
 | 38 | PLANNED | QR ordering and table self-service |
 | 39 | PLANNED | Delivery, pickup, fulfillment, and address zones |
 | 40 | PLANNED | Advanced reservations, waitlist, and guest seating |

@@ -314,6 +314,13 @@ enum BusinessDayStatus {
   @@map("business_day_status")
 }
 
+enum ShiftSessionStatus {
+  OPEN
+  CLOSED
+
+  @@map("shift_session_status")
+}
+
 enum PaymentMethod {
   CASH
   UPI
@@ -923,6 +930,7 @@ model Tenant {
   fiscalInvoiceSequences        FiscalInvoiceSequence[]
   taxCalculationSnapshots       TaxCalculationSnapshot[]
   businessDays                  BusinessDay[]
+  shiftSessions                 ShiftSession[]
   payments                      Payment[]
   paymentTransactions           PaymentTransaction[]
   paymentRefunds                PaymentRefund[]
@@ -1056,6 +1064,7 @@ model Outlet {
   fiscalInvoiceSequences   FiscalInvoiceSequence[]
   taxCalculationSnapshots  TaxCalculationSnapshot[]
   businessDays             BusinessDay[]
+  shiftSessions            ShiftSession[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1139,6 +1148,9 @@ model UserAccount {
   impersonatedAuditEvents              AuditEvent[]                   @relation("AuditImpersonator")
   openedBusinessDays                   BusinessDay[]                  @relation("BusinessDayOpenedBy")
   closedBusinessDays                   BusinessDay[]                  @relation("BusinessDayClosedBy")
+  assignedShiftSessions                ShiftSession[]                 @relation("ShiftSessionAssignedUser")
+  openedShiftSessions                  ShiftSession[]                 @relation("ShiftSessionOpenedBy")
+  closedShiftSessions                  ShiftSession[]                 @relation("ShiftSessionClosedBy")
   createdNotifications                 Notification[]                 @relation("NotificationCreatedBy")
   notificationRecipients               NotificationRecipient[]
   notificationPreferences              NotificationPreference[]
@@ -2137,16 +2149,50 @@ model BusinessDay {
   createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet   Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  openedBy UserAccount  @relation("BusinessDayOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
-  closedBy UserAccount? @relation("BusinessDayClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet   Outlet         @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  openedBy UserAccount    @relation("BusinessDayOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
+  closedBy UserAccount?   @relation("BusinessDayClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  shifts   ShiftSession[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, businessDate], map: "business_days_outlet_date_key")
   @@index([tenantId, outletId, status], map: "business_days_current_idx")
   @@index([tenantId, businessDate, outletId, status], map: "business_days_reporting_idx")
   @@map("business_days")
+}
+
+model ShiftSession {
+  id             String             @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId       String             @map("tenant_id") @db.Uuid
+  outletId       String             @map("outlet_id") @db.Uuid
+  businessDayId  String             @map("business_day_id") @db.Uuid
+  assignedUserId String             @map("assigned_user_id") @db.Uuid
+  shiftId        String?            @map("shift_id") @db.Uuid
+  status         ShiftSessionStatus @default(OPEN)
+  openedAt       DateTime           @default(now()) @map("opened_at") @db.Timestamptz(3)
+  closedAt       DateTime?          @map("closed_at") @db.Timestamptz(3)
+  openedByUserId String             @map("opened_by_user_id") @db.Uuid
+  closedByUserId String?            @map("closed_by_user_id") @db.Uuid
+  openingNotes   String?            @map("opening_notes") @db.VarChar(1000)
+  closingNotes   String?            @map("closing_notes") @db.VarChar(1000)
+  version        Int                @default(1)
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  businessDay  BusinessDay  @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
+  assignedUser UserAccount  @relation("ShiftSessionAssignedUser", fields: [assignedUserId], references: [id], onDelete: Restrict)
+  shift        Shift?       @relation(fields: [tenantId, shiftId], references: [tenantId, id], onDelete: Restrict)
+  openedBy     UserAccount  @relation("ShiftSessionOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
+  closedBy     UserAccount? @relation("ShiftSessionClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, outletId, businessDayId, status], map: "shift_sessions_business_day_idx")
+  @@index([tenantId, assignedUserId, status], map: "shift_sessions_user_status_idx")
+  @@index([tenantId, shiftId, status], map: "shift_sessions_shift_status_idx")
+  @@map("shift_sessions")
 }
 
 model DiscountPolicy {
@@ -3890,6 +3936,7 @@ model Shift {
   tenant      Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   outlet      Outlet                    @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
   assignments EmployeeShiftAssignment[]
+  sessions    ShiftSession[]
 
   @@unique([tenantId, id], map: "shifts_tenant_id_id_key")
   @@unique([tenantId, outletId, name], map: "shifts_tenant_outlet_name_key")
