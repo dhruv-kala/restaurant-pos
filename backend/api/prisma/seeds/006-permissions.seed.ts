@@ -95,6 +95,7 @@ const moduleActions: Record<string, readonly string[]> = {
   cash_drawer: ['read', 'open', 'adjust', 'close'],
   shift_reconciliation: ['read', 'create'],
   devices: ['read', 'register', 'update_status', 'enroll', 'activate', 'manage_sessions'],
+  terminals: ['manage'],
   subscriptions: [
     'create',
     'read',

@@ -117,6 +117,19 @@ export function canManageTrustedSessions(actor: AuthenticatedUser): boolean {
   );
 }
 
+export function requireTerminalManage(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'terminals.manage') ||
+    hasPermission(actor, 'devices.assign')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Terminal management permission is required');
+}
+
 export function assertOutletAccess(actor: AuthenticatedUser, outletId: string | null): void {
   if (hasRole(actor, PLATFORM_ADMIN_ROLE) || hasRole(actor, TENANT_ADMIN_ROLE)) {
     return;

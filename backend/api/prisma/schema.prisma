@@ -823,6 +823,30 @@ enum TrustedSessionStatus {
   @@map("trusted_session_status")
 }
 
+enum TerminalType {
+  POS_COUNTER
+  CASHIER_STATION
+  KITCHEN_SCREEN
+  WAITER_STATION
+  CUSTOMER_KIOSK
+
+  @@map("terminal_type")
+}
+
+enum TerminalStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("terminal_status")
+}
+
+enum DeviceAssignmentStatus {
+  ACTIVE
+  ENDED
+
+  @@map("device_assignment_status")
+}
+
 model Country {
   id        String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   code      String   @unique @db.Citext
@@ -1050,6 +1074,8 @@ model Tenant {
   devices                       Device[]
   deviceEnrollments             DeviceEnrollment[]
   trustedSessions               TrustedSession[]
+  terminals                     Terminal[]
+  deviceAssignments             DeviceAssignment[]
 
   @@index([status])
   @@index([deletedAt])
@@ -1136,6 +1162,8 @@ model Outlet {
   devices                  Device[]
   deviceEnrollments        DeviceEnrollment[]
   trustedSessions          TrustedSession[]
+  terminals                Terminal[]
+  deviceAssignments        DeviceAssignment[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1252,6 +1280,10 @@ model UserAccount {
   activatedDeviceEnrollments           DeviceEnrollment[]             @relation("DeviceEnrollmentActivatedBy")
   trustedDeviceSessions                TrustedSession[]               @relation("TrustedSessionUser")
   revokedTrustedDeviceSessions         TrustedSession[]               @relation("TrustedSessionRevokedBy")
+  createdTerminals                     Terminal[]                     @relation("TerminalCreatedBy")
+  updatedTerminals                     Terminal[]                     @relation("TerminalUpdatedBy")
+  assignedDevices                      DeviceAssignment[]             @relation("DeviceAssignmentAssignedBy")
+  endedDeviceAssignments               DeviceAssignment[]             @relation("DeviceAssignmentEndedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -1305,6 +1337,7 @@ model Device {
   updatedBy    UserAccount        @relation("DeviceUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
   enrollments  DeviceEnrollment[]
   sessions     TrustedSession[]
+  assignments  DeviceAssignment[]
 
   @@unique([tenantId, id], map: "devices_tenant_id_id_key")
   @@unique([tenantId, deviceIdentifier], map: "devices_tenant_identifier_key")
@@ -1380,6 +1413,65 @@ model TrustedSession {
   @@index([tenantId, userId, status], map: "trusted_sessions_user_status_idx")
   @@index([tenantId, status, expiresAt], map: "trusted_sessions_status_expiry_idx")
   @@map("trusted_sessions")
+}
+
+model Terminal {
+  id              String         @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId        String         @map("tenant_id") @db.Uuid
+  outletId        String         @map("outlet_id") @db.Uuid
+  terminalCode    String         @map("terminal_code") @db.Citext
+  name            String         @db.VarChar(160)
+  terminalType    TerminalType   @map("terminal_type")
+  status          TerminalStatus @default(ACTIVE)
+  description     String?        @db.VarChar(500)
+  createdByUserId String         @map("created_by_user_id") @db.Uuid
+  updatedByUserId String         @map("updated_by_user_id") @db.Uuid
+  version         Int            @default(1)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime?      @map("deleted_at") @db.Timestamptz(3)
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet      Outlet             @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  createdBy   UserAccount        @relation("TerminalCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy   UserAccount        @relation("TerminalUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+  assignments DeviceAssignment[]
+
+  @@unique([tenantId, id], map: "terminals_tenant_id_id_key")
+  @@unique([tenantId, outletId, terminalCode], map: "terminals_outlet_code_key")
+  @@index([tenantId, outletId, status, deletedAt], map: "terminals_outlet_status_idx")
+  @@index([tenantId, terminalType, status], map: "terminals_type_status_idx")
+  @@map("terminals")
+}
+
+model DeviceAssignment {
+  id               String                 @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId         String                 @map("tenant_id") @db.Uuid
+  outletId         String                 @map("outlet_id") @db.Uuid
+  terminalId       String                 @map("terminal_id") @db.Uuid
+  deviceId         String                 @map("device_id") @db.Uuid
+  status           DeviceAssignmentStatus @default(ACTIVE)
+  assignedByUserId String                 @map("assigned_by_user_id") @db.Uuid
+  endedByUserId    String?                @map("ended_by_user_id") @db.Uuid
+  assignedAt       DateTime               @default(now()) @map("assigned_at") @db.Timestamptz(3)
+  endedAt          DateTime?              @map("ended_at") @db.Timestamptz(3)
+  endReason        String?                @map("end_reason") @db.VarChar(500)
+  version          Int                    @default(1)
+  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant     Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet     Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  terminal   Terminal     @relation(fields: [tenantId, terminalId], references: [tenantId, id], onDelete: Restrict)
+  device     Device       @relation(fields: [tenantId, deviceId], references: [tenantId, id], onDelete: Restrict)
+  assignedBy UserAccount  @relation("DeviceAssignmentAssignedBy", fields: [assignedByUserId], references: [id], onDelete: Restrict)
+  endedBy    UserAccount? @relation("DeviceAssignmentEndedBy", fields: [endedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "device_assignments_tenant_id_id_key")
+  @@index([tenantId, terminalId, status], map: "device_assignments_terminal_status_idx")
+  @@index([tenantId, deviceId, status], map: "device_assignments_device_status_idx")
+  @@index([tenantId, outletId, status], map: "device_assignments_outlet_status_idx")
+  @@map("device_assignments")
 }
 
 model TenantMembership {

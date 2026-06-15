@@ -1,4 +1,11 @@
-import { DeviceStatus, DeviceType, TrustedSessionStatus } from '@prisma/client';
+import {
+  DeviceAssignmentStatus,
+  DeviceStatus,
+  DeviceType,
+  TerminalStatus,
+  TerminalType,
+  TrustedSessionStatus,
+} from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -232,6 +239,134 @@ export class RenewTrustedSessionDto {
 }
 
 export class RevokeTrustedSessionDto {
+  @IsInt()
+  @Min(1)
+  version!: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string | null;
+}
+
+export class CreateTerminalDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsUUID('all')
+  outletId!: string;
+
+  @IsString()
+  @MaxLength(80)
+  terminalCode!: string;
+
+  @IsString()
+  @MaxLength(160)
+  name!: string;
+
+  @IsEnum(TerminalType)
+  terminalType!: TerminalType;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  description?: string | null;
+}
+
+export class TerminalQueryDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  outletId?: string;
+
+  @IsOptional()
+  @IsEnum(TerminalStatus)
+  status?: TerminalStatus;
+
+  @IsOptional()
+  @IsEnum(TerminalType)
+  terminalType?: TerminalType;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  search?: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 20;
+}
+
+export class UpdateTerminalDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  name?: string;
+
+  @IsOptional()
+  @IsEnum(TerminalStatus)
+  status?: TerminalStatus;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  description?: string | null;
+
+  @IsInt()
+  @Min(1)
+  version!: number;
+}
+
+export class AssignDeviceToTerminalDto {
+  @IsUUID('all')
+  deviceId!: string;
+
+  @IsInt()
+  @Min(1)
+  terminalVersion!: number;
+}
+
+export class DeviceAssignmentQueryDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  terminalId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  deviceId?: string;
+
+  @IsOptional()
+  @IsEnum(DeviceAssignmentStatus)
+  status?: DeviceAssignmentStatus;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 20;
+}
+
+export class EndDeviceAssignmentDto {
   @IsInt()
   @Min(1)
   version!: number;

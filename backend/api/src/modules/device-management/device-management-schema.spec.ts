@@ -16,6 +16,10 @@ describe('device registry foundation schema', () => {
     join(root, 'prisma/migrations/20260616140000_add_trusted_device_sessions/migration.sql'),
     'utf8',
   );
+  const terminalMigration = readFileSync(
+    join(root, 'prisma/migrations/20260616150000_add_terminal_management/migration.sql'),
+    'utf8',
+  );
 
   it('defines tenant-scoped devices and statuses', () => {
     expect(schema).toContain('enum DeviceType {');
@@ -80,5 +84,27 @@ describe('device registry foundation schema', () => {
     expect(trustedSessionMigration).toContain('CREATE POLICY "trusted_sessions_tenant_isolation"');
     expect(trustedSessionMigration).toContain('reject_trusted_session_delete');
     expect(trustedSessionMigration).toContain('trusted sessions cannot be deleted');
+  });
+
+  it('defines outlet terminals and device assignment history', () => {
+    expect(schema).toContain('enum TerminalType {');
+    expect(schema).toContain('enum DeviceAssignmentStatus {');
+    expect(schema).toContain('model Terminal {');
+    expect(schema).toContain('model DeviceAssignment {');
+    expect(terminalMigration).toContain('CREATE TABLE "terminals"');
+    expect(terminalMigration).toContain('CREATE TABLE "device_assignments"');
+    expect(terminalMigration).toContain('device_assignments_one_active_per_terminal_key');
+    expect(terminalMigration).toContain('device_assignments_one_active_per_device_key');
+  });
+
+  it('enforces terminal tenant isolation and append-only assignments', () => {
+    expect(terminalMigration).toContain('ALTER TABLE "terminals" FORCE ROW LEVEL SECURITY');
+    expect(terminalMigration).toContain(
+      'ALTER TABLE "device_assignments" FORCE ROW LEVEL SECURITY',
+    );
+    expect(terminalMigration).toContain('CREATE POLICY "terminals_tenant_isolation"');
+    expect(terminalMigration).toContain('CREATE POLICY "device_assignments_tenant_isolation"');
+    expect(terminalMigration).toContain('reject_device_assignment_delete');
+    expect(terminalMigration).toContain('device assignments cannot be deleted');
   });
 });

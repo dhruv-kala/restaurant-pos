@@ -1,7 +1,8 @@
 # Device Management API
 
 Task 32.1 introduces the device registry foundation. Task 32.2 adds device
-enrollment and activation. Task 32.3 adds trusted sessions.
+enrollment and activation. Task 32.3 adds trusted sessions. Task 32.4 adds
+terminal management.
 
 ## Device Registry
 
@@ -231,6 +232,128 @@ Optional query:
 
 Revokes a trusted session and records the revoking actor.
 
+## Terminal Management
+
+### Create Terminal
+
+`POST /terminals`
+
+Body:
+
+* `tenantId` - optional; platform administrator only
+* `outletId`
+* `terminalCode`
+* `name`
+* `terminalType`: `POS_COUNTER`, `CASHIER_STATION`, `KITCHEN_SCREEN`,
+  `WAITER_STATION`, or `CUSTOMER_KIOSK`
+* `description` - optional
+
+Creates an outlet-scoped terminal. Terminal codes are unique per tenant/outlet.
+
+### List Terminals
+
+`GET /terminals`
+
+Query:
+
+* `tenantId`
+* `outletId`
+* `status`
+* `terminalType`
+* `search`
+* `page`
+* `limit`
+
+Returns paginated terminals subject to tenant and outlet authorization.
+
+### Terminal Detail
+
+`GET /terminals/:id`
+
+Optional query:
+
+* `tenantId`
+
+Returns one terminal.
+
+### Update Terminal
+
+`PATCH /terminals/:id`
+
+Body:
+
+* `name` - optional
+* `status` - optional, `ACTIVE` or `INACTIVE`
+* `description` - optional
+* `version`: optimistic concurrency version
+
+Optional query:
+
+* `tenantId`
+
+Updates terminal metadata or active/inactive status.
+
+### Assign Device To Terminal
+
+`POST /terminals/:id/device-assignments`
+
+Body:
+
+* `deviceId`
+* `terminalVersion`: optimistic terminal version
+
+Optional query:
+
+* `tenantId`
+
+Creates an active assignment between an active terminal and an active device in
+the same outlet. The database enforces one active assignment per terminal and
+one active assignment per device.
+
+### List Terminal Assignments
+
+`GET /terminals/:id/device-assignments`
+
+Query:
+
+* `tenantId`
+* `deviceId`
+* `status`
+* `page`
+* `limit`
+
+Returns assignment history for a terminal.
+
+### List Device Assignments
+
+`GET /device-assignments`
+
+Query:
+
+* `tenantId`
+* `terminalId`
+* `deviceId`
+* `status`
+* `page`
+* `limit`
+
+Returns assignment history.
+
+### End Device Assignment
+
+`PATCH /device-assignments/:id/end`
+
+Body:
+
+* `version`: optimistic concurrency version
+* `reason` - optional
+
+Optional query:
+
+* `tenantId`
+
+Ends an active device assignment and records the actor, timestamp, and reason.
+
 ## Audit Events
 
 * `device.registered`
@@ -244,3 +367,7 @@ Revokes a trusted session and records the revoking actor.
 * `trusted_session.renewed`
 * `trusted_session.expired`
 * `trusted_session.revoked`
+* `terminal.created`
+* `terminal.updated`
+* `terminal.device_assigned`
+* `terminal.device_assignment_ended`

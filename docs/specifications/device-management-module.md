@@ -2,14 +2,14 @@
 
 ## Status
 
-Implemented through Task 32.3.
+Implemented through Task 32.4.
 
 Task 32 is split into:
 
 * Task 32.1 Device Registry Foundation - Complete
 * Task 32.2 Device Enrollment and Activation - Complete
 * Task 32.3 Trusted Sessions - Complete
-* Task 32.4 Terminal Management
+* Task 32.4 Terminal Management - Complete
 * Task 32.5 Device Security Policies
 * Task 32.6 Device Administration UI
 
@@ -49,9 +49,9 @@ Potential entities:
 * Device - implemented in Task 32.1
 * DeviceEnrollment - implemented in Task 32.2
 * TrustedSession - implemented in Task 32.3
-* Terminal
+* Terminal - implemented in Task 32.4
 * DeviceSecurityPolicy
-* DeviceAssignment
+* DeviceAssignment - implemented in Task 32.4
 
 All tenant-owned records carry tenant scope.
 
@@ -100,8 +100,8 @@ Suggested permissions:
 
 Task 32.1 implements only `devices.read`, `devices.register`, and
 `devices.update_status`. Task 32.2 adds `devices.enroll` and
-`devices.activate`. Task 32.3 adds `devices.manage_sessions`. Later subtasks
-may add the remaining permissions.
+`devices.activate`. Task 32.3 adds `devices.manage_sessions`. Task 32.4 adds
+`terminals.manage`. Later subtasks may add the remaining permissions.
 
 ## API
 
@@ -152,6 +152,24 @@ renewed while active and unexpired. Expired active sessions transition to
 metadata. Session reads and writes enforce tenant scope, outlet access, and
 session ownership unless the actor has session-management authority.
 
+Terminal Management:
+
+* `POST /terminals`
+* `GET /terminals`
+* `GET /terminals/:id`
+* `PATCH /terminals/:id`
+* `POST /terminals/:id/device-assignments`
+* `GET /terminals/:id/device-assignments`
+* `GET /device-assignments`
+* `PATCH /device-assignments/:id/end`
+
+Task 32.4 implements outlet-scoped terminal identity and device assignment
+history. Terminal codes are unique per tenant/outlet. Devices can be assigned
+only to active terminals in the same outlet, and only active devices can be
+assigned. Assignment history is append-only; ending an assignment records actor,
+time, reason, and audit metadata. The database enforces one active assignment
+per terminal and one active assignment per device.
+
 ## Audit Requirements
 
 Audit:
@@ -163,6 +181,8 @@ Audit:
 * device deactivation
 * trusted session renewal
 * terminal assignment
+* terminal creation
+* terminal update
 * trusted session creation
 * trusted session revocation
 * security policy changes

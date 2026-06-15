@@ -3859,3 +3859,77 @@ Known limitations:
 Next task:
 
 - Task 32.4 - Terminal Management
+
+## 2026-06-15 - Task 32.4 Terminal Management
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616150000_add_terminal_management/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/device-management/device-management.module.ts`
+- `backend/api/src/modules/device-management/device-management-schema.spec.ts`
+- `backend/api/src/modules/device-management/controllers/terminals.controller.ts`
+- `backend/api/src/modules/device-management/dto/device.dto.ts`
+- `backend/api/src/modules/device-management/services/device-access.util.ts`
+- `backend/api/src/modules/device-management/services/terminals.service.ts`
+- `backend/api/src/modules/device-management/services/terminals.service.spec.ts`
+- `docs/api/device-management-module.md`
+- `docs/specifications/device-management-module.md`
+- `docs/tasks/032-device-management/32.4-terminal-management.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 32.4 only; device security policies, terminal UI, shared
+  Dart clients, and peripheral integrations remain deferred.
+- Added outlet-scoped `Terminal` records with `POS_COUNTER`,
+  `CASHIER_STATION`, `KITCHEN_SCREEN`, `WAITER_STATION`, and
+  `CUSTOMER_KIOSK` types.
+- Enforced per-tenant/outlet terminal-code uniqueness.
+- Added append-only `DeviceAssignment` history with `ACTIVE` and `ENDED`
+  states.
+- Enforced one active assignment per terminal and one active assignment per
+  device through partial unique indexes.
+- Required active terminals and active same-outlet devices for assignment.
+- Added terminal metadata/status update with optimistic `version` checks.
+- Added assignment ending with optimistic `version`, actor, timestamp, and
+  reason metadata.
+- Added protected APIs:
+  `POST /terminals`,
+  `GET /terminals`,
+  `GET /terminals/:id`,
+  `PATCH /terminals/:id`,
+  `POST /terminals/:id/device-assignments`,
+  `GET /terminals/:id/device-assignments`,
+  `GET /device-assignments`, and
+  `PATCH /device-assignments/:id/end`.
+- Added `terminals.manage` permission seed and manager role mapping.
+- Added audit events `terminal.created`, `terminal.updated`,
+  `terminal.device_assigned`, and `terminal.device_assignment_ended`.
+
+Validation:
+
+- `npx prisma format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/device-management`: passed, 5 suites
+  and 33 tests
+- `npm run lint`: passed
+- `npm run build`: passed
+
+Known limitations:
+
+- The Task 32.4 migration was not deployed to a live PostgreSQL database.
+- No frontend or shared Dart client work was added in this backend foundation
+  task.
+
+Next task:
+
+- Task 32.5 - Device Security Policies

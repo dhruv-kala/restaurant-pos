@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 32.3 are complete at the foundation level.
+Tasks 1 through 32.4 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -309,7 +309,13 @@ per device/user, one-time plaintext session token return, hashed token
 persistence, renewal, revocation, ownership enforcement, protected trusted
 session APIs, forced RLS, permission seeds, role mappings, and audit events.
 
-Task 32.4 is next provisionally: implement terminal management. Do
+Task 32.4 implemented outlet-scoped terminal records, terminal identity,
+per-tenant/outlet terminal-code uniqueness, append-only device assignment
+history, one active assignment per terminal and device, same-outlet assignment
+enforcement, protected terminal APIs, forced RLS, permission seeds, role
+mappings, and audit events.
+
+Task 32.5 is next provisionally: implement device security policies. Do
 not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
