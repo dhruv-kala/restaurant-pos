@@ -4,7 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AuditResult, DeviceStatus, Prisma, TrustedSessionStatus } from '@prisma/client';
+import {
+  AuditResult,
+  DeviceSecurityPolicyStatus,
+  DeviceStatus,
+  Prisma,
+  TrustedSessionStatus,
+} from '@prisma/client';
 import { createHash, randomBytes } from 'node:crypto';
 
 import { applyDatabaseRequestContext } from '../../../common/database/request-context.util';
@@ -60,6 +66,13 @@ type TrustedSessionRecord = Prisma.TrustedSessionGetPayload<{
   select: typeof trustedSessionSelect;
 }>;
 type DeviceForSession = Prisma.DeviceGetPayload<{ select: typeof deviceForSessionSelect }>;
+type EffectiveSecurityPolicy = {
+  id: string;
+  requireTrustedSession: boolean;
+  sessionTimeoutMinutes: number;
+  forceLogoutBefore: Date | null;
+  allowedDeviceTypes: DeviceForSession['deviceType'][];
+} | null;
 
 @Injectable()
 export class TrustedSessionsService {
@@ -76,7 +89,6 @@ export class TrustedSessionsService {
   ) {
     const scope = resolveDeviceWriteScope(actor, dto.tenantId);
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + dto.expiresInMinutes * 60_000);
     const sessionToken = this.generateSessionToken();
     const sessionTokenHash = this.hashSessionToken(sessionToken);
 
@@ -87,6 +99,9 @@ export class TrustedSessionsService {
       if (device.status !== DeviceStatus.ACTIVE) {
         throw new ConflictException('Trusted sessions require an active device');
       }
+      const policy = await this.findEffectiveSecurityPolicy(tx, device);
+      this.assertPolicyAllowsDevice(device, policy);
+      const expiresAt = this.resolveSessionExpiry(now, dto.expiresInMinutes, policy);
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`${scope.tenantId}:trusted-session:${device.id}:${actor.id}`}))`;
       await this.expireDueSessions(tx, scope.tenantId, device.id, actor.id, now);
       const active = await tx.trustedSession.findFirst({
@@ -182,7 +197,6 @@ export class TrustedSessionsService {
   ) {
     const scope = resolveDeviceWriteScope(actor, query.tenantId);
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + dto.expiresInMinutes * 60_000);
     return this.prisma.$transaction(async (tx) => {
       await applyDatabaseRequestContext(tx, actor, scope.tenantId);
       const session = await this.findSession(tx, scope.tenantId, id);
@@ -197,6 +211,10 @@ export class TrustedSessionsService {
         const expired = await this.markExpired(tx, session, actor, request);
         return this.toResponse(expired);
       }
+      const device = await this.findDevice(tx, scope.tenantId, session.deviceId);
+      const policy = await this.findEffectiveSecurityPolicy(tx, device);
+      this.assertPolicyAllowsDevice(device, policy);
+      const expiresAt = this.resolveSessionExpiry(now, dto.expiresInMinutes, policy);
       const renewed = await tx.trustedSession.update({
         where: { tenantId_id: { tenantId: scope.tenantId, id } },
         data: {
@@ -272,6 +290,47 @@ export class TrustedSessionsService {
     });
     if (!session) throw new NotFoundException('Trusted session not found');
     return session;
+  }
+
+  private async findEffectiveSecurityPolicy(
+    tx: Prisma.TransactionClient,
+    device: DeviceForSession,
+  ): Promise<EffectiveSecurityPolicy> {
+    return tx.deviceSecurityPolicy.findFirst({
+      where: {
+        tenantId: device.tenantId,
+        status: DeviceSecurityPolicyStatus.ACTIVE,
+        OR: [{ outletId: device.outletId }, { outletId: null }],
+      },
+      select: {
+        id: true,
+        requireTrustedSession: true,
+        sessionTimeoutMinutes: true,
+        forceLogoutBefore: true,
+        allowedDeviceTypes: true,
+      },
+      orderBy: [{ outletId: 'desc' }, { updatedAt: 'desc' }],
+    });
+  }
+
+  private assertPolicyAllowsDevice(
+    device: DeviceForSession,
+    policy: EffectiveSecurityPolicy,
+  ): void {
+    if (!policy || policy.allowedDeviceTypes.length === 0) return;
+    if (!policy.allowedDeviceTypes.includes(device.deviceType)) {
+      throw new ConflictException('Device type is blocked by the active security policy');
+    }
+  }
+
+  private resolveSessionExpiry(
+    now: Date,
+    requestedMinutes: number,
+    policy: EffectiveSecurityPolicy,
+  ): Date {
+    const policyMinutes = policy?.sessionTimeoutMinutes ?? requestedMinutes;
+    const effectiveMinutes = Math.min(requestedMinutes, policyMinutes);
+    return new Date(now.getTime() + effectiveMinutes * 60_000);
   }
 
   private buildReadableWhere(

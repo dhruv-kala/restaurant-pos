@@ -3933,3 +3933,82 @@ Known limitations:
 Next task:
 
 - Task 32.5 - Device Security Policies
+
+## 2026-06-15 - Task 32.5 Device Security Policies
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616160000_add_device_security_policies/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/device-management/device-management.module.ts`
+- `backend/api/src/modules/device-management/device-management-schema.spec.ts`
+- `backend/api/src/modules/device-management/controllers/device-security-policies.controller.ts`
+- `backend/api/src/modules/device-management/dto/device.dto.ts`
+- `backend/api/src/modules/device-management/services/device-access.util.ts`
+- `backend/api/src/modules/device-management/services/device-security-policies.service.ts`
+- `backend/api/src/modules/device-management/services/device-security-policies.service.spec.ts`
+- `backend/api/src/modules/device-management/services/trusted-sessions.service.ts`
+- `backend/api/src/modules/device-management/services/trusted-sessions.service.spec.ts`
+- `docs/api/device-management-module.md`
+- `docs/specifications/device-management-module.md`
+- `docs/tasks/032-device-management/32.5-device-security-policies.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 32.5 only; device administration UI, shared Dart clients,
+  request-level trusted-device guards, MDM integration, and peripheral
+  integrations remain deferred.
+- Added tenant/outlet-scoped `DeviceSecurityPolicy` records with `ACTIVE` and
+  `INACTIVE` states.
+- Enforced one active policy per tenant/outlet scope through a partial unique
+  index.
+- Supported outlet override policies over tenant-wide policies during effective
+  policy evaluation.
+- Added trusted-session requirement flag, session timeout caps, forced logout
+  timestamp, allowed device-type restrictions, and reserved JSON restrictions.
+- Applied active policy device-type restrictions and timeout caps during
+  trusted-session creation and renewal.
+- Revoked matching active trusted sessions when a policy sets
+  `forceLogoutBefore`.
+- Added protected APIs:
+  `POST /device-security-policies`,
+  `GET /device-security-policies`,
+  `GET /device-security-policies/:id`,
+  `PATCH /device-security-policies/:id`, and
+  `GET /devices/:id/security-policy`.
+- Added `devices.security_manage` permission seed and manager role mapping.
+- Added audit events `device_security_policy.created` and
+  `device_security_policy.updated`.
+- Documented that request-level trusted-session guard enforcement is deferred
+  until a device-session token/header contract exists.
+
+Validation:
+
+- `npx prisma format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm run test -- --runTestsByPath src/modules/device-management/services/device-security-policies.service.spec.ts src/modules/device-management/services/trusted-sessions.service.spec.ts src/modules/device-management/device-management-schema.spec.ts`: passed, 3 suites and 25 tests
+- `npm run test -- --runInBand src/modules/device-management`: passed, 6
+  suites and 42 tests
+- `npm run lint`: passed
+- `npm run build`: passed
+
+Known limitations:
+
+- The Task 32.5 migration was not deployed to a live PostgreSQL database.
+- No frontend or shared Dart client work was added in this backend foundation
+  task.
+- Full trusted-device request guard enforcement remains deferred until the
+  authentication layer accepts trusted-session device context.
+
+Next task:
+
+- Task 32.6 - Device Administration UI

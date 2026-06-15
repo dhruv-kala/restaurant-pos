@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 32.4**
+- Completed through: **Task 32.5**
 - Current module: **Device Registration, Trusted Sessions, and Terminal Management**
-- Next provisional task: **Task 32.5 - Device Security Policies**
+- Next provisional task: **Task 32.6 - Device Administration UI**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -63,6 +63,7 @@ Last updated: 2026-06-15
 | 32.2   | Tenant-scoped device enrollments, expiring activation codes, approval workflow, activation API, forced RLS, permissions, and audit events                             |
 | 32.3   | Tenant-scoped trusted sessions, hashed one-time session tokens, renewal, revocation, ownership enforcement, forced RLS, permissions, and audit events                  |
 | 32.4   | Outlet-scoped terminals, terminal identity, active device assignment history, one-active-assignment enforcement, forced RLS, permissions, and audit events             |
+| 32.5   | Tenant/outlet device security policies, session timeout caps, device-type restrictions, forced logout, effective policy evaluation, forced RLS, permissions, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -226,6 +227,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   active assignment per terminal and device, same-outlet assignment
   enforcement, protected terminal APIs, forced RLS, permission seeds, role
   mappings, and audit events
+- Device security policies with tenant/outlet-scoped `DeviceSecurityPolicy`
+  records, one active policy per scope, outlet override precedence, trusted
+  session timeout caps, device-type restrictions, forced logout before a policy
+  timestamp, protected policy/evaluation APIs, forced RLS, permission seeds,
+  role mappings, and audit events
 
 ## Known Environment Limitation
 
@@ -236,7 +242,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 32.5 - Device Security Policies
+### Task 32.6 - Device Administration UI
 
 Read:
 
@@ -245,8 +251,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 32.5 unless explicitly requested. It should build on the
-Task 32.1-32.4 device foundations and add device security policies only.
+Do not implement Task 32.6 unless explicitly requested. It should build on the
+Task 32.1-32.5 device foundations and add device administration UI/shared client
+work only.
 
 ## Status Maintenance
 

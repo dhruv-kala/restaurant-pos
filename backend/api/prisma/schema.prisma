@@ -847,6 +847,13 @@ enum DeviceAssignmentStatus {
   @@map("device_assignment_status")
 }
 
+enum DeviceSecurityPolicyStatus {
+  ACTIVE
+  INACTIVE
+
+  @@map("device_security_policy_status")
+}
+
 model Country {
   id        String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
   code      String   @unique @db.Citext
@@ -1076,6 +1083,7 @@ model Tenant {
   trustedSessions               TrustedSession[]
   terminals                     Terminal[]
   deviceAssignments             DeviceAssignment[]
+  deviceSecurityPolicies        DeviceSecurityPolicy[]
 
   @@index([status])
   @@index([deletedAt])
@@ -1164,6 +1172,7 @@ model Outlet {
   trustedSessions          TrustedSession[]
   terminals                Terminal[]
   deviceAssignments        DeviceAssignment[]
+  deviceSecurityPolicies   DeviceSecurityPolicy[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1284,6 +1293,8 @@ model UserAccount {
   updatedTerminals                     Terminal[]                     @relation("TerminalUpdatedBy")
   assignedDevices                      DeviceAssignment[]             @relation("DeviceAssignmentAssignedBy")
   endedDeviceAssignments               DeviceAssignment[]             @relation("DeviceAssignmentEndedBy")
+  createdDeviceSecurityPolicies        DeviceSecurityPolicy[]         @relation("DeviceSecurityPolicyCreatedBy")
+  updatedDeviceSecurityPolicies        DeviceSecurityPolicy[]         @relation("DeviceSecurityPolicyUpdatedBy")
 
   @@index([status])
   @@index([deletedAt])
@@ -1472,6 +1483,34 @@ model DeviceAssignment {
   @@index([tenantId, deviceId, status], map: "device_assignments_device_status_idx")
   @@index([tenantId, outletId, status], map: "device_assignments_outlet_status_idx")
   @@map("device_assignments")
+}
+
+model DeviceSecurityPolicy {
+  id                    String                     @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId              String                     @map("tenant_id") @db.Uuid
+  outletId              String?                    @map("outlet_id") @db.Uuid
+  name                  String                     @db.VarChar(160)
+  status                DeviceSecurityPolicyStatus @default(ACTIVE)
+  requireTrustedSession Boolean                    @default(false) @map("require_trusted_session")
+  sessionTimeoutMinutes Int                        @default(1440) @map("session_timeout_minutes")
+  forceLogoutBefore     DateTime?                  @map("force_logout_before") @db.Timestamptz(3)
+  allowedDeviceTypes    DeviceType[]               @map("allowed_device_types")
+  restrictions          Json?                      @db.JsonB
+  createdByUserId       String                     @map("created_by_user_id") @db.Uuid
+  updatedByUserId       String                     @map("updated_by_user_id") @db.Uuid
+  version               Int                        @default(1)
+  createdAt             DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet    Outlet?     @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  createdBy UserAccount @relation("DeviceSecurityPolicyCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  updatedBy UserAccount @relation("DeviceSecurityPolicyUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id], map: "device_security_policies_tenant_id_id_key")
+  @@index([tenantId, outletId, status], map: "device_security_policies_scope_status_idx")
+  @@index([tenantId, status, updatedAt], map: "device_security_policies_status_updated_idx")
+  @@map("device_security_policies")
 }
 
 model TenantMembership {

@@ -1,5 +1,6 @@
 import {
   DeviceAssignmentStatus,
+  DeviceSecurityPolicyStatus,
   DeviceStatus,
   DeviceType,
   TerminalStatus,
@@ -8,6 +9,10 @@ import {
 } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
+  ArrayUnique,
+  IsArray,
+  IsBoolean,
+  IsDateString,
   IsEnum,
   IsInt,
   IsObject,
@@ -375,4 +380,114 @@ export class EndDeviceAssignmentDto {
   @IsString()
   @MaxLength(500)
   reason?: string | null;
+}
+
+export class CreateDeviceSecurityPolicyDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  outletId?: string | null;
+
+  @IsString()
+  @MaxLength(160)
+  name!: string;
+
+  @IsOptional()
+  @IsBoolean()
+  requireTrustedSession = false;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(5)
+  @Max(43200)
+  sessionTimeoutMinutes = 1440;
+
+  @IsOptional()
+  @IsDateString()
+  forceLogoutBefore?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsEnum(DeviceType, { each: true })
+  allowedDeviceTypes: DeviceType[] = [];
+
+  @IsOptional()
+  @IsObject()
+  restrictions?: Record<string, unknown> | null;
+}
+
+export class DeviceSecurityPolicyQueryDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  outletId?: string;
+
+  @IsOptional()
+  @IsEnum(DeviceSecurityPolicyStatus)
+  status?: DeviceSecurityPolicyStatus;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 20;
+}
+
+export class UpdateDeviceSecurityPolicyDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  name?: string;
+
+  @IsOptional()
+  @IsEnum(DeviceSecurityPolicyStatus)
+  status?: DeviceSecurityPolicyStatus;
+
+  @IsOptional()
+  @IsBoolean()
+  requireTrustedSession?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(5)
+  @Max(43200)
+  sessionTimeoutMinutes?: number;
+
+  @IsOptional()
+  @IsDateString()
+  forceLogoutBefore?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsEnum(DeviceType, { each: true })
+  allowedDeviceTypes?: DeviceType[];
+
+  @IsOptional()
+  @IsObject()
+  restrictions?: Record<string, unknown> | null;
+
+  @IsInt()
+  @Min(1)
+  version!: number;
+}
+
+export class EvaluateDeviceSecurityPolicyQueryDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
 }

@@ -2,7 +2,7 @@
 
 Task 32.1 introduces the device registry foundation. Task 32.2 adds device
 enrollment and activation. Task 32.3 adds trusted sessions. Task 32.4 adds
-terminal management.
+terminal management. Task 32.5 adds device security policies.
 
 ## Device Registry
 
@@ -215,7 +215,9 @@ Optional query:
 * `tenantId`
 
 Renews an active, unexpired trusted session. Expired active sessions transition
-to `EXPIRED`.
+to `EXPIRED`. When an active device security policy exists, the requested
+expiry is capped by that policy's `sessionTimeoutMinutes`, and blocked device
+types cannot renew trusted sessions.
 
 ### Revoke Trusted Session
 
@@ -354,6 +356,80 @@ Optional query:
 
 Ends an active device assignment and records the actor, timestamp, and reason.
 
+## Device Security Policies
+
+### Create Device Security Policy
+
+`POST /device-security-policies`
+
+Body:
+
+* `tenantId` - optional; platform administrator only
+* `outletId` - optional; outlet override scope
+* `name`
+* `requireTrustedSession` - optional, defaults to `false`
+* `sessionTimeoutMinutes` - optional, 5 to 43200, defaults to 1440
+* `forceLogoutBefore` - optional ISO timestamp
+* `allowedDeviceTypes` - optional list of `DeviceType`; empty means all types
+* `restrictions` - optional JSON payload reserved for future policy flags
+
+Creates one active security policy for the tenant or outlet scope. Requires
+`devices.security_manage`. If `forceLogoutBefore` is set, matching active
+trusted sessions are revoked.
+
+### List Device Security Policies
+
+`GET /device-security-policies`
+
+Query:
+
+* `tenantId`
+* `outletId`
+* `status`
+* `page`
+* `limit`
+
+Returns paginated tenant-visible policies.
+
+### Device Security Policy Detail
+
+`GET /device-security-policies/:id`
+
+Optional query:
+
+* `tenantId`
+
+Returns one policy when the actor has tenant and outlet access.
+
+### Update Device Security Policy
+
+`PATCH /device-security-policies/:id`
+
+Body:
+
+* `version`: optimistic concurrency version
+* `name` - optional
+* `status` - optional, `ACTIVE` or `INACTIVE`
+* `requireTrustedSession` - optional
+* `sessionTimeoutMinutes` - optional
+* `forceLogoutBefore` - optional ISO timestamp or null
+* `allowedDeviceTypes` - optional
+* `restrictions` - optional JSON payload or null
+
+Updates policy metadata. Re-activating a policy fails when another active policy
+already exists for the same scope. Policy changes are audited.
+
+### Evaluate Effective Device Security Policy
+
+`GET /devices/:id/security-policy`
+
+Optional query:
+
+* `tenantId`
+
+Returns the effective outlet policy, tenant policy, or default policy response
+for the device, including whether the current device type is allowed.
+
 ## Audit Events
 
 * `device.registered`
@@ -371,3 +447,5 @@ Ends an active device assignment and records the actor, timestamp, and reason.
 * `terminal.updated`
 * `terminal.device_assigned`
 * `terminal.device_assignment_ended`
+* `device_security_policy.created`
+* `device_security_policy.updated`

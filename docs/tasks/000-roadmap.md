@@ -12,8 +12,8 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, and 32.1-32.4 are complete;
-  Task 32.5 device security policies is the next listed provisional task.
+- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, and 32.1-32.5 are complete;
+  Task 32.6 device administration UI is the next listed provisional task.
 
 ## Foundation and Core SaaS
 
@@ -61,8 +61,8 @@ Last updated: 2026-06-15
 | 32.2 | COMPLETE | Device enrollment and activation |
 | 32.3 | COMPLETE | Trusted sessions |
 | 32.4 | COMPLETE | Terminal management |
-| 32.5 | NEXT | Device security policies |
-| 32.6 | PLANNED | Device administration UI |
+| 32.5 | COMPLETE | Device security policies |
+| 32.6 | NEXT | Device administration UI |
 | 33.1 | PLANNED | Offline architecture foundation |
 | 33.2 | PLANNED | SQLite local storage |
 | 33.3 | PLANNED | Sync queue and change tracking |

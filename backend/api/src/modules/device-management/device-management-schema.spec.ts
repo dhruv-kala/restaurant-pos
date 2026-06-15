@@ -20,6 +20,10 @@ describe('device registry foundation schema', () => {
     join(root, 'prisma/migrations/20260616150000_add_terminal_management/migration.sql'),
     'utf8',
   );
+  const securityPolicyMigration = readFileSync(
+    join(root, 'prisma/migrations/20260616160000_add_device_security_policies/migration.sql'),
+    'utf8',
+  );
 
   it('defines tenant-scoped devices and statuses', () => {
     expect(schema).toContain('enum DeviceType {');
@@ -106,5 +110,28 @@ describe('device registry foundation schema', () => {
     expect(terminalMigration).toContain('CREATE POLICY "device_assignments_tenant_isolation"');
     expect(terminalMigration).toContain('reject_device_assignment_delete');
     expect(terminalMigration).toContain('device assignments cannot be deleted');
+  });
+
+  it('defines tenant and outlet scoped device security policies', () => {
+    expect(schema).toContain('enum DeviceSecurityPolicyStatus {');
+    expect(schema).toContain('model DeviceSecurityPolicy {');
+    expect(schema).toContain('deviceSecurityPolicies');
+    expect(securityPolicyMigration).toContain('CREATE TYPE "device_security_policy_status"');
+    expect(securityPolicyMigration).toContain('CREATE TABLE "device_security_policies"');
+    expect(securityPolicyMigration).toContain('require_trusted_session');
+    expect(securityPolicyMigration).toContain('session_timeout_minutes');
+    expect(securityPolicyMigration).toContain('allowed_device_types');
+    expect(securityPolicyMigration).toContain('device_security_policies_one_active_per_scope_key');
+  });
+
+  it('enforces device security policy tenant isolation and no hard delete', () => {
+    expect(securityPolicyMigration).toContain(
+      'ALTER TABLE "device_security_policies" FORCE ROW LEVEL SECURITY',
+    );
+    expect(securityPolicyMigration).toContain(
+      'CREATE POLICY "device_security_policies_tenant_isolation"',
+    );
+    expect(securityPolicyMigration).toContain('reject_device_security_policy_delete');
+    expect(securityPolicyMigration).toContain('device security policies cannot be deleted');
   });
 });

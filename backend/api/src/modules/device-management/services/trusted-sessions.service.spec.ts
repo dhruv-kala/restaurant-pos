@@ -1,5 +1,10 @@
 import { ConflictException, ForbiddenException } from '@nestjs/common';
-import { DeviceStatus, DeviceType, TrustedSessionStatus } from '@prisma/client';
+import {
+  DeviceSecurityPolicyStatus,
+  DeviceStatus,
+  DeviceType,
+  TrustedSessionStatus,
+} from '@prisma/client';
 
 import { PrismaService } from '../../../prisma/prisma.service';
 import type { AuthenticatedUser } from '../../auth/types/authenticated-user.type';
@@ -78,6 +83,28 @@ function trustedSession(overrides: Partial<Record<string, unknown>> = {}) {
   };
 }
 
+function securityPolicy(overrides: Partial<Record<string, unknown>> = {}) {
+  const now = new Date('2026-06-15T12:00:00.000Z');
+  return {
+    id: '01975c30-0000-7000-8000-000000000930',
+    tenantId,
+    outletId,
+    name: 'POS Security',
+    status: DeviceSecurityPolicyStatus.ACTIVE,
+    requireTrustedSession: true,
+    sessionTimeoutMinutes: 30,
+    forceLogoutBefore: null,
+    allowedDeviceTypes: [DeviceType.POS_TERMINAL],
+    restrictions: null,
+    createdByUserId: userId,
+    updatedByUserId: userId,
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
+
 interface CreateTrustedSessionCall {
   data: {
     tenantId: string;
@@ -108,6 +135,7 @@ describe('TrustedSessionsService', () => {
     const tx = {
       $queryRaw: jest.fn(),
       device: { findFirst: jest.fn().mockResolvedValue(device()) },
+      deviceSecurityPolicy: { findFirst: jest.fn().mockResolvedValue(null) },
       trustedSession: {
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
         findFirst: jest.fn().mockResolvedValue(null),
@@ -141,12 +169,55 @@ describe('TrustedSessionsService', () => {
     expect(createCall.data.sessionTokenMasked).toMatch(/^\*{6}.+$/);
     expect(result.sessionToken).toEqual(expect.any(String));
     expect(result.sessionToken).toHaveLength(43);
+    expect(tx.deviceSecurityPolicy.findFirst).toHaveBeenCalled();
     expect(append.mock.calls[0][1]).toEqual(
       expect.objectContaining({
         action: 'trusted_session.created',
         targetType: 'TrustedSession',
         targetId: sessionId,
       }),
+    );
+  });
+
+  it('caps trusted session expiry by the effective security policy', async () => {
+    const created = trustedSession();
+    const tx = {
+      $queryRaw: jest.fn(),
+      device: { findFirst: jest.fn().mockResolvedValue(device()) },
+      deviceSecurityPolicy: { findFirst: jest.fn().mockResolvedValue(securityPolicy()) },
+      trustedSession: {
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest
+          .fn<Promise<typeof created>, [CreateTrustedSessionCall]>()
+          .mockResolvedValue(created),
+      },
+    };
+    const append = jest.fn<Promise<unknown>, [object, AuditCall]>().mockResolvedValue(undefined);
+    const service = new TrustedSessionsService(transactionalPrisma(tx), {
+      append,
+    } as unknown as AuditService);
+
+    const before = Date.now();
+    await service.create(deviceId, { expiresInMinutes: 120 }, waiter, {});
+    const expiresAt = tx.trustedSession.create.mock.calls[0][0].data.expiresAt.getTime();
+
+    expect(expiresAt).toBeGreaterThanOrEqual(before + 29 * 60_000);
+    expect(expiresAt).toBeLessThanOrEqual(before + 31 * 60_000);
+  });
+
+  it('rejects trusted session creation when policy blocks the device type', async () => {
+    const tx = {
+      $queryRaw: jest.fn(),
+      device: {
+        findFirst: jest.fn().mockResolvedValue(device({ deviceType: DeviceType.KITCHEN_DISPLAY })),
+      },
+      deviceSecurityPolicy: { findFirst: jest.fn().mockResolvedValue(securityPolicy()) },
+    };
+    const service = new TrustedSessionsService(transactionalPrisma(tx), {} as AuditService);
+
+    await expect(service.create(deviceId, { expiresInMinutes: 60 }, waiter, {})).rejects.toThrow(
+      ConflictException,
     );
   });
 
@@ -169,6 +240,8 @@ describe('TrustedSessionsService', () => {
     });
     const tx = {
       $queryRaw: jest.fn(),
+      device: { findFirst: jest.fn().mockResolvedValue(device()) },
+      deviceSecurityPolicy: { findFirst: jest.fn().mockResolvedValue(null) },
       trustedSession: {
         findFirst: jest.fn().mockResolvedValue(trustedSession()),
         update: jest

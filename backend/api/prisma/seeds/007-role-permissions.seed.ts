@@ -175,7 +175,15 @@ const shiftReconciliationActions: Record<string, readonly string[]> = {
 const deviceActions: Record<string, readonly string[]> = {
   SUPER_ADMIN: ['*'],
   TENANT_ADMIN: ['*'],
-  MANAGER: ['read', 'register', 'update_status', 'enroll', 'activate', 'manage_sessions'],
+  MANAGER: [
+    'read',
+    'register',
+    'update_status',
+    'enroll',
+    'activate',
+    'manage_sessions',
+    'security_manage',
+  ],
 };
 
 const terminalActions: Record<string, readonly string[]> = {

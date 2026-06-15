@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented through Task 32.4.
+Implemented through Task 32.5.
 
 Task 32 is split into:
 
@@ -10,7 +10,7 @@ Task 32 is split into:
 * Task 32.2 Device Enrollment and Activation - Complete
 * Task 32.3 Trusted Sessions - Complete
 * Task 32.4 Terminal Management - Complete
-* Task 32.5 Device Security Policies
+* Task 32.5 Device Security Policies - Complete
 * Task 32.6 Device Administration UI
 
 ## Objective
@@ -50,7 +50,7 @@ Potential entities:
 * DeviceEnrollment - implemented in Task 32.2
 * TrustedSession - implemented in Task 32.3
 * Terminal - implemented in Task 32.4
-* DeviceSecurityPolicy
+* DeviceSecurityPolicy - implemented in Task 32.5
 * DeviceAssignment - implemented in Task 32.4
 
 All tenant-owned records carry tenant scope.
@@ -79,6 +79,9 @@ Examples:
 * Device status changes are auditable.
 * Cross-tenant device access is prohibited.
 * Device identity cannot be spoofed through client-provided tenant context.
+* One active device security policy is allowed per tenant/outlet scope.
+* Outlet-scoped device security policies override tenant-wide policies.
+* Device security policies are not hard deleted.
 
 ## Authorization
 
@@ -101,7 +104,7 @@ Suggested permissions:
 Task 32.1 implements only `devices.read`, `devices.register`, and
 `devices.update_status`. Task 32.2 adds `devices.enroll` and
 `devices.activate`. Task 32.3 adds `devices.manage_sessions`. Task 32.4 adds
-`terminals.manage`. Later subtasks may add the remaining permissions.
+`terminals.manage`. Task 32.5 adds `devices.security_manage`.
 
 ## API
 
@@ -169,6 +172,26 @@ only to active terminals in the same outlet, and only active devices can be
 assigned. Assignment history is append-only; ending an assignment records actor,
 time, reason, and audit metadata. The database enforces one active assignment
 per terminal and one active assignment per device.
+
+Device Security Policies:
+
+* `POST /device-security-policies`
+* `GET /device-security-policies`
+* `GET /device-security-policies/:id`
+* `PATCH /device-security-policies/:id`
+* `GET /devices/:id/security-policy`
+
+Task 32.5 implements tenant/outlet-scoped security policies with one active
+policy per scope. Policies control whether trusted sessions are required,
+session timeout caps, forced logout before a timestamp, allowed device types,
+and a reserved JSON restrictions payload. Outlet policies override tenant-wide
+policies. Trusted-session creation and renewal enforce active policy device-type
+restrictions and cap requested expiry by the active policy timeout. Policy
+changes with `forceLogoutBefore` revoke matching active trusted sessions.
+Effective policy evaluation returns whether the current device type is allowed.
+
+Full request-level trusted-device enforcement is intentionally deferred until
+there is a device-session token/header contract in the authentication layer.
 
 ## Audit Requirements
 
