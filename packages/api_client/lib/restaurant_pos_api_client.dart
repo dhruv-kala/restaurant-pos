@@ -10,6 +10,7 @@ export 'src/services/auth_api_service.dart';
 export 'src/services/billing_api_service.dart';
 export 'src/services/communication_api_service.dart';
 export 'src/services/customers_api_service.dart';
+export 'src/services/device_management_api_service.dart';
 export 'src/services/employees_api_service.dart';
 export 'src/services/inventory_api_service.dart';
 export 'src/services/kds_api_service.dart';

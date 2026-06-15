@@ -12,6 +12,7 @@ import 'features/promotions/presentation/screens/promotions_admin_screen.dart';
 import 'features/audit/presentation/screens/audit_dashboard.dart';
 import 'features/inventory/presentation/screens/inventory_dashboard.dart';
 import 'features/customers/presentation/screens/customer_dashboard.dart';
+import 'features/devices/presentation/screens/device_admin_screen.dart';
 import 'features/employees/presentation/screens/employee_dashboard.dart';
 import 'features/recipes/presentation/screens/recipe_dashboard.dart';
 import 'features/rbac/presentation/screens/user_management_dashboard.dart';
@@ -114,6 +115,17 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         user?.hasPermission('cash_drawer.close') == true ||
         user?.hasPermission('shift_reconciliation.read') == true ||
         user?.hasPermission('shift_reconciliation.create') == true;
+    final canViewDevices =
+        user?.hasRole(UserRole.superAdmin) == true ||
+        user?.hasRole(UserRole.tenantAdmin) == true ||
+        user?.hasPermission('devices.read') == true ||
+        user?.hasPermission('devices.register') == true ||
+        user?.hasPermission('devices.update_status') == true ||
+        user?.hasPermission('devices.enroll') == true ||
+        user?.hasPermission('devices.activate') == true ||
+        user?.hasPermission('devices.manage_sessions') == true ||
+        user?.hasPermission('devices.security_manage') == true ||
+        user?.hasPermission('terminals.manage') == true;
     final screens = <Widget>[
       const MenuDashboard(),
       const TableLayoutScreen(),
@@ -123,6 +135,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
       const ReportsDashboard(),
       const EmployeeDashboard(),
       if (canViewOperations) const OperationsAdminScreen(),
+      if (canViewDevices) const DeviceAdminScreen(),
       const NotificationCenterScreen(),
       if (canViewPromotions) const PromotionsAdminScreen(),
       if (canViewTax) const TaxAdminScreen(),
@@ -158,6 +171,11 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         const NavigationDestination(
           icon: Icon(Icons.manage_accounts),
           label: 'Operations',
+        ),
+      if (canViewDevices)
+        const NavigationDestination(
+          icon: Icon(Icons.devices_other),
+          label: 'Devices',
         ),
       const NavigationDestination(
         icon: Icon(Icons.notifications),

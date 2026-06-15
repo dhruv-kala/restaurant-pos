@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 32.5 are complete at the foundation level.
+Tasks 1 through 32.6 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -321,8 +321,14 @@ device-type restrictions, forced logout before a policy timestamp, protected
 policy and effective-policy APIs, forced RLS, permission seeds, role mappings,
 and audit events.
 
-Task 32.6 is next provisionally: implement device administration UI. Do not
-implement it unless the active user request explicitly asks for it.
+Task 32.6 implemented shared Dart device contracts, typed device-management API
+clients, Riverpod repository/providers, authorized admin navigation, and admin
+device screens for registered devices, enrollments, trusted sessions, terminals,
+assignments, security policies, effective policy evaluation, and audit
+visibility.
+
+Task 33.1 is next provisionally: implement offline architecture foundation. Do
+not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

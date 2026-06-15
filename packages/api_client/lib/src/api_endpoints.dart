@@ -72,6 +72,12 @@ abstract final class ApiEndpoints {
   static const String shiftSessions = '/shift-sessions';
   static const String cashDrawers = '/cash-drawers';
   static const String shiftReconciliations = '/shift-reconciliations';
+  static const String devices = '/devices';
+  static const String deviceEnrollments = '/device-enrollments';
+  static const String trustedSessions = '/trusted-sessions';
+  static const String terminals = '/terminals';
+  static const String deviceAssignments = '/device-assignments';
+  static const String deviceSecurityPolicies = '/device-security-policies';
 
   static String tenant(String tenantId) => '$tenants/$tenantId';
 
@@ -303,6 +309,29 @@ abstract final class ApiEndpoints {
       '${cashDrawer(id)}/transactions';
   static String cashDrawerClose(String id) => '${cashDrawer(id)}/close';
   static String shiftReconciliation(String id) => '$shiftReconciliations/$id';
+  static String device(String id) => '$devices/$id';
+  static String deviceStatus(String id) => '${device(id)}/status';
+  static String deviceEnrollmentRequests(String id) =>
+      '${device(id)}/enrollments';
+  static String deviceEnrollment(String id) => '$deviceEnrollments/$id';
+  static String deviceEnrollmentApprove(String id) =>
+      '${deviceEnrollment(id)}/approve';
+  static const String deviceEnrollmentActivate = '$deviceEnrollments/activate';
+  static String deviceTrustedSessions(String id) =>
+      '${device(id)}/trusted-sessions';
+  static String trustedSession(String id) => '$trustedSessions/$id';
+  static String trustedSessionRenew(String id) => '${trustedSession(id)}/renew';
+  static String trustedSessionRevoke(String id) =>
+      '${trustedSession(id)}/revoke';
+  static String terminal(String id) => '$terminals/$id';
+  static String terminalDeviceAssignments(String id) =>
+      '${terminal(id)}/device-assignments';
+  static String deviceAssignment(String id) => '$deviceAssignments/$id';
+  static String deviceAssignmentEnd(String id) => '${deviceAssignment(id)}/end';
+  static String deviceSecurityPolicy(String id) =>
+      '$deviceSecurityPolicies/$id';
+  static String deviceEffectiveSecurityPolicy(String id) =>
+      '${device(id)}/security-policy';
   static String employeePerformance(String id) => '${employee(id)}/performance';
   static const String employeeDashboard = '$employees/dashboard';
   static String shift(String id) => '$shifts/$id';

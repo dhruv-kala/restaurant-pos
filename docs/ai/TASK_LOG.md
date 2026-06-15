@@ -3638,7 +3638,9 @@ Validation:
 - `dart format` on changed Dart files: passed
 - `dart analyze` from `packages/shared_models`: passed
 - `dart analyze` from `packages/api_client`: passed
+- `flutter pub get` from `apps/admin`: passed
 - `flutter analyze` from `apps/admin`: passed
+- `flutter test` from `apps/admin`: passed, 2 tests
 
 Known limitations:
 
@@ -4012,3 +4014,67 @@ Known limitations:
 Next task:
 
 - Task 32.6 - Device Administration UI
+
+## 2026-06-15 - Task 32.6 Device Administration UI
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/admin/lib/app.dart`
+- `apps/admin/lib/features/devices/data/device_management_repository.dart`
+- `apps/admin/lib/features/devices/domain/device_query.dart`
+- `apps/admin/lib/features/devices/presentation/providers/device_management_providers.dart`
+- `apps/admin/lib/features/devices/presentation/screens/device_admin_screen.dart`
+- `packages/api_client/lib/restaurant_pos_api_client.dart`
+- `packages/api_client/lib/src/api_endpoints.dart`
+- `packages/api_client/lib/src/services/device_management_api_service.dart`
+- `packages/shared_models/lib/restaurant_pos_shared_models.dart`
+- `packages/shared_models/lib/src/devices/device_models.dart`
+- `docs/specifications/device-management-module.md`
+- `docs/tasks/032-device-management/32.6-device-admin-ui.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 32.6 only; no backend schema, migrations, or NestJS
+  controllers were changed because Tasks 32.1-32.5 already supplied the backend
+  contracts.
+- Added shared Dart models for devices, enrollments, trusted sessions,
+  terminals, device assignments, security policies, and effective policy
+  evaluation.
+- Added typed API client methods for `/devices`, `/device-enrollments`,
+  `/trusted-sessions`, `/terminals`, `/device-assignments`, and
+  `/device-security-policies`.
+- Added admin device repository and Riverpod providers for device lists,
+  enrollment history, trusted sessions, terminals, assignments, security
+  policies, and audit events.
+- Added the admin Device Administration screen with tabs for Devices,
+  Enrollments, Sessions, Terminals, Policies, and Audit.
+- Added admin navigation visibility for super admins, tenant admins, and users
+  with device or terminal permissions.
+- Kept backend authorization authoritative; client permission checks only
+  control navigation visibility.
+
+Validation:
+
+- `dart format lib` from `packages/shared_models`: passed
+- `dart format lib` from `packages/api_client`: passed
+- `dart format lib` from `apps/admin`: passed
+- `dart analyze` from `packages/shared_models`: passed
+- `dart analyze` from `packages/api_client`: passed
+- `flutter analyze` from `apps/admin`: passed
+
+Known limitations:
+
+- Task 32.6 did not add Flutter widget tests.
+- No backend validation was run because this task did not change backend code.
+- The admin screen uses manual tenant/outlet ID entry, matching the current
+  pattern used by recent administration screens.
+
+Next task:
+
+- Task 33.1 - Offline Architecture Foundation

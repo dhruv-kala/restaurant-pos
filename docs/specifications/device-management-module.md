@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented through Task 32.5.
+Implemented through Task 32.6.
 
 Task 32 is split into:
 
@@ -11,7 +11,7 @@ Task 32 is split into:
 * Task 32.3 Trusted Sessions - Complete
 * Task 32.4 Terminal Management - Complete
 * Task 32.5 Device Security Policies - Complete
-* Task 32.6 Device Administration UI
+* Task 32.6 Device Administration UI - Complete
 
 ## Objective
 
@@ -192,6 +192,15 @@ Effective policy evaluation returns whether the current device type is allowed.
 
 Full request-level trusted-device enforcement is intentionally deferred until
 there is a device-session token/header contract in the authentication layer.
+
+Admin UI:
+
+Task 32.6 implements shared Dart device contracts, typed API client methods,
+Riverpod providers, and the admin Device Administration screen. The screen
+covers registered devices, status changes, enrollment request/approval history,
+trusted-session renewal/revocation, terminal creation/status changes, device
+assignment/end assignment, security policy creation/status changes, effective
+policy evaluation, and device audit visibility.
 
 ## Audit Requirements
 
