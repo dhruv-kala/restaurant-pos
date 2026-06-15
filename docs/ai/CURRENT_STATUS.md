@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 33.2**
+- Completed through: **Task 33.3**
 - Current module: **Offline SQLite Operation and Synchronization**
-- Next provisional task: **Task 33.3 - Sync Queue and Change Tracking**
+- Next provisional task: **Task 33.4 - Conflict Resolution Engine**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -67,6 +67,7 @@ Last updated: 2026-06-15
 | 32.6   | Shared device contracts, typed API client, Riverpod providers, and admin device/enrollment/session/terminal/security-policy/audit screens |
 | 33.1   | Offline sync architecture, storage-neutral shared sync contracts, offline identifier contract, and future sync API contract documentation |
 | 33.2   | Restaurant-app SQLite local storage, scoped local projections for orders/bills/customers/inventory, entity mappers, repository APIs, and reopen persistence tests |
+| 33.3   | Append-only sync queue and local change log tables, transactional create/update/delete change tracking, scoped recovery reads, and reopen persistence tests |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -249,6 +250,10 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   `DeviceSyncState`, order, bill, customer, and inventory projection tables,
   tenant/outlet/device scoped repository APIs, JSON payload preservation, and
   file-backed reopen persistence coverage
+- Sync queue and change tracking foundation in restaurant-app with append-only
+  `sync_queue` and `local_change_log` tables, idempotency-key uniqueness,
+  transactional queue/change-log appends for create, update, and delete
+  operations, scoped recovery reads, and schema version 2 upgrade handling
 
 ## Known Environment Limitation
 
@@ -259,7 +264,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 33.3 - Sync Queue and Change Tracking
+### Task 33.4 - Conflict Resolution Engine
 
 Read:
 
@@ -268,9 +273,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 33.3 unless explicitly requested. It should add durable
-sync queue and local change tracking on top of the Task 33.2 SQLite foundation
-without implementing background sync workers, conflict resolution, offline POS
+Do not implement Task 33.4 unless explicitly requested. It should add conflict
+resolution records and decision handling on top of the Task 33.3 queue/change
+tracking foundation without implementing background sync workers, offline POS
 flows, or admin sync monitoring UI.
 
 ## Status Maintenance

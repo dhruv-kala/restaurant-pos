@@ -2,13 +2,13 @@
 
 ## Status
 
-Implemented through Task 33.2.
+Implemented through Task 33.3.
 
 Task 33 is split into:
 
 * Task 33.1 Offline Architecture Foundation - Complete
 * Task 33.2 SQLite Local Storage - Complete
-* Task 33.3 Sync Queue and Change Tracking
+* Task 33.3 Sync Queue and Change Tracking - Complete
 * Task 33.4 Conflict Resolution Engine
 * Task 33.5 Background Sync Service
 * Task 33.6 Offline POS Operations
@@ -56,11 +56,11 @@ Potential entities:
 
 * DeviceSyncState - contract defined in Task 33.1 and persisted locally in
   Task 33.2
-* SyncQueue - contract defined in Task 33.1
+* SyncQueue - contract defined in Task 33.1 and persisted locally in Task 33.3
 * SyncBatch - contract defined in Task 33.1
 * SyncConflict - contract defined in Task 33.1
 * SyncCheckpoint - contract defined in Task 33.1
-* LocalChangeLog - deferred to Task 33.3
+* LocalChangeLog - implemented locally in Task 33.3
 * LocalOrderProjection - Task 33.2 SQLite projection
 * LocalBillProjection - Task 33.2 SQLite projection
 * LocalCustomerProjection - Task 33.2 SQLite projection
@@ -69,8 +69,9 @@ Potential entities:
 SQLite mirrors approved online entities.
 
 Task 33.2 adds the first restaurant-app SQLite schema and repository layer for
-durable local projections. Sync queue mutation and local change logs remain
-deferred to Task 33.3.
+durable local projections. Task 33.3 adds append-only `sync_queue` and
+`local_change_log` tables for recoverable create, update, and delete tracking.
+Background sync, conflict resolution, and retry workers remain deferred.
 
 ## Offline Device Coverage
 

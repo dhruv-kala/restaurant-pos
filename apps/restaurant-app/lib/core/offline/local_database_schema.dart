@@ -1,6 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart' as sqlite;
 
-const offlineDatabaseVersion = 1;
+const offlineDatabaseVersion = 2;
 
 Future<void> createOfflineDatabaseSchema(sqlite.Database database) async {
   await database.execute('''
@@ -81,6 +81,81 @@ CREATE TABLE IF NOT EXISTS device_sync_state (
   await database.execute(
     'CREATE INDEX IF NOT EXISTS idx_local_inventory_scope_name '
     'ON local_inventory_items (tenant_id, outlet_id, name)',
+  );
+
+  await database.execute('''
+CREATE TABLE IF NOT EXISTS sync_queue (
+  local_id TEXT NOT NULL PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  outlet_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  actor_user_id TEXT NOT NULL,
+  module TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  operation_type TEXT NOT NULL,
+  idempotency_key TEXT NOT NULL,
+  base_version INTEGER,
+  business_date TEXT NOT NULL,
+  occurred_at TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  state TEXT NOT NULL,
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  next_retry_at TEXT,
+  error_code TEXT,
+  error_message TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  CHECK (length(local_id) > 0),
+  CHECK (length(tenant_id) > 0),
+  CHECK (length(outlet_id) > 0),
+  CHECK (length(device_id) > 0),
+  CHECK (operation_type IN ('CREATE', 'UPDATE', 'DELETE', 'LIFECYCLE', 'APPEND')),
+  CHECK (state IN ('PENDING', 'IN_PROGRESS', 'SUCCESS', 'FAILED', 'CONFLICT', 'RETRYING')),
+  UNIQUE (tenant_id, outlet_id, device_id, idempotency_key)
+)
+''');
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_sync_queue_scope_state '
+    'ON sync_queue (tenant_id, outlet_id, device_id, state, created_at)',
+  );
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_sync_queue_entity '
+    'ON sync_queue (tenant_id, outlet_id, entity_type, entity_id)',
+  );
+
+  await database.execute('''
+CREATE TABLE IF NOT EXISTS local_change_log (
+  id TEXT NOT NULL PRIMARY KEY,
+  queue_item_local_id TEXT NOT NULL,
+  tenant_id TEXT NOT NULL,
+  outlet_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  actor_user_id TEXT NOT NULL,
+  module TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  operation_type TEXT NOT NULL,
+  business_date TEXT NOT NULL,
+  occurred_at TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  CHECK (length(id) > 0),
+  CHECK (length(queue_item_local_id) > 0),
+  CHECK (length(tenant_id) > 0),
+  CHECK (length(outlet_id) > 0),
+  CHECK (length(device_id) > 0),
+  CHECK (operation_type IN ('CREATE', 'UPDATE', 'DELETE', 'LIFECYCLE', 'APPEND'))
+)
+''');
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_local_change_log_scope '
+    'ON local_change_log (tenant_id, outlet_id, device_id, created_at)',
+  );
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_local_change_log_entity '
+    'ON local_change_log (tenant_id, outlet_id, entity_type, entity_id)',
   );
 }
 

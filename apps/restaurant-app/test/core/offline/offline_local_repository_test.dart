@@ -146,4 +146,142 @@ void main() {
     await reopenedDatabase.close();
     await directory.delete(recursive: true);
   });
+
+  test('appends recoverable sync queue and change log entries', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'restaurant-pos-sync-queue-',
+    );
+    final databasePath = '${directory.path}/offline.db';
+    final timestamp = DateTime.utc(2026, 6, 15, 10);
+    final businessDate = DateTime.utc(2026, 6, 15);
+
+    final database = OfflineLocalDatabase(
+      databaseFactory: databaseFactoryFfi,
+      databasePath: databasePath,
+    );
+    final repository = OfflineLocalRepository(database);
+
+    final operations = [
+      SyncOperationType.create,
+      SyncOperationType.update,
+      SyncOperationType.delete,
+    ];
+
+    for (final (index, operation) in operations.indexed) {
+      final queueItem = _queueItem(
+        localId: 'queue-$index',
+        operationType: operation,
+        businessDate: businessDate,
+        occurredAt: timestamp.add(Duration(minutes: index)),
+      );
+      await repository.appendQueuedChange(
+        queueItem: queueItem,
+        changeLogEntry: _changeLogEntry(
+          id: 'change-$index',
+          queueItem: queueItem,
+        ),
+      );
+    }
+
+    await database.close();
+
+    final reopenedDatabase = OfflineLocalDatabase(
+      databaseFactory: databaseFactoryFfi,
+      databasePath: databasePath,
+    );
+    final reopenedRepository = OfflineLocalRepository(reopenedDatabase);
+
+    final pendingQueue = await reopenedRepository.listSyncQueueItems(
+      tenantId: 'tenant-1',
+      outletId: 'outlet-1',
+      deviceId: 'device-1',
+      state: SyncQueueState.pending,
+    );
+    final changes = await reopenedRepository.listLocalChanges(
+      tenantId: 'tenant-1',
+      outletId: 'outlet-1',
+      deviceId: 'device-1',
+      entityType: 'Order',
+      entityId: 'order-local-1',
+    );
+
+    expect(pendingQueue.map((item) => item.operationType), operations);
+    expect(changes.map((entry) => entry.operationType), operations);
+    expect(
+      pendingQueue.singleWhere((item) => item.localId == 'queue-0').payload,
+      {'status': 'CREATE'},
+    );
+
+    final duplicateItem = _queueItem(
+      localId: 'queue-0',
+      operationType: SyncOperationType.create,
+      businessDate: businessDate,
+      occurredAt: timestamp,
+    );
+    await expectLater(
+      reopenedRepository.appendQueuedChange(
+        queueItem: duplicateItem,
+        changeLogEntry: _changeLogEntry(
+          id: 'duplicate-change',
+          queueItem: duplicateItem,
+        ),
+      ),
+      throwsA(isA<Exception>()),
+    );
+
+    final otherTenantQueue = await reopenedRepository.listSyncQueueItems(
+      tenantId: 'tenant-2',
+      outletId: 'outlet-1',
+      deviceId: 'device-1',
+    );
+    expect(otherTenantQueue, isEmpty);
+
+    await reopenedDatabase.close();
+    await directory.delete(recursive: true);
+  });
 }
+
+SyncQueueItem _queueItem({
+  required String localId,
+  required SyncOperationType operationType,
+  required DateTime businessDate,
+  required DateTime occurredAt,
+}) => SyncQueueItem(
+  localId: localId,
+  tenantId: 'tenant-1',
+  outletId: 'outlet-1',
+  deviceId: 'device-1',
+  actorUserId: 'user-1',
+  module: 'orders',
+  entityType: 'Order',
+  entityId: 'order-local-1',
+  operationType: operationType,
+  idempotencyKey: 'idempotency-$localId',
+  businessDate: businessDate,
+  occurredAt: occurredAt,
+  payload: {'status': operationType.wireName},
+  state: SyncQueueState.pending,
+  attemptCount: 0,
+  createdAt: occurredAt,
+  updatedAt: occurredAt,
+);
+
+LocalChangeLogEntry _changeLogEntry({
+  required String id,
+  required SyncQueueItem queueItem,
+}) => LocalChangeLogEntry(
+  id: id,
+  queueItemLocalId: queueItem.localId,
+  tenantId: queueItem.tenantId,
+  outletId: queueItem.outletId,
+  deviceId: queueItem.deviceId,
+  actorUserId: queueItem.actorUserId,
+  module: queueItem.module,
+  entityType: queueItem.entityType,
+  entityId: queueItem.entityId,
+  operationType: queueItem.operationType,
+  businessDate: queueItem.businessDate,
+  occurredAt: queueItem.occurredAt,
+  payload: queueItem.payload,
+  createdAt: queueItem.createdAt,
+);

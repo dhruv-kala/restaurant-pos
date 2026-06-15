@@ -42,6 +42,95 @@ class OfflineEntityMapper {
         updatedAt: _dateFromRow(row, 'updated_at'),
       );
 
+  static Map<String, Object?> syncQueueItemToRow(SyncQueueItem item) => {
+    'local_id': item.localId,
+    'tenant_id': item.tenantId,
+    'outlet_id': item.outletId,
+    'device_id': item.deviceId,
+    'actor_user_id': item.actorUserId,
+    'module': item.module,
+    'entity_type': item.entityType,
+    'entity_id': item.entityId,
+    'operation_type': item.operationType.wireName,
+    'idempotency_key': item.idempotencyKey,
+    'base_version': item.baseVersion,
+    'business_date': _date(item.businessDate),
+    'occurred_at': _date(item.occurredAt),
+    'payload_json': jsonEncode(item.payload),
+    'state': item.state.wireName,
+    'attempt_count': item.attemptCount,
+    'last_attempt_at': _optionalDate(item.lastAttemptAt),
+    'next_retry_at': _optionalDate(item.nextRetryAt),
+    'error_code': item.errorCode,
+    'error_message': item.errorMessage,
+    'created_at': _date(item.createdAt),
+    'updated_at': _date(item.updatedAt),
+  };
+
+  static SyncQueueItem syncQueueItemFromRow(Map<String, Object?> row) =>
+      SyncQueueItem(
+        localId: _string(row, 'local_id'),
+        tenantId: _string(row, 'tenant_id'),
+        outletId: _string(row, 'outlet_id'),
+        deviceId: _string(row, 'device_id'),
+        actorUserId: _string(row, 'actor_user_id'),
+        module: _string(row, 'module'),
+        entityType: _string(row, 'entity_type'),
+        entityId: _string(row, 'entity_id'),
+        operationType: SyncOperationType.fromJson(row['operation_type']),
+        idempotencyKey: _string(row, 'idempotency_key'),
+        baseVersion: _optionalInt(row['base_version']),
+        businessDate: _dateFromRow(row, 'business_date'),
+        occurredAt: _dateFromRow(row, 'occurred_at'),
+        payload: _payload(row),
+        state: SyncQueueState.fromJson(row['state']),
+        attemptCount: _int(row, 'attempt_count'),
+        lastAttemptAt: _optionalDateFromRow(row['last_attempt_at']),
+        nextRetryAt: _optionalDateFromRow(row['next_retry_at']),
+        errorCode: row['error_code']?.toString(),
+        errorMessage: row['error_message']?.toString(),
+        createdAt: _dateFromRow(row, 'created_at'),
+        updatedAt: _dateFromRow(row, 'updated_at'),
+      );
+
+  static Map<String, Object?> localChangeLogEntryToRow(
+    LocalChangeLogEntry entry,
+  ) => {
+    'id': entry.id,
+    'queue_item_local_id': entry.queueItemLocalId,
+    'tenant_id': entry.tenantId,
+    'outlet_id': entry.outletId,
+    'device_id': entry.deviceId,
+    'actor_user_id': entry.actorUserId,
+    'module': entry.module,
+    'entity_type': entry.entityType,
+    'entity_id': entry.entityId,
+    'operation_type': entry.operationType.wireName,
+    'business_date': _date(entry.businessDate),
+    'occurred_at': _date(entry.occurredAt),
+    'payload_json': jsonEncode(entry.payload),
+    'created_at': _date(entry.createdAt),
+  };
+
+  static LocalChangeLogEntry localChangeLogEntryFromRow(
+    Map<String, Object?> row,
+  ) => LocalChangeLogEntry(
+    id: _string(row, 'id'),
+    queueItemLocalId: _string(row, 'queue_item_local_id'),
+    tenantId: _string(row, 'tenant_id'),
+    outletId: _string(row, 'outlet_id'),
+    deviceId: _string(row, 'device_id'),
+    actorUserId: _string(row, 'actor_user_id'),
+    module: _string(row, 'module'),
+    entityType: _string(row, 'entity_type'),
+    entityId: _string(row, 'entity_id'),
+    operationType: SyncOperationType.fromJson(row['operation_type']),
+    businessDate: _dateFromRow(row, 'business_date'),
+    occurredAt: _dateFromRow(row, 'occurred_at'),
+    payload: _payload(row),
+    createdAt: _dateFromRow(row, 'created_at'),
+  );
+
   static Map<String, Object?> orderToRow(LocalOrderProjection order) => {
     ..._baseProjectionToRow(order),
     'business_date': _date(order.businessDate),
@@ -215,6 +304,13 @@ class OfflineEntityMapper {
     if (value is int) return value;
     if (value is num) return value.toInt();
     throw FormatException('Expected integer for $key.');
+  }
+
+  static int? _optionalInt(Object? value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return null;
   }
 
   static double _double(Map<String, Object?> row, String key) {

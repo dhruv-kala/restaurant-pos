@@ -1,3 +1,39 @@
+import 'package:restaurant_pos_shared_models/restaurant_pos_shared_models.dart';
+
+class LocalChangeLogEntry {
+  const LocalChangeLogEntry({
+    required this.id,
+    required this.queueItemLocalId,
+    required this.tenantId,
+    required this.outletId,
+    required this.deviceId,
+    required this.actorUserId,
+    required this.module,
+    required this.entityType,
+    required this.entityId,
+    required this.operationType,
+    required this.businessDate,
+    required this.occurredAt,
+    required this.payload,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String queueItemLocalId;
+  final String tenantId;
+  final String outletId;
+  final String deviceId;
+  final String actorUserId;
+  final String module;
+  final String entityType;
+  final String entityId;
+  final SyncOperationType operationType;
+  final DateTime businessDate;
+  final DateTime occurredAt;
+  final Map<String, dynamic> payload;
+  final DateTime createdAt;
+}
+
 class LocalOrderProjection {
   const LocalOrderProjection({
     required this.id,

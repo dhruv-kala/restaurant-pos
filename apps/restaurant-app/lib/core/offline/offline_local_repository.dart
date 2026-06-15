@@ -178,6 +178,116 @@ class OfflineLocalRepository {
         .toList(growable: false);
   }
 
+  Future<void> appendQueuedChange({
+    required SyncQueueItem queueItem,
+    required LocalChangeLogEntry changeLogEntry,
+  }) async {
+    _validateQueueAndChangeLog(queueItem, changeLogEntry);
+    final database = await _database.open();
+    await database.transaction((transaction) async {
+      await transaction.insert(
+        'sync_queue',
+        OfflineEntityMapper.syncQueueItemToRow(queueItem),
+      );
+      await transaction.insert(
+        'local_change_log',
+        OfflineEntityMapper.localChangeLogEntryToRow(changeLogEntry),
+      );
+    });
+  }
+
+  Future<void> appendSyncQueueItem(SyncQueueItem item) async {
+    final database = await _database.open();
+    await database.insert(
+      'sync_queue',
+      OfflineEntityMapper.syncQueueItemToRow(item),
+    );
+  }
+
+  Future<void> appendLocalChange(LocalChangeLogEntry entry) async {
+    final database = await _database.open();
+    await database.insert(
+      'local_change_log',
+      OfflineEntityMapper.localChangeLogEntryToRow(entry),
+    );
+  }
+
+  Future<SyncQueueItem?> getSyncQueueItem({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    required String localId,
+  }) async {
+    final database = await _database.open();
+    final rows = await database.query(
+      'sync_queue',
+      where:
+          'tenant_id = ? AND outlet_id = ? AND device_id = ? AND local_id = ?',
+      whereArgs: [tenantId, outletId, deviceId, localId],
+      limit: 1,
+    );
+    return rows.isEmpty
+        ? null
+        : OfflineEntityMapper.syncQueueItemFromRow(rows.single);
+  }
+
+  Future<List<SyncQueueItem>> listSyncQueueItems({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    SyncQueueState? state,
+    int limit = 100,
+  }) async {
+    final database = await _database.open();
+    var where = 'tenant_id = ? AND outlet_id = ? AND device_id = ?';
+    final whereArgs = <Object?>[tenantId, outletId, deviceId];
+    if (state != null) {
+      where = '$where AND state = ?';
+      whereArgs.add(state.wireName);
+    }
+    final rows = await database.query(
+      'sync_queue',
+      where: where,
+      whereArgs: whereArgs,
+      orderBy: 'created_at ASC',
+      limit: limit,
+    );
+    return rows
+        .map(OfflineEntityMapper.syncQueueItemFromRow)
+        .toList(growable: false);
+  }
+
+  Future<List<LocalChangeLogEntry>> listLocalChanges({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    String? entityType,
+    String? entityId,
+    int limit = 100,
+  }) async {
+    final database = await _database.open();
+    var where = 'tenant_id = ? AND outlet_id = ? AND device_id = ?';
+    final whereArgs = <Object?>[tenantId, outletId, deviceId];
+    if (entityType != null) {
+      where = '$where AND entity_type = ?';
+      whereArgs.add(entityType);
+    }
+    if (entityId != null) {
+      where = '$where AND entity_id = ?';
+      whereArgs.add(entityId);
+    }
+    final rows = await database.query(
+      'local_change_log',
+      where: where,
+      whereArgs: whereArgs,
+      orderBy: 'created_at ASC',
+      limit: limit,
+    );
+    return rows
+        .map(OfflineEntityMapper.localChangeLogEntryFromRow)
+        .toList(growable: false);
+  }
+
   Future<void> _upsert(String table, Map<String, Object?> row) async {
     final database = await _database.open();
     await database.insert(
@@ -185,6 +295,27 @@ class OfflineLocalRepository {
       row,
       conflictAlgorithm: sqlite.ConflictAlgorithm.replace,
     );
+  }
+
+  void _validateQueueAndChangeLog(
+    SyncQueueItem queueItem,
+    LocalChangeLogEntry changeLogEntry,
+  ) {
+    final matchingScope =
+        queueItem.localId == changeLogEntry.queueItemLocalId &&
+        queueItem.tenantId == changeLogEntry.tenantId &&
+        queueItem.outletId == changeLogEntry.outletId &&
+        queueItem.deviceId == changeLogEntry.deviceId &&
+        queueItem.actorUserId == changeLogEntry.actorUserId &&
+        queueItem.module == changeLogEntry.module &&
+        queueItem.entityType == changeLogEntry.entityType &&
+        queueItem.entityId == changeLogEntry.entityId &&
+        queueItem.operationType == changeLogEntry.operationType;
+    if (!matchingScope) {
+      throw ArgumentError(
+        'Queue item and local change log entry must describe the same change.',
+      );
+    }
   }
 
   Future<Map<String, Object?>?> _getProjection(

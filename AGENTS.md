@@ -338,8 +338,13 @@ durable local tables for `DeviceSyncState`, orders, bills, customers, and
 inventory projections, tenant/outlet/device scoping, local entity mappers,
 repository APIs, and persistence tests across database reopen.
 
-Task 33.3 is next provisionally: implement sync queue and change tracking. Do
-not implement it unless the active user request explicitly asks for it.
+Task 33.3 implemented append-only restaurant-app sync queue and local change
+log storage for create, update, and delete operations, transactional queue and
+change-log appends, scoped recovery reads, idempotency-key uniqueness, schema
+upgrade handling, and persistence tests across database reopen.
+
+Task 33.4 is next provisionally: implement conflict resolution engine. Do not
+implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

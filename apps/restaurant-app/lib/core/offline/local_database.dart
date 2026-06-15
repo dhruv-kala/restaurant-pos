@@ -39,6 +39,9 @@ class OfflineLocalDatabase {
         onCreate: (database, version) async {
           await createOfflineDatabaseSchema(database);
         },
+        onUpgrade: (database, oldVersion, newVersion) async {
+          await createOfflineDatabaseSchema(database);
+        },
         onOpen: (database) async {
           await createOfflineDatabaseSchema(database);
         },

@@ -4192,3 +4192,58 @@ Known limitations:
 Next task:
 
 - Task 33.3 - Sync Queue and Change Tracking
+
+## 2026-06-15 - Task 33.3 Sync Queue and Change Tracking
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/restaurant-app/lib/core/offline/local_database.dart`
+- `apps/restaurant-app/lib/core/offline/local_database_schema.dart`
+- `apps/restaurant-app/lib/core/offline/offline_entity_mapper.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_models.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_repository.dart`
+- `apps/restaurant-app/test/core/offline/offline_local_repository_test.dart`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.3-sync-queue-and-change-tracking.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.3 only; queue claiming, retry state transitions,
+  background sync workers, conflict resolution, offline POS flows, and sync
+  administration UI remain deferred.
+- Bumped the local offline SQLite schema to version 2 and added upgrade-safe
+  schema creation for existing version-1 databases.
+- Added append-only `sync_queue` rows mapped to the Task 33.1 `SyncQueueItem`
+  contract.
+- Added append-only `local_change_log` rows for recoverable create, update,
+  and delete tracking.
+- Added a transactional `appendQueuedChange` repository method so the queue
+  item and local change-log entry are either both durable or both rejected.
+- Added scoped recovery reads for queue items and local change history.
+- Enforced per-device idempotency-key uniqueness in the local queue.
+
+Validation:
+
+- `dart format apps/restaurant-app/lib/core/offline apps/restaurant-app/test/core/offline`:
+  passed
+- `flutter analyze` from `apps/restaurant-app`: passed
+- `flutter test test/core/offline/offline_local_repository_test.dart` from
+  `apps/restaurant-app`: passed
+- `flutter test` from `apps/restaurant-app`: passed
+
+Known limitations:
+
+- Task 33.3 does not mutate queue states after append.
+- Sync batching, checkpointing, conflict handling, and worker orchestration are
+  future tasks.
+
+Next task:
+
+- Task 33.4 - Conflict Resolution Engine
