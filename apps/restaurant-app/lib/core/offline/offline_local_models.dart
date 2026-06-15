@@ -120,6 +120,74 @@ class LocalBillProjection {
   final bool isDirty;
 }
 
+class LocalPaymentProjection {
+  const LocalPaymentProjection({
+    required this.id,
+    required this.tenantId,
+    required this.outletId,
+    required this.deviceId,
+    required this.businessDate,
+    required this.billId,
+    required this.method,
+    required this.status,
+    required this.amountMinor,
+    required this.currencyCode,
+    required this.updatedAt,
+    required this.payload,
+    this.referenceNumber,
+    this.isDirty = false,
+  });
+
+  final String id;
+  final String tenantId;
+  final String outletId;
+  final String deviceId;
+  final DateTime businessDate;
+  final String billId;
+  final String method;
+  final String status;
+  final int amountMinor;
+  final String currencyCode;
+  final String? referenceNumber;
+  final DateTime updatedAt;
+  final Map<String, dynamic> payload;
+  final bool isDirty;
+}
+
+class LocalReceiptProjection {
+  const LocalReceiptProjection({
+    required this.id,
+    required this.tenantId,
+    required this.outletId,
+    required this.deviceId,
+    required this.businessDate,
+    required this.billId,
+    required this.type,
+    required this.status,
+    required this.totalMinor,
+    required this.currencyCode,
+    required this.updatedAt,
+    required this.payload,
+    this.receiptNumber,
+    this.isDirty = false,
+  });
+
+  final String id;
+  final String tenantId;
+  final String outletId;
+  final String deviceId;
+  final DateTime businessDate;
+  final String billId;
+  final String? receiptNumber;
+  final String type;
+  final String status;
+  final int totalMinor;
+  final String currencyCode;
+  final DateTime updatedAt;
+  final Map<String, dynamic> payload;
+  final bool isDirty;
+}
+
 class LocalCustomerProjection {
   const LocalCustomerProjection({
     required this.id,

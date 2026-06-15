@@ -4362,3 +4362,58 @@ Known limitations:
 Next task:
 
 - Task 33.6 - Offline POS Operations
+
+## 2026-06-15 - Task 33.6 Offline POS Operations
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/restaurant-app/lib/core/offline/local_database_schema.dart`
+- `apps/restaurant-app/lib/core/offline/offline_entity_mapper.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_models.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_repository.dart`
+- `apps/restaurant-app/lib/core/offline/offline_pos_operations_service.dart`
+- `apps/restaurant-app/test/core/offline/offline_pos_operations_service_test.dart`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.6-offline-pos-operations.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.6 only; live screen wiring, concrete backend sync
+  endpoints, inventory/customer offline workflows, and admin sync monitoring UI
+  remain deferred.
+- Bumped local offline SQLite schema to version 5.
+- Added local payment and receipt projection tables.
+- Added `OfflinePosOperationsService` as the POS operation facade over the
+  local repository and sync queue foundation.
+- Added offline order creation and order lifecycle status update commands.
+- Added offline bill generation.
+- Added offline manual payment recording with local bill paid-state update.
+- Added offline receipt generation.
+- Ensured each operation writes the local projection and queue/change-log entry
+  in one transaction.
+- Preserved stable local IDs and idempotency keys for reconnect
+  synchronization.
+
+Validation:
+
+- `dart format apps/restaurant-app/lib/core/offline apps/restaurant-app/test/core/offline`:
+  passed
+- `flutter analyze` from `apps/restaurant-app`: passed
+- `flutter test test/core/offline` from `apps/restaurant-app`: passed
+
+Known limitations:
+
+- The service foundation is not yet wired into POS screens.
+- Pulled server projection application and concrete HTTP sync endpoints remain
+  future work.
+
+Next task:
+
+- Task 33.7 - Offline Inventory and Customers

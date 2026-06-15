@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented through Task 33.5.
+Implemented through Task 33.6.
 
 Task 33 is split into:
 
@@ -11,7 +11,7 @@ Task 33 is split into:
 * Task 33.3 Sync Queue and Change Tracking - Complete
 * Task 33.4 Conflict Resolution Engine - Complete
 * Task 33.5 Background Sync Service - Complete
-* Task 33.6 Offline POS Operations
+* Task 33.6 Offline POS Operations - Complete
 * Task 33.7 Offline Inventory and Customers
 * Task 33.8 Sync Monitoring and Recovery
 * Task 33.9 Offline Administration UI
@@ -66,6 +66,8 @@ Potential entities:
 * LocalChangeLog - implemented locally in Task 33.3
 * LocalOrderProjection - Task 33.2 SQLite projection
 * LocalBillProjection - Task 33.2 SQLite projection
+* LocalPaymentProjection - Task 33.6 SQLite projection
+* LocalReceiptProjection - Task 33.6 SQLite projection
 * LocalCustomerProjection - Task 33.2 SQLite projection
 * LocalInventoryProjection - Task 33.2 SQLite projection
 
@@ -78,7 +80,9 @@ Task 33.4 adds local `sync_conflicts` and append-only
 `sync_conflict_decisions` for server wins, client wins, and manual-review
 decisions. Task 33.5 adds background sync orchestration, bounded retry policy,
 batch history, and checkpoint tracking through an injected transport
-abstraction. Offline POS feature flows remain deferred.
+abstraction. Task 33.6 adds offline POS operation foundations for orders,
+bills, payments, and receipts, storing local projections and queued commands
+atomically.
 
 ## Offline Device Coverage
 

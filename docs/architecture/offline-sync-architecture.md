@@ -2,13 +2,13 @@
 
 ## Status
 
-Implemented through Task 33.5.
+Implemented through Task 33.6.
 
 This document defines the offline architecture boundary. SQLite projection,
 sync queue, local change-log storage, and local conflict resolution persistence
 exist through Task 33.4. Task 33.5 adds a bounded background sync service
-foundation, batch history, and checkpoint tracking. Offline POS flows remain
-deferred.
+foundation, batch history, and checkpoint tracking. Task 33.6 adds offline POS
+operation foundations for orders, bills, payments, and receipts.
 
 ## Goals
 
@@ -72,6 +72,8 @@ Task 33.2 defines the first local SQLite tables in
 * `device_sync_state`
 * `local_orders`
 * `local_bills`
+* `local_payments`
+* `local_receipts`
 * `local_customers`
 * `local_inventory_items`
 * `sync_queue`
@@ -100,12 +102,17 @@ transport, applies success/retry/failure/conflict states, records sync batches,
 and updates per-module pull checkpoints. The transport abstraction allows
 future API client wiring without hard-coding routes in the local storage layer.
 
+Task 33.6 adds `OfflinePosOperationsService` for local order creation and
+status updates, bill generation, manual payment recording, and receipt
+generation. Each operation writes the local projection and sync queue/change-log
+entry atomically so reconnect synchronization can continue from SQLite.
+
 Future approved table groups are:
 
 * pulled server-change staging tables when projection application is added
 
-Task 33.5 intentionally does not implement offline POS command handlers or
-admin sync monitoring UI.
+Task 33.6 intentionally does not implement inventory/customer offline workflows
+or admin sync monitoring UI.
 
 ## Command Flow
 
@@ -209,7 +216,7 @@ These contracts are intentionally storage-neutral. Task 33.2 maps
 
 ## Non-Goals
 
-Task 33.5 does not implement:
+Task 33.6 does not implement:
 
-* offline POS command handling
+* offline inventory and customer workflows
 * admin sync monitoring UI

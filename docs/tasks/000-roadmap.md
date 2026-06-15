@@ -12,8 +12,8 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, 32.1-32.6, and 33.1-33.5 are
-  complete; Task 33.6 offline POS operations is the next listed
+- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, 32.1-32.6, and 33.1-33.6 are
+  complete; Task 33.7 offline inventory and customers is the next listed
   provisional task.
 
 ## Foundation and Core SaaS
@@ -69,8 +69,8 @@ Last updated: 2026-06-15
 | 33.3 | COMPLETE | Sync queue and change tracking |
 | 33.4 | COMPLETE | Conflict resolution engine |
 | 33.5 | COMPLETE | Background sync service |
-| 33.6 | NEXT | Offline POS operations |
-| 33.7 | PLANNED | Offline inventory and customers |
+| 33.6 | COMPLETE | Offline POS operations |
+| 33.7 | NEXT | Offline inventory and customers |
 | 33.8 | PLANNED | Sync monitoring and recovery |
 | 33.9 | PLANNED | Offline administration UI |
 | 34 | PLANNED | Transactional outbox, background jobs, and scheduler |

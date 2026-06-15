@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 33.5**
+- Completed through: **Task 33.6**
 - Current module: **Offline SQLite Operation and Synchronization**
-- Next provisional task: **Task 33.6 - Offline POS Operations**
+- Next provisional task: **Task 33.7 - Offline Inventory and Customers**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -70,6 +70,7 @@ Last updated: 2026-06-15
 | 33.3   | Append-only sync queue and local change log tables, transactional create/update/delete change tracking, scoped recovery reads, and reopen persistence tests |
 | 33.4   | Local sync conflict persistence, conflict detection, server/client/manual-review resolution decisions, financial manual-review guard, and decision history |
 | 33.5   | Background sync service foundation, retryable queue claiming, bounded retry policy, batch history, checkpoint tracking, and worker tests |
+| 33.6   | Offline POS operation foundation for orders, bills, payments, and receipts with atomic local writes, queued commands, and workflow tests |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -266,6 +267,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   checkpoint persistence, push result handling, conflict recording integration,
   queue success/retry/failure transitions, device sync counters, and schema
   version 4 upgrade handling
+- Offline POS operations foundation in restaurant-app with local payment and
+  receipt projections, schema version 5 upgrade handling, atomic projection
+  plus queued-command writes, offline order creation/status updates, bill
+  generation, manual payment recording, receipt generation, paid bill-state
+  updates, and workflow tests
 
 ## Known Environment Limitation
 
@@ -276,7 +282,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 33.6 - Offline POS Operations
+### Task 33.7 - Offline Inventory and Customers
 
 Read:
 
@@ -285,9 +291,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 33.6 unless explicitly requested. It should start wiring
-offline POS feature operations onto the Task 33.5 sync foundation without
-expanding inventory/customer offline workflows or admin sync monitoring UI.
+Do not implement Task 33.7 unless explicitly requested. It should add offline
+inventory and customer workflows on top of the Task 33.6 POS foundation without
+expanding admin sync monitoring UI.
 
 ## Status Maintenance
 

@@ -355,8 +355,14 @@ abstraction, batch history, checkpoint tracking, queue success/retry/failure
 transitions, conflict recording integration, device sync counters, schema
 version 4 upgrade handling, and worker tests.
 
-Task 33.6 is next provisionally: implement offline POS operations. Do not
-implement it unless the active user request explicitly asks for it.
+Task 33.6 implemented offline POS operation foundations for orders, bills,
+payments, and receipts with local payment/receipt projections, schema version 5
+upgrade handling, atomic local projection plus queued-command writes, offline
+order creation/status updates, bill generation, manual payment recording,
+receipt generation, bill paid-state updates, and offline POS workflow tests.
+
+Task 33.7 is next provisionally: implement offline inventory and customers. Do
+not implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

@@ -299,6 +299,64 @@ class OfflineEntityMapper {
         isDirty: _bool(row, 'is_dirty'),
       );
 
+  static Map<String, Object?> paymentToRow(LocalPaymentProjection payment) => {
+    ..._baseProjectionToRow(payment),
+    'business_date': _date(payment.businessDate),
+    'bill_id': payment.billId,
+    'method': payment.method,
+    'status': payment.status,
+    'amount_minor': payment.amountMinor,
+    'currency_code': payment.currencyCode,
+    'reference_number': payment.referenceNumber,
+  };
+
+  static LocalPaymentProjection paymentFromRow(Map<String, Object?> row) =>
+      LocalPaymentProjection(
+        id: _string(row, 'id'),
+        tenantId: _string(row, 'tenant_id'),
+        outletId: _string(row, 'outlet_id'),
+        deviceId: _string(row, 'device_id'),
+        businessDate: _dateFromRow(row, 'business_date'),
+        billId: _string(row, 'bill_id'),
+        method: _string(row, 'method'),
+        status: _string(row, 'status'),
+        amountMinor: _int(row, 'amount_minor'),
+        currencyCode: _string(row, 'currency_code'),
+        referenceNumber: row['reference_number']?.toString(),
+        updatedAt: _dateFromRow(row, 'updated_at'),
+        payload: _payload(row),
+        isDirty: _bool(row, 'is_dirty'),
+      );
+
+  static Map<String, Object?> receiptToRow(LocalReceiptProjection receipt) => {
+    ..._baseProjectionToRow(receipt),
+    'business_date': _date(receipt.businessDate),
+    'bill_id': receipt.billId,
+    'receipt_number': receipt.receiptNumber,
+    'type': receipt.type,
+    'status': receipt.status,
+    'total_minor': receipt.totalMinor,
+    'currency_code': receipt.currencyCode,
+  };
+
+  static LocalReceiptProjection receiptFromRow(Map<String, Object?> row) =>
+      LocalReceiptProjection(
+        id: _string(row, 'id'),
+        tenantId: _string(row, 'tenant_id'),
+        outletId: _string(row, 'outlet_id'),
+        deviceId: _string(row, 'device_id'),
+        businessDate: _dateFromRow(row, 'business_date'),
+        billId: _string(row, 'bill_id'),
+        receiptNumber: row['receipt_number']?.toString(),
+        type: _string(row, 'type'),
+        status: _string(row, 'status'),
+        totalMinor: _int(row, 'total_minor'),
+        currencyCode: _string(row, 'currency_code'),
+        updatedAt: _dateFromRow(row, 'updated_at'),
+        payload: _payload(row),
+        isDirty: _bool(row, 'is_dirty'),
+      );
+
   static Map<String, Object?> customerToRow(LocalCustomerProjection customer) =>
       {
         ..._baseProjectionToRow(customer),
@@ -350,6 +408,8 @@ class OfflineEntityMapper {
     final id = switch (projection) {
       LocalOrderProjection value => value.id,
       LocalBillProjection value => value.id,
+      LocalPaymentProjection value => value.id,
+      LocalReceiptProjection value => value.id,
       LocalCustomerProjection value => value.id,
       LocalInventoryProjection value => value.id,
       _ => throw ArgumentError.value(projection, 'projection'),
@@ -357,6 +417,8 @@ class OfflineEntityMapper {
     final tenantId = switch (projection) {
       LocalOrderProjection value => value.tenantId,
       LocalBillProjection value => value.tenantId,
+      LocalPaymentProjection value => value.tenantId,
+      LocalReceiptProjection value => value.tenantId,
       LocalCustomerProjection value => value.tenantId,
       LocalInventoryProjection value => value.tenantId,
       _ => throw ArgumentError.value(projection, 'projection'),
@@ -364,6 +426,8 @@ class OfflineEntityMapper {
     final outletId = switch (projection) {
       LocalOrderProjection value => value.outletId,
       LocalBillProjection value => value.outletId,
+      LocalPaymentProjection value => value.outletId,
+      LocalReceiptProjection value => value.outletId,
       LocalCustomerProjection value => value.outletId,
       LocalInventoryProjection value => value.outletId,
       _ => throw ArgumentError.value(projection, 'projection'),
@@ -371,6 +435,8 @@ class OfflineEntityMapper {
     final deviceId = switch (projection) {
       LocalOrderProjection value => value.deviceId,
       LocalBillProjection value => value.deviceId,
+      LocalPaymentProjection value => value.deviceId,
+      LocalReceiptProjection value => value.deviceId,
       LocalCustomerProjection value => value.deviceId,
       LocalInventoryProjection value => value.deviceId,
       _ => throw ArgumentError.value(projection, 'projection'),
@@ -378,6 +444,8 @@ class OfflineEntityMapper {
     final updatedAt = switch (projection) {
       LocalOrderProjection value => value.updatedAt,
       LocalBillProjection value => value.updatedAt,
+      LocalPaymentProjection value => value.updatedAt,
+      LocalReceiptProjection value => value.updatedAt,
       LocalCustomerProjection value => value.updatedAt,
       LocalInventoryProjection value => value.updatedAt,
       _ => throw ArgumentError.value(projection, 'projection'),
@@ -385,6 +453,8 @@ class OfflineEntityMapper {
     final payload = switch (projection) {
       LocalOrderProjection value => value.payload,
       LocalBillProjection value => value.payload,
+      LocalPaymentProjection value => value.payload,
+      LocalReceiptProjection value => value.payload,
       LocalCustomerProjection value => value.payload,
       LocalInventoryProjection value => value.payload,
       _ => throw ArgumentError.value(projection, 'projection'),
@@ -392,6 +462,8 @@ class OfflineEntityMapper {
     final isDirty = switch (projection) {
       LocalOrderProjection value => value.isDirty,
       LocalBillProjection value => value.isDirty,
+      LocalPaymentProjection value => value.isDirty,
+      LocalReceiptProjection value => value.isDirty,
       LocalCustomerProjection value => value.isDirty,
       LocalInventoryProjection value => value.isDirty,
       _ => throw ArgumentError.value(projection, 'projection'),

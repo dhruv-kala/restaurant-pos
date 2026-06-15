@@ -1,6 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart' as sqlite;
 
-const offlineDatabaseVersion = 4;
+const offlineDatabaseVersion = 5;
 
 Future<void> createOfflineDatabaseSchema(sqlite.Database database) async {
   await database.execute('''
@@ -52,6 +52,50 @@ CREATE TABLE IF NOT EXISTS device_sync_state (
   await database.execute(
     'CREATE INDEX IF NOT EXISTS idx_local_bills_scope_date '
     'ON local_bills (tenant_id, outlet_id, business_date, updated_at)',
+  );
+
+  await _createProjectionTable(
+    database,
+    tableName: 'local_payments',
+    extraColumns: '''
+  business_date TEXT NOT NULL,
+  bill_id TEXT NOT NULL,
+  method TEXT NOT NULL,
+  status TEXT NOT NULL,
+  amount_minor INTEGER NOT NULL,
+  currency_code TEXT NOT NULL,
+  reference_number TEXT,
+''',
+  );
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_local_payments_scope_date '
+    'ON local_payments (tenant_id, outlet_id, business_date, updated_at)',
+  );
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_local_payments_bill '
+    'ON local_payments (tenant_id, outlet_id, bill_id)',
+  );
+
+  await _createProjectionTable(
+    database,
+    tableName: 'local_receipts',
+    extraColumns: '''
+  business_date TEXT NOT NULL,
+  bill_id TEXT NOT NULL,
+  receipt_number TEXT,
+  type TEXT NOT NULL,
+  status TEXT NOT NULL,
+  total_minor INTEGER NOT NULL,
+  currency_code TEXT NOT NULL,
+''',
+  );
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_local_receipts_scope_date '
+    'ON local_receipts (tenant_id, outlet_id, business_date, updated_at)',
+  );
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_local_receipts_bill '
+    'ON local_receipts (tenant_id, outlet_id, bill_id)',
   );
 
   await _createProjectionTable(

@@ -106,6 +106,94 @@ class OfflineLocalRepository {
     return rows.map(OfflineEntityMapper.billFromRow).toList(growable: false);
   }
 
+  Future<void> upsertPayment(LocalPaymentProjection payment) async {
+    await _upsert('local_payments', OfflineEntityMapper.paymentToRow(payment));
+  }
+
+  Future<LocalPaymentProjection?> getPayment({
+    required String tenantId,
+    required String outletId,
+    required String id,
+  }) async {
+    final row = await _getProjection(
+      'local_payments',
+      tenantId: tenantId,
+      outletId: outletId,
+      id: id,
+    );
+    return row == null ? null : OfflineEntityMapper.paymentFromRow(row);
+  }
+
+  Future<List<LocalPaymentProjection>> listPayments({
+    required String tenantId,
+    required String outletId,
+    String? billId,
+    DateTime? businessDate,
+  }) async {
+    final filters = <String>[];
+    final args = <Object?>[];
+    if (billId != null) {
+      filters.add('bill_id = ?');
+      args.add(billId);
+    }
+    if (businessDate != null) {
+      filters.add('business_date = ?');
+      args.add(businessDate.toUtc().toIso8601String());
+    }
+    final rows = await _listProjections(
+      'local_payments',
+      tenantId: tenantId,
+      outletId: outletId,
+      extraWhere: filters.isEmpty ? null : filters.join(' AND '),
+      extraArgs: args,
+    );
+    return rows.map(OfflineEntityMapper.paymentFromRow).toList(growable: false);
+  }
+
+  Future<void> upsertReceipt(LocalReceiptProjection receipt) async {
+    await _upsert('local_receipts', OfflineEntityMapper.receiptToRow(receipt));
+  }
+
+  Future<LocalReceiptProjection?> getReceipt({
+    required String tenantId,
+    required String outletId,
+    required String id,
+  }) async {
+    final row = await _getProjection(
+      'local_receipts',
+      tenantId: tenantId,
+      outletId: outletId,
+      id: id,
+    );
+    return row == null ? null : OfflineEntityMapper.receiptFromRow(row);
+  }
+
+  Future<List<LocalReceiptProjection>> listReceipts({
+    required String tenantId,
+    required String outletId,
+    String? billId,
+    DateTime? businessDate,
+  }) async {
+    final filters = <String>[];
+    final args = <Object?>[];
+    if (billId != null) {
+      filters.add('bill_id = ?');
+      args.add(billId);
+    }
+    if (businessDate != null) {
+      filters.add('business_date = ?');
+      args.add(businessDate.toUtc().toIso8601String());
+    }
+    final rows = await _listProjections(
+      'local_receipts',
+      tenantId: tenantId,
+      outletId: outletId,
+      extraWhere: filters.isEmpty ? null : filters.join(' AND '),
+      extraArgs: args,
+    );
+    return rows.map(OfflineEntityMapper.receiptFromRow).toList(growable: false);
+  }
+
   Future<void> upsertCustomer(LocalCustomerProjection customer) async {
     await _upsert(
       'local_customers',
@@ -194,6 +282,71 @@ class OfflineLocalRepository {
         OfflineEntityMapper.localChangeLogEntryToRow(changeLogEntry),
       );
     });
+  }
+
+  Future<void> upsertOrderAndAppendChange({
+    required LocalOrderProjection order,
+    required SyncQueueItem queueItem,
+    required LocalChangeLogEntry changeLogEntry,
+  }) async {
+    _validateQueueAndChangeLog(queueItem, changeLogEntry);
+    await _upsertRowsAndAppendChange(
+      projectionTable: 'local_orders',
+      projectionRow: OfflineEntityMapper.orderToRow(order),
+      queueItem: queueItem,
+      changeLogEntry: changeLogEntry,
+    );
+  }
+
+  Future<void> upsertBillAndAppendChange({
+    required LocalBillProjection bill,
+    required SyncQueueItem queueItem,
+    required LocalChangeLogEntry changeLogEntry,
+  }) async {
+    _validateQueueAndChangeLog(queueItem, changeLogEntry);
+    await _upsertRowsAndAppendChange(
+      projectionTable: 'local_bills',
+      projectionRow: OfflineEntityMapper.billToRow(bill),
+      queueItem: queueItem,
+      changeLogEntry: changeLogEntry,
+    );
+  }
+
+  Future<void> upsertPaymentAndAppendChange({
+    required LocalPaymentProjection payment,
+    required SyncQueueItem queueItem,
+    required LocalChangeLogEntry changeLogEntry,
+    LocalBillProjection? updatedBill,
+  }) async {
+    _validateQueueAndChangeLog(queueItem, changeLogEntry);
+    await _upsertRowsAndAppendChange(
+      projectionTable: 'local_payments',
+      projectionRow: OfflineEntityMapper.paymentToRow(payment),
+      queueItem: queueItem,
+      changeLogEntry: changeLogEntry,
+      additionalRows: updatedBill == null
+          ? const []
+          : [
+              _OfflineProjectionWrite(
+                table: 'local_bills',
+                row: OfflineEntityMapper.billToRow(updatedBill),
+              ),
+            ],
+    );
+  }
+
+  Future<void> upsertReceiptAndAppendChange({
+    required LocalReceiptProjection receipt,
+    required SyncQueueItem queueItem,
+    required LocalChangeLogEntry changeLogEntry,
+  }) async {
+    _validateQueueAndChangeLog(queueItem, changeLogEntry);
+    await _upsertRowsAndAppendChange(
+      projectionTable: 'local_receipts',
+      projectionRow: OfflineEntityMapper.receiptToRow(receipt),
+      queueItem: queueItem,
+      changeLogEntry: changeLogEntry,
+    );
   }
 
   Future<void> appendSyncQueueItem(SyncQueueItem item) async {
@@ -771,6 +924,38 @@ AND (
     );
   }
 
+  Future<void> _upsertRowsAndAppendChange({
+    required String projectionTable,
+    required Map<String, Object?> projectionRow,
+    required SyncQueueItem queueItem,
+    required LocalChangeLogEntry changeLogEntry,
+    List<_OfflineProjectionWrite> additionalRows = const [],
+  }) async {
+    final database = await _database.open();
+    await database.transaction((transaction) async {
+      await transaction.insert(
+        projectionTable,
+        projectionRow,
+        conflictAlgorithm: sqlite.ConflictAlgorithm.replace,
+      );
+      for (final write in additionalRows) {
+        await transaction.insert(
+          write.table,
+          write.row,
+          conflictAlgorithm: sqlite.ConflictAlgorithm.replace,
+        );
+      }
+      await transaction.insert(
+        'sync_queue',
+        OfflineEntityMapper.syncQueueItemToRow(queueItem),
+      );
+      await transaction.insert(
+        'local_change_log',
+        OfflineEntityMapper.localChangeLogEntryToRow(changeLogEntry),
+      );
+    });
+  }
+
   Future<void> _updateQueueState(
     sqlite.Transaction transaction, {
     required String tenantId,
@@ -915,3 +1100,10 @@ const _financialEntityTypes = {
   'InventoryMovement',
   'StockMovement',
 };
+
+class _OfflineProjectionWrite {
+  const _OfflineProjectionWrite({required this.table, required this.row});
+
+  final String table;
+  final Map<String, Object?> row;
+}
