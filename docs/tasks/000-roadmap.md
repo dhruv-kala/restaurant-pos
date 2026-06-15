@@ -12,8 +12,8 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6 and 30.1-30.6 are complete; Task 37 customer ordering
-  application foundation is the next listed provisional task.
+- Tasks 29.1-29.6, 30.1-30.6, and 31.1-31.5 are complete; Task 31.6
+  operations administration UI is the next listed provisional task.
 
 ## Foundation and Core SaaS
 
@@ -55,13 +55,14 @@ Last updated: 2026-06-15
 | 31.2 | COMPLETE | Shift management |
 | 31.3 | COMPLETE | Cash drawer management |
 | 31.4 | COMPLETE | Shift closing and reconciliation |
-| 31.5 | NEXT | Business day closing |
-| 31.6 | PLANNED | Operations administration UI |
+| 31.5 | COMPLETE | Business day closing |
+| 31.6 | NEXT | Operations administration UI |
 | 32 | PLANNED | Device registration, trusted sessions, and terminal management |
 | 33 | PLANNED | Offline SQLite operation and synchronization protocol |
 | 34 | PLANNED | Transactional outbox, background jobs, and scheduler |
 | 35 | PLANNED | File/document storage abstraction and retention |
 | 36 | PLANNED | Webhooks, API integrations, and integration credentials |
+
 ## Restaurant and Customer Expansion
 
 | Task | Status | Provisional scope |

@@ -76,4 +76,15 @@ export class BusinessDayController {
   ) {
     return this.businessDays.close(id, dto, query, actor, auditRequestMetadata(request));
   }
+
+  @Get(':id/closing')
+  @ApiOperation({ summary: 'Get the immutable business day closing summary' })
+  @ApiOkResponse()
+  closing(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: TenantBusinessDayQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.businessDays.closing(id, query, actor);
+  }
 }

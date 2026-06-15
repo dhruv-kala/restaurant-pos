@@ -255,6 +255,38 @@ CREATE TABLE "shift_reconciliations" (
   )
 );
 
+CREATE TABLE "business_day_closings" (
+  "id" UUID NOT NULL DEFAULT app_uuid_v7(),
+  "tenant_id" UUID NOT NULL,
+  "outlet_id" UUID NOT NULL,
+  "business_day_id" UUID NOT NULL,
+  "business_date" DATE NOT NULL,
+  "shift_session_count" INTEGER NOT NULL,
+  "cash_drawer_count" INTEGER NOT NULL,
+  "reconciliation_count" INTEGER NOT NULL,
+  "currency_code" CHAR(3) NOT NULL DEFAULT 'INR',
+  "expected_cash_minor" INTEGER NOT NULL DEFAULT 0,
+  "counted_cash_minor" INTEGER NOT NULL DEFAULT 0,
+  "variance_minor" INTEGER NOT NULL DEFAULT 0,
+  "closed_by_user_id" UUID NOT NULL,
+  "closing_notes" VARCHAR(1000),
+  "closed_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT "business_day_closings_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "business_day_closings_currency_check" CHECK ("currency_code" ~ '^[A-Z]{3}$'),
+  CONSTRAINT "business_day_closings_counts_check" CHECK (
+    "shift_session_count" >= 0
+    AND "cash_drawer_count" >= 0
+    AND "reconciliation_count" >= 0
+  ),
+  CONSTRAINT "business_day_closings_amounts_check" CHECK (
+    "expected_cash_minor" >= 0
+    AND "counted_cash_minor" >= 0
+    AND "variance_minor" = "counted_cash_minor" - "expected_cash_minor"
+  )
+);
+
 CREATE UNIQUE INDEX "cash_drawers_tenant_id_id_key"
   ON "cash_drawers"("tenant_id", "id");
 CREATE UNIQUE INDEX "cash_drawers_one_open_per_shift_key"
@@ -280,6 +312,13 @@ CREATE UNIQUE INDEX "shift_reconciliations_cash_drawer_key"
   ON "shift_reconciliations"("tenant_id", "cash_drawer_id");
 CREATE INDEX "shift_reconciliations_reporting_idx"
   ON "shift_reconciliations"("tenant_id", "outlet_id", "business_day_id", "reconciled_at");
+
+CREATE UNIQUE INDEX "business_day_closings_tenant_id_id_key"
+  ON "business_day_closings"("tenant_id", "id");
+CREATE UNIQUE INDEX "business_day_closings_business_day_key"
+  ON "business_day_closings"("tenant_id", "business_day_id");
+CREATE INDEX "business_day_closings_reporting_idx"
+  ON "business_day_closings"("tenant_id", "outlet_id", "business_date");
 
 ALTER TABLE "cash_drawers"
   ADD CONSTRAINT "cash_drawers_tenant_id_fkey"
@@ -335,6 +374,19 @@ ALTER TABLE "shift_reconciliations"
   ADD CONSTRAINT "shift_reconciliations_reconciled_by_user_id_fkey"
   FOREIGN KEY ("reconciled_by_user_id") REFERENCES "user_accounts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+ALTER TABLE "business_day_closings"
+  ADD CONSTRAINT "business_day_closings_tenant_id_fkey"
+  FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "business_day_closings"
+  ADD CONSTRAINT "business_day_closings_outlet_id_fkey"
+  FOREIGN KEY ("tenant_id", "outlet_id") REFERENCES "outlets"("tenant_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "business_day_closings"
+  ADD CONSTRAINT "business_day_closings_business_day_id_fkey"
+  FOREIGN KEY ("tenant_id", "business_day_id") REFERENCES "business_days"("tenant_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "business_day_closings"
+  ADD CONSTRAINT "business_day_closings_closed_by_user_id_fkey"
+  FOREIGN KEY ("closed_by_user_id") REFERENCES "user_accounts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
 ALTER TABLE "cash_drawers" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "cash_drawers" FORCE ROW LEVEL SECURITY;
 CREATE POLICY "cash_drawers_tenant_isolation" ON "cash_drawers"
@@ -350,6 +402,12 @@ WITH CHECK (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id());
 ALTER TABLE "shift_reconciliations" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "shift_reconciliations" FORCE ROW LEVEL SECURITY;
 CREATE POLICY "shift_reconciliations_tenant_isolation" ON "shift_reconciliations"
+USING (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id())
+WITH CHECK (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id());
+
+ALTER TABLE "business_day_closings" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "business_day_closings" FORCE ROW LEVEL SECURITY;
+CREATE POLICY "business_day_closings_tenant_isolation" ON "business_day_closings"
 USING (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id())
 WITH CHECK (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id());
 
@@ -403,3 +461,18 @@ FOR EACH ROW EXECUTE FUNCTION reject_shift_reconciliation_mutation();
 CREATE TRIGGER "shift_reconciliations_no_delete"
 BEFORE DELETE ON "shift_reconciliations"
 FOR EACH ROW EXECUTE FUNCTION reject_shift_reconciliation_mutation();
+
+CREATE OR REPLACE FUNCTION reject_business_day_closing_mutation()
+RETURNS trigger AS $$
+BEGIN
+  RAISE EXCEPTION 'business day closings are immutable';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER "business_day_closings_no_update"
+BEFORE UPDATE ON "business_day_closings"
+FOR EACH ROW EXECUTE FUNCTION reject_business_day_closing_mutation();
+
+CREATE TRIGGER "business_day_closings_no_delete"
+BEFORE DELETE ON "business_day_closings"
+FOR EACH ROW EXECUTE FUNCTION reject_business_day_closing_mutation();

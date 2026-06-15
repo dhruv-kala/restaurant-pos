@@ -11,62 +11,62 @@ Last updated: 2026-06-15
 
 ## Current Summary
 
-Tasks 1 through 31.4 are complete at the requested foundation level.
+Tasks 1 through 31.5 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 31.5, Business Day Closing, is the next provisional roadmap item. It is
+Task 31.6, Operations Administration UI, is the next provisional roadmap item. It is
 not approved for implementation until
 explicitly requested.
 
 ## Task History
 
-| Task | Status | Result |
-|---|---|---|
-| 1. Repository layout analysis and restructuring | COMPLETE | Monorepo direction established under `apps`, `packages`, `backend`, `docs`, and `infrastructure`. |
-| 2. Create system overview | COMPLETE | `docs/architecture/system-overview.md` exists and records product, application, tenancy, offline, security, deployment, and scaling direction. |
-| 3. Create initial ERD | COMPLETE | `docs/database/initial-erd.md` exists and defines the initial multi-tenant relational baseline and migration sequence. |
-| 4. Create NestJS base project | COMPLETE | `backend/api` contains the NestJS foundation, configuration, health endpoint, Swagger setup, tests, and module scaffolds. |
-| 5. Configure PostgreSQL and Prisma | COMPLETE | Prisma dependencies, datasource, client generator, environment contract, commands, and database-aware health behavior were established before domain modeling began. |
-| 6. Create tenant, outlet, user, role, and permission schema | COMPLETE | Prisma models, initial migration, tenant-aware constraints, forced RLS, permission seed, tests, and database documentation are implemented. |
-| 7. Implement authentication with access and refresh tokens | COMPLETE | Login, refresh rotation, logout revocation, bearer `/auth/me`, bcrypt credentials, hashed refresh persistence, Swagger, tests, seed, and documentation are implemented. |
-| 8. Implement tenant and outlet module | COMPLETE | Protected tenant/outlet APIs, role boundaries, pagination, RLS request context, schema fields, migration, tests, and outlet-limit enforcement are implemented. |
-| 9. Create Flutter shared packages | COMPLETE | Standardized seven workspace packages, backend-aligned shared models, Dio auth/tenant/outlet services, auth contracts, UI primitives, analytics, utilities, and frontend architecture documentation are implemented. |
-| 10. Implement Flutter login and role-based navigation | COMPLETE | Secure token storage, Riverpod auth state/providers, NestJS auth repository, splash restore, guarded GoRouter role navigation, refresh/retry, logout, and seven role dashboard placeholders are implemented. |
-| 11. Implement Menu Management Module | COMPLETE | Tenant-scoped menu schema, forced RLS, category/item/variant/add-on APIs, outlet pricing, shared clients, Riverpod admin screens, tests, and documentation are implemented. |
-| 12. Implement Table Management Module | COMPLETE | Outlet-scoped sections, dining tables, statuses, reservations, merge/split/transfer operations, shared clients, Riverpod admin screens, tests, and documentation are implemented. |
-| 13. Implement Order Management Module | COMPLETE | Tenant/outlet-scoped orders, immutable item pricing snapshots, lifecycle, transfer, kitchen queue, typed clients, Riverpod state, restaurant-app screens, tests, and documentation are implemented. |
-| 14. Implement Kitchen Display System Module | COMPLETE | Tenant/outlet kitchen routing, queue projections, item and order kitchen transitions, SLA states, authorization, typed clients, Riverpod KDS screens, tests, and documentation are implemented. |
-| 15. Implement Billing Module | COMPLETE | Immutable bill snapshots, GST/tax breakdowns, atomic numbering, audited lifecycle, split/merge, typed clients, Riverpod screens, tests, and documentation are implemented. |
-| 16. Implement Payment Module | COMPLETE | Idempotent payment aggregates, tender transactions, partial/split payments, refunds, bill reconciliation, typed clients, Riverpod screens, tests, and documentation are implemented. |
-| 17. Implement Receipt & Invoice Module | COMPLETE | Immutable receipt and tax-invoice snapshots, numbering, PDF/thermal rendering, print audit, protected APIs, shared clients, and Flutter screens are implemented. |
-| 18. Complete Kitchen Display System | COMPLETE | First-class stations, station routing, item actor audits, preparation metrics, authenticated Socket.IO events, typed clients, Riverpod providers, and KDS screens are implemented. |
-| 19. Implement Inventory Module | COMPLETE | Tenant inventory masters, outlet balances, append-only movements, adjustments, transfers, purchasing, batches, alerts, valuation, typed clients, and admin screens are implemented. |
-| 20. Implement Recipe & Stock Consumption Engine | COMPLETE | Recipes, production recipes, costing, profitability, idempotent order consumption, wastage, typed clients, and admin screens are implemented. |
-| 21. Implement Customer Management Module | COMPLETE | Customer profiles, duplicate-safe lookup, addresses, notes, payment visits, stats/history, typed clients, admin screens, and restaurant lookup are implemented. |
-| 22. Implement Reports Module | COMPLETE | Business-date reports, dashboard KPIs, tenant/outlet authorization, audit history, export foundation, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
-| 23. Implement Employee & Staff Management Module | COMPLETE | User-linked profiles, shifts, assignments, attendance, performance projections, events, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
-| 23.5. Implement Master Data & Database Seed Framework | COMPLETE | Global locale/settings/module/role-template masters, 184 permissions, role mappings, environment-aware idempotent seeds, and a complete development demo restaurant dataset are implemented. |
-| 24. Implement RBAC & User Management Module | COMPLETE | Tenant-safe user provisioning, lifecycle controls, roles, granular permissions, outlet access, effective JWT permissions, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
-| 24.5. AI Development Optimization Framework | COMPLETE | Concern-specific AI standards, concise status, dependency map, module specifications, Task 24-100 roadmap, prompt template, and optimized restart instructions are implemented. |
-| 25. Implement Audit & Activity Logging Module | COMPLETE | Immutable tenant/platform events, per-scope hash chains, forced RLS, protected APIs, transactional security integrations, typed clients, Riverpod providers, admin explorer, tests, and documentation are implemented. |
-| 26. Implement Notification Center Module | COMPLETE | Tenant/outlet/user in-app notifications, recipient delivery/read state, preferences, publishing APIs, shared clients, admin center, and restaurant-app foundation are implemented. |
-| 27.1. Communication Infrastructure Foundation | COMPLETE | Provider/message/attempt schema, protected recipient addressing, immutable communication history, idempotent enqueueing, abstraction contracts, and state rules are implemented. |
-| 27.2. Communication Template Management | COMPLETE | Tenant template CRUD, immutable versions, strict variable rendering, preview, permissions, audit events, and exact message version references are implemented. |
-| 27.3. Email Delivery Providers | COMPLETE | SMTP execution, protected recipient decryption, append-only attempts, status tracking, history APIs, permissions, and audit events are implemented. |
-| 27.4. SMS Delivery Providers | COMPLETE | Twilio SMS execution, E.164 validation, protected credentials, shared delivery orchestration, attempts/status, and audit events are implemented. |
-| 27.5. WhatsApp Delivery Providers | COMPLETE | Twilio WhatsApp approved-template execution, protected credentials, delivered/read status foundation, and audit events are implemented. |
-| 27.6. Push Notification Delivery | COMPLETE | FCM HTTP v1 delivery, encrypted tenant/user devices, invalid-token deactivation, attempts/status, and audit events are implemented. |
-| 27.7. Webhooks and Delivery Tracking | COMPLETE | Verified Twilio and provider-neutral callbacks, immutable idempotent webhook events, centralized delivery synchronization, and audit events are implemented. |
-| 27.8. Communication Center UI | COMPLETE | Provider administration APIs, shared communication contracts, typed clients, Riverpod state, and admin dashboard/template/history/provider screens are implemented. |
-| 27.9. Communication Analytics | COMPLETE | Tenant/outlet KPIs, channel/provider delivery performance, webhook latency, trends, typed clients, and admin reporting are implemented. |
-| 28.1. Plan Management | COMPLETE | Platform-managed versioned plans, feature snapshots, immutable activated versions, protected APIs, tests, and audit events are implemented. |
-| 28.2. Subscription Lifecycle | COMPLETE | Tenant subscription aggregates, exact plan references, idempotent transitions, append-only history, RLS, tests, and audit events are implemented. |
-| 28.3. Feature Entitlements | COMPLETE | Tenant overrides, exact plan-version evaluation, fail-closed subscription checks, reusable enforcement, RLS, tests, and audit events are implemented. |
-| 28.4. Usage Limits | COMPLETE | Tenant counters, immutable idempotent operations, atomic limit enforcement, configurable over-limit policies, RLS, tests, and audit events are implemented. |
-| 28.5. Trial Management | COMPLETE | Trial subscriptions, immutable trial history, extension, expiry, due-expiry processing, paid conversion, RLS, tests, and audit events are implemented. |
-| 28.6. Subscription Admin UI | COMPLETE | Shared subscription models/client, Riverpod providers, and admin plan, subscription, entitlement, usage, and trial screens are implemented. |
+| Task                                                        | Status   | Result                                                                                                                                                                                                                 |
+| ----------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Repository layout analysis and restructuring             | COMPLETE | Monorepo direction established under `apps`, `packages`, `backend`, `docs`, and `infrastructure`.                                                                                                                      |
+| 2. Create system overview                                   | COMPLETE | `docs/architecture/system-overview.md` exists and records product, application, tenancy, offline, security, deployment, and scaling direction.                                                                         |
+| 3. Create initial ERD                                       | COMPLETE | `docs/database/initial-erd.md` exists and defines the initial multi-tenant relational baseline and migration sequence.                                                                                                 |
+| 4. Create NestJS base project                               | COMPLETE | `backend/api` contains the NestJS foundation, configuration, health endpoint, Swagger setup, tests, and module scaffolds.                                                                                              |
+| 5. Configure PostgreSQL and Prisma                          | COMPLETE | Prisma dependencies, datasource, client generator, environment contract, commands, and database-aware health behavior were established before domain modeling began.                                                   |
+| 6. Create tenant, outlet, user, role, and permission schema | COMPLETE | Prisma models, initial migration, tenant-aware constraints, forced RLS, permission seed, tests, and database documentation are implemented.                                                                            |
+| 7. Implement authentication with access and refresh tokens  | COMPLETE | Login, refresh rotation, logout revocation, bearer `/auth/me`, bcrypt credentials, hashed refresh persistence, Swagger, tests, seed, and documentation are implemented.                                                |
+| 8. Implement tenant and outlet module                       | COMPLETE | Protected tenant/outlet APIs, role boundaries, pagination, RLS request context, schema fields, migration, tests, and outlet-limit enforcement are implemented.                                                         |
+| 9. Create Flutter shared packages                           | COMPLETE | Standardized seven workspace packages, backend-aligned shared models, Dio auth/tenant/outlet services, auth contracts, UI primitives, analytics, utilities, and frontend architecture documentation are implemented.   |
+| 10. Implement Flutter login and role-based navigation       | COMPLETE | Secure token storage, Riverpod auth state/providers, NestJS auth repository, splash restore, guarded GoRouter role navigation, refresh/retry, logout, and seven role dashboard placeholders are implemented.           |
+| 11. Implement Menu Management Module                        | COMPLETE | Tenant-scoped menu schema, forced RLS, category/item/variant/add-on APIs, outlet pricing, shared clients, Riverpod admin screens, tests, and documentation are implemented.                                            |
+| 12. Implement Table Management Module                       | COMPLETE | Outlet-scoped sections, dining tables, statuses, reservations, merge/split/transfer operations, shared clients, Riverpod admin screens, tests, and documentation are implemented.                                      |
+| 13. Implement Order Management Module                       | COMPLETE | Tenant/outlet-scoped orders, immutable item pricing snapshots, lifecycle, transfer, kitchen queue, typed clients, Riverpod state, restaurant-app screens, tests, and documentation are implemented.                    |
+| 14. Implement Kitchen Display System Module                 | COMPLETE | Tenant/outlet kitchen routing, queue projections, item and order kitchen transitions, SLA states, authorization, typed clients, Riverpod KDS screens, tests, and documentation are implemented.                        |
+| 15. Implement Billing Module                                | COMPLETE | Immutable bill snapshots, GST/tax breakdowns, atomic numbering, audited lifecycle, split/merge, typed clients, Riverpod screens, tests, and documentation are implemented.                                             |
+| 16. Implement Payment Module                                | COMPLETE | Idempotent payment aggregates, tender transactions, partial/split payments, refunds, bill reconciliation, typed clients, Riverpod screens, tests, and documentation are implemented.                                   |
+| 17. Implement Receipt & Invoice Module                      | COMPLETE | Immutable receipt and tax-invoice snapshots, numbering, PDF/thermal rendering, print audit, protected APIs, shared clients, and Flutter screens are implemented.                                                       |
+| 18. Complete Kitchen Display System                         | COMPLETE | First-class stations, station routing, item actor audits, preparation metrics, authenticated Socket.IO events, typed clients, Riverpod providers, and KDS screens are implemented.                                     |
+| 19. Implement Inventory Module                              | COMPLETE | Tenant inventory masters, outlet balances, append-only movements, adjustments, transfers, purchasing, batches, alerts, valuation, typed clients, and admin screens are implemented.                                    |
+| 20. Implement Recipe & Stock Consumption Engine             | COMPLETE | Recipes, production recipes, costing, profitability, idempotent order consumption, wastage, typed clients, and admin screens are implemented.                                                                          |
+| 21. Implement Customer Management Module                    | COMPLETE | Customer profiles, duplicate-safe lookup, addresses, notes, payment visits, stats/history, typed clients, admin screens, and restaurant lookup are implemented.                                                        |
+| 22. Implement Reports Module                                | COMPLETE | Business-date reports, dashboard KPIs, tenant/outlet authorization, audit history, export foundation, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented.                     |
+| 23. Implement Employee & Staff Management Module            | COMPLETE | User-linked profiles, shifts, assignments, attendance, performance projections, events, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented.                                   |
+| 23.5. Implement Master Data & Database Seed Framework       | COMPLETE | Global locale/settings/module/role-template masters, 184 permissions, role mappings, environment-aware idempotent seeds, and a complete development demo restaurant dataset are implemented.                           |
+| 24. Implement RBAC & User Management Module                 | COMPLETE | Tenant-safe user provisioning, lifecycle controls, roles, granular permissions, outlet access, effective JWT permissions, shared clients, Riverpod providers, admin screens, tests, and documentation are implemented. |
+| 24.5. AI Development Optimization Framework                 | COMPLETE | Concern-specific AI standards, concise status, dependency map, module specifications, Task 24-100 roadmap, prompt template, and optimized restart instructions are implemented.                                        |
+| 25. Implement Audit & Activity Logging Module               | COMPLETE | Immutable tenant/platform events, per-scope hash chains, forced RLS, protected APIs, transactional security integrations, typed clients, Riverpod providers, admin explorer, tests, and documentation are implemented. |
+| 26. Implement Notification Center Module                    | COMPLETE | Tenant/outlet/user in-app notifications, recipient delivery/read state, preferences, publishing APIs, shared clients, admin center, and restaurant-app foundation are implemented.                                     |
+| 27.1. Communication Infrastructure Foundation               | COMPLETE | Provider/message/attempt schema, protected recipient addressing, immutable communication history, idempotent enqueueing, abstraction contracts, and state rules are implemented.                                       |
+| 27.2. Communication Template Management                     | COMPLETE | Tenant template CRUD, immutable versions, strict variable rendering, preview, permissions, audit events, and exact message version references are implemented.                                                         |
+| 27.3. Email Delivery Providers                              | COMPLETE | SMTP execution, protected recipient decryption, append-only attempts, status tracking, history APIs, permissions, and audit events are implemented.                                                                    |
+| 27.4. SMS Delivery Providers                                | COMPLETE | Twilio SMS execution, E.164 validation, protected credentials, shared delivery orchestration, attempts/status, and audit events are implemented.                                                                       |
+| 27.5. WhatsApp Delivery Providers                           | COMPLETE | Twilio WhatsApp approved-template execution, protected credentials, delivered/read status foundation, and audit events are implemented.                                                                                |
+| 27.6. Push Notification Delivery                            | COMPLETE | FCM HTTP v1 delivery, encrypted tenant/user devices, invalid-token deactivation, attempts/status, and audit events are implemented.                                                                                    |
+| 27.7. Webhooks and Delivery Tracking                        | COMPLETE | Verified Twilio and provider-neutral callbacks, immutable idempotent webhook events, centralized delivery synchronization, and audit events are implemented.                                                           |
+| 27.8. Communication Center UI                               | COMPLETE | Provider administration APIs, shared communication contracts, typed clients, Riverpod state, and admin dashboard/template/history/provider screens are implemented.                                                    |
+| 27.9. Communication Analytics                               | COMPLETE | Tenant/outlet KPIs, channel/provider delivery performance, webhook latency, trends, typed clients, and admin reporting are implemented.                                                                                |
+| 28.1. Plan Management                                       | COMPLETE | Platform-managed versioned plans, feature snapshots, immutable activated versions, protected APIs, tests, and audit events are implemented.                                                                            |
+| 28.2. Subscription Lifecycle                                | COMPLETE | Tenant subscription aggregates, exact plan references, idempotent transitions, append-only history, RLS, tests, and audit events are implemented.                                                                      |
+| 28.3. Feature Entitlements                                  | COMPLETE | Tenant overrides, exact plan-version evaluation, fail-closed subscription checks, reusable enforcement, RLS, tests, and audit events are implemented.                                                                  |
+| 28.4. Usage Limits                                          | COMPLETE | Tenant counters, immutable idempotent operations, atomic limit enforcement, configurable over-limit policies, RLS, tests, and audit events are implemented.                                                            |
+| 28.5. Trial Management                                      | COMPLETE | Trial subscriptions, immutable trial history, extension, expiry, due-expiry processing, paid conversion, RLS, tests, and audit events are implemented.                                                                 |
+| 28.6. Subscription Admin UI                                 | COMPLETE | Shared subscription models/client, Riverpod providers, and admin plan, subscription, entitlement, usage, and trial screens are implemented.                                                                            |
 
 ## Task 28.1-28.6 Repair Review
 
@@ -3534,3 +3534,67 @@ Known limitations:
 Next task:
 
 - Task 31.5 - Business Day Closing
+
+## 2026-06-15 - Task 31.5 Business Day Closing
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616100000_add_business_day_foundation/migration.sql`
+- `backend/api/src/modules/business-day/business-day-schema.spec.ts`
+- `backend/api/src/modules/business-day/controllers/business-day.controller.ts`
+- `backend/api/src/modules/business-day/services/business-day.service.ts`
+- `backend/api/src/modules/business-day/services/business-day.service.spec.ts`
+- `docs/api/business-day-module.md`
+- `docs/specifications/business-day-module.md`
+- `docs/tasks/031-business-day/31.5-business-day-closing.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 31.5 only; operations administration UI remains deferred.
+- Added immutable tenant/outlet/business-day-scoped `BusinessDayClosing`
+  records.
+- Enforced one closing summary per business day.
+- Added forced RLS, tenant-aware foreign keys, reporting indexes, and
+  no-update/no-delete triggers for business day closings.
+- Extended `PATCH /business-days/:id/close` to validate day-end prerequisites,
+  perform optimistic business-day close, create the closing summary, and write
+  audit events atomically.
+- Added close validation for active shift sessions, active cash drawers,
+  unreconciled shift sessions, duplicate closings, and mixed cash currencies.
+- Closing summary snapshots shift count, drawer count, reconciliation count,
+  expected cash, counted cash, variance, currency, actor, notes, and close
+  timestamp.
+- Added `GET /business-days/:id/closing` to read the immutable closing summary.
+- Added audit event `business_day.closing_recorded` with summary metadata.
+- Did not modify frontend or shared Dart packages.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/business-day`: passed, 6 suites and
+  45 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 101 suites and 381 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 31 migration was not deployed to a live PostgreSQL database.
+- Payment collection still does not automatically post cash tender movements
+  into cash drawer transactions.
+- Operations administration UI remains Task 31.6.
+
+Next task:
+
+- Task 31.6 - Operations Administration UI

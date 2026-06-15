@@ -7,9 +7,12 @@ import {
 import {
   AuditResult,
   BusinessDayStatus,
+  CashDrawerStatus,
   OutletStatus,
   Prisma,
+  ShiftSessionStatus,
   type BusinessDay,
+  type BusinessDayClosing,
 } from '@prisma/client';
 
 import { applyDatabaseRequestContext } from '../../../common/database/request-context.util';
@@ -106,6 +109,7 @@ export class BusinessDayService {
       if (existing.status !== BusinessDayStatus.OPEN) {
         throw new ConflictException('Business day is already closed');
       }
+      const closingData = await this.buildBusinessDayClosingData(tx, existing);
       const updatedCount = await tx.businessDay.updateMany({
         where: {
           tenantId: scope.tenantId,
@@ -125,8 +129,34 @@ export class BusinessDayService {
         throw new ConflictException('Business day was updated by another request');
       }
       const closed = await this.findBusinessDay(tx, scope.tenantId, id);
+      const closing = await tx.businessDayClosing.create({
+        data: {
+          ...closingData,
+          closedByUserId: actor.id,
+          closingNotes: this.optionalText(dto.closingNotes),
+        },
+      });
+      await this.auditBusinessDayClosing(tx, closing, actor, request);
       await this.auditBusinessDay(tx, closed, actor, request, 'business_day.closed');
-      return this.toResponse(closed);
+      return { ...this.toResponse(closed), closing: this.toClosingResponse(closing) };
+    });
+  }
+
+  async closing(id: string, query: TenantBusinessDayQueryDto, actor: AuthenticatedUser) {
+    requireBusinessDayRead(actor);
+    const scope = resolveBusinessDayScope(actor, query.tenantId);
+
+    return this.prisma.$transaction(async (tx) => {
+      await applyDatabaseRequestContext(tx, actor, scope.tenantId);
+      const businessDay = await this.findBusinessDay(tx, scope.tenantId, id);
+      assertOutletAccess(actor, businessDay.outletId);
+      const closing = await tx.businessDayClosing.findFirst({
+        where: { tenantId: scope.tenantId, businessDayId: id },
+      });
+      if (!closing) {
+        throw new NotFoundException('Business day closing not found');
+      }
+      return this.toClosingResponse(closing);
     });
   }
 
@@ -228,6 +258,107 @@ export class BusinessDayService {
     return businessDay;
   }
 
+  private async buildBusinessDayClosingData(
+    tx: Prisma.TransactionClient,
+    businessDay: BusinessDay,
+  ) {
+    const existingClosing = await tx.businessDayClosing.findFirst({
+      where: { tenantId: businessDay.tenantId, businessDayId: businessDay.id },
+      select: { id: true },
+    });
+    if (existingClosing) {
+      throw new ConflictException('Business day closing already exists');
+    }
+
+    const [activeShiftCount, activeDrawerCount, unreconciledShiftCount] = await Promise.all([
+      tx.shiftSession.count({
+        where: {
+          tenantId: businessDay.tenantId,
+          businessDayId: businessDay.id,
+          status: ShiftSessionStatus.OPEN,
+        },
+      }),
+      tx.cashDrawer.count({
+        where: {
+          tenantId: businessDay.tenantId,
+          businessDayId: businessDay.id,
+          status: CashDrawerStatus.OPEN,
+        },
+      }),
+      tx.shiftSession.count({
+        where: {
+          tenantId: businessDay.tenantId,
+          businessDayId: businessDay.id,
+          reconciliation: null,
+        },
+      }),
+    ]);
+
+    if (activeShiftCount > 0) {
+      throw new ConflictException(
+        'Active shift sessions must be closed before business day closing',
+      );
+    }
+    if (activeDrawerCount > 0) {
+      throw new ConflictException('Active cash drawers must be closed before business day closing');
+    }
+    if (unreconciledShiftCount > 0) {
+      throw new ConflictException(
+        'All shift sessions must be reconciled before business day closing',
+      );
+    }
+
+    const [shiftSessionCount, drawers, reconciliations] = await Promise.all([
+      tx.shiftSession.count({
+        where: { tenantId: businessDay.tenantId, businessDayId: businessDay.id },
+      }),
+      tx.cashDrawer.findMany({
+        where: { tenantId: businessDay.tenantId, businessDayId: businessDay.id },
+        select: { id: true, currencyCode: true },
+      }),
+      tx.shiftReconciliation.findMany({
+        where: { tenantId: businessDay.tenantId, businessDayId: businessDay.id },
+        select: {
+          id: true,
+          currencyCode: true,
+          expectedCashMinor: true,
+          countedCashMinor: true,
+          varianceMinor: true,
+        },
+      }),
+    ]);
+
+    const currencyCode = this.resolveClosingCurrency(
+      drawers.map((drawer) => drawer.currencyCode),
+      reconciliations.map((reconciliation) => reconciliation.currencyCode),
+    );
+    return {
+      tenantId: businessDay.tenantId,
+      outletId: businessDay.outletId,
+      businessDayId: businessDay.id,
+      businessDate: businessDay.businessDate,
+      shiftSessionCount,
+      cashDrawerCount: drawers.length,
+      reconciliationCount: reconciliations.length,
+      currencyCode,
+      expectedCashMinor: this.sum(reconciliations.map((item) => item.expectedCashMinor)),
+      countedCashMinor: this.sum(reconciliations.map((item) => item.countedCashMinor)),
+      varianceMinor: this.sum(reconciliations.map((item) => item.varianceMinor)),
+    };
+  }
+
+  private resolveClosingCurrency(drawerCurrencies: string[], reconciliationCurrencies: string[]) {
+    const currencies = new Set([...drawerCurrencies, ...reconciliationCurrencies]);
+    if (currencies.size > 1) {
+      throw new ConflictException('Business day closing requires a single cash currency');
+    }
+    return currencies.values().next().value ?? 'INR';
+  }
+
+  private sum(values: number[]): number {
+    return values.reduce((total, value) => total + value, 0);
+  }
+
   private async lockOutlet(
     tx: Prisma.TransactionClient,
     tenantId: string,
@@ -256,6 +387,36 @@ export class BusinessDayService {
         businessDate: this.isoDate(businessDay.businessDate),
         status: businessDay.status,
         version: businessDay.version,
+      },
+      ...request,
+    });
+  }
+
+  private async auditBusinessDayClosing(
+    tx: Prisma.TransactionClient,
+    closing: BusinessDayClosing,
+    actor: AuthenticatedUser,
+    request: AuditRequestMetadata,
+  ): Promise<void> {
+    await this.audit.append(tx, {
+      tenantId: closing.tenantId,
+      outletId: closing.outletId,
+      actorUserId: actor.id,
+      actorRoles: actor.roles,
+      action: 'business_day.closing_recorded',
+      targetType: 'BusinessDayClosing',
+      targetId: closing.id,
+      result: AuditResult.SUCCESS,
+      metadata: {
+        businessDayId: closing.businessDayId,
+        businessDate: this.isoDate(closing.businessDate),
+        shiftSessionCount: closing.shiftSessionCount,
+        cashDrawerCount: closing.cashDrawerCount,
+        reconciliationCount: closing.reconciliationCount,
+        currencyCode: closing.currencyCode,
+        expectedCashMinor: closing.expectedCashMinor,
+        countedCashMinor: closing.countedCashMinor,
+        varianceMinor: closing.varianceMinor,
       },
       ...request,
     });
@@ -294,6 +455,27 @@ export class BusinessDayService {
       version: day.version,
       createdAt: day.createdAt.toISOString(),
       updatedAt: day.updatedAt.toISOString(),
+    };
+  }
+
+  private toClosingResponse(closing: BusinessDayClosing) {
+    return {
+      id: closing.id,
+      tenantId: closing.tenantId,
+      outletId: closing.outletId,
+      businessDayId: closing.businessDayId,
+      businessDate: this.isoDate(closing.businessDate),
+      shiftSessionCount: closing.shiftSessionCount,
+      cashDrawerCount: closing.cashDrawerCount,
+      reconciliationCount: closing.reconciliationCount,
+      currencyCode: closing.currencyCode,
+      expectedCashMinor: closing.expectedCashMinor,
+      countedCashMinor: closing.countedCashMinor,
+      varianceMinor: closing.varianceMinor,
+      closedByUserId: closing.closedByUserId,
+      closingNotes: closing.closingNotes,
+      closedAt: closing.closedAt.toISOString(),
+      createdAt: closing.createdAt.toISOString(),
     };
   }
 

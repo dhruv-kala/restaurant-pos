@@ -44,6 +44,14 @@ describe('business day foundation schema', () => {
     expect(migration).toContain('shift_reconciliations_cash_drawer_key');
   });
 
+  it('defines immutable business day closing summaries', () => {
+    expect(schema).toContain('model BusinessDayClosing {');
+    expect(schema).toContain('businessDayClosings');
+    expect(schema).toContain('@@map("business_day_closings")');
+    expect(migration).toContain('CREATE TABLE "business_day_closings"');
+    expect(migration).toContain('business_day_closings_business_day_key');
+  });
+
   it('creates business days with tenant constraints and forced RLS', () => {
     expect(migration).toContain('CREATE TABLE "business_days"');
     expect(migration).toContain('FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id")');
@@ -85,5 +93,12 @@ describe('business day foundation schema', () => {
     expect(migration).toContain('CREATE POLICY "shift_reconciliations_tenant_isolation"');
     expect(migration).toContain('reject_shift_reconciliation_mutation');
     expect(migration).toContain('shift reconciliations are immutable');
+  });
+
+  it('enforces tenant isolation and immutability for business day closings', () => {
+    expect(migration).toContain('ALTER TABLE "business_day_closings" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "business_day_closings_tenant_isolation"');
+    expect(migration).toContain('reject_business_day_closing_mutation');
+    expect(migration).toContain('business day closings are immutable');
   });
 });

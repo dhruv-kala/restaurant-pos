@@ -6,12 +6,12 @@ Partially implemented.
 
 Task 31 is split into:
 
-* Task 31.1 Business Day Foundation - Complete
-* Task 31.2 Shift Management - Complete
-* Task 31.3 Cash Drawer Management - Complete
-* Task 31.4 Shift Closing and Reconciliation - Complete
-* Task 31.5 Business Day Closing
-* Task 31.6 Operations Administration UI
+- Task 31.1 Business Day Foundation - Complete
+- Task 31.2 Shift Management - Complete
+- Task 31.3 Cash Drawer Management - Complete
+- Task 31.4 Shift Closing and Reconciliation - Complete
+- Task 31.5 Business Day Closing - Complete
+- Task 31.6 Operations Administration UI
 
 ## Objective
 
@@ -19,25 +19,25 @@ Provide operational control over restaurant trading days, cashier shifts, cash d
 
 The module controls:
 
-* business dates
-* shift lifecycle
-* cash drawer lifecycle
-* opening balances
-* closing balances
-* shift reconciliation
-* business day closing
+- business dates
+- shift lifecycle
+- cash drawer lifecycle
+- opening balances
+- closing balances
+- shift reconciliation
+- business day closing
 
 This module becomes the authoritative source for operational reporting.
 
 ## Ownership
 
-* business day lifecycle
-* shift lifecycle
-* cash drawer lifecycle
-* opening balances
-* closing balances
-* shift reconciliation
-* day-end reconciliation
+- business day lifecycle
+- shift lifecycle
+- cash drawer lifecycle
+- opening balances
+- closing balances
+- shift reconciliation
+- day-end reconciliation
 
 Billing, payments, and orders generate activity.
 
@@ -47,12 +47,12 @@ This module owns operational accountability.
 
 Potential entities:
 
-* BusinessDay - implemented in Task 31.1
-* ShiftSession - implemented in Task 31.2
-* CashDrawer - implemented in Task 31.3
-* CashDrawerTransaction - implemented in Task 31.3
-* ShiftReconciliation - implemented in Task 31.4
-* BusinessDayClosing
+- BusinessDay - implemented in Task 31.1
+- ShiftSession - implemented in Task 31.2
+- CashDrawer - implemented in Task 31.3
+- CashDrawerTransaction - implemented in Task 31.3
+- ShiftReconciliation - implemented in Task 31.4
+- BusinessDayClosing - implemented in Task 31.5
 
 All tenant-owned records carry tenant scope.
 
@@ -60,39 +60,42 @@ Operational records are outlet scoped.
 
 ## Invariants
 
-* Only one active business day per outlet.
-* Only one active shift per user.
-* Only one active cash drawer per shift.
-* Shift reconciliation must be recorded before shift closure.
-* Business days are outlet scoped.
-* Historical business days are immutable after closing.
-* Shift reconciliation is append-only.
-* Cash drawer history is append-only.
-* Reports use businessDate.
-* Cross-tenant access is prohibited.
+- Only one active business day per outlet.
+- Only one active shift per user.
+- Only one active cash drawer per shift.
+- Shift reconciliation must be recorded before shift closure.
+- Business day closing requires no active shifts, no active drawers, and no
+  unreconciled shift sessions.
+- Business days are outlet scoped.
+- Historical business days are immutable after closing.
+- Business day closing summaries are append-only.
+- Shift reconciliation is append-only.
+- Cash drawer history is append-only.
+- Reports use businessDate.
+- Cross-tenant access is prohibited.
 
 ## Authorization
 
-* SUPER_ADMIN may inspect all.
-* TENANT_ADMIN may manage tenant outlets.
-* MANAGER may open/close business days and shifts.
-* CASHIER may open and close assigned shifts.
-* Backend authorization is authoritative.
+- SUPER_ADMIN may inspect all.
+- TENANT_ADMIN may manage tenant outlets.
+- MANAGER may open/close business days and shifts.
+- CASHIER may open and close assigned shifts.
+- Backend authorization is authoritative.
 
 Suggested permissions:
 
-* `business_day.read`
-* `business_day.open`
-* `business_day.close`
-* `shifts.read`
-* `shifts.open`
-* `shifts.close`
-* `cash_drawer.read`
-* `cash_drawer.open`
-* `cash_drawer.adjust`
-* `cash_drawer.close`
-* `shift_reconciliation.read`
-* `shift_reconciliation.create`
+- `business_day.read`
+- `business_day.open`
+- `business_day.close`
+- `shifts.read`
+- `shifts.open`
+- `shifts.close`
+- `cash_drawer.read`
+- `cash_drawer.open`
+- `cash_drawer.adjust`
+- `cash_drawer.close`
+- `shift_reconciliation.read`
+- `shift_reconciliation.create`
 
 The lowercase dot-key convention matches the repository's RBAC seed pattern.
 
@@ -100,10 +103,11 @@ The lowercase dot-key convention matches the repository's RBAC seed pattern.
 
 Business Day Foundation:
 
-* `POST /business-days/open`
-* `GET /business-days`
-* `GET /business-days/current`
-* `PATCH /business-days/:id/close`
+- `POST /business-days/open`
+- `GET /business-days`
+- `GET /business-days/current`
+- `PATCH /business-days/:id/close`
+- `GET /business-days/:id/closing`
 
 Task 31.1 implements tenant/outlet-scoped business days with
 `BusinessDayStatus.OPEN` and `BusinessDayStatus.CLOSED`. Opening a business day
@@ -113,10 +117,10 @@ optimistic `version` checks. Open and close actions write audit events.
 
 Shift Management:
 
-* `POST /shift-sessions/open`
-* `GET /shift-sessions`
-* `GET /shift-sessions/current`
-* `PATCH /shift-sessions/:id/close`
+- `POST /shift-sessions/open`
+- `GET /shift-sessions`
+- `GET /shift-sessions/current`
+- `PATCH /shift-sessions/:id/close`
 
 Task 31.2 implements tenant/outlet-scoped operational shift sessions with
 `ShiftSessionStatus.OPEN` and `ShiftSessionStatus.CLOSED`. A shift session is
@@ -128,12 +132,12 @@ close actions write audit events.
 
 Cash Drawer Management:
 
-* `POST /cash-drawers/open`
-* `GET /cash-drawers`
-* `GET /cash-drawers/current`
-* `GET /cash-drawers/:id/transactions`
-* `POST /cash-drawers/:id/transactions`
-* `PATCH /cash-drawers/:id/close`
+- `POST /cash-drawers/open`
+- `GET /cash-drawers`
+- `GET /cash-drawers/current`
+- `GET /cash-drawers/:id/transactions`
+- `POST /cash-drawers/:id/transactions`
+- `PATCH /cash-drawers/:id/close`
 
 Task 31.3 implements tenant/outlet-scoped cash drawers attached to shift
 sessions and business days. One open drawer is allowed per shift session.
@@ -145,9 +149,9 @@ events.
 
 Shift Closing and Reconciliation:
 
-* `POST /shift-reconciliations`
-* `GET /shift-reconciliations`
-* `GET /shift-reconciliations/:id`
+- `POST /shift-reconciliations`
+- `GET /shift-reconciliations`
+- `GET /shift-reconciliations/:id`
 
 Task 31.4 implements immutable tenant/outlet/business-day/shift-scoped
 `ShiftReconciliation` records. A reconciliation references a closed cash
@@ -156,23 +160,37 @@ requires approval notes for non-zero variance. Only one reconciliation can
 exist per shift session and per cash drawer. Shift-session closure is rejected
 until reconciliation exists. Reconciliation actions write audit events.
 
+Business Day Closing:
+
+- `PATCH /business-days/:id/close`
+- `GET /business-days/:id/closing`
+
+Task 31.5 implements immutable tenant/outlet/business-day-scoped
+`BusinessDayClosing` records. Closing a business day rejects active shift
+sessions, active cash drawers, unreconciled shift sessions, duplicate closing
+summaries, and mixed drawer/reconciliation cash currencies. The close command
+uses optimistic `version` checks, marks the business day closed, snapshots
+shift count, drawer count, reconciliation count, expected cash, counted cash,
+variance, currency, actor, notes, and close time, and writes business-day close
+and closing-summary audit events atomically.
+
 ## Audit Requirements
 
 Audit:
 
-* shift opening
-* shift closing
-* business day opening
-* business day closing
-* opening balance changes
-* closing balance changes
-* reconciliation overrides
+- shift opening
+- shift closing
+- business day opening
+- business day closing
+- opening balance changes
+- closing balance changes
+- reconciliation overrides
 
 ## Non-Goals
 
-* payroll
-* attendance
-* employee scheduling
-* accounting export
+- payroll
+- attendance
+- employee scheduling
+- accounting export
 
 These belong to dedicated modules.

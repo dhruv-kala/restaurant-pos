@@ -947,6 +947,7 @@ model Tenant {
   fiscalInvoiceSequences        FiscalInvoiceSequence[]
   taxCalculationSnapshots       TaxCalculationSnapshot[]
   businessDays                  BusinessDay[]
+  businessDayClosings           BusinessDayClosing[]
   shiftSessions                 ShiftSession[]
   cashDrawers                   CashDrawer[]
   cashDrawerTransactions        CashDrawerTransaction[]
@@ -1084,6 +1085,7 @@ model Outlet {
   fiscalInvoiceSequences   FiscalInvoiceSequence[]
   taxCalculationSnapshots  TaxCalculationSnapshot[]
   businessDays             BusinessDay[]
+  businessDayClosings      BusinessDayClosing[]
   shiftSessions            ShiftSession[]
   cashDrawers              CashDrawer[]
   cashDrawerTransactions   CashDrawerTransaction[]
@@ -1171,6 +1173,7 @@ model UserAccount {
   impersonatedAuditEvents              AuditEvent[]                   @relation("AuditImpersonator")
   openedBusinessDays                   BusinessDay[]                  @relation("BusinessDayOpenedBy")
   closedBusinessDays                   BusinessDay[]                  @relation("BusinessDayClosedBy")
+  businessDayClosings                  BusinessDayClosing[]           @relation("BusinessDayClosingClosedBy")
   assignedShiftSessions                ShiftSession[]                 @relation("ShiftSessionAssignedUser")
   openedShiftSessions                  ShiftSession[]                 @relation("ShiftSessionOpenedBy")
   closedShiftSessions                  ShiftSession[]                 @relation("ShiftSessionClosedBy")
@@ -2180,6 +2183,7 @@ model BusinessDay {
   outlet                 Outlet                  @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
   openedBy               UserAccount             @relation("BusinessDayOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
   closedBy               UserAccount?            @relation("BusinessDayClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  closing                BusinessDayClosing?
   shifts                 ShiftSession[]
   drawers                CashDrawer[]
   cashDrawerTransactions CashDrawerTransaction[]
@@ -2190,6 +2194,35 @@ model BusinessDay {
   @@index([tenantId, outletId, status], map: "business_days_current_idx")
   @@index([tenantId, businessDate, outletId, status], map: "business_days_reporting_idx")
   @@map("business_days")
+}
+
+model BusinessDayClosing {
+  id                  String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  outletId            String   @map("outlet_id") @db.Uuid
+  businessDayId       String   @map("business_day_id") @db.Uuid
+  businessDate        DateTime @map("business_date") @db.Date
+  shiftSessionCount   Int      @map("shift_session_count")
+  cashDrawerCount     Int      @map("cash_drawer_count")
+  reconciliationCount Int      @map("reconciliation_count")
+  currencyCode        String   @default("INR") @map("currency_code") @db.Char(3)
+  expectedCashMinor   Int      @default(0) @map("expected_cash_minor")
+  countedCashMinor    Int      @default(0) @map("counted_cash_minor")
+  varianceMinor       Int      @default(0) @map("variance_minor")
+  closedByUserId      String   @map("closed_by_user_id") @db.Uuid
+  closingNotes        String?  @map("closing_notes") @db.VarChar(1000)
+  closedAt            DateTime @default(now()) @map("closed_at") @db.Timestamptz(3)
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet      Outlet      @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  businessDay BusinessDay @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
+  closedBy    UserAccount @relation("BusinessDayClosingClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, businessDayId], map: "business_day_closings_business_day_key")
+  @@index([tenantId, outletId, businessDate], map: "business_day_closings_reporting_idx")
+  @@map("business_day_closings")
 }
 
 model ShiftSession {

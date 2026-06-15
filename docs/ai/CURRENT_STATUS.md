@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 31.4**
+- Completed through: **Task 31.5**
 - Current module: **Business Day, Shifts, Cash Drawer, and Closing**
-- Next provisional task: **Task 31.5 - Business Day Closing**
+- Next provisional task: **Task 31.6 - Operations Administration UI**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -14,49 +14,50 @@ Last updated: 2026-06-15
 
 ## Completed Tasks
 
-| Range | Result |
-|---|---|
-| 1-5 | Repository, architecture, ERD, NestJS, PostgreSQL, and Prisma foundations |
-| 6-10 | Tenancy authorization, authentication, tenant/outlet APIs, shared Flutter packages, and login/navigation |
-| 11-18 | Menu, tables, orders, billing, payments, receipts, and complete kitchen/KDS workflows |
-| 19-23 | Inventory, recipes/consumption, customers, reports, and employee/staff management |
-| 23.5 | Master-data and environment-aware seed framework |
-| 24 | RBAC and user management |
-| 24.5 | AI-first documentation, standards, task index, and prompt framework |
-| 25 | Immutable audit ledger, hash-chain integrity, protected APIs, security/RBAC/report integrations, and admin explorer |
-| 26 | Tenant/outlet/user in-app notifications, recipient/read state, preferences, publishing APIs, shared clients, and Flutter notification centers |
-| 27.1 | Provider/message/attempt schema, protected addressing, idempotent enqueue service, abstraction contracts, and state rules |
-| 27.2 | Tenant template CRUD, immutable versions, strict placeholder preview/rendering, authorization, audit integration, and exact message version references |
-| 27.3 | SMTP execution, protected recipient decryption, delivery attempts/status, history APIs, authorization, and audit events |
-| 27.4 | Twilio SMS execution, E.164 validation, shared delivery orchestration, attempt/status tracking, and audit events |
-| 27.5 | Twilio WhatsApp approved-template execution, protected credentials, delivery/read state foundation, and audit events |
-| 27.6 | FCM HTTP v1 delivery, encrypted tenant/user device registration, invalid-token deactivation, and audit events |
-| 27.7 | Verified provider webhooks, immutable idempotent event history, and monotonic delivery-state synchronization |
-| 27.8 | Provider administration APIs, shared communication clients, and admin dashboard/template/history/provider screens |
-| 27.9 | Tenant/outlet communication KPIs, channel/provider performance, delivery trends, typed clients, and admin reporting |
-| 28.1 | Global versioned plan catalog, feature snapshots, immutable activated versions, platform APIs, and audit events |
-| 28.2 | Tenant subscription lifecycle, exact plan references, idempotent commands, append-only history, RLS, and audit events |
-| 28.3 | Tenant feature overrides, fail-closed evaluation, route guard/decorator enforcement, RLS, and audit events |
-| 28.4 | Tenant usage counters, immutable operations, atomic enforcement, configurable over-limit policies, RLS, and audit events |
-| 28.5 | Trial subscriptions, immutable trial history, extension, expiry, paid conversion, RLS, and audit events |
-| 28.6 | Shared subscription contracts, typed clients, Riverpod providers, and admin plan/subscription/entitlement/usage/trial screens |
-| 29.1 | Tenant discount policies, deterministic percentage/fixed calculations, immutable application snapshots, RBAC foundation, RLS, and audit events |
-| 29.2 | Tenant coupon definitions, normalized codes, validity/status management, read-only validation, usage-limit foundation, RLS, RBAC, and audit events |
-| 29.3 | Tenant promotion campaigns, selected-outlet targeting, campaign rules, activation/deactivation, read-only evaluation, RLS, RBAC, and audit events |
-| 29.4 | Central discount eligibility service, context validation, explicit denial reasons, deterministic candidate evaluation, and conservative stacking enforcement |
-| 29.5 | Append-only promotion redemptions, idempotent creation, coupon usage counters, per-customer usage limits, bill-level history, RLS, and audit events |
-| 29.6 | Shared promotions contracts, typed API client, Riverpod providers, and admin dashboard/policy/coupon/campaign/preview/redemption screens |
-| 30.1 | Tenant-scoped tax profiles, tax type/mode enums, active default enforcement, protected APIs, RLS, RBAC, and audit events |
-| 30.2 | Tenant-scoped tax rates, groups, rules, category/item mappings, effective dating, overlap prevention, RLS, and audit events |
-| 30.2.5 | Formal tax architecture review, tenant-default mapping correction, precedence documentation, and approval to proceed to fiscal policy |
-| 30.3 | Outlet-scoped fiscal policies, fiscal invoice sequences, monotonic number generation, RLS, permissions, and audit events |
-| 30.4 | Deterministic tax calculation engine, inclusive/exclusive support, rule precedence, immutable bill snapshots, RLS, and bill integration |
-| 30.5 | Tax summary and detailed reporting from bill/tax snapshots, invoice counts, taxable sales, outlet filtering, and audit events |
-| 30.6 | Shared tax Dart contracts, typed API client, Riverpod providers, and admin tax profile/rate/group/mapping/fiscal policy/report screens |
-| 31.1 | Outlet-scoped business days, one-open-day enforcement, current-day lookup, optimistic close, forced RLS, permissions, and audit events |
-| 31.2 | Operational shift sessions, one-open-session-per-user enforcement, current-session lookup, optimistic close, forced RLS, permissions, and audit events |
-| 31.3 | Cash drawers, one-open-drawer-per-shift enforcement, append-only drawer transactions, counted close, forced RLS, permissions, and audit events |
-| 31.4 | Immutable shift reconciliations, expected/counted cash variance tracking, approval notes, close-before-reconcile protection, forced RLS, permissions, and audit events |
+| Range  | Result                                                                                                                                                                 |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1-5    | Repository, architecture, ERD, NestJS, PostgreSQL, and Prisma foundations                                                                                              |
+| 6-10   | Tenancy authorization, authentication, tenant/outlet APIs, shared Flutter packages, and login/navigation                                                               |
+| 11-18  | Menu, tables, orders, billing, payments, receipts, and complete kitchen/KDS workflows                                                                                  |
+| 19-23  | Inventory, recipes/consumption, customers, reports, and employee/staff management                                                                                      |
+| 23.5   | Master-data and environment-aware seed framework                                                                                                                       |
+| 24     | RBAC and user management                                                                                                                                               |
+| 24.5   | AI-first documentation, standards, task index, and prompt framework                                                                                                    |
+| 25     | Immutable audit ledger, hash-chain integrity, protected APIs, security/RBAC/report integrations, and admin explorer                                                    |
+| 26     | Tenant/outlet/user in-app notifications, recipient/read state, preferences, publishing APIs, shared clients, and Flutter notification centers                          |
+| 27.1   | Provider/message/attempt schema, protected addressing, idempotent enqueue service, abstraction contracts, and state rules                                              |
+| 27.2   | Tenant template CRUD, immutable versions, strict placeholder preview/rendering, authorization, audit integration, and exact message version references                 |
+| 27.3   | SMTP execution, protected recipient decryption, delivery attempts/status, history APIs, authorization, and audit events                                                |
+| 27.4   | Twilio SMS execution, E.164 validation, shared delivery orchestration, attempt/status tracking, and audit events                                                       |
+| 27.5   | Twilio WhatsApp approved-template execution, protected credentials, delivery/read state foundation, and audit events                                                   |
+| 27.6   | FCM HTTP v1 delivery, encrypted tenant/user device registration, invalid-token deactivation, and audit events                                                          |
+| 27.7   | Verified provider webhooks, immutable idempotent event history, and monotonic delivery-state synchronization                                                           |
+| 27.8   | Provider administration APIs, shared communication clients, and admin dashboard/template/history/provider screens                                                      |
+| 27.9   | Tenant/outlet communication KPIs, channel/provider performance, delivery trends, typed clients, and admin reporting                                                    |
+| 28.1   | Global versioned plan catalog, feature snapshots, immutable activated versions, platform APIs, and audit events                                                        |
+| 28.2   | Tenant subscription lifecycle, exact plan references, idempotent commands, append-only history, RLS, and audit events                                                  |
+| 28.3   | Tenant feature overrides, fail-closed evaluation, route guard/decorator enforcement, RLS, and audit events                                                             |
+| 28.4   | Tenant usage counters, immutable operations, atomic enforcement, configurable over-limit policies, RLS, and audit events                                               |
+| 28.5   | Trial subscriptions, immutable trial history, extension, expiry, paid conversion, RLS, and audit events                                                                |
+| 28.6   | Shared subscription contracts, typed clients, Riverpod providers, and admin plan/subscription/entitlement/usage/trial screens                                          |
+| 29.1   | Tenant discount policies, deterministic percentage/fixed calculations, immutable application snapshots, RBAC foundation, RLS, and audit events                         |
+| 29.2   | Tenant coupon definitions, normalized codes, validity/status management, read-only validation, usage-limit foundation, RLS, RBAC, and audit events                     |
+| 29.3   | Tenant promotion campaigns, selected-outlet targeting, campaign rules, activation/deactivation, read-only evaluation, RLS, RBAC, and audit events                      |
+| 29.4   | Central discount eligibility service, context validation, explicit denial reasons, deterministic candidate evaluation, and conservative stacking enforcement           |
+| 29.5   | Append-only promotion redemptions, idempotent creation, coupon usage counters, per-customer usage limits, bill-level history, RLS, and audit events                    |
+| 29.6   | Shared promotions contracts, typed API client, Riverpod providers, and admin dashboard/policy/coupon/campaign/preview/redemption screens                               |
+| 30.1   | Tenant-scoped tax profiles, tax type/mode enums, active default enforcement, protected APIs, RLS, RBAC, and audit events                                               |
+| 30.2   | Tenant-scoped tax rates, groups, rules, category/item mappings, effective dating, overlap prevention, RLS, and audit events                                            |
+| 30.2.5 | Formal tax architecture review, tenant-default mapping correction, precedence documentation, and approval to proceed to fiscal policy                                  |
+| 30.3   | Outlet-scoped fiscal policies, fiscal invoice sequences, monotonic number generation, RLS, permissions, and audit events                                               |
+| 30.4   | Deterministic tax calculation engine, inclusive/exclusive support, rule precedence, immutable bill snapshots, RLS, and bill integration                                |
+| 30.5   | Tax summary and detailed reporting from bill/tax snapshots, invoice counts, taxable sales, outlet filtering, and audit events                                          |
+| 30.6   | Shared tax Dart contracts, typed API client, Riverpod providers, and admin tax profile/rate/group/mapping/fiscal policy/report screens                                 |
+| 31.1   | Outlet-scoped business days, one-open-day enforcement, current-day lookup, optimistic close, forced RLS, permissions, and audit events                                 |
+| 31.2   | Operational shift sessions, one-open-session-per-user enforcement, current-session lookup, optimistic close, forced RLS, permissions, and audit events                 |
+| 31.3   | Cash drawers, one-open-drawer-per-shift enforcement, append-only drawer transactions, counted close, forced RLS, permissions, and audit events                         |
+| 31.4   | Immutable shift reconciliations, expected/counted cash variance tracking, approval notes, close-before-reconcile protection, forced RLS, permissions, and audit events |
+| 31.5   | Immutable business day closings, active shift/drawer/reconciliation validation, cash summary snapshots, forced RLS, close audit events, and closing summary read API   |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -192,6 +193,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   drawer, expected/count cash variance snapshots, required notes for non-zero
   variance, protected `/shift-reconciliations` APIs, forced RLS, permissions,
   shift-close precondition enforcement, and audit events
+- Business day closing foundation with tenant/outlet/business-day-scoped
+  immutable `BusinessDayClosing` records, one closing per business day,
+  close-time validation for active shifts, active drawers, and unreconciled
+  shifts, expected/count cash summary snapshots, protected closing summary read
+  API, forced RLS, and audit events
 
 ## Known Environment Limitation
 
@@ -202,7 +208,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 31.5 - Business Day Closing
+### Task 31.6 - Operations Administration UI
 
 Read:
 
@@ -211,10 +217,10 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 31.5 unless explicitly requested. It should build on
+Do not implement Task 31.6 unless explicitly requested. It should build on
 Task 31.1 business days, Task 31.2 shift sessions, Task 31.3 cash drawers, and
-Task 31.4 shift reconciliations and add business day closing only; operations
-UI remains a later Task 31 subtask.
+Task 31.4 shift reconciliations, and Task 31.5 business day closings and add
+operations administration UI only.
 
 ## Status Maintenance
 
