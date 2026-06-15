@@ -526,7 +526,7 @@ class _AsyncList<T> extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
-            if (action != null) action!,
+            ?action,
           ],
         ),
         const SizedBox(height: 12),
@@ -587,6 +587,7 @@ Future<void> _openBusinessDay(
     ],
   );
   if (confirmed != true || scope.outletId == null) return;
+  if (!context.mounted) return;
   await _runCommand(context, () async {
     await ref
         .read(operationsRepositoryProvider)
@@ -617,6 +618,7 @@ Future<void> _closeBusinessDay(
     ],
   );
   if (confirmed != true) return;
+  if (!context.mounted) return;
   await _runCommand(context, () async {
     await ref
         .read(operationsRepositoryProvider)
@@ -651,6 +653,7 @@ Future<void> _openShift(
     ],
   );
   if (confirmed != true || scope.outletId == null) return;
+  if (!context.mounted) return;
   await _runCommand(context, () async {
     await ref
         .read(operationsRepositoryProvider)
@@ -682,6 +685,7 @@ Future<void> _closeShift(
     ],
   );
   if (confirmed != true) return;
+  if (!context.mounted) return;
   await _runCommand(context, () async {
     await ref
         .read(operationsRepositoryProvider)
@@ -708,6 +712,7 @@ Future<void> _openDrawer(
     ],
   );
   if (confirmed != true || scope.shiftSessionId == null) return;
+  if (!context.mounted) return;
   await _runCommand(context, () async {
     await ref
         .read(operationsRepositoryProvider)
@@ -741,7 +746,7 @@ Future<void> _adjustDrawer(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               DropdownButtonFormField<CashDrawerTransactionType>(
-                value: type,
+                initialValue: type,
                 decoration: const InputDecoration(
                   labelText: 'Transaction type',
                 ),
@@ -782,6 +787,7 @@ Future<void> _adjustDrawer(
     ),
   );
   if (confirmed != true) return;
+  if (!context.mounted) return;
   await _runCommand(context, () async {
     await ref
         .read(operationsRepositoryProvider)
@@ -815,6 +821,7 @@ Future<void> _closeDrawer(
     ],
   );
   if (confirmed != true) return;
+  if (!context.mounted) return;
   await _runCommand(context, () async {
     await ref
         .read(operationsRepositoryProvider)
@@ -847,6 +854,7 @@ Future<void> _createReconciliation(
       scope.cashDrawerId == null) {
     return;
   }
+  if (!context.mounted) return;
   await _runCommand(context, () async {
     await ref
         .read(operationsRepositoryProvider)

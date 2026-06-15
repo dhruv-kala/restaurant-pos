@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 31.5 are complete at the foundation level.
+Tasks 1 through 31.6 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -289,8 +289,14 @@ closings, one closing per business day, close-time validation for active
 shifts, active drawers, and unreconciled shifts, expected/count cash summary
 snapshots, protected closing summary read API, forced RLS, and audit events.
 
-Task 31.6 is next provisionally: implement operations administration UI. Do not
-implement it unless the active user request explicitly asks for it.
+Task 31.6 implemented shared Dart operation contracts, a typed operations API
+client, Riverpod providers, authorized admin navigation, and Operations
+administration tabs for business days, shifts, cash drawers, reconciliations,
+day closings, and audit history.
+
+Task 32 is next provisionally: implement device registration, trusted sessions,
+and terminal management. Do not implement it unless the active user request
+explicitly asks for it.
 
 ## Working Practices
 

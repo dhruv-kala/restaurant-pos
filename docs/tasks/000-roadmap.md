@@ -12,8 +12,9 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6, 30.1-30.6, and 31.1-31.5 are complete; Task 31.6
-  operations administration UI is the next listed provisional task.
+- Tasks 29.1-29.6, 30.1-30.6, and 31.1-31.6 are complete; Task 32
+  device registration, trusted sessions, and terminal management is the next
+  listed provisional task.
 
 ## Foundation and Core SaaS
 
@@ -56,8 +57,8 @@ Last updated: 2026-06-15
 | 31.3 | COMPLETE | Cash drawer management |
 | 31.4 | COMPLETE | Shift closing and reconciliation |
 | 31.5 | COMPLETE | Business day closing |
-| 31.6 | NEXT | Operations administration UI |
-| 32 | PLANNED | Device registration, trusted sessions, and terminal management |
+| 31.6 | COMPLETE | Operations administration UI |
+| 32 | NEXT | Device registration, trusted sessions, and terminal management |
 | 33 | PLANNED | Offline SQLite operation and synchronization protocol |
 | 34 | PLANNED | Transactional outbox, background jobs, and scheduler |
 | 35 | PLANNED | File/document storage abstraction and retention |

@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially implemented.
+Implemented through Task 31.6.
 
 Task 31 is split into:
 
@@ -11,7 +11,7 @@ Task 31 is split into:
 - Task 31.3 Cash Drawer Management - Complete
 - Task 31.4 Shift Closing and Reconciliation - Complete
 - Task 31.5 Business Day Closing - Complete
-- Task 31.6 Operations Administration UI
+- Task 31.6 Operations Administration UI - Complete
 
 ## Objective
 
@@ -53,6 +53,7 @@ Potential entities:
 - CashDrawerTransaction - implemented in Task 31.3
 - ShiftReconciliation - implemented in Task 31.4
 - BusinessDayClosing - implemented in Task 31.5
+- Operations administration UI - implemented in Task 31.6
 
 All tenant-owned records carry tenant scope.
 
@@ -173,6 +174,15 @@ uses optimistic `version` checks, marks the business day closed, snapshots
 shift count, drawer count, reconciliation count, expected cash, counted cash,
 variance, currency, actor, notes, and close time, and writes business-day close
 and closing-summary audit events atomically.
+
+Operations Administration UI:
+
+Task 31.6 adds typed shared Dart models, a Dio operations API client, Riverpod
+providers, and an admin Operations screen. The screen exposes business day,
+shift session, cash drawer, reconciliation, day closing, and audit-history tabs.
+It reuses the backend's existing tenant/outlet scoping, optimistic version
+checks, RBAC enforcement, immutable reconciliation/closing records, and audit
+event APIs.
 
 ## Audit Requirements
 

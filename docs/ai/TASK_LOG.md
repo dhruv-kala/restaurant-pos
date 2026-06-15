@@ -3598,3 +3598,53 @@ Known limitations:
 Next task:
 
 - Task 31.6 - Operations Administration UI
+
+## 2026-06-15 - Task 31.6 Operations Administration UI
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/admin/lib/features/operations/presentation/screens/operations_admin_screen.dart`
+- `packages/api_client/lib/restaurant_pos_api_client.dart`
+- `packages/shared_models/lib/restaurant_pos_shared_models.dart`
+- `docs/specifications/business-day-module.md`
+- `docs/tasks/031-business-day/31.6-operations-admin-ui.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 31.6 only; no backend schema or NestJS API changes were
+  required because Tasks 31.1-31.5 already supplied the operations contracts.
+- Used the shared Dart operation models for business days, shift sessions, cash
+  drawers, drawer transactions, shift reconciliations, and business day closing
+  summaries.
+- Used the typed operations Dio API client covering the existing
+  `/business-days`, `/shift-sessions`, `/cash-drawers`, and
+  `/shift-reconciliations` APIs.
+- Verified the admin Riverpod repository/provider wiring for operations lists,
+  command actions, drawer transaction inspection, closing summary lookup, and
+  operation audit history.
+- Added the admin Operations screen with tabs for business days, shifts, cash
+  drawers, reconciliation, day closing, and audit history.
+- Verified Operations is available in admin navigation behind tenant admin,
+  super admin, and granular operations permissions.
+
+Validation:
+
+- `dart format` on changed Dart files: passed
+- `dart analyze` from `packages/shared_models`: passed
+- `dart analyze` from `packages/api_client`: passed
+- `flutter analyze` from `apps/admin`: passed
+
+Known limitations:
+
+- Task 31.6 did not add frontend widget tests.
+- No backend validation was run because no backend files changed.
+
+Next task:
+
+- Task 32 - Device Registration, Trusted Sessions, and Terminal Management
