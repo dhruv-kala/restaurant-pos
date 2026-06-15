@@ -2,12 +2,13 @@
 
 ## Status
 
-Implemented through Task 33.4.
+Implemented through Task 33.5.
 
 This document defines the offline architecture boundary. SQLite projection,
 sync queue, local change-log storage, and local conflict resolution persistence
-exist through Task 33.4. Sync workers, background scheduling, and offline POS
-flows remain deferred.
+exist through Task 33.4. Task 33.5 adds a bounded background sync service
+foundation, batch history, and checkpoint tracking. Offline POS flows remain
+deferred.
 
 ## Goals
 
@@ -77,6 +78,8 @@ Task 33.2 defines the first local SQLite tables in
 * `local_change_log`
 * `sync_conflicts`
 * `sync_conflict_decisions`
+* `sync_batches`
+* `sync_checkpoints`
 
 The tables preserve tenant, outlet, and device scope, store globally stable
 local IDs, and keep source payload JSON so future sync tasks can avoid lossy
@@ -92,12 +95,17 @@ Server-authority decisions close local queue items as `SUCCESS`; client-wins
 decisions return them to `PENDING`; manual-review decisions keep them in
 `CONFLICT`. Financial entity conflicts require manual review.
 
+Task 33.5 claims pending/retryable queue items, sends them through an injected
+transport, applies success/retry/failure/conflict states, records sync batches,
+and updates per-module pull checkpoints. The transport abstraction allows
+future API client wiring without hard-coding routes in the local storage layer.
+
 Future approved table groups are:
 
-* `SyncBatch`
-* `SyncCheckpoint`
+* pulled server-change staging tables when projection application is added
 
-Task 33.4 intentionally does not implement background workers.
+Task 33.5 intentionally does not implement offline POS command handlers or
+admin sync monitoring UI.
 
 ## Command Flow
 
@@ -201,8 +209,7 @@ These contracts are intentionally storage-neutral. Task 33.2 maps
 
 ## Non-Goals
 
-Task 33.4 does not implement:
+Task 33.5 does not implement:
 
-* background workers
 * offline POS command handling
 * admin sync monitoring UI

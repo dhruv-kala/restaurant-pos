@@ -4304,3 +4304,61 @@ Known limitations:
 Next task:
 
 - Task 33.5 - Background Sync Service
+
+## 2026-06-15 - Task 33.5 Background Sync Service
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `apps/restaurant-app/lib/core/offline/local_database_schema.dart`
+- `apps/restaurant-app/lib/core/offline/offline_background_sync_service.dart`
+- `apps/restaurant-app/lib/core/offline/offline_entity_mapper.dart`
+- `apps/restaurant-app/lib/core/offline/offline_local_repository.dart`
+- `apps/restaurant-app/test/core/offline/offline_local_repository_test.dart`
+- `docs/architecture/offline-sync-architecture.md`
+- `docs/specifications/offline-sync-module.md`
+- `docs/tasks/033-offline-sync/33.5-background-sync-service.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 33.5 only; concrete backend sync APIs, pulled projection
+  application, offline POS command handlers, foreground scheduling, and admin
+  sync monitoring UI remain deferred.
+- Bumped local offline SQLite schema to version 4.
+- Added `sync_batches` for local batch history and `sync_checkpoints` for
+  tenant/outlet/device/module-scoped pull cursors.
+- Added `OfflineBackgroundSyncService` with injected `OfflineSyncTransport`
+  so future API client wiring can be added without coupling local storage to
+  route details.
+- Added bounded exponential retry policy via `OfflineSyncRetryPolicy`.
+- Added queue claiming for `PENDING` and due `RETRYING` items, moving claimed
+  rows to `IN_PROGRESS` and incrementing attempt count.
+- Added push result handling for accepted, retry, and conflict outcomes.
+- Preserved Task 33.4 conflict flow by routing conflict push results through
+  `recordSyncConflict`.
+- Added checkpoint updates from pull results and device sync-state counter
+  refresh after a worker run.
+
+Validation:
+
+- `dart format apps/restaurant-app/lib/core/offline apps/restaurant-app/test/core/offline`:
+  passed
+- `flutter analyze` from `apps/restaurant-app`: passed
+- `flutter test test/core/offline/offline_local_repository_test.dart` from
+  `apps/restaurant-app`: passed
+
+Known limitations:
+
+- The transport is an abstraction; no concrete HTTP sync endpoint client is
+  implemented in this task.
+- Pulled server changes update checkpoints only; applying server projections is
+  deferred to later offline workflow tasks.
+
+Next task:
+
+- Task 33.6 - Offline POS Operations

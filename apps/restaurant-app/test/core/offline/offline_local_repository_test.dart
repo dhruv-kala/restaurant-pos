@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:restaurant_app/core/offline/offline_background_sync_service.dart';
 import 'package:restaurant_app/core/offline/local_database.dart';
 import 'package:restaurant_app/core/offline/offline_local_models.dart';
 import 'package:restaurant_app/core/offline/offline_local_repository.dart';
@@ -427,6 +428,225 @@ void main() {
     await database.close();
     await directory.delete(recursive: true);
   });
+
+  test(
+    'background sync pushes, retries, records conflicts, and checkpoints',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'restaurant-pos-background-sync-',
+      );
+      final databasePath = '${directory.path}/offline.db';
+      final timestamp = DateTime.utc(2026, 6, 15, 12);
+      final businessDate = DateTime.utc(2026, 6, 15);
+
+      final database = OfflineLocalDatabase(
+        databaseFactory: databaseFactoryFfi,
+        databasePath: databasePath,
+      );
+      final repository = OfflineLocalRepository(database);
+
+      await repository.upsertDeviceSyncState(
+        DeviceSyncState(
+          tenantId: 'tenant-1',
+          outletId: 'outlet-1',
+          deviceId: 'device-1',
+          userId: 'user-1',
+          syncEnabled: true,
+          isOnline: false,
+          pendingCount: 3,
+          failedCount: 0,
+          conflictCount: 0,
+          updatedAt: timestamp,
+        ),
+      );
+
+      final accepted = _queueItem(
+        localId: 'queue-sync-accepted',
+        operationType: SyncOperationType.create,
+        businessDate: businessDate,
+        occurredAt: timestamp,
+      );
+      final retry = _queueItem(
+        localId: 'queue-sync-retry',
+        operationType: SyncOperationType.update,
+        businessDate: businessDate,
+        occurredAt: timestamp.add(const Duration(minutes: 1)),
+      );
+      final conflict = _queueItem(
+        localId: 'queue-sync-conflict',
+        operationType: SyncOperationType.update,
+        businessDate: businessDate,
+        occurredAt: timestamp.add(const Duration(minutes: 2)),
+      );
+
+      for (final item in [accepted, retry, conflict]) {
+        await repository.appendQueuedChange(
+          queueItem: item,
+          changeLogEntry: _changeLogEntry(
+            id: 'change-${item.localId}',
+            queueItem: item,
+          ),
+        );
+      }
+
+      final service = OfflineBackgroundSyncService(
+        repository: repository,
+        transport: _FakeSyncTransport(
+          pushResult: OfflineSyncPushResult(
+            items: [
+              OfflineSyncPushItemResult(
+                localId: accepted.localId,
+                status: OfflineSyncPushItemStatus.accepted,
+              ),
+              OfflineSyncPushItemResult(
+                localId: retry.localId,
+                status: OfflineSyncPushItemStatus.retry,
+                errorCode: 'NETWORK_TIMEOUT',
+              ),
+              OfflineSyncPushItemResult(
+                localId: conflict.localId,
+                status: OfflineSyncPushItemStatus.conflict,
+                conflict: _conflict(
+                  id: 'sync-conflict-1',
+                  queueItem: conflict,
+                  detectedAt: timestamp,
+                ),
+              ),
+            ],
+          ),
+          pullResult: const OfflineSyncPullResult(
+            module: 'orders',
+            nextCursor: 'orders-cursor-2',
+          ),
+        ),
+        retryPolicy: const OfflineSyncRetryPolicy(
+          maxAttempts: 3,
+          baseDelay: Duration(seconds: 10),
+        ),
+        idFactory: () => 'batch-1',
+      );
+
+      final result = await service.runOnce(
+        tenantId: 'tenant-1',
+        outletId: 'outlet-1',
+        deviceId: 'device-1',
+        now: timestamp.add(const Duration(minutes: 3)),
+        pullModules: const ['orders'],
+      );
+
+      expect(result.claimedCount, 3);
+      expect(result.acceptedCount, 1);
+      expect(result.retryCount, 1);
+      expect(result.conflictCount, 1);
+      expect(result.pulledModules, ['orders']);
+
+      final acceptedAfter = await repository.getSyncQueueItem(
+        tenantId: 'tenant-1',
+        outletId: 'outlet-1',
+        deviceId: 'device-1',
+        localId: accepted.localId,
+      );
+      final retryAfter = await repository.getSyncQueueItem(
+        tenantId: 'tenant-1',
+        outletId: 'outlet-1',
+        deviceId: 'device-1',
+        localId: retry.localId,
+      );
+      final conflictAfter = await repository.getSyncQueueItem(
+        tenantId: 'tenant-1',
+        outletId: 'outlet-1',
+        deviceId: 'device-1',
+        localId: conflict.localId,
+      );
+      final checkpoint = await repository.getSyncCheckpoint(
+        tenantId: 'tenant-1',
+        outletId: 'outlet-1',
+        deviceId: 'device-1',
+        module: 'orders',
+      );
+      final batches = await repository.listSyncBatches(
+        tenantId: 'tenant-1',
+        outletId: 'outlet-1',
+        deviceId: 'device-1',
+      );
+      final state = await repository.getDeviceSyncState(
+        tenantId: 'tenant-1',
+        outletId: 'outlet-1',
+        deviceId: 'device-1',
+      );
+
+      expect(acceptedAfter?.state, SyncQueueState.success);
+      expect(retryAfter?.state, SyncQueueState.retrying);
+      expect(retryAfter?.attemptCount, 1);
+      expect(
+        retryAfter?.nextRetryAt,
+        timestamp.add(const Duration(minutes: 3, seconds: 10)),
+      );
+      expect(conflictAfter?.state, SyncQueueState.conflict);
+      expect(checkpoint?.cursor, 'orders-cursor-2');
+      expect(batches.single.state, SyncQueueState.conflict);
+      expect(state?.pendingCount, 1);
+      expect(state?.conflictCount, 1);
+      expect(state?.lastPullCursor, 'orders-cursor-2');
+
+      await database.close();
+      await directory.delete(recursive: true);
+    },
+  );
+
+  test('background sync fails items after bounded retry attempts', () async {
+    final directory = await Directory.systemTemp.createTemp(
+      'restaurant-pos-background-sync-failed-',
+    );
+    final databasePath = '${directory.path}/offline.db';
+    final timestamp = DateTime.utc(2026, 6, 15, 13);
+    final businessDate = DateTime.utc(2026, 6, 15);
+
+    final database = OfflineLocalDatabase(
+      databaseFactory: databaseFactoryFfi,
+      databasePath: databasePath,
+    );
+    final repository = OfflineLocalRepository(database);
+
+    final item = _queueItem(
+      localId: 'queue-sync-fail',
+      operationType: SyncOperationType.update,
+      businessDate: businessDate,
+      occurredAt: timestamp,
+      attemptCount: 1,
+    );
+    await repository.appendQueuedChange(
+      queueItem: item,
+      changeLogEntry: _changeLogEntry(id: 'change-sync-fail', queueItem: item),
+    );
+
+    final service = OfflineBackgroundSyncService(
+      repository: repository,
+      transport: _ThrowingSyncTransport(),
+      retryPolicy: const OfflineSyncRetryPolicy(maxAttempts: 2),
+      idFactory: () => 'batch-failed',
+    );
+
+    final result = await service.runOnce(
+      tenantId: 'tenant-1',
+      outletId: 'outlet-1',
+      deviceId: 'device-1',
+      now: timestamp.add(const Duration(minutes: 1)),
+    );
+    final failed = await repository.getSyncQueueItem(
+      tenantId: 'tenant-1',
+      outletId: 'outlet-1',
+      deviceId: 'device-1',
+      localId: item.localId,
+    );
+
+    expect(result.failedCount, 1);
+    expect(failed?.state, SyncQueueState.failed);
+    expect(failed?.attemptCount, 2);
+
+    await database.close();
+    await directory.delete(recursive: true);
+  });
 }
 
 SyncQueueItem _queueItem({
@@ -436,6 +656,7 @@ SyncQueueItem _queueItem({
   required DateTime occurredAt,
   String entityType = 'Order',
   String entityId = 'order-local-1',
+  int attemptCount = 0,
 }) => SyncQueueItem(
   localId: localId,
   tenantId: 'tenant-1',
@@ -451,7 +672,7 @@ SyncQueueItem _queueItem({
   occurredAt: occurredAt,
   payload: {'status': operationType.wireName},
   state: SyncQueueState.pending,
-  attemptCount: 0,
+  attemptCount: attemptCount,
   createdAt: occurredAt,
   updatedAt: occurredAt,
 );
@@ -475,6 +696,36 @@ LocalChangeLogEntry _changeLogEntry({
   payload: queueItem.payload,
   createdAt: queueItem.createdAt,
 );
+
+class _FakeSyncTransport implements OfflineSyncTransport {
+  const _FakeSyncTransport({
+    required this.pushResult,
+    required this.pullResult,
+  });
+
+  final OfflineSyncPushResult pushResult;
+  final OfflineSyncPullResult pullResult;
+
+  @override
+  Future<OfflineSyncPushResult> push(SyncPushRequest request) async =>
+      pushResult;
+
+  @override
+  Future<OfflineSyncPullResult> pull(SyncPullRequest request) async =>
+      pullResult;
+}
+
+class _ThrowingSyncTransport implements OfflineSyncTransport {
+  @override
+  Future<OfflineSyncPushResult> push(SyncPushRequest request) async {
+    throw StateError('offline');
+  }
+
+  @override
+  Future<OfflineSyncPullResult> pull(SyncPullRequest request) async {
+    throw StateError('offline');
+  }
+}
 
 SyncConflict _conflict({
   required String id,

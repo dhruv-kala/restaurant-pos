@@ -349,7 +349,13 @@ decisions, manual-review handling, append-only conflict decision history,
 financial-record manual-review enforcement, schema version 3 upgrade handling,
 and conflict resolution tests.
 
-Task 33.5 is next provisionally: implement background sync service. Do not
+Task 33.5 implemented the restaurant-app background sync service foundation
+with retryable queue claiming, bounded exponential retry policy, push transport
+abstraction, batch history, checkpoint tracking, queue success/retry/failure
+transitions, conflict recording integration, device sync counters, schema
+version 4 upgrade handling, and worker tests.
+
+Task 33.6 is next provisionally: implement offline POS operations. Do not
 implement it unless the active user request explicitly asks for it.
 
 ## Working Practices

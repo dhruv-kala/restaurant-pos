@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 33.4**
+- Completed through: **Task 33.5**
 - Current module: **Offline SQLite Operation and Synchronization**
-- Next provisional task: **Task 33.5 - Background Sync Service**
+- Next provisional task: **Task 33.6 - Offline POS Operations**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -69,6 +69,7 @@ Last updated: 2026-06-15
 | 33.2   | Restaurant-app SQLite local storage, scoped local projections for orders/bills/customers/inventory, entity mappers, repository APIs, and reopen persistence tests |
 | 33.3   | Append-only sync queue and local change log tables, transactional create/update/delete change tracking, scoped recovery reads, and reopen persistence tests |
 | 33.4   | Local sync conflict persistence, conflict detection, server/client/manual-review resolution decisions, financial manual-review guard, and decision history |
+| 33.5   | Background sync service foundation, retryable queue claiming, bounded retry policy, batch history, checkpoint tracking, and worker tests |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -260,6 +261,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   server-authority and client-wins resolution behavior, manual-review handling,
   financial record auto-resolution protection, and schema version 3 upgrade
   handling
+- Background sync foundation in restaurant-app with an injected sync transport,
+  retryable queue claiming, bounded exponential retry policy, batch history,
+  checkpoint persistence, push result handling, conflict recording integration,
+  queue success/retry/failure transitions, device sync counters, and schema
+  version 4 upgrade handling
 
 ## Known Environment Limitation
 
@@ -270,7 +276,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 33.5 - Background Sync Service
+### Task 33.6 - Offline POS Operations
 
 Read:
 
@@ -279,9 +285,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 33.5 unless explicitly requested. It should add bounded
-background sync orchestration on top of the Task 33.4 conflict foundation
-without implementing offline POS feature workflows or admin sync monitoring UI.
+Do not implement Task 33.6 unless explicitly requested. It should start wiring
+offline POS feature operations onto the Task 33.5 sync foundation without
+expanding inventory/customer offline workflows or admin sync monitoring UI.
 
 ## Status Maintenance
 

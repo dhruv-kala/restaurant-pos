@@ -1,6 +1,6 @@
 import 'package:sqflite_common/sqlite_api.dart' as sqlite;
 
-const offlineDatabaseVersion = 3;
+const offlineDatabaseVersion = 4;
 
 Future<void> createOfflineDatabaseSchema(sqlite.Database database) async {
   await database.execute('''
@@ -223,6 +223,45 @@ CREATE TABLE IF NOT EXISTS sync_conflict_decisions (
     'CREATE INDEX IF NOT EXISTS idx_sync_conflict_decisions_conflict '
     'ON sync_conflict_decisions (tenant_id, outlet_id, device_id, conflict_id, decided_at)',
   );
+
+  await database.execute('''
+CREATE TABLE IF NOT EXISTS sync_batches (
+  id TEXT NOT NULL PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  outlet_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  queue_item_ids_json TEXT NOT NULL,
+  state TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  started_at TEXT,
+  completed_at TEXT,
+  CHECK (length(id) > 0),
+  CHECK (length(tenant_id) > 0),
+  CHECK (length(outlet_id) > 0),
+  CHECK (length(device_id) > 0),
+  CHECK (state IN ('PENDING', 'IN_PROGRESS', 'SUCCESS', 'FAILED', 'CONFLICT', 'RETRYING'))
+)
+''');
+  await database.execute(
+    'CREATE INDEX IF NOT EXISTS idx_sync_batches_scope '
+    'ON sync_batches (tenant_id, outlet_id, device_id, created_at)',
+  );
+
+  await database.execute('''
+CREATE TABLE IF NOT EXISTS sync_checkpoints (
+  tenant_id TEXT NOT NULL,
+  outlet_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  module TEXT NOT NULL,
+  cursor TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  CHECK (length(tenant_id) > 0),
+  CHECK (length(outlet_id) > 0),
+  CHECK (length(device_id) > 0),
+  CHECK (length(module) > 0),
+  PRIMARY KEY (tenant_id, outlet_id, device_id, module)
+)
+''');
 }
 
 Future<void> _createProjectionTable(

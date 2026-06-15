@@ -257,6 +257,294 @@ class OfflineLocalRepository {
         .toList(growable: false);
   }
 
+  Future<List<SyncQueueItem>> claimRetryableSyncQueueItems({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    required DateTime now,
+    int limit = 25,
+    int maxAttempts = 5,
+  }) async {
+    final database = await _database.open();
+    final nowIso = now.toUtc().toIso8601String();
+    return database.transaction((transaction) async {
+      final rows = await transaction.query(
+        'sync_queue',
+        where: '''
+tenant_id = ? AND outlet_id = ? AND device_id = ?
+AND attempt_count < ?
+AND (
+  state = ?
+  OR (state = ? AND (next_retry_at IS NULL OR next_retry_at <= ?))
+)
+''',
+        whereArgs: [
+          tenantId,
+          outletId,
+          deviceId,
+          maxAttempts,
+          SyncQueueState.pending.wireName,
+          SyncQueueState.retrying.wireName,
+          nowIso,
+        ],
+        orderBy: 'created_at ASC',
+        limit: limit,
+      );
+
+      final claimed = <SyncQueueItem>[];
+      for (final row in rows) {
+        final item = OfflineEntityMapper.syncQueueItemFromRow(row);
+        final nextAttemptCount = item.attemptCount + 1;
+        await transaction.update(
+          'sync_queue',
+          {
+            'state': SyncQueueState.inProgress.wireName,
+            'attempt_count': nextAttemptCount,
+            'last_attempt_at': nowIso,
+            'next_retry_at': null,
+            'updated_at': nowIso,
+            'error_code': null,
+            'error_message': null,
+          },
+          where:
+              'tenant_id = ? AND outlet_id = ? AND device_id = ? AND local_id = ? '
+              'AND state IN (?, ?)',
+          whereArgs: [
+            tenantId,
+            outletId,
+            deviceId,
+            item.localId,
+            SyncQueueState.pending.wireName,
+            SyncQueueState.retrying.wireName,
+          ],
+        );
+        claimed.add(
+          SyncQueueItem(
+            localId: item.localId,
+            tenantId: item.tenantId,
+            outletId: item.outletId,
+            deviceId: item.deviceId,
+            actorUserId: item.actorUserId,
+            module: item.module,
+            entityType: item.entityType,
+            entityId: item.entityId,
+            operationType: item.operationType,
+            idempotencyKey: item.idempotencyKey,
+            businessDate: item.businessDate,
+            occurredAt: item.occurredAt,
+            payload: item.payload,
+            state: SyncQueueState.inProgress,
+            attemptCount: nextAttemptCount,
+            createdAt: item.createdAt,
+            updatedAt: now,
+            baseVersion: item.baseVersion,
+            lastAttemptAt: now,
+          ),
+        );
+      }
+      return claimed;
+    });
+  }
+
+  Future<void> markSyncQueueItemSuccess({
+    required SyncQueueItem item,
+    required DateTime completedAt,
+  }) async {
+    final database = await _database.open();
+    await database.transaction((transaction) async {
+      await _updateQueueState(
+        transaction,
+        tenantId: item.tenantId,
+        outletId: item.outletId,
+        deviceId: item.deviceId,
+        localId: item.localId,
+        state: SyncQueueState.success,
+        updatedAt: completedAt,
+      );
+    });
+  }
+
+  Future<void> markSyncQueueItemRetrying({
+    required SyncQueueItem item,
+    required DateTime updatedAt,
+    required DateTime nextRetryAt,
+    String? errorCode,
+    String? errorMessage,
+  }) async {
+    final database = await _database.open();
+    await database.transaction((transaction) async {
+      await transaction.update(
+        'sync_queue',
+        {
+          'state': SyncQueueState.retrying.wireName,
+          'next_retry_at': nextRetryAt.toUtc().toIso8601String(),
+          'updated_at': updatedAt.toUtc().toIso8601String(),
+          'error_code': errorCode,
+          'error_message': errorMessage,
+        },
+        where:
+            'tenant_id = ? AND outlet_id = ? AND device_id = ? AND local_id = ?',
+        whereArgs: [item.tenantId, item.outletId, item.deviceId, item.localId],
+      );
+    });
+  }
+
+  Future<void> markSyncQueueItemFailed({
+    required SyncQueueItem item,
+    required DateTime failedAt,
+    String? errorCode,
+    String? errorMessage,
+  }) async {
+    final database = await _database.open();
+    await database.transaction((transaction) async {
+      await _updateQueueState(
+        transaction,
+        tenantId: item.tenantId,
+        outletId: item.outletId,
+        deviceId: item.deviceId,
+        localId: item.localId,
+        state: SyncQueueState.failed,
+        updatedAt: failedAt,
+        errorCode: errorCode,
+        errorMessage: errorMessage,
+      );
+    });
+  }
+
+  Future<void> insertSyncBatch(SyncBatch batch) async {
+    final database = await _database.open();
+    await database.insert(
+      'sync_batches',
+      OfflineEntityMapper.syncBatchToRow(batch),
+    );
+  }
+
+  Future<void> completeSyncBatch({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    required String batchId,
+    required SyncQueueState state,
+    required DateTime completedAt,
+  }) async {
+    final database = await _database.open();
+    await database.update(
+      'sync_batches',
+      {
+        'state': state.wireName,
+        'completed_at': completedAt.toUtc().toIso8601String(),
+      },
+      where: 'tenant_id = ? AND outlet_id = ? AND device_id = ? AND id = ?',
+      whereArgs: [tenantId, outletId, deviceId, batchId],
+    );
+  }
+
+  Future<List<SyncBatch>> listSyncBatches({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    int limit = 50,
+  }) async {
+    final database = await _database.open();
+    final rows = await database.query(
+      'sync_batches',
+      where: 'tenant_id = ? AND outlet_id = ? AND device_id = ?',
+      whereArgs: [tenantId, outletId, deviceId],
+      orderBy: 'created_at DESC',
+      limit: limit,
+    );
+    return rows
+        .map(OfflineEntityMapper.syncBatchFromRow)
+        .toList(growable: false);
+  }
+
+  Future<void> upsertSyncCheckpoint(SyncCheckpoint checkpoint) async {
+    final database = await _database.open();
+    await database.insert(
+      'sync_checkpoints',
+      OfflineEntityMapper.syncCheckpointToRow(checkpoint),
+      conflictAlgorithm: sqlite.ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<SyncCheckpoint?> getSyncCheckpoint({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    required String module,
+  }) async {
+    final database = await _database.open();
+    final rows = await database.query(
+      'sync_checkpoints',
+      where: 'tenant_id = ? AND outlet_id = ? AND device_id = ? AND module = ?',
+      whereArgs: [tenantId, outletId, deviceId, module],
+      limit: 1,
+    );
+    return rows.isEmpty
+        ? null
+        : OfflineEntityMapper.syncCheckpointFromRow(rows.single);
+  }
+
+  Future<void> updateDeviceSyncStateCounters({
+    required String tenantId,
+    required String outletId,
+    required String deviceId,
+    required DateTime updatedAt,
+    DateTime? lastPushedAt,
+    DateTime? lastPulledAt,
+    String? lastPullCursor,
+    bool? isOnline,
+  }) async {
+    final database = await _database.open();
+    final state = await getDeviceSyncState(
+      tenantId: tenantId,
+      outletId: outletId,
+      deviceId: deviceId,
+    );
+    if (state == null) return;
+
+    final pendingCount = await _countQueueStates(
+      database,
+      tenantId,
+      outletId,
+      deviceId,
+      {SyncQueueState.pending, SyncQueueState.retrying},
+    );
+    final failedCount = await _countQueueStates(
+      database,
+      tenantId,
+      outletId,
+      deviceId,
+      {SyncQueueState.failed},
+    );
+    final conflictCount = await _countQueueStates(
+      database,
+      tenantId,
+      outletId,
+      deviceId,
+      {SyncQueueState.conflict},
+    );
+
+    await upsertDeviceSyncState(
+      DeviceSyncState(
+        tenantId: state.tenantId,
+        outletId: state.outletId,
+        deviceId: state.deviceId,
+        userId: state.userId,
+        syncEnabled: state.syncEnabled,
+        isOnline: isOnline ?? state.isOnline,
+        pendingCount: pendingCount,
+        failedCount: failedCount,
+        conflictCount: conflictCount,
+        updatedAt: updatedAt,
+        trustedSessionId: state.trustedSessionId,
+        lastPullCursor: lastPullCursor ?? state.lastPullCursor,
+        lastPushedAt: lastPushedAt ?? state.lastPushedAt,
+        lastPulledAt: lastPulledAt ?? state.lastPulledAt,
+      ),
+    );
+  }
+
   Future<List<LocalChangeLogEntry>> listLocalChanges({
     required String tenantId,
     required String outletId,
@@ -591,6 +879,26 @@ class OfflineLocalRepository {
       whereArgs: [tenantId, outletId, ...extraArgs],
       orderBy: orderBy,
     );
+  }
+
+  Future<int> _countQueueStates(
+    sqlite.Database database,
+    String tenantId,
+    String outletId,
+    String deviceId,
+    Set<SyncQueueState> states,
+  ) async {
+    final placeholders = List.filled(states.length, '?').join(', ');
+    final rows = await database.rawQuery(
+      'SELECT COUNT(*) AS count FROM sync_queue '
+      'WHERE tenant_id = ? AND outlet_id = ? AND device_id = ? '
+      'AND state IN ($placeholders)',
+      [tenantId, outletId, deviceId, ...states.map((state) => state.wireName)],
+    );
+    final value = rows.single['count'];
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return 0;
   }
 }
 

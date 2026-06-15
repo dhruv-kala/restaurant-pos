@@ -204,6 +204,53 @@ class OfflineEntityMapper {
     notes: row['notes']?.toString(),
   );
 
+  static Map<String, Object?> syncBatchToRow(SyncBatch batch) => {
+    'id': batch.id,
+    'tenant_id': batch.tenantId,
+    'outlet_id': batch.outletId,
+    'device_id': batch.deviceId,
+    'queue_item_ids_json': jsonEncode(batch.queueItemIds),
+    'state': batch.state.wireName,
+    'created_at': _date(batch.createdAt),
+    'started_at': _optionalDate(batch.startedAt),
+    'completed_at': _optionalDate(batch.completedAt),
+  };
+
+  static SyncBatch syncBatchFromRow(Map<String, Object?> row) => SyncBatch(
+    id: _string(row, 'id'),
+    tenantId: _string(row, 'tenant_id'),
+    outletId: _string(row, 'outlet_id'),
+    deviceId: _string(row, 'device_id'),
+    queueItemIds: _jsonList(
+      row,
+      'queue_item_ids_json',
+    ).map((value) => value.toString()).toList(growable: false),
+    state: SyncQueueState.fromJson(row['state']),
+    createdAt: _dateFromRow(row, 'created_at'),
+    startedAt: _optionalDateFromRow(row['started_at']),
+    completedAt: _optionalDateFromRow(row['completed_at']),
+  );
+
+  static Map<String, Object?> syncCheckpointToRow(SyncCheckpoint checkpoint) =>
+      {
+        'tenant_id': checkpoint.tenantId,
+        'outlet_id': checkpoint.outletId,
+        'device_id': checkpoint.deviceId,
+        'module': checkpoint.module,
+        'cursor': checkpoint.cursor,
+        'updated_at': _date(checkpoint.updatedAt),
+      };
+
+  static SyncCheckpoint syncCheckpointFromRow(Map<String, Object?> row) =>
+      SyncCheckpoint(
+        tenantId: _string(row, 'tenant_id'),
+        outletId: _string(row, 'outlet_id'),
+        deviceId: _string(row, 'device_id'),
+        module: _string(row, 'module'),
+        cursor: _string(row, 'cursor'),
+        updatedAt: _dateFromRow(row, 'updated_at'),
+      );
+
   static Map<String, Object?> orderToRow(LocalOrderProjection order) => {
     ..._baseProjectionToRow(order),
     'business_date': _date(order.businessDate),
@@ -427,5 +474,15 @@ class OfflineEntityMapper {
       return Map<String, dynamic>.from(decoded);
     }
     throw const FormatException('Expected JSON payload object.');
+  }
+
+  static List<Object?> _jsonList(Map<String, Object?> row, String key) {
+    final value = row[key];
+    if (value is! String) {
+      throw const FormatException('Expected JSON list string.');
+    }
+    final decoded = jsonDecode(value);
+    if (decoded is List) return decoded;
+    throw const FormatException('Expected JSON list.');
   }
 }
