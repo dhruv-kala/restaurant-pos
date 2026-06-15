@@ -108,6 +108,15 @@ export function requireDeviceActivate(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Device activation permission is required');
 }
 
+export function canManageTrustedSessions(actor: AuthenticatedUser): boolean {
+  return (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'devices.manage_sessions')
+  );
+}
+
 export function assertOutletAccess(actor: AuthenticatedUser, outletId: string | null): void {
   if (hasRole(actor, PLATFORM_ADMIN_ROLE) || hasRole(actor, TENANT_ADMIN_ROLE)) {
     return;

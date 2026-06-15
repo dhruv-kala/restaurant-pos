@@ -173,7 +173,7 @@ const shiftReconciliationActions: Record<string, readonly string[]> = {
 const deviceActions: Record<string, readonly string[]> = {
   SUPER_ADMIN: ['*'],
   TENANT_ADMIN: ['*'],
-  MANAGER: ['read', 'register', 'update_status', 'enroll', 'activate'],
+  MANAGER: ['read', 'register', 'update_status', 'enroll', 'activate', 'manage_sessions'],
 };
 
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {

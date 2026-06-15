@@ -1,4 +1,4 @@
-import { DeviceStatus, DeviceType } from '@prisma/client';
+import { DeviceStatus, DeviceType, TrustedSessionStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -164,4 +164,80 @@ export class ActivateDeviceEnrollmentDto {
   @IsString()
   @MaxLength(64)
   activationCode!: string;
+}
+
+export class CreateTrustedSessionDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(5)
+  @Max(43200)
+  expiresInMinutes = 1440;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  userAgent?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  ipAddress?: string | null;
+}
+
+export class TrustedSessionQueryDto {
+  @IsOptional()
+  @IsUUID('all')
+  tenantId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  deviceId?: string;
+
+  @IsOptional()
+  @IsUUID('all')
+  userId?: string;
+
+  @IsOptional()
+  @IsEnum(TrustedSessionStatus)
+  status?: TrustedSessionStatus;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 20;
+}
+
+export class RenewTrustedSessionDto {
+  @IsInt()
+  @Min(1)
+  version!: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(5)
+  @Max(43200)
+  expiresInMinutes = 1440;
+}
+
+export class RevokeTrustedSessionDto {
+  @IsInt()
+  @Min(1)
+  version!: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string | null;
 }

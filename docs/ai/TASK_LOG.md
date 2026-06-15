@@ -3785,3 +3785,77 @@ Known limitations:
 Next task:
 
 - Task 32.3 - Trusted Sessions
+
+## 2026-06-15 - Task 32.3 Trusted Sessions
+
+Status: Complete.
+
+Files changed:
+
+- `AGENTS.md`
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616140000_add_trusted_device_sessions/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/device-management/device-management.module.ts`
+- `backend/api/src/modules/device-management/device-management-schema.spec.ts`
+- `backend/api/src/modules/device-management/controllers/trusted-sessions.controller.ts`
+- `backend/api/src/modules/device-management/dto/device.dto.ts`
+- `backend/api/src/modules/device-management/services/device-access.util.ts`
+- `backend/api/src/modules/device-management/services/trusted-sessions.service.ts`
+- `backend/api/src/modules/device-management/services/trusted-sessions.service.spec.ts`
+- `docs/api/device-management-module.md`
+- `docs/specifications/device-management-module.md`
+- `docs/tasks/032-device-management/32.3-trusted-sessions.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 32.3 only; terminal assignment, device security policies,
+  trusted-session auth-guard enforcement, shared Dart clients, and UI remain
+  deferred.
+- Added tenant-scoped `TrustedSession` records with `ACTIVE`, `EXPIRED`, and
+  `REVOKED` states.
+- Created trusted sessions only for active devices and bound session ownership
+  to the authenticated actor.
+- Returned the plaintext session token only at creation time; persisted only a
+  SHA-256 hash and masked token value.
+- Enforced one active trusted session per device/user through a partial unique
+  index.
+- Added session renewal, expiry transition during renewal, and revocation with
+  actor/reason metadata.
+- Enforced tenant scope, outlet access, and session ownership unless the actor
+  has device-session management authority.
+- Added protected APIs:
+  `POST /devices/:id/trusted-sessions`,
+  `GET /devices/:id/trusted-sessions`,
+  `GET /trusted-sessions`,
+  `GET /trusted-sessions/:id`,
+  `PATCH /trusted-sessions/:id/renew`, and
+  `PATCH /trusted-sessions/:id/revoke`.
+- Added `devices.manage_sessions` permission seed and manager role mapping.
+- Added audit events `trusted_session.created`, `trusted_session.renewed`,
+  `trusted_session.expired`, and `trusted_session.revoked`.
+
+Validation:
+
+- `npx prisma format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/device-management`: passed, 4 suites
+  and 24 tests
+- `npm run lint`: passed
+- `npm run build`: passed
+
+Known limitations:
+
+- The Task 32.3 migration was not deployed to a live PostgreSQL database.
+- No frontend or shared Dart client work was added in this backend foundation
+  task.
+- Trusted-session token enforcement in authentication guards remains deferred.
+
+Next task:
+
+- Task 32.4 - Terminal Management

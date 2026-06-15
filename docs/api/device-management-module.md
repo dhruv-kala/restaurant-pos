@@ -1,7 +1,7 @@
 # Device Management API
 
 Task 32.1 introduces the device registry foundation. Task 32.2 adds device
-enrollment and activation.
+enrollment and activation. Task 32.3 adds trusted sessions.
 
 ## Device Registry
 
@@ -141,6 +141,96 @@ Body:
 Activates the linked device when the code matches an approved, unexpired
 enrollment.
 
+## Trusted Sessions
+
+### Create Trusted Session
+
+`POST /devices/:id/trusted-sessions`
+
+Body:
+
+* `tenantId` - optional; platform administrator only
+* `expiresInMinutes` - optional, 5 to 43200, defaults to 1440
+* `userAgent` - optional
+* `ipAddress` - optional
+
+Creates an `ACTIVE` trusted session for an active device and the authenticated
+actor. The response includes the one-time plaintext `sessionToken`; only a
+SHA-256 hash and masked token are stored.
+
+### List Device Trusted Sessions
+
+`GET /devices/:id/trusted-sessions`
+
+Query:
+
+* `tenantId`
+* `userId`
+* `status`
+* `page`
+* `limit`
+
+Managers and tenant administrators can inspect outlet sessions. Non-manager
+users are constrained to their own sessions.
+
+### List Trusted Sessions
+
+`GET /trusted-sessions`
+
+Query:
+
+* `tenantId`
+* `deviceId`
+* `userId`
+* `status`
+* `page`
+* `limit`
+
+Returns paginated trusted sessions subject to tenant, outlet, and ownership
+authorization.
+
+### Trusted Session Detail
+
+`GET /trusted-sessions/:id`
+
+Optional query:
+
+* `tenantId`
+
+Returns one trusted session when the actor has ownership or session-management
+authority.
+
+### Renew Trusted Session
+
+`PATCH /trusted-sessions/:id/renew`
+
+Body:
+
+* `version`: optimistic concurrency version
+* `expiresInMinutes` - optional, 5 to 43200, defaults to 1440
+
+Optional query:
+
+* `tenantId`
+
+Renews an active, unexpired trusted session. Expired active sessions transition
+to `EXPIRED`.
+
+### Revoke Trusted Session
+
+`PATCH /trusted-sessions/:id/revoke`
+
+Body:
+
+* `version`: optimistic concurrency version
+* `reason` - optional
+
+Optional query:
+
+* `tenantId`
+
+Revokes a trusted session and records the revoking actor.
+
 ## Audit Events
 
 * `device.registered`
@@ -150,3 +240,7 @@ enrollment.
 * `device.enrollment_expired`
 * `device.enrollment_activated`
 * `device.activated`
+* `trusted_session.created`
+* `trusted_session.renewed`
+* `trusted_session.expired`
+* `trusted_session.revoked`

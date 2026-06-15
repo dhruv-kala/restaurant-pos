@@ -12,8 +12,8 @@ Last updated: 2026-06-15
 - Detailed completion evidence lives in `docs/ai/TASK_LOG.md`.
 - Task 28.1-28.6 were reviewed against the subscription specification on
   2026-06-14.
-- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, and 32.1-32.2 are complete;
-  Task 32.3 trusted sessions is the next listed provisional task.
+- Tasks 29.1-29.6, 30.1-30.6, 31.1-31.6, and 32.1-32.3 are complete;
+  Task 32.4 terminal management is the next listed provisional task.
 
 ## Foundation and Core SaaS
 
@@ -59,8 +59,8 @@ Last updated: 2026-06-15
 | 31.6 | COMPLETE | Operations administration UI |
 | 32.1 | COMPLETE | Device registry foundation |
 | 32.2 | COMPLETE | Device enrollment and activation |
-| 32.3 | NEXT | Trusted sessions |
-| 32.4 | PLANNED | Terminal management |
+| 32.3 | COMPLETE | Trusted sessions |
+| 32.4 | NEXT | Terminal management |
 | 32.5 | PLANNED | Device security policies |
 | 32.6 | PLANNED | Device administration UI |
 | 33.1 | PLANNED | Offline architecture foundation |

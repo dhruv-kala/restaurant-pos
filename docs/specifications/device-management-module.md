@@ -2,13 +2,13 @@
 
 ## Status
 
-Implemented through Task 32.2.
+Implemented through Task 32.3.
 
 Task 32 is split into:
 
 * Task 32.1 Device Registry Foundation - Complete
 * Task 32.2 Device Enrollment and Activation - Complete
-* Task 32.3 Trusted Sessions
+* Task 32.3 Trusted Sessions - Complete
 * Task 32.4 Terminal Management
 * Task 32.5 Device Security Policies
 * Task 32.6 Device Administration UI
@@ -48,7 +48,7 @@ Potential entities:
 
 * Device - implemented in Task 32.1
 * DeviceEnrollment - implemented in Task 32.2
-* TrustedSession
+* TrustedSession - implemented in Task 32.3
 * Terminal
 * DeviceSecurityPolicy
 * DeviceAssignment
@@ -100,7 +100,8 @@ Suggested permissions:
 
 Task 32.1 implements only `devices.read`, `devices.register`, and
 `devices.update_status`. Task 32.2 adds `devices.enroll` and
-`devices.activate`. Later subtasks may add the remaining permissions.
+`devices.activate`. Task 32.3 adds `devices.manage_sessions`. Later subtasks
+may add the remaining permissions.
 
 ## API
 
@@ -133,6 +134,24 @@ device identifier and activation code, marks the enrollment `ACTIVATED`, and
 activates the linked device. Enrollment records are tenant scoped, append-only,
 RLS protected, and retain masked activation-code metadata only.
 
+Trusted Sessions:
+
+* `POST /devices/:id/trusted-sessions`
+* `GET /devices/:id/trusted-sessions`
+* `GET /trusted-sessions`
+* `GET /trusted-sessions/:id`
+* `PATCH /trusted-sessions/:id/renew`
+* `PATCH /trusted-sessions/:id/revoke`
+
+Task 32.3 implements trusted device sessions for active devices. Session
+creation binds the trusted session to the authenticated actor rather than a
+client-supplied user. Session tokens are returned once at creation time, stored
+as SHA-256 hashes, and represented by masked values thereafter. Sessions may be
+renewed while active and unexpired. Expired active sessions transition to
+`EXPIRED`; revoked sessions transition to `REVOKED` with actor and reason
+metadata. Session reads and writes enforce tenant scope, outlet access, and
+session ownership unless the actor has session-management authority.
+
 ## Audit Requirements
 
 Audit:
@@ -142,6 +161,7 @@ Audit:
 * device enrollment approval
 * device activation
 * device deactivation
+* trusted session renewal
 * terminal assignment
 * trusted session creation
 * trusted session revocation

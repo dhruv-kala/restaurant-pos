@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 32.2**
+- Completed through: **Task 32.3**
 - Current module: **Device Registration, Trusted Sessions, and Terminal Management**
-- Next provisional task: **Task 32.3 - Trusted Sessions**
+- Next provisional task: **Task 32.4 - Terminal Management**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -61,6 +61,7 @@ Last updated: 2026-06-15
 | 31.6   | Shared operations contracts, typed API client, Riverpod providers, and admin operations screens for business days, shifts, drawers, reconciliation, closing, and audit |
 | 32.1   | Tenant-scoped device registry, device type/status enums, unique identifiers, protected APIs, RLS, permissions, and audit events                                        |
 | 32.2   | Tenant-scoped device enrollments, expiring activation codes, approval workflow, activation API, forced RLS, permissions, and audit events                             |
+| 32.3   | Tenant-scoped trusted sessions, hashed one-time session tokens, renewal, revocation, ownership enforcement, forced RLS, permissions, and audit events                  |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -214,6 +215,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   records, expiring hashed activation codes, approval workflow, one active
   enrollment per device, activation of approved devices, protected enrollment
   APIs, forced RLS, permission seeds, role mappings, and audit events
+- Trusted device sessions with tenant-scoped `TrustedSession` records, one
+  active session per device/user, one-time plaintext session token return,
+  hashed token persistence, renewal, revocation, ownership enforcement,
+  protected trusted-session APIs, forced RLS, permission seeds, role mappings,
+  and audit events
 
 ## Known Environment Limitation
 
@@ -224,7 +230,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 32.3 - Trusted Sessions
+### Task 32.4 - Terminal Management
 
 Read:
 
@@ -233,9 +239,9 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 32.3 unless explicitly requested. It should build on the
-Task 32.1 device registry and Task 32.2 activation workflow, and add trusted
-session records and revocation only.
+Do not implement Task 32.4 unless explicitly requested. It should build on the
+Task 32.1 device registry, Task 32.2 activation workflow, and Task 32.3 trusted
+sessions, and add terminal management only.
 
 ## Status Maintenance
 
