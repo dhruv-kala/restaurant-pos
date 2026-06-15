@@ -124,6 +124,7 @@ describe('ShiftSessionsService', () => {
           .mockResolvedValueOnce(closedSession),
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
+      shiftReconciliation: { findFirst: jest.fn().mockResolvedValue({ id: 'reconciliation-id' }) },
     });
     const service = new ShiftSessionsService(transactionalPrisma(tx), {
       append,
@@ -167,12 +168,29 @@ describe('ShiftSessionsService', () => {
         findFirst: jest.fn().mockResolvedValue(session()),
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
+      shiftReconciliation: { findFirst: jest.fn().mockResolvedValue({ id: 'reconciliation-id' }) },
     });
     const service = new ShiftSessionsService(transactionalPrisma(tx), {} as AuditService);
 
     await expect(service.close(sessionId, { version: 1 }, {}, actor, {})).rejects.toThrow(
       ConflictException,
     );
+  });
+
+  it('rejects close before shift reconciliation is recorded', async () => {
+    const tx = txMock({
+      shiftSession: {
+        findFirst: jest.fn().mockResolvedValue(session()),
+        updateMany: jest.fn(),
+      },
+      shiftReconciliation: { findFirst: jest.fn().mockResolvedValue(null) },
+    });
+    const service = new ShiftSessionsService(transactionalPrisma(tx), {} as AuditService);
+
+    await expect(service.close(sessionId, { version: 1 }, {}, actor, {})).rejects.toThrow(
+      ConflictException,
+    );
+    expect(tx.shiftSession.updateMany).not.toHaveBeenCalled();
   });
 });
 
@@ -223,6 +241,7 @@ function txMock(overrides: Record<string, unknown>) {
       findMany: jest.fn(),
       count: jest.fn(),
     },
+    shiftReconciliation: { findFirst: jest.fn() },
     ...overrides,
   };
 }

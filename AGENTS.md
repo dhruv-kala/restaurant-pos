@@ -116,7 +116,7 @@ See `docs/database/initial-erd.md` for the broader data baseline.
 
 ## Current Work Boundary
 
-Tasks 1 through 27.4 are complete at the foundation level.
+Tasks 1 through 31.4 are complete at the foundation level.
 
 Task 11 created the tenant-scoped menu database schema, NestJS category/item
 APIs, variants, add-ons, outlet price overrides, shared client contracts, and
@@ -257,9 +257,35 @@ Riverpod state, and the admin Subscription Administration center for plan
 management, tenant subscription lifecycle actions, entitlement overrides, usage
 reconciliation, and trial management.
 
-Task 29 is next provisionally: implement promotions, coupons, and discount
-policy engine. Do not implement it unless the active user request explicitly
-asks for it.
+Task 29 implemented the promotions module through discount policy foundation,
+coupon management, promotion campaigns, eligibility evaluation, redemption and
+usage tracking, shared client contracts, and admin promotions UI.
+
+Task 30 implemented tax foundation, tax rules and rates, architecture review
+and correction, fiscal policy administration, tax calculation, tax reporting,
+shared client contracts, and admin tax UI.
+
+Task 31.1 implemented outlet-scoped business days, one-open-day enforcement,
+current-day lookup, optimistic close, forced RLS, permissions, and audit events.
+
+Task 31.2 implemented tenant/outlet-scoped operational shift sessions,
+one-open-session-per-user enforcement, current-session lookup, optional staff
+shift-template references, protected lifecycle APIs, forced RLS, permissions,
+and audit events.
+
+Task 31.3 implemented tenant/outlet/business-day/shift-scoped cash drawers,
+one-open-drawer-per-shift enforcement, append-only drawer transactions,
+opening balances, cash adjustments, counted close, forced RLS, permissions, and
+audit events.
+
+Task 31.4 implemented immutable tenant/outlet/business-day/shift-scoped shift
+reconciliations, one reconciliation per shift and drawer, expected/count cash
+variance snapshots, required notes for non-zero variance, protected
+`/shift-reconciliations` APIs, forced RLS, permissions, shift-close
+precondition enforcement, and audit events.
+
+Task 31.5 is next provisionally: implement business day closing. Do not
+implement it unless the active user request explicitly asks for it.
 
 ## Working Practices
 

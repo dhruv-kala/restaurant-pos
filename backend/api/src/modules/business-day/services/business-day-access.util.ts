@@ -150,6 +150,31 @@ export function requireCashDrawerRead(actor: AuthenticatedUser): void {
   throw new ForbiddenException('Cash drawer read permission is required');
 }
 
+export function requireShiftReconciliationRead(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'shift_reconciliation.read') ||
+    hasPermission(actor, 'shift_reconciliation.create')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Shift reconciliation read permission is required');
+}
+
+export function requireShiftReconciliationCreate(actor: AuthenticatedUser): void {
+  if (
+    hasRole(actor, PLATFORM_ADMIN_ROLE) ||
+    hasRole(actor, TENANT_ADMIN_ROLE) ||
+    hasRole(actor, MANAGER_ROLE) ||
+    hasPermission(actor, 'shift_reconciliation.create')
+  ) {
+    return;
+  }
+  throw new ForbiddenException('Shift reconciliation create permission is required');
+}
+
 export function requireCashDrawerOpen(actor: AuthenticatedUser): void {
   if (
     hasRole(actor, PLATFORM_ADMIN_ROLE) ||

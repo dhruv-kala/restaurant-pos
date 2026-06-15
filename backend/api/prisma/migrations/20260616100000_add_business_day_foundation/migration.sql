@@ -230,6 +230,31 @@ CREATE TABLE "cash_drawer_transactions" (
   CONSTRAINT "cash_drawer_transactions_amount_check" CHECK ("amount_minor" >= 0 AND "balance_after_minor" >= 0)
 );
 
+CREATE TABLE "shift_reconciliations" (
+  "id" UUID NOT NULL DEFAULT app_uuid_v7(),
+  "tenant_id" UUID NOT NULL,
+  "outlet_id" UUID NOT NULL,
+  "business_day_id" UUID NOT NULL,
+  "shift_session_id" UUID NOT NULL,
+  "cash_drawer_id" UUID NOT NULL,
+  "currency_code" CHAR(3) NOT NULL,
+  "expected_cash_minor" INTEGER NOT NULL,
+  "counted_cash_minor" INTEGER NOT NULL,
+  "variance_minor" INTEGER NOT NULL,
+  "approval_notes" VARCHAR(1000),
+  "reconciled_by_user_id" UUID NOT NULL,
+  "reconciled_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT "shift_reconciliations_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "shift_reconciliations_currency_check" CHECK ("currency_code" ~ '^[A-Z]{3}$'),
+  CONSTRAINT "shift_reconciliations_amounts_check" CHECK (
+    "expected_cash_minor" >= 0
+    AND "counted_cash_minor" >= 0
+    AND "variance_minor" = "counted_cash_minor" - "expected_cash_minor"
+  )
+);
+
 CREATE UNIQUE INDEX "cash_drawers_tenant_id_id_key"
   ON "cash_drawers"("tenant_id", "id");
 CREATE UNIQUE INDEX "cash_drawers_one_open_per_shift_key"
@@ -246,6 +271,15 @@ CREATE INDEX "cash_drawer_transactions_drawer_idx"
   ON "cash_drawer_transactions"("tenant_id", "cash_drawer_id", "recorded_at");
 CREATE INDEX "cash_drawer_transactions_reporting_idx"
   ON "cash_drawer_transactions"("tenant_id", "business_day_id", "outlet_id", "transaction_type");
+
+CREATE UNIQUE INDEX "shift_reconciliations_tenant_id_id_key"
+  ON "shift_reconciliations"("tenant_id", "id");
+CREATE UNIQUE INDEX "shift_reconciliations_shift_session_key"
+  ON "shift_reconciliations"("tenant_id", "shift_session_id");
+CREATE UNIQUE INDEX "shift_reconciliations_cash_drawer_key"
+  ON "shift_reconciliations"("tenant_id", "cash_drawer_id");
+CREATE INDEX "shift_reconciliations_reporting_idx"
+  ON "shift_reconciliations"("tenant_id", "outlet_id", "business_day_id", "reconciled_at");
 
 ALTER TABLE "cash_drawers"
   ADD CONSTRAINT "cash_drawers_tenant_id_fkey"
@@ -282,6 +316,25 @@ ALTER TABLE "cash_drawer_transactions"
   ADD CONSTRAINT "cash_drawer_transactions_recorded_by_user_id_fkey"
   FOREIGN KEY ("recorded_by_user_id") REFERENCES "user_accounts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+ALTER TABLE "shift_reconciliations"
+  ADD CONSTRAINT "shift_reconciliations_tenant_id_fkey"
+  FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "shift_reconciliations"
+  ADD CONSTRAINT "shift_reconciliations_outlet_id_fkey"
+  FOREIGN KEY ("tenant_id", "outlet_id") REFERENCES "outlets"("tenant_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "shift_reconciliations"
+  ADD CONSTRAINT "shift_reconciliations_business_day_id_fkey"
+  FOREIGN KEY ("tenant_id", "business_day_id") REFERENCES "business_days"("tenant_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "shift_reconciliations"
+  ADD CONSTRAINT "shift_reconciliations_shift_session_id_fkey"
+  FOREIGN KEY ("tenant_id", "shift_session_id") REFERENCES "shift_sessions"("tenant_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "shift_reconciliations"
+  ADD CONSTRAINT "shift_reconciliations_cash_drawer_id_fkey"
+  FOREIGN KEY ("tenant_id", "cash_drawer_id") REFERENCES "cash_drawers"("tenant_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "shift_reconciliations"
+  ADD CONSTRAINT "shift_reconciliations_reconciled_by_user_id_fkey"
+  FOREIGN KEY ("reconciled_by_user_id") REFERENCES "user_accounts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
 ALTER TABLE "cash_drawers" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "cash_drawers" FORCE ROW LEVEL SECURITY;
 CREATE POLICY "cash_drawers_tenant_isolation" ON "cash_drawers"
@@ -291,6 +344,12 @@ WITH CHECK (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id());
 ALTER TABLE "cash_drawer_transactions" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "cash_drawer_transactions" FORCE ROW LEVEL SECURITY;
 CREATE POLICY "cash_drawer_transactions_tenant_isolation" ON "cash_drawer_transactions"
+USING (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id())
+WITH CHECK (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id());
+
+ALTER TABLE "shift_reconciliations" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "shift_reconciliations" FORCE ROW LEVEL SECURITY;
+CREATE POLICY "shift_reconciliations_tenant_isolation" ON "shift_reconciliations"
 USING (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id())
 WITH CHECK (app_is_platform_admin() OR "tenant_id" = app_current_tenant_id());
 
@@ -329,3 +388,18 @@ FOR EACH ROW EXECUTE FUNCTION reject_cash_drawer_transaction_mutation();
 CREATE TRIGGER "cash_drawer_transactions_no_delete"
 BEFORE DELETE ON "cash_drawer_transactions"
 FOR EACH ROW EXECUTE FUNCTION reject_cash_drawer_transaction_mutation();
+
+CREATE OR REPLACE FUNCTION reject_shift_reconciliation_mutation()
+RETURNS trigger AS $$
+BEGIN
+  RAISE EXCEPTION 'shift reconciliations are immutable';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER "shift_reconciliations_no_update"
+BEFORE UPDATE ON "shift_reconciliations"
+FOR EACH ROW EXECUTE FUNCTION reject_shift_reconciliation_mutation();
+
+CREATE TRIGGER "shift_reconciliations_no_delete"
+BEFORE DELETE ON "shift_reconciliations"
+FOR EACH ROW EXECUTE FUNCTION reject_shift_reconciliation_mutation();

@@ -93,6 +93,7 @@ const moduleActions: Record<string, readonly string[]> = {
   fiscal_policy: ['read', 'manage'],
   business_day: ['read', 'open', 'close'],
   cash_drawer: ['read', 'open', 'adjust', 'close'],
+  shift_reconciliation: ['read', 'create'],
   subscriptions: [
     'create',
     'read',

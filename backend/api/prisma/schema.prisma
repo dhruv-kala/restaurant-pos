@@ -950,6 +950,7 @@ model Tenant {
   shiftSessions                 ShiftSession[]
   cashDrawers                   CashDrawer[]
   cashDrawerTransactions        CashDrawerTransaction[]
+  shiftReconciliations          ShiftReconciliation[]
   payments                      Payment[]
   paymentTransactions           PaymentTransaction[]
   paymentRefunds                PaymentRefund[]
@@ -1086,6 +1087,7 @@ model Outlet {
   shiftSessions            ShiftSession[]
   cashDrawers              CashDrawer[]
   cashDrawerTransactions   CashDrawerTransaction[]
+  shiftReconciliations     ShiftReconciliation[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, code])
@@ -1175,6 +1177,7 @@ model UserAccount {
   openedCashDrawers                    CashDrawer[]                   @relation("CashDrawerOpenedBy")
   closedCashDrawers                    CashDrawer[]                   @relation("CashDrawerClosedBy")
   cashDrawerTransactions               CashDrawerTransaction[]        @relation("CashDrawerTransactionRecordedBy")
+  shiftReconciliations                 ShiftReconciliation[]          @relation("ShiftReconciliationReconciledBy")
   createdNotifications                 Notification[]                 @relation("NotificationCreatedBy")
   notificationRecipients               NotificationRecipient[]
   notificationPreferences              NotificationPreference[]
@@ -2180,6 +2183,7 @@ model BusinessDay {
   shifts                 ShiftSession[]
   drawers                CashDrawer[]
   cashDrawerTransactions CashDrawerTransaction[]
+  shiftReconciliations   ShiftReconciliation[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, outletId, businessDate], map: "business_days_outlet_date_key")
@@ -2206,14 +2210,15 @@ model ShiftSession {
   createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet       Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  businessDay  BusinessDay  @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
-  assignedUser UserAccount  @relation("ShiftSessionAssignedUser", fields: [assignedUserId], references: [id], onDelete: Restrict)
-  shift        Shift?       @relation(fields: [tenantId, shiftId], references: [tenantId, id], onDelete: Restrict)
-  openedBy     UserAccount  @relation("ShiftSessionOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
-  closedBy     UserAccount? @relation("ShiftSessionClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
-  cashDrawers  CashDrawer[]
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet         Outlet               @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  businessDay    BusinessDay          @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
+  assignedUser   UserAccount          @relation("ShiftSessionAssignedUser", fields: [assignedUserId], references: [id], onDelete: Restrict)
+  shift          Shift?               @relation(fields: [tenantId, shiftId], references: [tenantId, id], onDelete: Restrict)
+  openedBy       UserAccount          @relation("ShiftSessionOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
+  closedBy       UserAccount?         @relation("ShiftSessionClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  cashDrawers    CashDrawer[]
+  reconciliation ShiftReconciliation?
 
   @@unique([tenantId, id])
   @@index([tenantId, outletId, businessDayId, status], map: "shift_sessions_business_day_idx")
@@ -2243,13 +2248,14 @@ model CashDrawer {
   createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tenant       Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  outlet       Outlet                  @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
-  businessDay  BusinessDay             @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
-  shiftSession ShiftSession            @relation(fields: [tenantId, shiftSessionId], references: [tenantId, id], onDelete: Restrict)
-  openedBy     UserAccount             @relation("CashDrawerOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
-  closedBy     UserAccount?            @relation("CashDrawerClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
-  transactions CashDrawerTransaction[]
+  tenant         Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet         Outlet                  @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  businessDay    BusinessDay             @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
+  shiftSession   ShiftSession            @relation(fields: [tenantId, shiftSessionId], references: [tenantId, id], onDelete: Restrict)
+  openedBy       UserAccount             @relation("CashDrawerOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict)
+  closedBy       UserAccount?            @relation("CashDrawerClosedBy", fields: [closedByUserId], references: [id], onDelete: Restrict)
+  transactions   CashDrawerTransaction[]
+  reconciliation ShiftReconciliation?
 
   @@unique([tenantId, id])
   @@index([tenantId, outletId, businessDayId, status], map: "cash_drawers_business_day_idx")
@@ -2280,6 +2286,36 @@ model CashDrawerTransaction {
   @@index([tenantId, cashDrawerId, recordedAt], map: "cash_drawer_transactions_drawer_idx")
   @@index([tenantId, businessDayId, outletId, transactionType], map: "cash_drawer_transactions_reporting_idx")
   @@map("cash_drawer_transactions")
+}
+
+model ShiftReconciliation {
+  id                 String   @id @default(dbgenerated("app_uuid_v7()")) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  outletId           String   @map("outlet_id") @db.Uuid
+  businessDayId      String   @map("business_day_id") @db.Uuid
+  shiftSessionId     String   @map("shift_session_id") @db.Uuid
+  cashDrawerId       String   @map("cash_drawer_id") @db.Uuid
+  currencyCode       String   @map("currency_code") @db.Char(3)
+  expectedCashMinor  Int      @map("expected_cash_minor")
+  countedCashMinor   Int      @map("counted_cash_minor")
+  varianceMinor      Int      @map("variance_minor")
+  approvalNotes      String?  @map("approval_notes") @db.VarChar(1000)
+  reconciledByUserId String   @map("reconciled_by_user_id") @db.Uuid
+  reconciledAt       DateTime @default(now()) @map("reconciled_at") @db.Timestamptz(3)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  outlet       Outlet       @relation(fields: [tenantId, outletId], references: [tenantId, id], onDelete: Restrict)
+  businessDay  BusinessDay  @relation(fields: [tenantId, businessDayId], references: [tenantId, id], onDelete: Restrict)
+  shiftSession ShiftSession @relation(fields: [tenantId, shiftSessionId], references: [tenantId, id], onDelete: Restrict)
+  cashDrawer   CashDrawer   @relation(fields: [tenantId, cashDrawerId], references: [tenantId, id], onDelete: Restrict)
+  reconciledBy UserAccount  @relation("ShiftReconciliationReconciledBy", fields: [reconciledByUserId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, shiftSessionId], map: "shift_reconciliations_shift_session_key")
+  @@unique([tenantId, cashDrawerId], map: "shift_reconciliations_cash_drawer_key")
+  @@index([tenantId, outletId, businessDayId, reconciledAt], map: "shift_reconciliations_reporting_idx")
+  @@map("shift_reconciliations")
 }
 
 model DiscountPolicy {

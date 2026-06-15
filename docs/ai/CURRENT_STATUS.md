@@ -4,9 +4,9 @@ Last updated: 2026-06-15
 
 ## Current Position
 
-- Completed through: **Task 31.3**
+- Completed through: **Task 31.4**
 - Current module: **Business Day, Shifts, Cash Drawer, and Closing**
-- Next provisional task: **Task 31.4 - Shift Closing and Reconciliation**
+- Next provisional task: **Task 31.5 - Business Day Closing**
 - Later roadmap entries: **Provisional until explicitly approved**
 - Task 28.1-28.6 repair review on 2026-06-14 found no communication-module
   leakage in subscription implementation; one shared Dart response contract was
@@ -56,6 +56,7 @@ Last updated: 2026-06-15
 | 31.1 | Outlet-scoped business days, one-open-day enforcement, current-day lookup, optimistic close, forced RLS, permissions, and audit events |
 | 31.2 | Operational shift sessions, one-open-session-per-user enforcement, current-session lookup, optimistic close, forced RLS, permissions, and audit events |
 | 31.3 | Cash drawers, one-open-drawer-per-shift enforcement, append-only drawer transactions, counted close, forced RLS, permissions, and audit events |
+| 31.4 | Immutable shift reconciliations, expected/counted cash variance tracking, approval notes, close-before-reconcile protection, forced RLS, permissions, and audit events |
 
 Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
 
@@ -186,6 +187,11 @@ Detailed evidence and validation history remain in `docs/ai/TASK_LOG.md`.
   `CashDrawerTransaction` history, opening balance, cash in/out adjustments,
   counted closing balance, protected `/cash-drawers` lifecycle APIs, forced
   RLS, drawer permissions, and audit events
+- Shift reconciliation foundation with tenant/outlet/business-day/shift-scoped
+  immutable `ShiftReconciliation` records, one reconciliation per shift and
+  drawer, expected/count cash variance snapshots, required notes for non-zero
+  variance, protected `/shift-reconciliations` APIs, forced RLS, permissions,
+  shift-close precondition enforcement, and audit events
 
 ## Known Environment Limitation
 
@@ -196,7 +202,7 @@ valid credentials and migration deployment.
 
 ## Next Task
 
-### Task 31.4 - Shift Closing and Reconciliation
+### Task 31.5 - Business Day Closing
 
 Read:
 
@@ -205,10 +211,10 @@ Read:
 - `docs/ai/DATABASE_STANDARDS.md`
 - `docs/ai/API_STANDARDS.md`
 
-Do not implement Task 31.4 unless explicitly requested. It should build on
-Task 31.1 business days, Task 31.2 shift sessions, and Task 31.3 cash drawers
-and add shift closing/reconciliation only; business day closing and operations
-UI remain later Task 31 subtasks.
+Do not implement Task 31.5 unless explicitly requested. It should build on
+Task 31.1 business days, Task 31.2 shift sessions, Task 31.3 cash drawers, and
+Task 31.4 shift reconciliations and add business day closing only; operations
+UI remains a later Task 31 subtask.
 
 ## Status Maintenance
 

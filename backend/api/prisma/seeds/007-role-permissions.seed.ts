@@ -28,6 +28,7 @@ const roleModules: Record<string, readonly string[]> = {
     'fiscal_policy',
     'business_day',
     'cash_drawer',
+    'shift_reconciliation',
     'settings',
     'audit',
     'notifications',
@@ -56,6 +57,7 @@ const roleModules: Record<string, readonly string[]> = {
     'fiscal_policy',
     'business_day',
     'cash_drawer',
+    'shift_reconciliation',
   ],
   CASHIER: [
     'billing',
@@ -66,6 +68,7 @@ const roleModules: Record<string, readonly string[]> = {
     'tables',
     'shifts',
     'cash_drawer',
+    'shift_reconciliation',
     'notifications',
     'promotions',
   ],
@@ -158,6 +161,13 @@ const cashDrawerActions: Record<string, readonly string[]> = {
   CASHIER: ['read', 'open', 'adjust', 'close'],
 };
 
+const shiftReconciliationActions: Record<string, readonly string[]> = {
+  SUPER_ADMIN: ['*'],
+  TENANT_ADMIN: ['*'],
+  MANAGER: ['*'],
+  CASHIER: ['read', 'create'],
+};
+
 export async function seedRolePermissions({ prisma }: SeedContext): Promise<void> {
   const permissions = await prisma.permission.findMany();
   const templates = await prisma.systemRoleTemplate.findMany();
@@ -178,6 +188,7 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
     const allowedFiscalPolicyActions = fiscalPolicyActions[roleKey] ?? [];
     const allowedShiftActions = shiftActions[roleKey] ?? [];
     const allowedCashDrawerActions = cashDrawerActions[roleKey] ?? [];
+    const allowedShiftReconciliationActions = shiftReconciliationActions[roleKey] ?? [];
     const allowed = permissions.filter(
       (permission) =>
         (modules.includes('*') || modules.includes(permission.module)) &&
@@ -201,7 +212,10 @@ export async function seedRolePermissions({ prisma }: SeedContext): Promise<void
           allowedShiftActions.includes(permission.action)) &&
         (permission.module !== 'cash_drawer' ||
           allowedCashDrawerActions.includes('*') ||
-          allowedCashDrawerActions.includes(permission.action)),
+          allowedCashDrawerActions.includes(permission.action)) &&
+        (permission.module !== 'shift_reconciliation' ||
+          allowedShiftReconciliationActions.includes('*') ||
+          allowedShiftReconciliationActions.includes(permission.action)),
     );
     for (const permission of allowed) {
       await prisma.systemRolePermission.upsert({

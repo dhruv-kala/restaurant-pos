@@ -1,6 +1,6 @@
 # AI Task Log
 
-Last updated: 2026-06-14
+Last updated: 2026-06-15
 
 ## Status Legend
 
@@ -11,13 +11,13 @@ Last updated: 2026-06-14
 
 ## Current Summary
 
-Tasks 1 through 28.6 are complete at the requested foundation level.
+Tasks 1 through 31.4 are complete at the requested foundation level.
 
 The worktree contains uncommitted project changes. Future agents must inspect and
 preserve them rather than assuming a clean checkout.
 
-Task 29, Promotions, Coupons, and Discount Policy Engine, is the next
-provisional roadmap item. It is not approved for implementation until
+Task 31.5, Business Day Closing, is the next provisional roadmap item. It is
+not approved for implementation until
 explicitly requested.
 
 ## Task History
@@ -3307,6 +3307,7 @@ Files changed:
 - `backend/api/src/modules/business-day/services/business-day-access.util.spec.ts`
 - `backend/api/src/modules/business-day/services/shift-sessions.service.ts`
 - `backend/api/src/modules/business-day/services/shift-sessions.service.spec.ts`
+- `AGENTS.md`
 - `docs/api/business-day-module.md`
 - `docs/specifications/business-day-module.md`
 - `docs/tasks/031-business-day/31.2-shift-management.md`
@@ -3456,3 +3457,80 @@ Known limitations:
 Next task:
 
 - Task 31.4 - Shift Closing and Reconciliation
+
+## 2026-06-15 - Task 31.4 Shift Closing and Reconciliation
+
+Status: Complete.
+
+Files changed:
+
+- `backend/api/prisma/schema.prisma`
+- `backend/api/prisma/migrations/20260616100000_add_business_day_foundation/migration.sql`
+- `backend/api/prisma/seeds/006-permissions.seed.ts`
+- `backend/api/prisma/seeds/007-role-permissions.seed.ts`
+- `backend/api/src/modules/business-day/business-day.module.ts`
+- `backend/api/src/modules/business-day/business-day-schema.spec.ts`
+- `backend/api/src/modules/business-day/controllers/shift-reconciliations.controller.ts`
+- `backend/api/src/modules/business-day/dto/shift-reconciliation.dto.ts`
+- `backend/api/src/modules/business-day/services/business-day-access.util.ts`
+- `backend/api/src/modules/business-day/services/business-day-access.util.spec.ts`
+- `backend/api/src/modules/business-day/services/shift-reconciliations.service.ts`
+- `backend/api/src/modules/business-day/services/shift-reconciliations.service.spec.ts`
+- `backend/api/src/modules/business-day/services/shift-sessions.service.ts`
+- `backend/api/src/modules/business-day/services/shift-sessions.service.spec.ts`
+- `docs/api/business-day-module.md`
+- `docs/specifications/business-day-module.md`
+- `docs/tasks/031-business-day/31.4-shift-closing-and-reconciliation.md`
+- `docs/ai/CURRENT_STATUS.md`
+- `docs/ai/TASK_LOG.md`
+- `docs/tasks/000-roadmap.md`
+
+Decisions:
+
+- Implemented Task 31.4 only; business day closing and operations UI remain
+  deferred.
+- Added immutable tenant/outlet/business-day/shift-scoped
+  `ShiftReconciliation` records.
+- Enforced one reconciliation per shift session and one reconciliation per cash
+  drawer.
+- Required a closed cash drawer before recording reconciliation.
+- Snapshotted expected cash from the closed drawer and stored counted cash plus
+  server-computed variance.
+- Required approval notes when variance is non-zero.
+- Added forced RLS, tenant-aware foreign keys, no-update/no-delete triggers, and
+  reporting indexes for shift reconciliations.
+- Added protected APIs:
+  `POST /shift-reconciliations`,
+  `GET /shift-reconciliations`, and
+  `GET /shift-reconciliations/:id`.
+- Added `shift_reconciliation.read` and `shift_reconciliation.create`
+  permission seeds and role-template mappings for tenant admins, managers, and
+  cashiers.
+- Updated shift session close to reject closure until reconciliation is
+  recorded.
+- Added audit event `shift_reconciliation.recorded` with variance metadata.
+- Did not modify frontend or shared Dart packages.
+
+Validation:
+
+- `npm run prisma:format`: passed
+- `npm run prisma:validate`: passed
+- `npm run prisma:generate`: passed
+- `npm test -- --runInBand src/modules/business-day`: passed, 6 suites and
+  40 tests
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm test -- --runInBand`: passed, 101 suites and 376 tests
+- `npm run test:e2e -- --runInBand`: passed, 2 suites and 7 tests
+- `git diff --check`: passed with line-ending warnings only
+
+Known limitations:
+
+- The Task 31 migration was not deployed to a live PostgreSQL database.
+- Payment collection still does not automatically post cash tender movements
+  into cash drawer transactions.
+- Business day close validations remain Task 31.5.
+
+Next task:
+
+- Task 31.5 - Business Day Closing

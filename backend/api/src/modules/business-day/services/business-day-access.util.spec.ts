@@ -10,6 +10,8 @@ import {
   requireCashDrawerClose,
   requireCashDrawerOpen,
   requireCashDrawerRead,
+  requireShiftReconciliationCreate,
+  requireShiftReconciliationRead,
   requireShiftSessionClose,
   requireShiftSessionOpen,
   requireShiftSessionRead,
@@ -126,6 +128,26 @@ describe('business day access utilities', () => {
     ).not.toThrow();
     expect(() =>
       requireCashDrawerClose({ ...cashier, permissions: ['cash_drawer.close'] }),
+    ).not.toThrow();
+  });
+
+  it('allows managers and granular permissions to operate shift reconciliations', () => {
+    const manager = { ...tenantAdmin, roles: ['MANAGER'], outletId };
+    expect(() => requireShiftReconciliationRead(manager)).not.toThrow();
+    expect(() => requireShiftReconciliationCreate(manager)).not.toThrow();
+
+    const cashier = {
+      ...tenantAdmin,
+      roles: ['CASHIER'],
+      permissions: ['shift_reconciliation.read'],
+    };
+    expect(() => requireShiftReconciliationRead(cashier)).not.toThrow();
+    expect(() => requireShiftReconciliationCreate(cashier)).toThrow(ForbiddenException);
+    expect(() =>
+      requireShiftReconciliationCreate({
+        ...cashier,
+        permissions: ['shift_reconciliation.create'],
+      }),
     ).not.toThrow();
   });
 });

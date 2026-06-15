@@ -36,6 +36,14 @@ describe('business day foundation schema', () => {
     expect(migration).toContain('CREATE TABLE "cash_drawer_transactions"');
   });
 
+  it('defines immutable shift reconciliations', () => {
+    expect(schema).toContain('model ShiftReconciliation {');
+    expect(schema).toContain('shiftReconciliations');
+    expect(migration).toContain('CREATE TABLE "shift_reconciliations"');
+    expect(migration).toContain('shift_reconciliations_shift_session_key');
+    expect(migration).toContain('shift_reconciliations_cash_drawer_key');
+  });
+
   it('creates business days with tenant constraints and forced RLS', () => {
     expect(migration).toContain('CREATE TABLE "business_days"');
     expect(migration).toContain('FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id")');
@@ -70,5 +78,12 @@ describe('business day foundation schema', () => {
     expect(migration).toContain('reject_closed_cash_drawer_mutation');
     expect(migration).toContain('reject_cash_drawer_transaction_mutation');
     expect(migration).toContain('cash drawer transactions are append-only');
+  });
+
+  it('enforces tenant isolation and immutability for shift reconciliations', () => {
+    expect(migration).toContain('ALTER TABLE "shift_reconciliations" FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('CREATE POLICY "shift_reconciliations_tenant_isolation"');
+    expect(migration).toContain('reject_shift_reconciliation_mutation');
+    expect(migration).toContain('shift reconciliations are immutable');
   });
 });

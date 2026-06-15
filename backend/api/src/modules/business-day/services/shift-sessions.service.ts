@@ -106,6 +106,15 @@ export class ShiftSessionsService {
       if (existing.status !== ShiftSessionStatus.OPEN) {
         throw new ConflictException('Shift session is already closed');
       }
+      const reconciliation = await tx.shiftReconciliation.findFirst({
+        where: { tenantId: scope.tenantId, shiftSessionId: id },
+        select: { id: true },
+      });
+      if (!reconciliation) {
+        throw new ConflictException(
+          'Shift reconciliation is required before closing shift session',
+        );
+      }
       const updated = await tx.shiftSession.updateMany({
         where: {
           tenantId: scope.tenantId,

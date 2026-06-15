@@ -54,8 +54,8 @@ Last updated: 2026-06-15
 | 31.1 | COMPLETE | Business day foundation |
 | 31.2 | COMPLETE | Shift management |
 | 31.3 | COMPLETE | Cash drawer management |
-| 31.4 | NEXT | Shift closing and reconciliation |
-| 31.5 | PLANNED | Business day closing |
+| 31.4 | COMPLETE | Shift closing and reconciliation |
+| 31.5 | NEXT | Business day closing |
 | 31.6 | PLANNED | Operations administration UI |
 | 32 | PLANNED | Device registration, trusted sessions, and terminal management |
 | 33 | PLANNED | Offline SQLite operation and synchronization protocol |

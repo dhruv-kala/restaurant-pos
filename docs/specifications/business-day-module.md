@@ -9,7 +9,7 @@ Task 31 is split into:
 * Task 31.1 Business Day Foundation - Complete
 * Task 31.2 Shift Management - Complete
 * Task 31.3 Cash Drawer Management - Complete
-* Task 31.4 Shift Closing and Reconciliation
+* Task 31.4 Shift Closing and Reconciliation - Complete
 * Task 31.5 Business Day Closing
 * Task 31.6 Operations Administration UI
 
@@ -51,7 +51,7 @@ Potential entities:
 * ShiftSession - implemented in Task 31.2
 * CashDrawer - implemented in Task 31.3
 * CashDrawerTransaction - implemented in Task 31.3
-* ShiftReconciliation
+* ShiftReconciliation - implemented in Task 31.4
 * BusinessDayClosing
 
 All tenant-owned records carry tenant scope.
@@ -63,6 +63,7 @@ Operational records are outlet scoped.
 * Only one active business day per outlet.
 * Only one active shift per user.
 * Only one active cash drawer per shift.
+* Shift reconciliation must be recorded before shift closure.
 * Business days are outlet scoped.
 * Historical business days are immutable after closing.
 * Shift reconciliation is append-only.
@@ -90,7 +91,8 @@ Suggested permissions:
 * `cash_drawer.open`
 * `cash_drawer.adjust`
 * `cash_drawer.close`
-* `shift.reconciliation`
+* `shift_reconciliation.read`
+* `shift_reconciliation.create`
 
 The lowercase dot-key convention matches the repository's RBAC seed pattern.
 
@@ -121,7 +123,8 @@ Task 31.2 implements tenant/outlet-scoped operational shift sessions with
 assigned to a user, belongs to the outlet's current open business day, and may
 reference an existing staff shift template from the employee module. Only one
 open shift session is allowed per user. Closing uses optimistic `version`
-checks. Open and close actions write audit events.
+checks and requires a recorded shift reconciliation from Task 31.4. Open and
+close actions write audit events.
 
 Cash Drawer Management:
 
@@ -139,6 +142,19 @@ and adjustment transactions update expected cash while preserving transaction
 history. Closing records a counted closing balance transaction and uses
 optimistic `version` checks. Drawer lifecycle and adjustment actions write audit
 events.
+
+Shift Closing and Reconciliation:
+
+* `POST /shift-reconciliations`
+* `GET /shift-reconciliations`
+* `GET /shift-reconciliations/:id`
+
+Task 31.4 implements immutable tenant/outlet/business-day/shift-scoped
+`ShiftReconciliation` records. A reconciliation references a closed cash
+drawer, snapshots expected cash, stores counted cash, computes variance, and
+requires approval notes for non-zero variance. Only one reconciliation can
+exist per shift session and per cash drawer. Shift-session closure is rejected
+until reconciliation exists. Reconciliation actions write audit events.
 
 ## Audit Requirements
 
